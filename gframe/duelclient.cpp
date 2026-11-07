@@ -16,6 +16,7 @@
 #include "game_config.h"
 #include <irrlicht.h>
 #include "duelclient.h"
+#include "netserver.h"
 #include "client_card.h"
 #include "materials.h"
 #include "image_manager.h"
