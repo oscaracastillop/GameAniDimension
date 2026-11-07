@@ -1,52 +1,18 @@
-#ifndef DLL_INTERFACE_H
-#define DLL_INTERFACE_H
+#ifndef DLL_INTERFACE_H_
+#define DLL_INTERFACE_H_
+#ifndef YGOPRO_BUILD_DLL
+#include <ocgapi.h>
+#else
 #include "ocgapi_types.h"
-
-#include "dll.h"
 #include "text_types.h"
 
-class Duel;
-using DuelPtr = std::unique_ptr<const Duel>;
+void UnloadCore(void* handle);
+void* LoadOCGcore(epro::path_stringview path);
+void* ChangeOCGcore(epro::path_stringview path, void* handle);
 
-class Core : public std::enable_shared_from_this<Core> {
-	friend class Duel;
-private:
-#ifdef YGOPRO_BUILD_DLL
-	Dll library;
-#endif
-	explicit Core() = default;
-
-	bool check_api_version() const;
-
-#define X(type,name,...) type(*name)(__VA_ARGS__);
+#define X(type,name,...) extern type(*name)(__VA_ARGS__);
 #include "ocgcore_functions.inl"
-public:
+#undef X
 
-	static std::shared_ptr<const Core> Load(epro::path_stringview path);
-	DuelPtr CreateDuel(OCG_DuelOptions* options_ptr) const;
-};
-
-class Duel {
-	friend class Core;
-public:
-	struct ScriptReaderPayload {
-		void* ogPayload;
-		const Duel* duel;
-	};
-	std::unique_ptr<ScriptReaderPayload> scriptReaderPayload;
-private:
-	std::shared_ptr<const Core> core;
-	OCG_Duel thiz;
-public:
-	~Duel() {
-		core->OCG_DestroyDuel(thiz);
-	}
-#define ONLY_DUEL_FUNCTIONS
-#define PREFIX(func) func
-#define X(type,name,...) template<typename... Args> decltype(auto) name(Args&&... args) const { return core->OCG_##name(thiz,std::forward<Args>(args)...); }
-#include "ocgcore_functions.inl"
-};
-
-using CorePtr = std::shared_ptr<const Core>;
-
-#endif /* DLL_INTERFACE_H */
+#endif //YGOPRO_BUILD_DLL
+#endif /* DLL_INTERFACE_H_ */

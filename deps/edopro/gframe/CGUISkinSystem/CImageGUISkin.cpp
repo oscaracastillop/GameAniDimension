@@ -379,7 +379,7 @@ void CImageGUISkin::drawElementStyle(const SImageGUIElementStyle& elem, const co
 	core::rect<s32> srcRect;
 	core::rect<s32> dstRect;
 
-	core::dimension2du tsize = elem.Texture->getOriginalSize();
+	core::dimension2du tsize = elem.Texture->getSize();
 	video::ITexture* texture = elem.Texture;
 
 	video::SColor color = elem.Color;

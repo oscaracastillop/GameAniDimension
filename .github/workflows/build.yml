@@ -1,4 +1,4 @@
-name: Build app
+name: Build Android App
 on:
   push:
   pull_request:
@@ -11,46 +11,43 @@ jobs:
       OS_NAME: linux
       LIBWINDBOT_URL: https://github.com/ProjectIgnis/windbot/releases/download/20250412/libWindbot.aar
       LIBWINDBOT_RESOURCES: https://github.com/ProjectIgnis/windbot/releases/download/20250412/WindBotIgnite-Resources.7z
-      DEPLOY_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
-      DEPLOY_DIR: release
-      DEPLOY_REPO: ${{ secrets.DEPLOY_REPO }}
-      COVERS_URL: ${{ secrets.COVERS_URL }}
-      FIELDS_URL: ${{ secrets.FIELDS_URL }}
-      JKS_PASS: ${{ secrets.JKS_PASS }}
-      PICS_URL: ${{ secrets.PICS_URL }}
-      UPDATE_URL: ${{ secrets.UPDATE_URL }}
       USE_BUNDLED_FONT: 1
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 1
-        submodules: recursive
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
     - name: Install apt deps
       run: |
-        sudo apt install lua5.3
+        sudo apt update
+        sudo apt install -y lua5.3 p7zip-full
+        sudo ln -sf /usr/bin/lua5.3 /usr/bin/lua
     - name: Download libwindbot
       run: |
         mkdir -p libs
-        curl --retry 5 --connect-timeout 30 --location --remote-header-name -o libs/libWindbot.aar $LIBWINDBOT_URL
+        curl --retry 5 --connect-timeout 30 --location -o libs/libWindbot.aar $LIBWINDBOT_URL
     - name: Set local.properties
       run: |
-       echo "sdk.dir=$ANDROID_HOME" > local.properties
-       echo "org.gradle.jvmargs=-Xmx8192M" >> gradle.properties
+        echo "sdk.dir=$ANDROID_HOME" > local.properties
+        echo "org.gradle.jvmargs=-Xmx8192M" >> gradle.properties
     - name: Prepare assets
       run: |
-       ./ci/touch-assets.sh
+        chmod +x ci/*.sh
+        ./ci/touch-assets.sh
     - name: Build client
       run: ./ci/build-android.sh
-    - name: Build base apk
+    - name: Build APK
       run: |
-       ./gradlew assemble
-       ./ci/sign-apk.sh EDOPro-release-base.apk
-    - name: Deploy
-      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
-      shell: bash
-      run: ./ci/deploy.sh
+        chmod +x gradlew
+        ./gradlew assembleDebug
+        mkdir -p release
+        cp build/outputs/apk/debug/*.apk release/AniDimension-Android-ModoAventura.apk
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: EDOPro
-        path: release/EDOPro-release-base.apk
+        name: AniDimension-Android-ModoAventura
+        path: release/AniDimension-Android-ModoAventura.apk

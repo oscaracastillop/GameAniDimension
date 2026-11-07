@@ -26,10 +26,12 @@ std::vector<ServerInfo> ServerLobby::serversVector;
 std::atomic_bool ServerLobby::is_refreshing{ false };
 std::atomic_bool ServerLobby::has_refreshed{ false };
 
-static size_t WriteMemoryCallback(char* contents, size_t size, size_t nmemb, void* userp) {
+static size_t WriteMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
 	size_t realsize = size * nmemb;
 	auto buff = static_cast<std::string*>(userp);
-	buff->append(contents, realsize);
+	size_t prev_size = buff->size();
+	buff->resize(prev_size + realsize);
+	memcpy((char*)buff->data() + prev_size, contents, realsize);
 	return realsize;
 }
 
@@ -37,7 +39,7 @@ void ServerLobby::FillOnlineRooms() {
 	mainGame->roomListTable->clearRows();
 	auto& rooms = roomsVector;
 
-	std::wstring searchText(Utils::ToUpperNoAccents(mainGame->ebRoomName->getText()));
+	std::wstring searchText(Utils::ToUpperNoAccents<std::wstring>(mainGame->ebRoomName->getText()));
 
 	int searchRules = mainGame->cbFilterRule->getSelected();
 	int searchBanlist = mainGame->cbFilterBanlist->getSelected();

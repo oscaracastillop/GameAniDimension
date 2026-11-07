@@ -1,12 +1,7 @@
 #ifdef YGOPRO_USE_MINIAUDIO
 #include "sound_miniaudio.h"
 
-#include <map>
-#include <memory>
-#include <string>
 #include <utility>
-#include <vector>
-
 #include "../../compiler_features.h"
 #include "../../fmt.h"
 #include "../../utils.h"
@@ -54,50 +49,15 @@ namespace {
 #pragma warning(pop)
 #endif
 
-class SoundMiniaudioBase final : public SoundBackend {
-public:
-	SoundMiniaudioBase();
-	~SoundMiniaudioBase() override;
-	void SetSoundVolume(double volume) override;
-	void SetMusicVolume(double volume) override;
-	bool PlayMusic(const std::string& name, bool loop) override;
-	bool PlaySound(const std::string& name) override;
-	void StopSounds() override;
-	void StopMusic() override;
-	void PauseMusic(bool pause) override;
-	void LoopMusic(bool loop) override;
-	bool MusicPlaying() override;
-	void Tick() override;
-private:
-	static void FreeEngine(ma_engine* engine);
-	static void FreeSound(ma_sound* sound);
-	static void FreeSoundGroup(ma_sound_group* sound_group);
-	using EnginePtr = std::unique_ptr<ma_engine, decltype(&FreeEngine)>;
-	using SoundPtr = std::unique_ptr<ma_sound, decltype(&FreeSound)>;
-	using SoundGroupPtr = std::unique_ptr<ma_sound_group, decltype(&FreeSoundGroup)>;
-
-	static SoundPtr AdoptSoundPointer(std::unique_ptr<ma_sound> soundPtr);
-
-	ma_sound* getCachedSound(const std::string& name);
-	SoundPtr openSound(const std::string& name);
-
-	std::string cur_music;
-	EnginePtr engine;
-	SoundGroupPtr sounds_group;
-	std::vector<SoundPtr> playing_sounds;
-	std::map<std::string, SoundPtr> cached_sounds;
-	SoundPtr music;
-	float sound_volume, music_volume;
-};
-
-template<>
-std::unique_ptr<SoundBackend> SoundBackendHelper<SoundMiniaudioBase>::make_ptr() {
-	return std::make_unique<SoundMiniaudioBase>();
-}
+// define the previously forward declared classes as just directly inheriting off the c
+// structs, thus allowing to not include miniaudio in the header
+class MaEngine final : public ma_engine {};
+class MaSound final : public ma_sound {};
+class MaSoundGroup final : public ma_sound_group {};
 
 SoundMiniaudioBase::SoundMiniaudioBase() : engine{ nullptr, &FreeEngine }, sounds_group{ nullptr, &FreeSoundGroup }, music{nullptr, &FreeSound}, sound_volume(0), music_volume(0) {
 	{
-		auto tmp_engine = std::make_unique<ma_engine>();
+		auto tmp_engine = std::make_unique<MaEngine>();
 		if(auto res = ma_engine_init(nullptr, tmp_engine.get()); res != MA_SUCCESS) {
 			throw std::runtime_error(epro::format("Failed to initialize miniaudio engine, {}", ma_result_description(res)));
 		}
@@ -109,7 +69,7 @@ SoundMiniaudioBase::SoundMiniaudioBase() : engine{ nullptr, &FreeEngine }, sound
 										}, nullptr));
 	}
 	{
-		auto tmp_sound_group = std::make_unique<ma_sound_group>();
+		auto tmp_sound_group = std::make_unique<MaSoundGroup>();
 		if(auto res = ma_sound_group_init(engine.get(), 0, nullptr, tmp_sound_group.get()); res != MA_SUCCESS) {
 			throw std::runtime_error(epro::format("Failed to initialize sound group, {}", ma_result_description(res)));
 		}
@@ -144,7 +104,7 @@ bool SoundMiniaudioBase::PlayMusic(const std::string& name, bool loop) {
 	if(MusicPlaying() && cur_music == name)
 		return true;
 
-	auto snd = std::make_unique<ma_sound>();
+	auto snd = std::make_unique<MaSound>();
 	if(sound_init_from_file(engine.get(), ygo::Utils::ToPathString(name).data(),
 							SOUND_INIT_FLAGS | MA_SOUND_FLAG_STREAM, nullptr, nullptr, snd.get()) != MA_SUCCESS)
 		return false;
@@ -158,33 +118,33 @@ bool SoundMiniaudioBase::PlayMusic(const std::string& name, bool loop) {
 
 	cur_music = name;
 
-	music = AdoptSoundPointer(std::move(snd));
+	music = AdoptSoundPointer(snd.release());
 	return true;
 }
 
-SoundMiniaudioBase::SoundPtr SoundMiniaudioBase::AdoptSoundPointer(std::unique_ptr<ma_sound> soundPtr) {
-	return { soundPtr.release(), &FreeSound };
+SoundMiniaudioBase::SoundPtr SoundMiniaudioBase::AdoptSoundPointer(MaSound* soundPtr) {
+	return { soundPtr, &FreeSound };
 }
 
-ma_sound* SoundMiniaudioBase::getCachedSound(const std::string& name) {
+MaSound* SoundMiniaudioBase::getCachedSound(const std::string& name) {
 	auto it = cached_sounds.find(name);
 	if(it != cached_sounds.end())
 		return it->second.get();
 
-	auto snd = std::make_unique<ma_sound>();
+	auto snd = std::make_unique<MaSound>();
 	if(sound_init_from_file(engine.get(), ygo::Utils::ToPathString(name).data(),
 							SOUND_INIT_FLAGS, sounds_group.get(), nullptr, snd.get()) != MA_SUCCESS)
 		return nullptr;
 
-	return cached_sounds.emplace(name, AdoptSoundPointer(std::move(snd))).first->second.get();
+	return cached_sounds.emplace(name, AdoptSoundPointer(snd.release())).first->second.get();
 }
 
 SoundMiniaudioBase::SoundPtr SoundMiniaudioBase::openSound(const std::string& name) {
 	auto* cache_snd = getCachedSound(name);
 	if(cache_snd) {
-		auto snd = std::make_unique<ma_sound>();
+		auto snd = std::make_unique<MaSound>();
 		if(ma_sound_init_copy(engine.get(), cache_snd, SOUND_INIT_FLAGS, sounds_group.get(), snd.get()) == MA_SUCCESS) {
-			return AdoptSoundPointer(std::move(snd));
+			return AdoptSoundPointer(snd.release());
 		}
 	}
 	return AdoptSoundPointer(nullptr);
@@ -242,14 +202,14 @@ void SoundMiniaudioBase::Tick() {
 	}
 }
 
-void SoundMiniaudioBase::FreeEngine(ma_engine* engine) {
+void SoundMiniaudioBase::FreeEngine(MaEngine* engine) {
 	if(!engine)
 		return;
 	ma_engine_uninit(engine);
 	delete engine;
 }
 
-void SoundMiniaudioBase::FreeSound(ma_sound* sound) {
+void SoundMiniaudioBase::FreeSound(MaSound* sound) {
 	if(!sound)
 		return;
 	ma_sound_stop(sound);
@@ -257,7 +217,7 @@ void SoundMiniaudioBase::FreeSound(ma_sound* sound) {
 	delete sound;
 }
 
-void SoundMiniaudioBase::FreeSoundGroup(ma_sound_group* sound_group) {
+void SoundMiniaudioBase::FreeSoundGroup(MaSoundGroup* sound_group) {
 	if(!sound_group)
 		return;
 	ma_sound_group_stop(sound_group);
@@ -275,9 +235,7 @@ namespace {
 #pragma warning(disable : 4701) // potentially uninitialized local variable used
 #endif
 
-#ifdef __MINGW32__
-#undef __STDC_WANT_SECURE_LIB__
-#endif
+
 #undef STB_VORBIS_HEADER_ONLY
 #include "stb_vorbis.h"
 

@@ -1,6 +1,5 @@
 #include "game_config.h"
 #include <algorithm>
-#include <functional>
 #include <sstream>
 #include <unordered_map>
 #include <irrlicht.h>
@@ -136,18 +135,17 @@ bool DeckBuilder::SetCurrentDeckFromFile(epro::path_stringview file, bool separa
 void DeckBuilder::ImportDeck() {
 	const wchar_t* deck_string = Utils::OSOperator->getTextFromClipboard();
 	if(deck_string) {
-		epro::wstringview text{ deck_string };
-		if(starts_with(text, L"ydke://"))
-			DeckManager::ImportDeckYdke(current_deck, text.data());
+		if(wcsncmp(L"ydke://", deck_string, sizeof(L"ydke://") / sizeof(wchar_t) - 1) == 0)
+			DeckManager::ImportDeckBase64(current_deck, deck_string);
 		else
-			(void)DeckManager::ImportDeckBase64Omega(current_deck, text);
+			(void)DeckManager::ImportDeckBase64Omega(current_deck, deck_string);
 		RefreshLimitationStatus();
 	}
 }
 void DeckBuilder::ExportDeckToClipboard(bool plain_text) {
-	auto deck_string = plain_text ? DeckManager::ExportDeckCardNames(current_deck) : DeckManager::ExportDeckYdke(current_deck);
-	if(!deck_string.empty()) {
-		Utils::OSOperator->copyToClipboard(deck_string.data());
+	auto deck_string = plain_text ? DeckManager::ExportDeckCardNames(current_deck) : DeckManager::ExportDeckBase64(current_deck);
+	if(deck_string) {
+		Utils::OSOperator->copyToClipboard(deck_string);
 		mainGame->stACMessage->setText(gDataManager->GetSysString(1368).data());
 	} else {
 		mainGame->stACMessage->setText(gDataManager->GetSysString(1369).data());
@@ -273,7 +271,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					break;
 				int sel = -1;
 				{
-					const auto upper = Utils::ToUpperNoAccents(dname);
+					const auto upper = Utils::ToUpperNoAccents<std::wstring>({ dname.data(), dname.size() });
 					for(irr::u32 i = 0; i < mainGame->cbDBDecks->getItemCount(); ++i) {
 						if(Utils::EqualIgnoreCaseFirst<epro::wstringview>(upper, mainGame->cbDBDecks->getItem(i))) {
 							sel = i;
@@ -530,9 +528,9 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				mainGame->ebDefense->setText(L"");
 				mainGame->ebStar->setText(L"");
 				mainGame->ebScale->setText(L"");
-				switch(mainGame->cbCardType->getItemData(mainGame->cbCardType->getSelected())) {
-				case CARD_TYPE_FILTER_ALL:
-				case CARD_TYPE_FILTER_SKILL: {
+				switch(mainGame->cbCardType->getSelected()) {
+				case 0:
+				case 4: {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
@@ -541,7 +539,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->ebScale->setEnabled(false);
 					break;
 				}
-				case CARD_TYPE_FILTER_MONSTER: {
+				case 1: {
 					mainGame->cbRace->setEnabled(true);
 					mainGame->cbAttribute->setEnabled(true);
 					mainGame->ebAttack->setEnabled(true);
@@ -550,7 +548,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->ebScale->setEnabled(true);
 					break;
 				}
-				case CARD_TYPE_FILTER_SPELL: {
+				case 2: {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
@@ -559,7 +557,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->ebScale->setEnabled(false);
 					break;
 				}
-				case CARD_TYPE_FILTER_TRAP: {
+				case 3: {
 					mainGame->cbRace->setEnabled(false);
 					mainGame->cbAttribute->setEnabled(false);
 					mainGame->ebAttack->setEnabled(false);
@@ -574,7 +572,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			}
 			case COMBOBOX_SECONDTYPE:
 			case COMBOBOX_OTHER_FILT: {
-				if (id==COMBOBOX_SECONDTYPE && mainGame->cbCardType->getItemData(mainGame->cbCardType->getSelected()) == CARD_TYPE_FILTER_MONSTER) {
+				if (id==COMBOBOX_SECONDTYPE && mainGame->cbCardType->getSelected() == 1) {
 					if (mainGame->cbCardType2->getSelected() == 8) {
 						mainGame->ebDefense->setEnabled(false);
 						mainGame->ebDefense->setText(L"");
@@ -832,14 +830,13 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				irr::gui::IGUIElement* root = mainGame->env->getRootGUIElement();
 				if(root->getElementFromPoint({ event.DropEvent.X, event.DropEvent.Y }) != root)
 					break;
-				epro::wstringview text{ event.DropEvent.Text };
-				if(starts_with(text, L"ydke://")) {
-					gdeckManager->ImportDeckYdke(current_deck, text);
+				if(wcsncmp(L"ydke://", event.DropEvent.Text, sizeof(L"ydke://") / sizeof(wchar_t) - 1) == 0) {
+					gdeckManager->ImportDeckBase64(current_deck, event.DropEvent.Text);
 					return true;
 				}
-				if(gdeckManager->ImportDeckBase64Omega(current_deck, text))
+				if(gdeckManager->ImportDeckBase64Omega(current_deck, event.DropEvent.Text))
 					return true;
-				std::wstringstream ss(Utils::ToUpperNoAccents(text));
+				std::wstringstream ss(Utils::ToUpperNoAccents<std::wstring>(event.DropEvent.Text));
 				std::wstring to;
 				int firstcode = 0;
 				while(std::getline(ss, to)) {
@@ -1038,10 +1035,10 @@ bool DeckBuilder::FiltersChanged() {
 }
 #undef CHECK_AND_SET
 void DeckBuilder::StartFilter(bool force_refresh) {
-	filter_type = mainGame->cbCardType->getItemData(mainGame->cbCardType->getSelected());
+	filter_type = mainGame->cbCardType->getSelected();
 	filter_type2 = mainGame->cbCardType2->getItemData(mainGame->cbCardType2->getSelected());
 	filter_lm = static_cast<limitation_search_filters>(mainGame->cbLimit->getItemData(mainGame->cbLimit->getSelected()));
-	if(filter_type == CARD_TYPE_FILTER_MONSTER) {
+	if(filter_type == 1) {
 		filter_attrib = mainGame->cbAttribute->getItemData(mainGame->cbAttribute->getSelected());
 		auto selected = mainGame->cbRace->getItemData(mainGame->cbRace->getSelected());
 		if(selected == 0)
@@ -1058,50 +1055,32 @@ void DeckBuilder::StartFilter(bool force_refresh) {
 }
 void DeckBuilder::FilterCards(bool force_refresh) {
 	results.clear();
-	std::vector<epro::wstringview> searchterms;
-	const auto uppercase_text = Utils::ToUpperNoAccents(mainGame->ebCardName->getText());
-	if(!uppercase_text.empty()) {
-		searchterms = Utils::TokenizeString<epro::wstringview>(uppercase_text, L"||");
-	} else {
+	std::vector<std::wstring> searchterms;
+	if(wcslen(mainGame->ebCardName->getText())) {
+		searchterms = Utils::TokenizeString<std::wstring>(Utils::ToUpperNoAccents<std::wstring>(mainGame->ebCardName->getText()), L"||");
+	} else
 		searchterms = { L"" };
-	}
 	if(FiltersChanged() || force_refresh)
 		searched_terms.clear();
-	if(!searched_terms.empty()) {
-		//removes search terms already cached
-		for(auto it = searchterms.cbegin(); it != searchterms.cend();) {
-			if(searched_terms.find((*it)) != searched_terms.end())
-				it = searchterms.erase(it);
-			else
-				it++;
-		}
+	//removes no longer existing search terms from the cache
+	for(auto it = searched_terms.cbegin(); it != searched_terms.cend();) {
+		if(std::find(searchterms.begin(), searchterms.end(), it->first) == searchterms.end())
+			it = searched_terms.erase(it);
+		else
+			++it;
 	}
-	//removes duplicate search terms
+	//removes search terms already cached
 	for(auto it = searchterms.cbegin(); it != searchterms.cend();) {
-		if(auto found_it = std::find(searchterms.cbegin(), searchterms.cend(), *it); found_it != it)
+		if(searched_terms.count((*it)))
 			it = searchterms.erase(it);
 		else
 			it++;
-	}
-	//removes no longer existing search terms from the cache
-	if(!searchterms.empty()) {
-		for(auto it = searched_terms.cbegin(); it != searched_terms.cend();) {
-			if(std::find(searchterms.begin(), searchterms.end(), it->first) == searchterms.end())
-				it = searched_terms.erase(it);
-			else
-				++it;
-		}
 	}
 	for(const auto& term_ : searchterms) {
 		int trycode = BufferIO::GetVal(term_.data());
 		const CardDataC* data = nullptr;
 		if(trycode && (data = gDataManager->GetCardData(trycode))) {
-			auto it = searched_terms.find(term_);
-			if(it != searched_terms.end()) {
-				it->second = { data };
-			} else {
-				searched_terms.emplace(std::wstring{ term_ }, std::vector{ data });
-			}
+			searched_terms[term_] = { data };
 			continue;
 		}
 		auto subterms = Utils::TokenizeString<epro::wstringview>(term_, L"&&");
@@ -1119,9 +1098,6 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 				if(starts_with(subterm, L'@')) {
 					modif |= SEARCH_MODIFIER_ARCHETYPE_ONLY;
 					subterm.remove_prefix(1);
-				} else if(starts_with(subterm, L"$$")) {
-					modif |= SEARCH_MODIFIER_TEXT_ONLY;
-					subterm.remove_prefix(1);
 				} else if(starts_with(subterm, L'$')) {
 					modif |= SEARCH_MODIFIER_NAME_ONLY;
 					subterm.remove_prefix(1);
@@ -1138,14 +1114,11 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 					break;
 				}
 			}
-			std::vector<uint16_t> setcodes;
-			if((modif & (SEARCH_MODIFIER_NAME_ONLY | SEARCH_MODIFIER_TEXT_ONLY)) == 0) {
-				setcodes = gDataManager->GetSetCode(tokens);
-				// no valid setcode found, either it will return everything (if negative lookup is used), or it will return nothing
-				if(tokens.size() && setcodes.empty() && (modif & SEARCH_MODIFIER_ARCHETYPE_ONLY)) {
-					would_return_nothing = ((modif & SEARCH_MODIFIER_NEGATIVE_LOOKUP) == 0);
-					break;
-				}
+			auto setcodes = gDataManager->GetSetCode(tokens);
+			// no valid setcode found, either it will return everything (if negative lookup is used), or it will return nothing
+			if(tokens.size() && setcodes.empty() && (modif & SEARCH_MODIFIER_ARCHETYPE_ONLY)) {
+				would_return_nothing = ((modif & SEARCH_MODIFIER_NEGATIVE_LOOKUP) == 0);
+				break;
 			}
 			search_parameters.push_back(SearchParameter{std::move(tokens), std::move(setcodes), static_cast<SEARCH_MODIFIER>(modif)});
 		}
@@ -1162,18 +1135,11 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 			searchterm_results.push_back(&card.second._data);
 		skip:;
 		}
-		if(searchterm_results.size()) {
-			auto it = searched_terms.find(term_);
-			if(it != searched_terms.end()) {
-				it->second.swap(searchterm_results);
-			} else {
-				searched_terms.emplace(std::wstring{ term_ }, std::move(searchterm_results));
-			}
-		}
+		if(searchterm_results.size())
+			searched_terms[term_] = searchterm_results;
 	}
-	for(const auto& [term, individual_results] : searched_terms) {
-		results.reserve(results.size() + individual_results.size());
-		results.insert(results.end(), individual_results.begin(), individual_results.end());
+	for(const auto& res : searched_terms) {
+		results.insert(results.end(), res.second.begin(), res.second.end());
 	}
 	SortList();
 	auto ip = std::unique(results.begin(), results.end());
@@ -1192,7 +1158,7 @@ bool DeckBuilder::CheckCardProperties(const CardDataM& data) {
 	if(data._data.type & TYPE_TOKEN || data._data.ot & SCOPE_HIDDEN || ((data._data.ot & SCOPE_OFFICIAL) != data._data.ot && (!mainGame->chkAnime->isChecked() && !filterList->whitelist)))
 		return false;
 	switch(filter_type) {
-	case CARD_TYPE_FILTER_MONSTER: {
+	case 1: {
 		if(!(data._data.type & TYPE_MONSTER) || (data._data.type & filter_type2) != filter_type2)
 			return false;
 		if(filter_race && data._data.race != filter_race)
@@ -1227,21 +1193,21 @@ bool DeckBuilder::CheckCardProperties(const CardDataM& data) {
 		}
 		break;
 	}
-	case CARD_TYPE_FILTER_SPELL: {
+	case 2: {
 		if(!(data._data.type & TYPE_SPELL))
 			return false;
 		if(filter_type2 && data._data.type != filter_type2)
 			return false;
 		break;
 	}
-	case CARD_TYPE_FILTER_TRAP: {
+	case 3: {
 		if(!(data._data.type & TYPE_TRAP))
 			return false;
 		if(filter_type2 && data._data.type != filter_type2)
 			return false;
 		break;
 	}
-	case CARD_TYPE_FILTER_SKILL: {
+	case 4: {
 		if(!(data._data.type & TYPE_SKILL))
 			return false;
 		break;
@@ -1311,7 +1277,7 @@ bool DeckBuilder::CheckCardProperties(const CardDataM& data) {
 					return false;
 				break;
 			case LIMITATION_FILTER_CUSTOM:
-				if(!(data._data.ot & SCOPE_CUSTOM))
+				if(data._data.ot != SCOPE_CUSTOM)
 					return false;
 				break;
 			default:
@@ -1347,8 +1313,6 @@ bool DeckBuilder::CheckCardText(const CardDataM& data, const SearchParameter& se
 	const auto& strings = data.GetStrings();
 	if(search_parameter.modifier & SEARCH_MODIFIER_NAME_ONLY) {
 		return checkNeg(Utils::ContainsSubstring(strings.uppercase_name, search_parameter.tokens));
-	} else if(search_parameter.modifier & SEARCH_MODIFIER_TEXT_ONLY) {
-		return checkNeg(Utils::ContainsSubstring(strings.uppercase_text, search_parameter.tokens));
 	} else if(search_parameter.modifier & SEARCH_MODIFIER_ARCHETYPE_ONLY) {
 		const auto& setcodes = CardSetcodes(data._data);
 		if(search_parameter.setcodes.empty())
@@ -1395,39 +1359,28 @@ void DeckBuilder::ClearFilter() {
 		mainGame->btnMark[i]->setPressed(false);
 }
 void DeckBuilder::SortList() {
-	auto last = [&] {
-		auto it = results.begin(), left = it;
-		for(; it != results.end(); ++it) {
-			if(searched_terms.find(gDataManager->GetUppercaseName((*it)->code)) != searched_terms.end()) {
-				std::iter_swap(left, it);
-				++left;
-			}
-		}
-		return left;
-	}();
-	auto sort = [&](const auto& comparator) {
-		std::sort(last, results.end(), comparator);
-		std::sort(results.begin(), last, comparator);
+	auto sort = [&](auto& comparator) {
+		std::sort(results.begin(), results.end(), comparator);
 	};
-	switch(mainGame->cbSortType->getItemData(mainGame->cbSortType->getSelected())) {
-	case SORT_MODIFIER::SORT_MODIFIER_LEVEL_DESC:
+	switch(mainGame->cbSortType->getSelected()) {
+	case 0:
 		sort(DataManager::deck_sort_lv);
 		break;
-	case SORT_MODIFIER::SORT_MODIFIER_ATK_DESC:
+	case 1:
 		sort( DataManager::deck_sort_atk);
 		break;
-	case SORT_MODIFIER::SORT_MODIFIER_DEF_DESC:
+	case 2:
 		sort(DataManager::deck_sort_def);
 		break;
-	case SORT_MODIFIER::SORT_MODIFIER_NAME_ASC:
+	case 3:
 		sort(DataManager::deck_sort_name);
 		break;
-	case SORT_MODIFIER::SORT_MODIFIER_PASSCODE_DESC:
-		sort(DataManager::deck_sort_passcode_descending);
-		break;
-	case SORT_MODIFIER::SORT_MODIFIER_PASSCODE_ASC:
-		sort(std::not_fn(DataManager::deck_sort_passcode_descending));
-		break;
+	}
+	for(auto it = results.begin(), left = it; it != results.end(); ++it) {
+		if(searched_terms.find(gDataManager->GetUppercaseName((*it)->code)) != searched_terms.end()) {
+			std::iter_swap(left, it);
+			++left;
+		}
 	}
 }
 void DeckBuilder::ClearDeck() {

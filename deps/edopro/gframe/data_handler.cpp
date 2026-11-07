@@ -4,7 +4,6 @@
 #include "cli_args.h"
 #include "utils_gui.h"
 #include "deck_manager.h"
-#include "replay.h"
 #include "logging.h"
 #include "fmt.h"
 #include "utils.h"
@@ -134,8 +133,6 @@ DataHandler::DataHandler() {
 	Utils::filesystem = filesystem;
 	LoadZipArchives();
 	deckManager = std::make_unique<DeckManager>();
-	DeckManager::SetDeckFolder(Utils::GetUserFolderPathFor(EPRO_TEXT("./deck/")));
-	Replay::SetReplayFolder(Utils::GetUserFolderPathFor(EPRO_TEXT("./replay/")));
 	gitManager = std::make_unique<RepoManager>();
 	auto sound_backend = SoundManager::DEFAULT;
 	if constexpr(SoundManager::HasMultipleBackends()) {
@@ -163,6 +160,7 @@ DataHandler::DataHandler() {
 	LoadPicUrls();
 	deckManager->LoadLFList();
 	dataManager->LoadIdsMapping(EPRO_TEXT("./config/mappings.json"));
+	WindBotPanel::absolute_deck_path = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
 }
 DataHandler::~DataHandler() {
 	if(filesystem)

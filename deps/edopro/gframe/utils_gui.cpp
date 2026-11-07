@@ -7,10 +7,9 @@
 #include "text_types.h"
 #include "porting.h"
 #include "fmt.h"
-#include "localtime.h"
 #if EDOPRO_WINDOWS
 #define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <Windows.h>
 #include <vector>
 #include "logging.h"
 #include "Base64.h"
@@ -146,17 +145,8 @@ std::shared_ptr<irr::IrrlichtDevice> GUIUtils::CreateDevice(GameConfig* configs)
 #if EDOPRO_ANDROID || EDOPRO_IOS
 	device->getGUIEnvironment()->setOSOperator(Utils::OSOperator);
 #endif
-#if (IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9)
-	if(auto driver_type = driver->getDriverType(); driver_type == irr::video::EDT_OGLES1 || driver_type == irr::video::EDT_OGLES2) {
-		auto& InitMaterial2D = driver->getMaterial2D();
-		for (auto& layer : InitMaterial2D.TextureLayer)
-		{
-			layer.TextureWrapU = irr::video::ETC_CLAMP_TO_EDGE;
-			layer.TextureWrapV = irr::video::ETC_CLAMP_TO_EDGE;
-			layer.TextureWrapW = irr::video::ETC_CLAMP_TO_EDGE;
-		}
-		driver->enableMaterial2D(true);
-	}
+#if EDOPRO_IOS_SIMULATOR
+	driver->disableFeature(irr::video::EVDF_TEXTURE_NPOT);
 #endif
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
@@ -212,7 +202,7 @@ bool GUIUtils::TakeScreenshot(std::shared_ptr<irr::IrrlichtDevice>& device) {
 	if(!image)
 		return false;
 	const auto now = std::time(nullptr);
-	const auto filename = epro::format(EPRO_TEXT("screenshots/EDOPro {:%Y-%m-%d %H-%M-%S}.png"), epro::localtime(now));
+	const auto filename = epro::format(EPRO_TEXT("screenshots/EDOPro {:%Y-%m-%d %H-%M-%S}.png"), fmt::localtime(now));
 	auto written = driver->writeImageToFile(image, { filename.data(), static_cast<irr::u32>(filename.size()) });
 	if(!written)
 		device->getLogger()->log(L"Failed to take screenshot.", irr::ELL_WARNING);
@@ -223,7 +213,7 @@ bool GUIUtils::TakeScreenshot(std::shared_ptr<irr::IrrlichtDevice>& device) {
 void GUIUtils::ToggleFullscreen(std::shared_ptr<irr::IrrlichtDevice>& device, [[maybe_unused]] bool& fullscreen) {
 #if EDOPRO_MACOS
 	EDOPRO_ToggleFullScreen();
-#elif EDOPRO_WINDOWS || EDOPRO_LINUX || EDOPRO_HAIKU
+#elif EDOPRO_WINDOWS || EDOPRO_LINUX
 	device->toggleFullscreen(!std::exchange(fullscreen, !fullscreen));
 #endif
 }

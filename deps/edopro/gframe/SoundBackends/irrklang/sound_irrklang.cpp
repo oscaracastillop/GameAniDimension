@@ -1,42 +1,8 @@
 #ifdef YGOPRO_USE_IRRKLANG
 #include "sound_irrklang.h"
-
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include <irrKlang.h>
-
 #include "irrklang_dynamic_loader.h"
-#include "../../sound_backend.h"
-
-class SoundIrrklang final : public SoundBackend {
-public:
-	SoundIrrklang();
-	~SoundIrrklang() override;
-	void SetSoundVolume(double volume) override;
-	void SetMusicVolume(double volume) override;
-	bool PlayMusic(const std::string& name, bool loop) override;
-	bool PlaySound(const std::string& name) override;
-	void StopSounds() override;
-	void StopMusic() override;
-	void PauseMusic(bool pause) override;
-	void LoopMusic(bool loop) override;
-	bool MusicPlaying() override;
-	void Tick() override;
-private:
-	KlangLoader loader;
-	irrklang::ISoundEngine* soundEngine;
-	irrklang::ISound* soundBGM;
-	std::vector<irrklang::ISound*> sounds;
-	double sfxVolume;
-	double bgmVolume;
-};
-
-template<>
-std::unique_ptr<SoundBackend> SoundBackendHelper<SoundIrrklang>::make_ptr() {
-	return std::make_unique<SoundIrrklang>();
-}
+#include <stdexcept>
+#include <irrKlang.h>
 
 SoundIrrklang::SoundIrrklang() :
 	soundEngine(nullptr), soundBGM(nullptr), sfxVolume(0.0), bgmVolume(0.0) {

@@ -7,7 +7,6 @@
 #include <IGUIWindow.h>
 #include <IGUIEnvironment.h>
 #include <ISceneManager.h>
-#include <optional>
 #include "client_updater.h"
 #include "cli_args.h"
 #include "config.h"
@@ -62,15 +61,13 @@ inline void ThreadsStartup() {
 	if(res != CURLE_OK)
 		throw std::runtime_error(epro::format("Curl error: ({}) {}", res, curl_easy_strerror(res)));
 }
-struct ThreadsCleaner {
-	~ThreadsCleaner() {
-		curl_global_cleanup();
-		libevent_global_shutdown();
+inline void ThreadsCleanup() {
+	curl_global_cleanup();
+	libevent_global_shutdown();
 #if EDOPRO_WINDOWS
-		WSACleanup();
+	WSACleanup();
 #endif
-	}
-};
+}
 
 //clang below version 11 (llvm version 8) has a bug with brace class initialization
 //where it can't properly deduce the destructors of its members
@@ -119,16 +116,10 @@ int edopro_main(const args_t& args) {
 			return EXIT_FAILURE;
 		}
 	}
-	{
-		const auto& userdir = args[LAUNCH_PARAM::USER_STORAGE_DIRECTORY];
-		const epro::path_stringview dir = userdir.enabled ? userdir.argument : EPRO_TEXT("./");
-		ygo::Utils::SetUserStorageDirectory(dir);
-	}
 	ygo::Utils::SetupCrashDumpLogging();
-	std::optional<ThreadsCleaner> cleaner;
 	try {
 		ThreadsStartup();
-		cleaner.emplace();
+		std::atexit(ThreadsCleanup);
 	} catch(const std::exception& e) {
 		epro::stringview text(e.what());
 		ygo::ErrorLog(text);
@@ -161,15 +152,9 @@ int edopro_main(const args_t& args) {
 #if EDOPRO_WINDOWS
 	if(!data->configs->showConsole) {
 		FILE* fDummy;
-#ifdef _MSC_VER
 		freopen_s(&fDummy, "NUL", "r", stdin);
 		freopen_s(&fDummy, "NUL", "w", stderr);
 		freopen_s(&fDummy, "NUL", "w", stdout);
-#else
-		fDummy = freopen("NUL", "r", stdin);
-		fDummy = freopen("NUL", "w", stderr);
-		fDummy = freopen("NUL", "w", stdout);
-#endif
 		FreeConsole();
 	}
 #endif

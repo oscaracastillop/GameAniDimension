@@ -6,8 +6,6 @@
 namespace ygo {
 class ClientCard;
 }
-class Duel;
-
 namespace CoreUtils {
 class Packet {
 public:
@@ -108,7 +106,8 @@ private:
 	void ParseCompat(const uint8_t* buff, uint32_t len);
 	size_t GetSize() const;
 };
-PacketStream ParseMessages(const Duel* duel);
+using OCG_Duel = void*;
+PacketStream ParseMessages(OCG_Duel duel);
 }
 
 #define HINT_SKILL        200

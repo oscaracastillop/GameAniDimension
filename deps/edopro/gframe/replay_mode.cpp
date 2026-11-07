@@ -9,7 +9,7 @@
 
 namespace ygo {
 
-DuelPtr ReplayMode::pduel = nullptr;
+void* ReplayMode::pduel = 0;
 bool ReplayMode::yrp = false;
 Replay ReplayMode::cur_replay{};
 Replay* ReplayMode::cur_yrp = nullptr;
@@ -150,6 +150,7 @@ int ReplayMode::ReplayThread() {
 }
 void ReplayMode::EndDuel() {
 	if(pduel) {
+		OCG_DestroyDuel(pduel);
 		pduel = nullptr;
 	}
 	if(!is_closing) {
@@ -176,6 +177,7 @@ void ReplayMode::EndDuel() {
 }
 void ReplayMode::Restart(bool refresh) {
 	if(pduel) {
+		OCG_DestroyDuel(pduel);
 		pduel = nullptr;
 		//end_duel(pduel);
 		cur_replay.Rewind();
