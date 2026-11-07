@@ -146,7 +146,7 @@ void ImageDownloader::DownloadPic() {
 		for(auto& src : pic_urls) {
 			if(src.type != type)
 				continue;
-			Utils::CreateDirectory(EPRO_TEXT("./pics/temp"));
+			Utils::MakeDirectory(EPRO_TEXT("./pics/temp"));
 			auto fp = fileopen(name.data(), "wb");
 			if(fp == nullptr) {
 				if(gGameConfig->logDownloadErrors) {
