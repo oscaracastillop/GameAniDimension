@@ -95,10 +95,10 @@ void ImageDownloader::DownloadPic() {
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	if(gGameConfig->ssl_certificate_path.size() && Utils::FileExists(Utils::ToPathString(gGameConfig->ssl_certificate_path)))
 		curl_easy_setopt(curl, CURLOPT_CAINFO, gGameConfig->ssl_certificate_path.data());
-	auto SetPayloadAndUrl = [&payload, &curl](epro::stringview url, FILE* stream) {
+	auto SetPayloadAndUrl = [&payload, &curl](const std::string& url, FILE* stream) {
 		payload.stream = stream;
 		payload.header_written = 0;
-		curl_easy_setopt(curl, CURLOPT_URL, url.data());
+		curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 	};
 	while(true) {
 		std::unique_lock<epro::mutex> lck(pic_download);
