@@ -57,9 +57,6 @@ namespace ygo {
 		static std::thread::id GetCurrThreadId() { return std::this_thread::get_id(); }
 		static std::thread::id GetMainThreadId();
 		static bool IsMainThread() { return GetMainThreadId() == GetCurrThreadId(); }
-		static epro::thread::id GetCurrThreadId() { return epro::this_thread::get_id(); }
-		static epro::thread::id GetMainThreadId();
-		static bool IsMainThread() { return GetMainThreadId() == GetCurrThreadId(); }
 
 		static std::vector<SynchronizedIrrArchive> archives;
 		static irr::io::IFileSystem* filesystem;
