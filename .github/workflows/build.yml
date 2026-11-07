@@ -12,6 +12,7 @@ jobs:
       LIBWINDBOT_URL: https://github.com/ProjectIgnis/windbot/releases/download/20250412/libWindbot.aar
       LIBWINDBOT_RESOURCES: https://github.com/ProjectIgnis/windbot/releases/download/20250412/WindBotIgnite-Resources.7z
       USE_BUNDLED_FONT: 1
+      PICS_URL: https://images.ygoprodeck.com/images/cards/{}.jpg
     steps:
     - uses: actions/checkout@v4
       with:
