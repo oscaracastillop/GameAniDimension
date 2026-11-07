@@ -38,6 +38,7 @@ struct unzip_payload {
 using unzip_callback = void(*)(unzip_payload* payload);
 
 namespace ygo {
+	extern std::thread::id main_thread_id;
 	// Irrlicht has only one handle open per archive, which does not support concurrency and is not thread-safe.
 	// Thus, we need to own a corresponding mutex that is also used for all files from this archive
 	class SynchronizedIrrArchive {
