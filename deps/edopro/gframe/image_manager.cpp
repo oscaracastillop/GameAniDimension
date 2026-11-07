@@ -632,7 +632,7 @@ ImageManager::load_return ImageManager::LoadCardTexture(uint32_t code, imgType t
 			ret.texture = img;
 		}
 		return ret;
-	} else if(status == ImageDownloader::downloadStatus::NONE) {
+	} else if(status == ImageDownloader::downloadStatus::NONE || status == ImageDownloader::downloadStatus::DOWNLOAD_ERROR) {
 		for(auto& path : (type == imgType::ART) ? mainGame->pic_dirs : mainGame->cover_dirs) {
 			for(auto extension : { EPRO_TEXT(".png"), EPRO_TEXT(".jpg") }) {
 				if(call_timestamp_id != source_timestamp_id.load())

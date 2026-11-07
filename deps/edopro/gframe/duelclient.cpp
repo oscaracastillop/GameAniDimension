@@ -400,6 +400,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			if(mainGame->isAdventureMode) {
 				if(!mainGame->wAdventureMode->isVisible())
 					mainGame->ShowElement(mainGame->wAdventureMode);
+				mainGame->btnAdventureDuel->setEnabled(true);
 				mainGame->RefreshAdventureMode();
 			} else if(mainGame->isHostingOnline) {
 				if(!mainGame->wCreateHost->isVisible() && !mainGame->wRoomListPlaceholder->isVisible())
@@ -422,6 +423,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->HideElement(mainGame->gBot.window);
 				if(mainGame->isAdventureMode) {
 					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
 					mainGame->ShowElement(mainGame->wRoomListPlaceholder);
@@ -454,6 +456,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
 					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
 					mainGame->ShowElement(mainGame->wRoomListPlaceholder);
@@ -924,6 +927,15 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		mainGame->cbDeckSelect->setEnabled(true);
 		if(mainGame->isAdventureMode) {
 			// In adventure mode, do NOT show host preparation lobby or chat
+			mainGame->HideElement(mainGame->wHostPrepare);
+			mainGame->HideElement(mainGame->wHostPrepareL);
+			mainGame->HideElement(mainGame->wHostPrepareR);
+			mainGame->HideElement(mainGame->gBot.window);
+			mainGame->btnHostPrepStart->setVisible(false);
+			mainGame->btnHostPrepReady->setVisible(false);
+			mainGame->btnHostPrepNotReady->setVisible(false);
+			mainGame->wChat->setVisible(false);
+
 			mainGame->deckBuilder.SetCurrentDeckFromFile(Utils::ToPathString(mainGame->selectedAdventureUserDeckName), false, RITUAL_LOCATION::MAIN);
 			const auto& deck = mainGame->deckBuilder.GetCurrentDeck();
 			uint8_t deckbuf[0xf000];
@@ -954,10 +966,17 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			}
 			std::wstring fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
 
-			WindBot* engineToLaunch = mainGame->gBot.genericEngine;
+			WindBot* engineToLaunch = nullptr;
+			// Prioritize MokeyMokey/MokeyMokeyKing: the universal active beatdown AI executor that summons, sets, activates spells/traps, and attacks with any custom deck
+			for(auto& bot : mainGame->gBot.bots) {
+				if(bot.deck == L"MokeyMokey" || bot.deck == L"MokeyMokeyKing") {
+					engineToLaunch = &bot;
+					break;
+				}
+			}
 			if(!engineToLaunch) {
 				for(auto& bot : mainGame->gBot.bots) {
-					if(bot.deck == L"Lucky") {
+					if(bot.deck != L"Lucky") {
 						engineToLaunch = &bot;
 						break;
 					}
@@ -997,28 +1016,30 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		auto pkt = BufferIO::getStruct<STOC_TypeChange>(pdata, len);
 		selftype = pkt.type & 0xf;
 		is_host = ((pkt.type >> 4) & 0xf) != 0;
-		for(int i = 0; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
-			mainGame->btnHostPrepKick[i]->setVisible(is_host);
+		if(!mainGame->isAdventureMode) {
+			for(int i = 0; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
+				mainGame->btnHostPrepKick[i]->setVisible(is_host);
+			}
+			for(int i = 0; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
+				mainGame->chkHostPrepReady[i]->setEnabled(false);
+			}
+			if(selftype >= mainGame->dInfo.team1 + mainGame->dInfo.team2) {
+				mainGame->btnHostPrepDuelist->setEnabled(true);
+				mainGame->btnHostPrepOB->setEnabled(false);
+				mainGame->btnHostPrepReady->setVisible(false);
+				mainGame->btnHostPrepNotReady->setVisible(false);
+			} else {
+				mainGame->chkHostPrepReady[selftype]->setEnabled(true);
+				mainGame->chkHostPrepReady[selftype]->setChecked(false);
+				mainGame->btnHostPrepDuelist->setEnabled(mainGame->dInfo.team1 + mainGame->dInfo.team2 > 2);
+				mainGame->btnHostPrepOB->setEnabled(true);
+				mainGame->btnHostPrepReady->setVisible(true);
+				mainGame->btnHostPrepNotReady->setVisible(false);
+			}
+			mainGame->btnHostPrepWindBot->setVisible(is_host && !mainGame->isHostingOnline);
+			mainGame->btnHostPrepStart->setVisible(is_host);
+			mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
 		}
-		for(int i = 0; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
-			mainGame->chkHostPrepReady[i]->setEnabled(false);
-		}
-		if(selftype >= mainGame->dInfo.team1 + mainGame->dInfo.team2) {
-			mainGame->btnHostPrepDuelist->setEnabled(true);
-			mainGame->btnHostPrepOB->setEnabled(false);
-			mainGame->btnHostPrepReady->setVisible(false);
-			mainGame->btnHostPrepNotReady->setVisible(false);
-		} else {
-			mainGame->chkHostPrepReady[selftype]->setEnabled(true);
-			mainGame->chkHostPrepReady[selftype]->setChecked(false);
-			mainGame->btnHostPrepDuelist->setEnabled(mainGame->dInfo.team1 + mainGame->dInfo.team2 > 2);
-			mainGame->btnHostPrepOB->setEnabled(true);
-			mainGame->btnHostPrepReady->setVisible(true);
-			mainGame->btnHostPrepNotReady->setVisible(false);
-		}
-		mainGame->btnHostPrepWindBot->setVisible(is_host && !mainGame->isHostingOnline);
-		mainGame->btnHostPrepStart->setVisible(is_host);
-		mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
 		mainGame->dInfo.player_type = selftype;
 		mainGame->dInfo.isFirst = (mainGame->dInfo.player_type < mainGame->dInfo.team1) || (mainGame->dInfo.player_type >= 7);
 		mainGame->dInfo.isTeam1 = mainGame->dInfo.isFirst;
@@ -1026,6 +1047,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 	}
 	case STOC_DUEL_START: {
 		std::unique_lock<epro::mutex> lock(mainGame->gMutex);
+		if(mainGame->isAdventureMode) {
+			mainGame->HideElement(mainGame->wAdventureMode);
+		}
 		mainGame->HideElement(mainGame->wHostPrepare);
 		mainGame->HideElement(mainGame->gBot.window);
 		mainGame->HideElement(mainGame->wHostPrepareL);
@@ -1220,8 +1244,10 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		else
 			mainGame->dInfo.opponames[pkt.pos - mainGame->dInfo.team1] = name;
 		mainGame->stHostPrepDuelist[pkt.pos]->setText(name);
-		mainGame->btnHostPrepStart->setVisible(is_host);
-		mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
+		if(!mainGame->isAdventureMode) {
+			mainGame->btnHostPrepStart->setVisible(is_host);
+			mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
+		}
 		if(mainGame->isAdventureMode && is_host && CheckReady()) {
 			DuelClient::SendPacketToServer(CTOS_HS_START);
 		}
@@ -1250,13 +1276,13 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->dInfo.opponames[state - mainGame->dInfo.team1] = prename;
 		} else if(state == PLAYERCHANGE_READY) {
 			mainGame->chkHostPrepReady[pos]->setChecked(true);
-			if(pos == selftype) {
+			if(!mainGame->isAdventureMode && pos == selftype) {
 				mainGame->btnHostPrepReady->setVisible(false);
 				mainGame->btnHostPrepNotReady->setVisible(true);
 			}
 		} else if(state == PLAYERCHANGE_NOTREADY) {
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
-			if(pos == selftype) {
+			if(!mainGame->isAdventureMode && pos == selftype) {
 				mainGame->btnHostPrepReady->setVisible(true);
 				mainGame->btnHostPrepNotReady->setVisible(false);
 			}
@@ -1269,8 +1295,10 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 			mainGame->stHostPrepOB->setText(epro::format(L"{} {}", gDataManager->GetSysString(1253), watching).data());
 		}
-		mainGame->btnHostPrepStart->setVisible(is_host);
-		mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
+		if(!mainGame->isAdventureMode) {
+			mainGame->btnHostPrepStart->setVisible(is_host);
+			mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
+		}
 		if(mainGame->isAdventureMode && is_host && CheckReady()) {
 			DuelClient::SendPacketToServer(CTOS_HS_START);
 		}
@@ -1480,6 +1508,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
 					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
 					mainGame->ShowElement(mainGame->wRoomListPlaceholder);

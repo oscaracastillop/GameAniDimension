@@ -1512,6 +1512,7 @@ void Game::UpdateAdventureNPCDisplay() {
 	stAdventureNPCName->setText(epro::format(L"Personaje: {}", npc.name).c_str());
 	stAdventureNPCLevel->setText(epro::format(L"Nivel: {}", npc.level).c_str());
 	stAdventureNPCDeck->setText(epro::format(L"Deck: {}", npc.deckFile).c_str());
+	btnAdventureDuel->setEnabled(true);
 
 	selectedAdventureNPCName = npc.name;
 	selectedAdventureBotDeckName = npc.deckFile;
@@ -1653,19 +1654,17 @@ void Game::StartAdventureDuel() {
 	isAdventureMode = true;
 	isHostingOnline = false;
 
-	uint16_t host_port = 7911;
-	try {
-		host_port = static_cast<uint16_t>(std::stoul(gGameConfig->serverport));
-	} catch(...) {
-		host_port = 7911;
-	}
-
+	// Use dedicated port 7933 for local adventure duels to eliminate delay and prevent port collision with multirole (7911)
+	uint16_t host_port = 7933;
 	if (!NetServer::StartServer(host_port)) {
-		host_port = 7913;
+		host_port = 7935;
 		if (!NetServer::StartServer(host_port)) {
-			PopupMessage(L"No se pudo iniciar el servidor local para el duelo.");
-			isAdventureMode = false;
-			return;
+			host_port = 7937;
+			if (!NetServer::StartServer(host_port)) {
+				PopupMessage(L"No se pudo iniciar el servidor local para el duelo.");
+				isAdventureMode = false;
+				return;
+			}
 		}
 	}
 
@@ -1678,7 +1677,10 @@ void Game::StartAdventureDuel() {
 	}
 
 	DuelClient::is_local_host = true;
-	HideElement(wAdventureMode);
+
+	// Keep adventure mode window visible until duel starts to avoid empty screens and ghost windows
+	btnAdventureDuel->setEnabled(false);
+	stAdventureNPCDeck->setText(L"Iniciando duelo...");
 }
 
 void Game::PopulateTabSettingsWindow() {
