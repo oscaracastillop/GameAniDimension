@@ -232,7 +232,7 @@ catch(...) { what = def; }
 				cscg.info.start_lp = 8000;
 				cscg.info.draw_count = 1;
 				cscg.info.time_limit = 180;
-				cscg.info.lflist = 0; // N/A (No banlist)
+				cscg.info.lflist = mainGame->adventureLFListHash; // 2026.10
 				cscg.info.duel_rule = 5; // Master Rules (2020)
 				cscg.info.duel_flag_low = 0;
 				cscg.info.duel_flag_high = 0;
@@ -941,8 +941,11 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			DuelClient::SendPacketToServer(CTOS_HS_READY);
 
 			uint16_t bport = NetServer::GetServerPort();
-			if(mainGame->selectedAdventureBot >= 0 && mainGame->selectedAdventureBot < (int)mainGame->gBot.bots.size()) {
-				mainGame->gBot.bots[mainGame->selectedAdventureBot].Launch(bport, L"", true, 0, nullptr);
+			std::wstring botDeck = mainGame->selectedAdventureBotDeckName;
+			if(botDeck.empty())
+				botDeck = L"Skull servant 2026";
+			if(!mainGame->gBot.bots.empty()) {
+				mainGame->gBot.bots[0].Launch(bport, L"", true, 0, botDeck.c_str());
 			}
 		} else {
 			if(mainGame->wCreateHost->isVisible())

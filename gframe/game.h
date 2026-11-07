@@ -397,15 +397,30 @@ struct server_lobby_page_elements {
 	irr::gui::IGUIButton* btnJoinCancel2;
 };
 
+struct AdventureNpcInfo {
+	int id{ 0 };
+	int level{ 1 };
+	std::wstring name{};
+	std::wstring avatarFile{};
+	std::wstring deckFile{ L"Skull servant 2026.ydk" };
+	std::wstring serverImagePath{};
+};
+
 struct adventure_mode_panel_elements {
 	bool isAdventureMode{ false };
 	int selectedAdventureBot{ 0 };
 	std::wstring selectedAdventureUserDeckName{};
+	std::wstring selectedAdventureBotDeckName{ L"Skull servant 2026" };
 	uint32_t adventureLFListHash{ 0 };
+	std::vector<AdventureNpcInfo> adventureNpcList{};
 	irr::gui::IGUIWindow* wAdventureMode{ nullptr };
+	irr::gui::IGUIImage* imgAdventureBg{ nullptr };
 	irr::gui::IGUIComboBox* cbAdventureNPC{ nullptr };
 	irr::gui::IGUIComboBox* cbAdventureUserDeck{ nullptr };
-	irr::gui::IGUIStaticText* stAdventureNPCInfo{ nullptr };
+	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureNPCName{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureNPCLevel{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureNPCDeck{ nullptr };
 	irr::gui::IGUIButton* btnAdventureDuel{ nullptr };
 	irr::gui::IGUIButton* btnAdventureBack{ nullptr };
 };
@@ -757,6 +772,7 @@ public:
 	void PopulateAIBotWindow();
 	void PopulateAdventureModeWindow();
 	void RefreshAdventureMode();
+	void UpdateAdventureNPCDisplay();
 	void StartAdventureDuel();
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
