@@ -168,8 +168,8 @@ LONG WINAPI crashDumpHandler(EXCEPTION_POINTERS* pExceptionInfo) {
 #endif
 
 namespace ygo {
-	epro::thread::id main_thread_id;
-	epro::thread::id Utils::GetMainThreadId() {
+	std::thread::id main_thread_id;
+	std::thread::id Utils::GetMainThreadId() {
 		return main_thread_id;
 	}
 	std::vector<SynchronizedIrrArchive> Utils::archives;

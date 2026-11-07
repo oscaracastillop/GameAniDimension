@@ -581,7 +581,7 @@ public:
 	void ClearTextures();
 	void CloseDuelWindow();
 	void PopupMessage(epro::wstringview text, epro::wstringview caption = L"");
-	void PopupSaveWindow(epro::wstringview caption, epro::wstringview text, epro::wstringview hint);
+	void PopupSaveWindow(epro::wstringview caption, epro::wstringview text, epro::wstringview hint = L"");
 
 	uint8_t LocalPlayer(uint8_t player);
 	void UpdateDuelParam();
