@@ -1469,12 +1469,13 @@ void Game::PopulateAdventureModeWindow() {
 	// Rules Info Box (Pre-set parameters from Ani Dimension Adventure mode)
 	auto* stRules = env->addStaticText(
 		L"Parametros Predeterminados de Duelo:\n"
-		L" - Lista de Prohibidas: 2026.10 TCG / N/A\n"
+		L" - Lista de Prohibidas: N/A\n"
 		L" - Cartas Permitidas: Todo se Vale\n"
+		L" - No revisar los decks: Si\n"
 		L" - Modo de Duelo: 1 vs 1 (Mejor de 1)\n"
 		L" - Puntos de Vida: 8000 | Mano Inicial: 5 | Robo: 1\n"
 		L" - Regla: Master Rules (2020) | Tiempo Limite: 180s",
-		Scale(20, 215, 460, 335), true, true, wAdventureMode);
+		Scale(20, 215, 460, 345), true, true, wAdventureMode);
 	stRules->setOverrideColor(irr::video::SColor(255, 215, 230, 255));
 
 	// Action buttons
@@ -1531,14 +1532,8 @@ void Game::StartAdventureDuel() {
 	selectedAdventureBot = npcIdx;
 	selectedAdventureUserDeckName = cbAdventureUserDeck->getItem(deckIdx);
 
-	// Locate 2026.10 LFList hash
+	// Default to N/A (0) so bot decks with older formats never fail
 	adventureLFListHash = 0;
-	for (const auto& lf : gdeckManager->_lfList) {
-		if (lf.listName.find(L"2026.10") != std::wstring::npos) {
-			adventureLFListHash = lf.hash;
-			break;
-		}
-	}
 
 	isAdventureMode = true;
 	isHostingOnline = false;
