@@ -944,8 +944,37 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			std::wstring botDeck = mainGame->selectedAdventureBotDeckName;
 			if(botDeck.empty())
 				botDeck = L"Skull servant 2026";
-			if(!mainGame->gBot.bots.empty()) {
-				mainGame->gBot.bots[0].Launch(bport, L"", true, 0, botDeck.c_str());
+			if(botDeck.size() > 4 && botDeck.substr(botDeck.size() - 4) == L".ydk") {
+				botDeck = botDeck.substr(0, botDeck.size() - 4);
+			}
+
+			std::wstring deckDir = WindBotPanel::absolute_deck_path;
+			if(deckDir.empty()) {
+				deckDir = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
+			}
+			std::wstring fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
+
+			WindBot* engineToLaunch = mainGame->gBot.genericEngine;
+			if(!engineToLaunch) {
+				for(auto& bot : mainGame->gBot.bots) {
+					if(bot.deck == L"Lucky") {
+						engineToLaunch = &bot;
+						break;
+					}
+				}
+			}
+			if(!engineToLaunch && !mainGame->gBot.bots.empty()) {
+				engineToLaunch = &mainGame->gBot.bots[0];
+			}
+
+			if(engineToLaunch) {
+				std::wstring botName = mainGame->selectedAdventureNPCName;
+				if(botName.empty() && !mainGame->adventureNpcList.empty() && 
+				   mainGame->selectedAdventureBot >= 0 && 
+				   mainGame->selectedAdventureBot < (int)mainGame->adventureNpcList.size()) {
+					botName = mainGame->adventureNpcList[mainGame->selectedAdventureBot].name;
+				}
+				engineToLaunch->Launch(bport, L"", true, 0, fullDeckPath.c_str(), botName.empty() ? nullptr : botName.c_str());
 			}
 		} else {
 			if(mainGame->wCreateHost->isVisible())

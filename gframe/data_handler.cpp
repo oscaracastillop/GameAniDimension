@@ -51,6 +51,14 @@ void DataHandler::LoadArchivesDB() {
 }
 
 void DataHandler::LoadPicUrls() {
+	auto cleanUrlStr = [](std::string u) -> std::string {
+		while(!u.empty() && (u.front() == '"' || u.front() == '\'' || u.front() == ' '))
+			u.erase(0, 1);
+		while(!u.empty() && (u.back() == '"' || u.back() == '\'' || u.back() == ' '))
+			u.pop_back();
+		return u;
+	};
+	bool hasArtUrl = false;
 	for(auto& _config : { &configs->user_configs, &configs->configs }) {
 		const auto& config = *_config;
 		auto it = config.find("urls");
@@ -62,25 +70,28 @@ void DataHandler::LoadPicUrls() {
 					if(url == "default") {
 						if(type == "pic") {
 #ifdef DEFAULT_PIC_URL
-							imageDownloader->AddDownloadResource({ DEFAULT_PIC_URL, imgType::ART });
+							imageDownloader->AddDownloadResource({ cleanUrlStr(DEFAULT_PIC_URL), imgType::ART });
+							hasArtUrl = true;
 #else
 							continue;
 #endif
 						} else if(type == "field") {
 #ifdef DEFAULT_FIELD_URL
-							imageDownloader->AddDownloadResource({ DEFAULT_FIELD_URL, imgType::FIELD });
+							imageDownloader->AddDownloadResource({ cleanUrlStr(DEFAULT_FIELD_URL), imgType::FIELD });
 #else
 							continue;
 #endif
 						} else if(type == "cover") {
 #ifdef DEFAULT_COVER_URL
-							imageDownloader->AddDownloadResource({ DEFAULT_COVER_URL, imgType::COVER });
+							imageDownloader->AddDownloadResource({ cleanUrlStr(DEFAULT_COVER_URL), imgType::COVER });
 #else
 							continue;
 #endif
 						}
 					} else {
-						imageDownloader->AddDownloadResource({ url, type == "field" ?
+						if(type == "pic")
+							hasArtUrl = true;
+						imageDownloader->AddDownloadResource({ cleanUrlStr(url), type == "field" ?
 																imgType::FIELD : (type == "pic") ?
 																imgType::ART : imgType::COVER });
 					}
@@ -90,6 +101,9 @@ void DataHandler::LoadPicUrls() {
 				}
 			}
 		}
+	}
+	if(!hasArtUrl) {
+		imageDownloader->AddDownloadResource({ "https://images.ygoprodeck.com/images/cards/{}.jpg", imgType::ART });
 	}
 }
 void DataHandler::LoadZipArchives() {

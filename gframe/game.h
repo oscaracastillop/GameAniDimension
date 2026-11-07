@@ -409,6 +409,7 @@ struct AdventureNpcInfo {
 struct adventure_mode_panel_elements {
 	bool isAdventureMode{ false };
 	int selectedAdventureBot{ 0 };
+	std::wstring selectedAdventureNPCName{};
 	std::wstring selectedAdventureUserDeckName{};
 	std::wstring selectedAdventureBotDeckName{ L"Skull servant 2026" };
 	uint32_t adventureLFListHash{ 0 };
