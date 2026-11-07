@@ -52,6 +52,9 @@ namespace ygo {
 			static_assert(N <= 16, "Thread name on posix can't be more than 16 bytes!");
 			InternalSetThreadName(s, ws);
 		}
+		static epro::thread::id GetCurrThreadId() { return epro::this_thread::get_id(); }
+		static epro::thread::id GetMainThreadId();
+		static bool IsMainThread() { return GetMainThreadId() == GetCurrThreadId(); }
 
 		static std::vector<SynchronizedIrrArchive> archives;
 		static irr::io::IFileSystem* filesystem;
