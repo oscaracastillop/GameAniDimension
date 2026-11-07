@@ -244,11 +244,7 @@ catch(...) { what = def; }
 				cscg.info.team2 = 1;
 				cscg.info.best_of = 1;
 				static constexpr DeckSizes nolimit_deck_sizes{ {0,999},{0,999},{0,999} };
-				auto& sizes = cscg.info.sizes;
-				for (size_t i = 0; i < 3; ++i) {
-					sizes[i].min = nolimit_deck_sizes[i].min;
-					sizes[i].max = nolimit_deck_sizes[i].max;
-				}
+				cscg.info.sizes = nolimit_deck_sizes;
 				cscg.info.forbiddentypes = 0;
 				cscg.info.extra_rules = 0;
 				SendPacketToServer(CTOS_CREATE_GAME, cscg);
