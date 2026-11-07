@@ -6,24 +6,24 @@ on:
   pull_request:
   workflow_dispatch:
 env:
-  DEPENDENCIES_BASE_URL: https://github.com/edo9300/edopro-vcpkg-cache/releases/latest/download
+  DEPENDENCIES_BASE_URL: https://github.com/edo9300/edopro-vcpkg-cache/releases/download/20260914
   DEPLOY_DIR: deploy
 jobs:
   Windows:
     runs-on: windows-2022
     env:
-      DEPLOY_BRANCH: travis-windows-2019
+      DEPLOY_BRANCH: travis-windows-2022
       TRAVIS_OS_NAME: windows
       DXSDK_DIR: /c/d3d9sdk/
       VCPKG_ROOT: /c/vcpkg2
-      VS_GEN: vs2019
+      VS_GEN: vs2022
       BUILD_CONFIG: release
       ARCH: x86
     steps:
     - name: Set custom env vars
       shell: bash
       run: |
-        echo "VCPKG_CACHE_ZIP_URL=$DEPENDENCIES_BASE_URL/installed_x86-windows-static-vs2019.zip" >> $GITHUB_ENV
+        echo "VCPKG_CACHE_ZIP_URL=$DEPENDENCIES_BASE_URL/installed_x86-windows-static-vs2022.zip" >> $GITHUB_ENV
     - name: Add msbuild to PATH
       uses: microsoft/setup-msbuild@v2
     - uses: actions/checkout@v4
