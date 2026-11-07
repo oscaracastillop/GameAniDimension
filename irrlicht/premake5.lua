@@ -1,5 +1,6 @@
 project "Irrlicht"
 	kind "StaticLib"
+	cppdialect "C++17"
 	includedirs "include"
 	links "imm32"
 	dofile("defines.lua")
