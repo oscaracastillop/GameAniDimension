@@ -1055,12 +1055,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case COMBOBOX_ADVENTURE_NPC: {
-				int selected = mainGame->cbAdventureNPC->getSelected();
-				if (selected >= 0 && selected < (int)mainGame->gBot.bots.size()) {
-					auto& bot = mainGame->gBot.bots[selected];
-					std::wstring info = epro::format(L"Oponente: {}\nDificultad: {}", bot.name, bot.difficulty != 0 ? epro::to_wstring(bot.difficulty) : L"Estandar");
-					mainGame->stAdventureNPCInfo->setText(info.data());
-				}
+				mainGame->UpdateAdventureNPCDisplay();
 				break;
 			}
 			case SERVER_CHOICE: {

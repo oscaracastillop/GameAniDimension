@@ -1,6 +1,7 @@
 #include <sstream>
 #include <nlohmann/json.hpp>
 #include <irrlicht.h>
+#include <curl/curl.h>
 #include "client_updater.h"
 #include "game_config.h"
 #include "repo_manager.h"
@@ -257,9 +258,10 @@ void Game::Initialize() {
 	offset += 35;
 	btnAdventureMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ADVENTURE_MODE, L"Modo Aventura");
 	offset += 35;
-	btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
-	defaultStrings.emplace_back(btnLanMode, 1200);
-	offset += 35;
+	// LAN + AI disabled as requested
+	// btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
+	// defaultStrings.emplace_back(btnLanMode, 1200);
+	// offset += 35;
 	btnSingleMode = env->addButton(OFFSET(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, gDataManager->GetSysString(1201).data());
 	defaultStrings.emplace_back(btnSingleMode, 1201);
 	offset += 35;
@@ -1448,51 +1450,164 @@ void Game::PopulateAIBotWindow() {
 	}
 }
 
+static size_t NpcHttpCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+	size_t realsize = size * nmemb;
+	auto buff = static_cast<std::string*>(userp);
+	size_t prev_size = buff->size();
+	buff->resize(prev_size + realsize);
+	memcpy((char*)buff->data() + prev_size, contents, realsize);
+	return realsize;
+}
+
 void Game::PopulateAdventureModeWindow() {
-	wAdventureMode = env->addWindow(Scale(270, 80, 750, 530), false, L"Modo Aventura - Ani Dimension");
+	// Window: Width 660, Height 500
+	wAdventureMode = env->addWindow(Scale(180, 50, 840, 550), false, L"Modo Aventura - Ani Dimension");
 	wAdventureMode->getCloseButton()->setVisible(false);
 	wAdventureMode->setVisible(false);
 
-	// NPC Label & Dropdown (ONLY bot name, NEVER showing/exposing the bot deck)
-	env->addStaticText(L"Seleccionar Oponente (NPC):", Scale(20, 30, 460, 50), false, false, wAdventureMode);
-	cbAdventureNPC = AddComboBox(env, Scale(20, 55, 460, 80), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
-	cbAdventureNPC->setMaxSelectionRows(10);
+	// Optional background image (can be placed in textures/bg_adventure.png or textures/characters/bg_adventure.png)
+	imgAdventureBg = env->addImage(Scale(0, 0, 660, 500), wAdventureMode);
+	imgAdventureBg->setScaleImage(true);
+	auto bgTex = driver->getTexture("textures/bg_adventure.png");
+	if(!bgTex) bgTex = driver->getTexture("textures/characters/bg_adventure.png");
+	if(bgTex) imgAdventureBg->setImage(bgTex);
+	else imgAdventureBg->setVisible(false);
 
-	// NPC Info / Difficulty
-	stAdventureNPCInfo = env->addStaticText(L"", Scale(20, 90, 460, 140), true, true, wAdventureMode);
+	// --- Left Side: Selectors & Actions ---
+	env->addStaticText(L"Seleccionar Oponente (NPC):", Scale(20, 40, 340, 60), false, false, wAdventureMode);
+	cbAdventureNPC = AddComboBox(env, Scale(20, 65, 340, 95), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
+	cbAdventureNPC->setMaxSelectionRows(15);
 
-	// User Deck Label & Dropdown (allowing the player to choose their own deck)
-	env->addStaticText(L"Tu Deck:", Scale(20, 150, 460, 170), false, false, wAdventureMode);
-	cbAdventureUserDeck = AddComboBox(env, Scale(20, 175, 460, 200), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	env->addStaticText(L"Tu Deck:", Scale(20, 120, 340, 140), false, false, wAdventureMode);
+	cbAdventureUserDeck = AddComboBox(env, Scale(20, 145, 340, 175), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	// Rules Info Box (Pre-set parameters from Ani Dimension Adventure mode)
-	auto* stRules = env->addStaticText(
-		L"Parametros Predeterminados de Duelo:\n"
-		L" - Lista de Prohibidas: N/A\n"
-		L" - Cartas Permitidas: Todo se Vale\n"
-		L" - No revisar los decks: Si\n"
-		L" - Modo de Duelo: 1 vs 1 (Mejor de 1)\n"
-		L" - Puntos de Vida: 8000 | Mano Inicial: 5 | Robo: 1\n"
-		L" - Regla: Master Rules (2020) | Tiempo Limite: 180s",
-		Scale(20, 215, 460, 345), true, true, wAdventureMode);
-	stRules->setOverrideColor(irr::video::SColor(255, 215, 230, 255));
+	btnAdventureDuel = env->addButton(Scale(20, 220, 170, 265), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"Duelo");
+	btnAdventureBack = env->addButton(Scale(190, 220, 340, 265), wAdventureMode, BUTTON_ADVENTURE_BACK, L"Volver");
 
-	// Action buttons
-	btnAdventureDuel = env->addButton(Scale(70, 360, 210, 395), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"Duelo");
-	btnAdventureBack = env->addButton(Scale(270, 360, 410, 395), wAdventureMode, BUTTON_ADVENTURE_BACK, L"Volver");
+	// --- Right Side: NPC Card Information & Portrait ---
+	imgAdventureNPC = env->addImage(Scale(380, 40, 620, 320), wAdventureMode);
+	imgAdventureNPC->setScaleImage(true);
+
+	stAdventureNPCName = env->addStaticText(L"", Scale(370, 335, 640, 365), true, true, wAdventureMode);
+	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+
+	stAdventureNPCLevel = env->addStaticText(L"", Scale(370, 375, 640, 405), true, true, wAdventureMode);
+	stAdventureNPCLevel->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	stAdventureNPCDeck = env->addStaticText(L"", Scale(370, 415, 640, 445), true, true, wAdventureMode);
+	stAdventureNPCDeck->setOverrideColor(irr::video::SColor(255, 180, 220, 255));
+}
+
+void Game::UpdateAdventureNPCDisplay() {
+	int selected = cbAdventureNPC->getSelected();
+	if (selected < 0 || selected >= (int)adventureNpcList.size()) {
+		stAdventureNPCName->setText(L"");
+		stAdventureNPCLevel->setText(L"");
+		stAdventureNPCDeck->setText(L"");
+		imgAdventureNPC->setVisible(false);
+		return;
+	}
+	const auto& npc = adventureNpcList[selected];
+	stAdventureNPCName->setText(epro::format(L"Personaje: {}", npc.name).c_str());
+	stAdventureNPCLevel->setText(epro::format(L"Nivel: {}", npc.level).c_str());
+	stAdventureNPCDeck->setText(epro::format(L"Deck: {}", npc.deckFile).c_str());
+
+	selectedAdventureBotDeckName = npc.deckFile;
+	if (selectedAdventureBotDeckName.size() > 4 && 
+	    selectedAdventureBotDeckName.substr(selectedAdventureBotDeckName.size() - 4) == L".ydk") {
+		selectedAdventureBotDeckName = selectedAdventureBotDeckName.substr(0, selectedAdventureBotDeckName.size() - 4);
+	}
+
+	auto utf8Avatar = Utils::ToUTF8IfNeeded(npc.avatarFile);
+	auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
+	if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
+	if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+	if(tex) {
+		imgAdventureNPC->setImage(tex);
+		imgAdventureNPC->setVisible(true);
+	} else {
+		imgAdventureNPC->setVisible(false);
+	}
 }
 
 void Game::RefreshAdventureMode() {
-	RefreshAiDecks();
+	adventureNpcList.clear();
 	cbAdventureNPC->clear();
-	int i = 0;
-	for (const auto& bot : gBot.bots) {
-		if (gBot.genericEngine == &bot)
-			continue;
-		// Only display the NPC name (never expose bot deck)
-		cbAdventureNPC->addItem(bot.name.data(), i);
-		++i;
+
+	// Check if background image was placed in textures
+	auto bgTex = driver->getTexture("textures/bg_adventure.png");
+	if(!bgTex) bgTex = driver->getTexture("textures/characters/bg_adventure.png");
+	if(bgTex && imgAdventureBg) {
+		imgAdventureBg->setImage(bgTex);
+		imgAdventureBg->setVisible(true);
+	}
+
+	// Fetch NPCs from REST API (SQL Server DBAniDimension)
+	std::string retrieved_data;
+	auto curl_handle = curl_easy_init();
+	if (curl_handle) {
+		std::string apiUrl = "http://66.92.168.136:8080/api/npcs";
+		curl_easy_setopt(curl_handle, CURLOPT_URL, apiUrl.c_str());
+		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
+		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 3L);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 5L);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &retrieved_data);
+		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
+		auto res = curl_easy_perform(curl_handle);
+		curl_easy_cleanup(curl_handle);
+		if (res == CURLE_OK && !retrieved_data.empty()) {
+			try {
+				auto json = nlohmann::json::parse(retrieved_data);
+				if (json.contains("npcs") && json["npcs"].is_array()) {
+					for (const auto& item : json["npcs"]) {
+						AdventureNpcInfo info;
+						info.id = item.value("Id", item.value("id", 0));
+						info.level = item.value("Level", item.value("level", 1));
+						info.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
+						info.avatarFile = Utils::ToUnicodeIfNeeded(item.value("AvatarFile", item.value("avatarFile", "")));
+						info.deckFile = Utils::ToUnicodeIfNeeded(item.value("DeckFile", item.value("deckFile", "Skull servant 2026.ydk")));
+						info.serverImagePath = Utils::ToUnicodeIfNeeded(item.value("ServerImagePath", item.value("serverImagePath", "")));
+						adventureNpcList.push_back(std::move(info));
+					}
+				}
+			} catch(...) {}
+		}
+	}
+
+	// Fallback list if API offline
+	if (adventureNpcList.empty()) {
+		static const struct { int lv; const wchar_t* name; const wchar_t* av; } fallback[] = {
+			{1, L"Tea Gardner", L"tea_domino.png"},
+			{2, L"Tristan Taylor", L"tristan_domino.png"},
+			{3, L"Joey Wheeler", L"joey_domino.png"},
+			{4, L"Solomon Muto", L"solomon_domino.png"},
+			{5, L"Yugi Muto", L"yugi_domino.png"},
+			{6, L"Seto Kaiba", L"kaiba_domino.png"},
+			{7, L"Weevil Underwood", L"weevil_kod.png"},
+			{8, L"Rex Raptor", L"rex_kod.png"},
+			{9, L"Mako Tsunami", L"mako_kod.png"},
+			{10, L"Mai Valentine", L"panik_kod.png"},
+			{11, L"Bandit Keith", L"bonz_kod.png"},
+			{12, L"Maximillion Pegasus", L"bakura_kod.png"},
+			{86, L"Faraon Atem", L"atem.png"}
+		};
+		for (const auto& fb : fallback) {
+			AdventureNpcInfo info;
+			info.id = fb.lv;
+			info.level = fb.lv;
+			info.name = fb.name;
+			info.avatarFile = fb.av;
+			info.deckFile = L"Skull servant 2026.ydk";
+			adventureNpcList.push_back(std::move(info));
+		}
+	}
+
+	for (size_t i = 0; i < adventureNpcList.size(); ++i) {
+		const auto& npc = adventureNpcList[i];
+		cbAdventureNPC->addItem(epro::format(L"Lv.{} - {}", npc.level, npc.name).c_str(), (int)i);
 	}
 	if (cbAdventureNPC->getItemCount() > 0)
 		cbAdventureNPC->setSelected(0);
@@ -1501,25 +1616,18 @@ void Game::RefreshAdventureMode() {
 	if (!gGameConfig->lastdeck.empty()) {
 		for (size_t d = 0; d < cbAdventureUserDeck->getItemCount(); ++d) {
 			if (gGameConfig->lastdeck == cbAdventureUserDeck->getItem(d)) {
-				cbAdventureUserDeck->setSelected(d);
+				cbAdventureUserDeck->setSelected((int)d);
 				break;
 			}
 		}
 	}
 
-	int selected = cbAdventureNPC->getSelected();
-	if (selected >= 0 && selected < (int)gBot.bots.size()) {
-		auto& bot = gBot.bots[selected];
-		std::wstring info = epro::format(L"Oponente: {}\nDificultad: {}", bot.name, bot.difficulty != 0 ? epro::to_wstring(bot.difficulty) : L"Estandar");
-		stAdventureNPCInfo->setText(info.data());
-	} else {
-		stAdventureNPCInfo->setText(L"");
-	}
+	UpdateAdventureNPCDisplay();
 }
 
 void Game::StartAdventureDuel() {
 	int npcIdx = cbAdventureNPC->getSelected();
-	if (npcIdx < 0 || npcIdx >= (int)gBot.bots.size()) {
+	if (npcIdx < 0 || npcIdx >= (int)adventureNpcList.size()) {
 		PopupMessage(L"Por favor selecciona un NPC.");
 		return;
 	}
@@ -1532,8 +1640,14 @@ void Game::StartAdventureDuel() {
 	selectedAdventureBot = npcIdx;
 	selectedAdventureUserDeckName = cbAdventureUserDeck->getItem(deckIdx);
 
-	// Default to N/A (0) so bot decks with older formats never fail
+	// Pre-set Banlist 2026.10
 	adventureLFListHash = 0;
+	for (const auto& lf : gdeckManager->_lfList) {
+		if (lf.listName.find(L"2026.10") != std::wstring::npos) {
+			adventureLFListHash = lf.hash;
+			break;
+		}
+	}
 
 	isAdventureMode = true;
 	isHostingOnline = false;
