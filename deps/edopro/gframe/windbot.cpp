@@ -30,7 +30,7 @@ bool WindBot::serialized{ false };
 decltype(WindBot::serialized_databases) WindBot::serialized_databases{};
 #endif
 
-WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck) const {
+WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck, const wchar_t* botName) const {
 #if !EDOPRO_ANDROID && !EDOPRO_IOS
 	if(!serialized) {
 		serialized = true;
@@ -39,9 +39,10 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 #endif
 #if EDOPRO_WINDOWS
 	//Windows can modify this string
+	auto actualName = (botName && botName[0]) ? botName : name.c_str();
 	auto args = Utils::ToPathString(epro::format(
 		L"WindBot.exe HostInfo=\"{}\" Deck=\"{}\" Port={} Version={} name=\"[AI] {}\" Chat={} Hand={} DbPaths={}{} AssetPath=./WindBot",
-		pass, deck, port, version, name, chat, hand, serialized_databases, overridedeck ? epro::format(L" DeckFile=\"{}\"", overridedeck) : L""));
+		pass, deck, port, version, actualName, chat, hand, serialized_databases, overridedeck ? epro::format(L" DeckFile=\"{}\"", overridedeck) : L""));
 	STARTUPINFO si{ sizeof(si) };
 	si.dwFlags = STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_HIDE;
@@ -52,12 +53,13 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 	CloseHandle(pi.hThread);
 	return true;
 #elif EDOPRO_ANDROID
+	auto actualName = (botName && botName[0]) ? BufferIO::EncodeUTF8(botName) : BufferIO::EncodeUTF8(name);
 	nlohmann::json param({
 							{"HostInfo", BufferIO::EncodeUTF8(pass)},
 							{"Deck", BufferIO::EncodeUTF8(deck)},
 							{"Port", epro::to_string(port)},
 							{"Version", epro::to_string(version)},
-							{"Name", BufferIO::EncodeUTF8(name)},
+							{"Name", epro::format("[AI] {}", actualName)},
 							{"Chat", epro::to_string(static_cast<int>(chat))},
 							{"Hand", epro::to_string(hand)}
 						  });
@@ -66,11 +68,12 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 	porting::launchWindbot(param.dump());
 	return true;
 #elif EDOPRO_LINUX || EDOPRO_MACOS
+	auto actualName = (botName && botName[0]) ? BufferIO::EncodeUTF8(botName) : BufferIO::EncodeUTF8(name);
 	std::string argPass = epro::format("HostInfo={}", BufferIO::EncodeUTF8(pass));
 	std::string argDeck = epro::format("Deck={}", BufferIO::EncodeUTF8(deck));
 	std::string argPort = epro::format("Port={}", port);
 	std::string argVersion = epro::format("Version={}", version);
-	std::string argName = epro::format("name=[AI] {}", BufferIO::EncodeUTF8(name));
+	std::string argName = epro::format("name=[AI] {}", actualName);
 	std::string argChat = epro::format("Chat={}", chat);
 	std::string argHand = epro::format("Hand={}", hand);
 	std::string argDbPaths = epro::format("DbPaths={}", serialized_databases);
@@ -112,7 +115,7 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 #endif
 }
 
-std::wstring WindBot::GetLaunchParameters(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck) const {
+std::wstring WindBot::GetLaunchParameters(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck, const wchar_t* botName) const {
 #if !EDOPRO_ANDROID && !EDOPRO_IOS
 	if(!serialized) {
 		serialized = true;
@@ -120,9 +123,10 @@ std::wstring WindBot::GetLaunchParameters(int port, epro::wstringview pass, bool
 	}
 	const auto assets_path = Utils::GetAbsolutePath(EPRO_TEXT("./WindBot"sv));
 	const auto override_deck = overridedeck ? epro::format(L" DeckFile=\"{}\"", overridedeck) : L"";
+	auto actualName = (botName && botName[0]) ? botName : name.c_str();
 	return epro::format(
 		L"HostInfo=\"{}\" Deck=\"{}\" Port={} Version={} name=\"[AI] {}\" Chat={} Hand={} DbPaths={}{} AssetPath=\"{}\"",
-		pass, deck, port, version, name, chat, hand, Utils::ToUnicodeIfNeeded(serialized_databases), override_deck, Utils::ToUnicodeIfNeeded(assets_path));
+		pass, deck, port, version, actualName, chat, hand, Utils::ToUnicodeIfNeeded(serialized_databases), override_deck, Utils::ToUnicodeIfNeeded(assets_path));
 #else
 	return {};
 #endif

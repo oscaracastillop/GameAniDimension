@@ -90,6 +90,9 @@ void ImageDownloader::DownloadPic() {
 	curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 30L);
 	curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AniDimension/1.0");
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	if(gGameConfig->ssl_certificate_path.size() && Utils::FileExists(Utils::ToPathString(gGameConfig->ssl_certificate_path)))
 		curl_easy_setopt(curl, CURLOPT_CAINFO, gGameConfig->ssl_certificate_path.data());
 	auto SetPayloadAndUrl = [&payload, &curl](epro::stringview url, FILE* stream) {
@@ -143,6 +146,7 @@ void ImageDownloader::DownloadPic() {
 		for(auto& src : pic_urls) {
 			if(src.type != type)
 				continue;
+			Utils::CreateDirectory(EPRO_TEXT("./pics/temp"));
 			auto fp = fileopen(name.data(), "wb");
 			if(fp == nullptr) {
 				if(gGameConfig->logDownloadErrors) {
@@ -151,7 +155,12 @@ void ImageDownloader::DownloadPic() {
 				}
 				continue;
 			}
-			SetPayloadAndUrl(epro::format(src.url, code), fp);
+			std::string finalUrl = epro::format(src.url, code);
+			while(!finalUrl.empty() && (finalUrl.front() == '"' || finalUrl.front() == '\'' || finalUrl.front() == ' ' || finalUrl.front() == '\r' || finalUrl.front() == '\n'))
+				finalUrl.erase(0, 1);
+			while(!finalUrl.empty() && (finalUrl.back() == '"' || finalUrl.back() == '\'' || finalUrl.back() == ' ' || finalUrl.back() == '\r' || finalUrl.back() == '\n'))
+				finalUrl.pop_back();
+			SetPayloadAndUrl(finalUrl, fp);
 			res = curl_easy_perform(curl);
 			fclose(fp);
 			if(res == CURLE_OK) {

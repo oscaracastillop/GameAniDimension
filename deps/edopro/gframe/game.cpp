@@ -1513,6 +1513,7 @@ void Game::UpdateAdventureNPCDisplay() {
 	stAdventureNPCLevel->setText(epro::format(L"Nivel: {}", npc.level).c_str());
 	stAdventureNPCDeck->setText(epro::format(L"Deck: {}", npc.deckFile).c_str());
 
+	selectedAdventureNPCName = npc.name;
 	selectedAdventureBotDeckName = npc.deckFile;
 	if (selectedAdventureBotDeckName.size() > 4 && 
 	    selectedAdventureBotDeckName.substr(selectedAdventureBotDeckName.size() - 4) == L".ydk") {

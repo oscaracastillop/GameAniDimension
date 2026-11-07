@@ -28,8 +28,8 @@ struct WindBot {
 	using launch_ret_t = pid_t;
 	static epro::path_string executablePath;
 #endif
-	launch_ret_t Launch(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck) const;
-	std::wstring GetLaunchParameters(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck) const;
+	launch_ret_t Launch(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck, const wchar_t* botName = nullptr) const;
+	std::wstring GetLaunchParameters(int port, epro::wstringview pass, bool chat, int hand, const wchar_t* overridedeck, const wchar_t* botName = nullptr) const;
 
 #if EDOPRO_WINDOWS || EDOPRO_MACOS || EDOPRO_LINUX
 	static nlohmann::ordered_json databases;
