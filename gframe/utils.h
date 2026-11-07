@@ -9,6 +9,7 @@
 #include <memory> // unique_ptr
 #include <string>
 #include <vector>
+#include <thread>
 #include "RNG/Xoshiro256.hpp"
 #include "RNG/SplitMix64.hpp"
 #include "epro_mutex.h"
@@ -52,6 +53,9 @@ namespace ygo {
 			static_assert(N <= 16, "Thread name on posix can't be more than 16 bytes!");
 			InternalSetThreadName(s, ws);
 		}
+		static std::thread::id GetCurrThreadId() { return std::this_thread::get_id(); }
+		static std::thread::id GetMainThreadId();
+		static bool IsMainThread() { return GetMainThreadId() == GetCurrThreadId(); }
 
 		static std::vector<SynchronizedIrrArchive> archives;
 		static irr::io::IFileSystem* filesystem;

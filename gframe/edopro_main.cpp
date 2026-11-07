@@ -68,6 +68,7 @@ auto ParseArguments(int argc, epro::path_char* argv[]) {
 }
 
 extern "C" int real_main(int argc, epro::path_char** argv) {
+	ygo::main_thread_id = ygo::Utils::GetCurrThreadId();
 #if EDOPRO_POSIX
 	setlocale(LC_CTYPE, "UTF-8");
 	struct sigaction sa;
