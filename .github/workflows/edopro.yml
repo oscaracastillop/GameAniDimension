@@ -9,8 +9,8 @@ env:
   DEPENDENCIES_BASE_URL: https://github.com/edo9300/edopro-vcpkg-cache/releases/latest/download
   DEPLOY_DIR: deploy
 jobs:
-  Windows-vs2019:
-    runs-on: windows-2019
+  Windows:
+    runs-on: windows-2022
     env:
       DEPLOY_BRANCH: travis-windows-2019
       TRAVIS_OS_NAME: windows
