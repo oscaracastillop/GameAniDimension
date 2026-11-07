@@ -226,7 +226,7 @@ catch(...) { what = def; }
 				BufferIO::EncodeUTF16(L"Ani Dimension", cscg.name, 20);
 				cscg.pass[0] = 0;
 				mainGame->dInfo.secret.pass = L"";
-				cscg.info.rule = 3; // Todo se Vale
+				cscg.info.rule = 4; // Todo se Vale (4 = All Cards allowed)
 				cscg.info.mode = 0; // 1 vs 1 Single
 				cscg.info.start_hand = 5;
 				cscg.info.start_lp = 8000;
