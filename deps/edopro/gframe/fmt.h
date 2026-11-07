@@ -27,17 +27,15 @@ static_assert(FMT_VERSION >= 50000, "Fmt 5.0.0 or greater is required");
 #endif
 
 #include <ctime>
+#if defined(_MSC_VER)
 namespace fmt {
 inline std::tm localtime(std::time_t time) {
 	std::tm tm_buf;
-#if defined(_MSC_VER)
 	localtime_s(&tm_buf, &time);
-#else
-	localtime_r(&time, &tm_buf);
-#endif
 	return tm_buf;
 }
 }
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

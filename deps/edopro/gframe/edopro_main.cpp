@@ -2,6 +2,7 @@
 #include "cli_args.h"
 #include "text_types.h"
 #include "repo_cloner.h"
+#include "utils.h"
 
 #if EDOPRO_WINDOWS
 #define WIN32_LEAN_AND_MEAN
