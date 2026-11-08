@@ -1654,12 +1654,18 @@ void Game::StartAdventureDuel() {
 	isAdventureMode = true;
 	isHostingOnline = false;
 
-	// Use dedicated port 7933 for local adventure duels to eliminate delay and prevent port collision with multirole (7911)
-	uint16_t host_port = 7933;
+	// Standard LAN + AI port configuration (serverport from config, fallback to 7913/7915)
+	uint16_t host_port = 7911;
+	try {
+		host_port = static_cast<uint16_t>(std::stoul(gGameConfig->serverport));
+	} catch(...) {
+		host_port = 7911;
+	}
+
 	if (!NetServer::StartServer(host_port)) {
-		host_port = 7935;
+		host_port = 7913;
 		if (!NetServer::StartServer(host_port)) {
-			host_port = 7937;
+			host_port = 7915;
 			if (!NetServer::StartServer(host_port)) {
 				PopupMessage(L"No se pudo iniciar el servidor local para el duelo.");
 				isAdventureMode = false;
