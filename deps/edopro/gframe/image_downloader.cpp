@@ -127,15 +127,18 @@ void ImageDownloader::DownloadPic() {
 		switch(type) {
 			case imgType::ART:
 			case imgType::THUMB: {
+				Utils::MakeDirectory(EPRO_TEXT("./pics"));
 				dest = EPRO_TEXT("./pics/{}"sv);
 				break;
 			}
 			case imgType::FIELD: {
+				Utils::MakeDirectory(EPRO_TEXT("./pics/field"));
 				dest = EPRO_TEXT("./pics/field/{}"sv);
 				name.append(EPRO_TEXT("_f"));
 				break;
 			}
 			case imgType::COVER: {
+				Utils::MakeDirectory(EPRO_TEXT("./pics/cover"));
 				dest = EPRO_TEXT("./pics/cover/{}"sv);
 				name.append(EPRO_TEXT("_c"));
 				break;
@@ -166,6 +169,12 @@ void ImageDownloader::DownloadPic() {
 			if(res == CURLE_OK) {
 				const auto ext = GetExtension(payload.header);
 				dest_folder.append(ext.data(), ext.size());
+				if(type == imgType::FIELD)
+					Utils::MakeDirectory(EPRO_TEXT("./pics/field"));
+				else if(type == imgType::COVER)
+					Utils::MakeDirectory(EPRO_TEXT("./pics/cover"));
+				else
+					Utils::MakeDirectory(EPRO_TEXT("./pics"));
 				if(!Utils::FileMove(name, dest_folder))
 					Utils::FileDelete(name);
 				break;

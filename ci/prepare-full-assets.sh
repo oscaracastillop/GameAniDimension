@@ -23,6 +23,13 @@ if [ -d "/tmp/Distribution/config" ]; then
     cp -r /tmp/Distribution/config "$ASSETS/" || true
 fi
 
+echo "=== Pre-populating field spell illustrations ==="
+mkdir -p "$ASSETS/pics/field"
+FIELD_CODES=(59197169 86318356 87430998 23424603 22702055 50913601 47355498 37694547 43175858 75376965 76375976 62265044 22804644 39284521 35371948 41440148 47594939 41418852 92246806 74892653 62015408 75041269 80987696 20624263 71645242 67616300 97574404 90011152 295517 60519422 56433456 95440946 38468214 32354768 93302695 42713844 6568731 56673480 24094653 84941194 74725513)
+for code in "${FIELD_CODES[@]}"; do
+    curl -s --connect-timeout 10 -o "$ASSETS/pics/field/$code.jpg" "https://images.ygoprodeck.com/images/cards_cropped/$code.jpg" || true
+done
+
 echo "=== [3/4] Downloading WindBot resources ==="
 curl --retry 5 --connect-timeout 30 --location -o /tmp/WindBotIgnite-Resources.7z https://github.com/ProjectIgnis/windbot/releases/download/20250412/WindBotIgnite-Resources.7z
 7z x /tmp/WindBotIgnite-Resources.7z -o"$ASSETS" -y
@@ -40,3 +47,4 @@ find -L . ! -path . -type d | sed -E "s|^\./||" > ../indexu.txt
 find -L . ! -path . | sed -E "s|^\./||" > ../filelistu.txt
 
 echo "=== Assets prepared successfully! ==="
+

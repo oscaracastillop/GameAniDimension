@@ -761,6 +761,11 @@ irr::video::ITexture* ImageManager::GetTextureField(uint32_t code) {
 			tFields.emplace(code, downloaded);
 			return downloaded;
 		}
+		if(status == ImageDownloader::downloadStatus::DOWNLOAD_ERROR) {
+			auto fallback = GetTexture(code);
+			if(fallback)
+				return fallback;
+		}
 		return nullptr;
 	}
 	for(auto& path : mainGame->field_dirs) {
