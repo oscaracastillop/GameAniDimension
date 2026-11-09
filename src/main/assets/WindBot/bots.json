@@ -78,6 +78,24 @@
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
+        "name": "Yami Bakura",
+        "deck": "Npc_Nv20_Bakura",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Maximillion Pegasus (Toon)",
+        "deck": "Npc_Nv34_Pegasus",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Maximillion Pegasus (Illusion)",
+        "deck": "Npc_Nv36_Pegasus",
+        "difficulty": 3,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
         "name": "ABC-Dragon Buster",
         "deck": "ABC",
         "difficulty": 3,
