@@ -64,8 +64,8 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 							{"Hand", epro::to_string(hand)}
 						  });
 	if(overridedeck && overridedeck[0]) {
-		auto absDeck = Utils::GetAbsolutePath(overridedeck);
-		param["DeckFile"] = BufferIO::EncodeUTF8(absDeck);
+		auto absDeck = Utils::GetAbsolutePath(Utils::ToPathString(overridedeck));
+		param["DeckFile"] = Utils::ToUTF8IfNeeded(absDeck);
 	}
 	porting::launchWindbot(param.dump());
 	return true;
