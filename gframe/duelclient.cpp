@@ -234,8 +234,9 @@ catch(...) { what = def; }
 				cscg.info.time_limit = 180;
 				cscg.info.lflist = mainGame->adventureLFListHash; // 2026.10
 				cscg.info.duel_rule = 5; // Master Rules (2020)
-				cscg.info.duel_flag_low = 0;
-				cscg.info.duel_flag_high = 0;
+				cscg.info.duel_flag_low = DUEL_MODE_MR5 & 0xffffffff;
+				cscg.info.duel_flag_high = (DUEL_MODE_MR5 >> 32) & 0xffffffff;
+				cscg.info.forbiddentypes = DUEL_MODE_MR5_FORB;
 				cscg.info.no_check_deck_content = true; // [X] No revisar los decks
 				cscg.info.no_shuffle_deck = false;
 				cscg.info.handshake = SERVER_HANDSHAKE;
@@ -787,6 +788,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		str.append(epro::format(L"{}{}\n", gDataManager->GetSysString(1233), pkt.info.draw_count));
 		int rule;
 		mainGame->dInfo.duel_field = mainGame->GetMasterRule(params & ~DUEL_TCG_SEGOC_NONPUBLIC, pkt.info.forbiddentypes, &rule);
+		if(mainGame->isAdventureMode) {
+			mainGame->dInfo.duel_field = 4; // Force field3.png (Extra Monster Zones + Pendulum Zones)
+		}
 		if(mainGame->dInfo.compat_mode)
 			rule = pkt.info.duel_rule;
 		if (rule >= 6) {
