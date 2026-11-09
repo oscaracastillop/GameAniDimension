@@ -2,8 +2,8 @@
 
 set -euo pipefail
 
-PICS_URL=${PICS_URL:-""}
-FIELDS_URL=${FIELDS_URL:-""}
+PICS_URL=${PICS_URL:-"https://images.ygoprodeck.com/images/cards/{}.jpg"}
+FIELDS_URL=${FIELDS_URL:-"https://images.ygoprodeck.com/images/cards_cropped/{}.jpg"}
 COVERS_URL=${COVERS_URL:-""}
 DISCORD_APP_ID=${DISCORD_APP_ID:-""}
 UPDATE_URL=${UPDATE_URL:-""}

@@ -59,6 +59,7 @@ void DataHandler::LoadPicUrls() {
 		return u;
 	};
 	bool hasArtUrl = false;
+	bool hasFieldUrl = false;
 	for(auto& _config : { &configs->user_configs, &configs->configs }) {
 		const auto& config = *_config;
 		auto it = config.find("urls");
@@ -79,8 +80,9 @@ void DataHandler::LoadPicUrls() {
 #ifdef DEFAULT_FIELD_URL
 							imageDownloader->AddDownloadResource({ cleanUrlStr(DEFAULT_FIELD_URL), imgType::FIELD });
 #else
-							continue;
+							imageDownloader->AddDownloadResource({ "https://images.ygoprodeck.com/images/cards_cropped/{}.jpg", imgType::FIELD });
 #endif
+							hasFieldUrl = true;
 						} else if(type == "cover") {
 #ifdef DEFAULT_COVER_URL
 							imageDownloader->AddDownloadResource({ cleanUrlStr(DEFAULT_COVER_URL), imgType::COVER });
@@ -91,6 +93,8 @@ void DataHandler::LoadPicUrls() {
 					} else {
 						if(type == "pic")
 							hasArtUrl = true;
+						else if(type == "field")
+							hasFieldUrl = true;
 						imageDownloader->AddDownloadResource({ cleanUrlStr(url), type == "field" ?
 																imgType::FIELD : (type == "pic") ?
 																imgType::ART : imgType::COVER });
@@ -104,6 +108,9 @@ void DataHandler::LoadPicUrls() {
 	}
 	if(!hasArtUrl) {
 		imageDownloader->AddDownloadResource({ "https://images.ygoprodeck.com/images/cards/{}.jpg", imgType::ART });
+	}
+	if(!hasFieldUrl) {
+		imageDownloader->AddDownloadResource({ "https://images.ygoprodeck.com/images/cards_cropped/{}.jpg", imgType::FIELD });
 	}
 }
 void DataHandler::LoadZipArchives() {
