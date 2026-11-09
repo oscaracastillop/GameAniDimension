@@ -38,7 +38,7 @@ jobs:
     - name: Prepare assets
       run: |
         chmod +x ci/*.sh
-        ./ci/touch-assets.sh
+        ./ci/prepare-full-assets.sh
     - name: Build client
       run: ./ci/build-android.sh
     - name: Build APK
