@@ -960,18 +960,30 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				botDeck = botDeck.substr(0, botDeck.size() - 4);
 			}
 
-			std::wstring deckDir = WindBotPanel::absolute_deck_path;
-			if(deckDir.empty()) {
-				deckDir = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
+			std::wstring fullDeckPath = epro::format(L"./WindBot/Decks/{}.ydk", botDeck);
+			if(!Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+				std::wstring deckDir = WindBotPanel::absolute_deck_path;
+				if(deckDir.empty()) {
+					deckDir = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
+				}
+				fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
 			}
-			std::wstring fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
 
 			WindBot* engineToLaunch = nullptr;
-			// Prioritize MokeyMokey/MokeyMokeyKing: the universal active beatdown AI executor that summons, sets, activates spells/traps, and attacks with any custom deck
+			// 1. Check if there is a specialized AI bot matching this exact deck name
 			for(auto& bot : mainGame->gBot.bots) {
-				if(bot.deck == L"MokeyMokey" || bot.deck == L"MokeyMokeyKing") {
+				if(bot.deck == botDeck) {
 					engineToLaunch = &bot;
 					break;
+				}
+			}
+			// 2. Prioritize MokeyMokey/MokeyMokeyKing: the universal active beatdown AI executor fallback
+			if(!engineToLaunch) {
+				for(auto& bot : mainGame->gBot.bots) {
+					if(bot.deck == L"MokeyMokey" || bot.deck == L"MokeyMokeyKing") {
+						engineToLaunch = &bot;
+						break;
+					}
 				}
 			}
 			if(!engineToLaunch) {
