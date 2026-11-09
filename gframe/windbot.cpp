@@ -40,9 +40,13 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 #if EDOPRO_WINDOWS
 	//Windows can modify this string
 	auto actualName = (botName && botName[0]) ? botName : name.c_str();
+	epro::path_string absOverrideDeck;
+	if(overridedeck && overridedeck[0]) {
+		absOverrideDeck = Utils::GetAbsolutePath(overridedeck);
+	}
 	auto args = Utils::ToPathString(epro::format(
 		L"WindBot.exe HostInfo=\"{}\" Deck=\"{}\" Port={} Version={} name=\"[AI] {}\" Chat={} Hand={} DbPaths={}{} AssetPath=./WindBot",
-		pass, deck, port, version, actualName, chat, hand, serialized_databases, overridedeck ? epro::format(L" DeckFile=\"{}\"", overridedeck) : L""));
+		pass, deck, port, version, actualName, chat, hand, serialized_databases, !absOverrideDeck.empty() ? epro::format(L" DeckFile=\"{}\"", absOverrideDeck) : L""));
 	STARTUPINFO si{ sizeof(si) };
 	si.dwFlags = STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_HIDE;
