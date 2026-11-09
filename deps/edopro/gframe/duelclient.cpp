@@ -965,12 +965,17 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			}
 
 			std::wstring fullDeckPath = epro::format(L"./WindBot/Decks/{}.ydk", botDeck);
-			if(!Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+			if(Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+				fullDeckPath = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(Utils::ToPathString(fullDeckPath)));
+			} else {
 				std::wstring deckDir = WindBotPanel::absolute_deck_path;
 				if(deckDir.empty()) {
 					deckDir = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
 				}
 				fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
+				if(Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+					fullDeckPath = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(Utils::ToPathString(fullDeckPath)));
+				}
 			}
 
 			WindBot* engineToLaunch = nullptr;

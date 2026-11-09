@@ -63,8 +63,10 @@ WindBot::launch_ret_t WindBot::Launch(int port, epro::wstringview pass, bool cha
 							{"Chat", epro::to_string(static_cast<int>(chat))},
 							{"Hand", epro::to_string(hand)}
 						  });
-	if(overridedeck)
-		param["DeckFile"] = BufferIO::EncodeUTF8(overridedeck);
+	if(overridedeck && overridedeck[0]) {
+		auto absDeck = Utils::GetAbsolutePath(overridedeck);
+		param["DeckFile"] = BufferIO::EncodeUTF8(absDeck);
+	}
 	porting::launchWindbot(param.dump());
 	return true;
 #elif EDOPRO_LINUX || EDOPRO_MACOS
