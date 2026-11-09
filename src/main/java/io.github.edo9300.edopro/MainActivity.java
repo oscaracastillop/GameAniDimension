@@ -24,16 +24,25 @@ import androidx.documentfile.provider.DocumentFile;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import libwindbot.windbot.WindBot;
 
@@ -315,6 +324,119 @@ public class MainActivity extends Activity {
 	}
 
 	public void next() {
+		checkRemoteUpdates(new Runnable() {
+			@Override
+			public void run() {
+				launchGame();
+			}
+		});
+	}
+
+	private void checkRemoteUpdates(final Runnable onComplete) {
+		new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					String apiUrl = "http://66.92.168.136:8080";
+					String manifestUrl = apiUrl + "/api/updates/manifest?platform=android";
+					URL url = new URL(manifestUrl);
+					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+					conn.setConnectTimeout(3000);
+					conn.setReadTimeout(5000);
+					conn.setRequestMethod("GET");
+					if (conn.getResponseCode() == 200) {
+						BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+						StringBuilder sb = new StringBuilder();
+						String line;
+						while ((line = reader.readLine()) != null) {
+							sb.append(line);
+						}
+						reader.close();
+						JSONObject json = new JSONObject(sb.toString());
+						JSONArray files = json.optJSONArray("files");
+						if (files != null && working_directory != null) {
+							for (int i = 0; i < files.length(); i++) {
+								JSONObject fileObj = files.getJSONObject(i);
+								String relPath = fileObj.getString("path");
+								String fileUrl = fileObj.getString("url");
+								String remoteMd5 = fileObj.getString("md5");
+								File localFile = new File(working_directory, relPath);
+								boolean needsDownload = !localFile.exists();
+								if (!needsDownload) {
+									String localMd5 = calculateMD5(localFile);
+									if (!remoteMd5.equalsIgnoreCase(localMd5)) {
+										needsDownload = true;
+									}
+								}
+								if (needsDownload) {
+									downloadFile(apiUrl + fileUrl, localFile);
+								}
+							}
+						}
+					}
+				} catch (Exception e) {
+					Log.w("AniDimensionUpdate", "Android Auto-update check skipped/offline: " + e.getMessage());
+				}
+				runOnUiThread(onComplete);
+			}
+		}).start();
+	}
+
+	private static String calculateMD5(File file) {
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			FileInputStream fis = new FileInputStream(file);
+			byte[] buffer = new byte[8192];
+			int read;
+			while ((read = fis.read(buffer)) > 0) {
+				md.update(buffer, 0, read);
+			}
+			fis.close();
+			byte[] digest = md.digest();
+			StringBuilder sb = new StringBuilder();
+			for (byte b : digest) {
+				sb.append(String.format("%02x", b));
+			}
+			return sb.toString();
+		} catch (Exception e) {
+			return "";
+		}
+	}
+
+	private static void downloadFile(String fileUrl, File destFile) {
+		try {
+			File parent = destFile.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
+			URL url = new URL(fileUrl);
+			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(4000);
+			conn.setReadTimeout(10000);
+			if (conn.getResponseCode() == 200) {
+				InputStream in = conn.getInputStream();
+				File tempFile = new File(destFile.getAbsolutePath() + ".tmp");
+				FileOutputStream out = new FileOutputStream(tempFile);
+				byte[] buffer = new byte[8192];
+				int read;
+				while ((read = in.read(buffer)) > 0) {
+					out.write(buffer, 0, read);
+				}
+				out.flush();
+				out.close();
+				in.close();
+				if (destFile.exists()) {
+					destFile.delete();
+				}
+				tempFile.renameTo(destFile);
+				Log.i("AniDimensionUpdate", "Downloaded updated file on Android: " + destFile.getName());
+			}
+		} catch (Exception e) {
+			Log.e("AniDimensionUpdate", "Failed to download " + fileUrl + ": " + e.getMessage());
+		}
+	}
+
+	private void launchGame() {
 		var use_windbot = true;
 		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
 			use_windbot = false;

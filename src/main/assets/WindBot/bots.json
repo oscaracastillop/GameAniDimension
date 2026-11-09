@@ -1,56 +1,80 @@
 [
     {
         "name": "Tea Gardner",
-        "deck": "Tea_Nv1",
+        "deck": "Npc_Nv1_Tea",
         "difficulty": 1,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
         "name": "Tristan Taylor",
-        "deck": "Tristan_Nv1",
+        "deck": "Npc_Nv3_Tristan",
         "difficulty": 1,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
         "name": "Joey Wheeler",
-        "deck": "Joey_Nv1",
+        "deck": "Npc_Nv5_Joey",
         "difficulty": 1,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
-        "name": "Seto Kaiba",
-        "deck": "Kaiba_Nv1",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
-    },
-    {
         "name": "Solomon Muto",
-        "deck": "Solomon_Nv1",
+        "deck": "Npc_Nv6_Solomon",
         "difficulty": 2,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
         "name": "Yugi Muto",
-        "deck": "Yugi_Nv1",
+        "deck": "Npc_Nv8_Yugi",
         "difficulty": 2,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
-        "name": "Mako Tsunami",
-        "deck": "Mako_Tsunami_Nv1",
+        "name": "Seto Kaiba",
+        "deck": "Npc_Nv10_Kaiba",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Weevil Underwood",
+        "deck": "Npc_Nv12_Weevil",
         "difficulty": 1,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
         "name": "Rex Raptor",
-        "deck": "Rex_Raptor_Nv1",
+        "deck": "Npc_Nv13_Rex_Raptor",
         "difficulty": 1,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
-        "name": "Weevil Underwood",
-        "deck": "Weevil_Nv1",
+        "name": "Mako Tsunami",
+        "deck": "Npc_Nv15_Mako_Tsunami",
         "difficulty": 1,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Panik",
+        "deck": "Npc_Nv17_Panik",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Bonz",
+        "deck": "Npc_Nv19_Bonz",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Mai Valentine",
+        "deck": "Npc_Nv27_Mai_Valentine",
+        "difficulty": 2,
+        "masterRules": [ 1, 2, 3, 4, 5 ]
+    },
+    {
+        "name": "Bandit Keith",
+        "deck": "Npc_Nv29_Bandit_Keith",
+        "difficulty": 2,
         "masterRules": [ 1, 2, 3, 4, 5 ]
     },
     {
