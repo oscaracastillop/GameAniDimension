@@ -762,7 +762,7 @@ irr::video::ITexture* ImageManager::GetTextureField(uint32_t code) {
 			return downloaded;
 		}
 		if(status == ImageDownloader::downloadStatus::DOWNLOAD_ERROR) {
-			auto fallback = GetTexture(code);
+			auto fallback = GetTextureCard(code, imgType::ART);
 			if(fallback)
 				return fallback;
 		}

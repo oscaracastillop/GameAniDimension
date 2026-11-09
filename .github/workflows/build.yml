@@ -13,7 +13,6 @@ jobs:
       LIBWINDBOT_RESOURCES: https://github.com/ProjectIgnis/windbot/releases/download/20250412/WindBotIgnite-Resources.7z
       USE_BUNDLED_FONT: 1
       PICS_URL: https://images.ygoprodeck.com/images/cards/{}.jpg
-      FIELDS_URL: https://images.ygoprodeck.com/images/cards_cropped/{}.jpg
     steps:
     - uses: actions/checkout@v4
       with:
