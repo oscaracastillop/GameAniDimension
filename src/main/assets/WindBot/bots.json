@@ -1459,5 +1459,341 @@
       4,
       5
     ]
+  },
+  {
+    "name": "Npc_Nv97_Rex_Raptor",
+    "deck": "Npc_Nv97_Rex_Raptor",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv97_Rex_Raptor_Estructurado",
+    "deck": "Npc_Nv97_Rex_Raptor_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv99_Wheevil_Underwoob",
+    "deck": "Npc_Nv99_Wheevil_Underwoob",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv99_Wheevil_Underwoob_Estructurado",
+    "deck": "Npc_Nv99_Wheevil_Underwoob_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv101_Gurimo",
+    "deck": "Npc_Nv101_Gurimo",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv101_Gurimo_Estructurado",
+    "deck": "Npc_Nv101_Gurimo_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv104_Alister",
+    "deck": "Npc_Nv104_Alister",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv104_Alister_Estructurado",
+    "deck": "Npc_Nv104_Alister_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv108_Valon",
+    "deck": "Npc_Nv108_Valon",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv108_Valon_Estructurado",
+    "deck": "Npc_Nv108_Valon_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv110_Mai_Valentine",
+    "deck": "Npc_Nv110_Mai_Valentine",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv110_Mai_Valentine_Estructurado",
+    "deck": "Npc_Nv110_Mai_Valentine_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv111_Rafael",
+    "deck": "Npc_Nv111_Rafael",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv111_Rafael_Estructurado",
+    "deck": "Npc_Nv111_Rafael_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv113_Rafael",
+    "deck": "Npc_Nv113_Rafael",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv113_Rafael_Estructurado",
+    "deck": "Npc_Nv113_Rafael_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv115_Joey_Wheller",
+    "deck": "Npc_Nv115_Joey_Wheller",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv115_Joey_Wheeler_Estructurado",
+    "deck": "Npc_Nv115_Joey_Wheeler_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv117_Kaiba",
+    "deck": "Npc_Nv117_Kaiba",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv117_Kaiba_Estructurado",
+    "deck": "Npc_Nv117_Kaiba_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv118_Yami_Yugi",
+    "deck": "Npc_Nv118_Yami_Yugi",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv118_Yami_Yugi_Estructurado",
+    "deck": "Npc_Nv118_Yami_Yugi_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv120_Dartz",
+    "deck": "Npc_Nv120_Dartz",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv120_Dartz_Estructurado",
+    "deck": "Npc_Nv120_Dartz_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv122_Dartz",
+    "deck": "Npc_Nv122_Dartz",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv122_Dartz_Estructurado",
+    "deck": "Npc_Nv122_Dartz_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv124_Yami_Yugi",
+    "deck": "Npc_Nv124_Yami_Yugi",
+    "difficulty": 2,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Npc_Nv124_Yami_Yugi_Estructurado",
+    "deck": "Npc_Nv124_Yami_Yugi_Estructurado",
+    "difficulty": 3,
+    "masterRules": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ]
   }
 ]
