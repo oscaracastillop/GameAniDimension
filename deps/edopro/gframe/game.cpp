@@ -1459,61 +1459,289 @@ static size_t NpcHttpCallback(void* contents, size_t size, size_t nmemb, void* u
 	return realsize;
 }
 
+static nlohmann::json FetchAdventureApi(const std::string& endpoint) {
+	std::string retrieved_data;
+	auto curl_handle = curl_easy_init();
+	if(!curl_handle)
+		return {};
+	std::vector<std::string> hosts = { "http://127.0.0.1:8080", "http://localhost:8080", "http://66.92.168.136:8080" };
+	for(const auto& host : hosts) {
+		std::string apiUrl = host + endpoint;
+		curl_easy_setopt(curl_handle, CURLOPT_URL, apiUrl.c_str());
+		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
+		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 1L);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &retrieved_data);
+		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
+		retrieved_data.clear();
+		auto res = curl_easy_perform(curl_handle);
+		if(res == CURLE_OK && !retrieved_data.empty()) {
+			try {
+				auto j = nlohmann::json::parse(retrieved_data);
+				curl_easy_cleanup(curl_handle);
+				return j;
+			} catch(...) {}
+		}
+	}
+	curl_easy_cleanup(curl_handle);
+	return {};
+}
+
 void Game::PopulateAdventureModeWindow() {
-	// Window: Width 660, Height 500
-	wAdventureMode = env->addWindow(Scale(180, 50, 840, 550), false, L"Modo Aventura - Ani Dimension");
+	// Full dedicated adventure interface: 1004 x 620
+	wAdventureMode = env->addWindow(Scale(10, 10, 1014, 630), false, L"");
 	wAdventureMode->getCloseButton()->setVisible(false);
+	wAdventureMode->setDraggable(false);
+	wAdventureMode->setDrawTitlebar(false);
 	wAdventureMode->setVisible(false);
 
-	// Optional background image (can be placed in textures/bg_adventure.png or textures/characters/bg_adventure.png)
-	imgAdventureBg = env->addImage(Scale(0, 0, 660, 500), wAdventureMode);
+	// Dedicated background
+	imgAdventureBg = env->addImage(Scale(0, 0, 1004, 620), wAdventureMode);
 	imgAdventureBg->setScaleImage(true);
 	auto bgTex = driver->getTexture("textures/bg_adventure.png");
 	if(!bgTex) bgTex = driver->getTexture("textures/characters/bg_adventure.png");
 	if(bgTex) imgAdventureBg->setImage(bgTex);
 	else imgAdventureBg->setVisible(false);
 
-	// --- Left Side: Selectors & Actions ---
-	env->addStaticText(L"Seleccionar Oponente (NPC):", Scale(20, 40, 340, 60), false, false, wAdventureMode);
-	cbAdventureNPC = AddComboBox(env, Scale(20, 65, 340, 95), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
-	cbAdventureNPC->setMaxSelectionRows(15);
+	// ==================== PANEL IZQUIERDO: SERIE, ARCO Y ACCIONES ====================
+	auto txtSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", Scale(20, 20, 290, 42), false, false, wAdventureMode);
+	txtSerie->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	env->addStaticText(L"Tu Deck:", Scale(20, 120, 340, 140), false, false, wAdventureMode);
-	cbAdventureUserDeck = AddComboBox(env, Scale(20, 145, 340, 175), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	cbAdventureSeries = AddComboBox(env, Scale(20, 45, 290, 75), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
+	cbAdventureSeries->setMaxSelectionRows(8);
+
+	imgAdventureSeriesLogo = env->addImage(Scale(20, 85, 290, 185), wAdventureMode);
+	imgAdventureSeriesLogo->setScaleImage(true);
+	imgAdventureSeriesLogo->setUseAlphaChannel(true);
+
+	auto txtArco = env->addStaticText(L"2. ARCO ARGUMENTAL:", Scale(20, 195, 290, 217), false, false, wAdventureMode);
+	txtArco->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	cbAdventureArc = AddComboBox(env, Scale(20, 220, 290, 250), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
+	cbAdventureArc->setMaxSelectionRows(10);
+
+	stAdventureArcDesc = env->addStaticText(L"", Scale(20, 258, 290, 360), true, true, wAdventureMode);
+	stAdventureArcDesc->setWordWrap(true);
+	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 225, 255));
+
+	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(20, 370, 290, 392), false, false, wAdventureMode);
+	txtDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	cbAdventureUserDeck = AddComboBox(env, Scale(20, 395, 290, 425), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	btnAdventureDuel = env->addButton(Scale(20, 220, 170, 265), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"Duelo");
-	btnAdventureBack = env->addButton(Scale(190, 220, 340, 265), wAdventureMode, BUTTON_ADVENTURE_BACK, L"Volver");
+	btnAdventureDuel = env->addButton(Scale(20, 460, 290, 520), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
+	btnAdventureBack = env->addButton(Scale(20, 535, 290, 585), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENÚ");
 
-	// --- Right Side: NPC Card Information & Portrait ---
-	imgAdventureNPC = env->addImage(Scale(380, 40, 620, 320), wAdventureMode);
+	// ==================== PANEL CENTRAL: CATÁLOGO DE DUELISTAS ====================
+	auto txtCat = env->addStaticText(L"CATÁLOGO DE DUELISTAS DEL ARCO:", Scale(310, 20, 625, 42), false, false, wAdventureMode);
+	txtCat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	lstAdventureNPC = env->addListBox(Scale(310, 45, 625, 585), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
+	lstAdventureNPC->setItemHeight(Scale(26));
+
+	// Invisible fallback combo for backwards compatibility
+	cbAdventureNPC = AddComboBox(env, Scale(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
+	cbAdventureNPC->setVisible(false);
+
+	// ==================== PANEL DERECHO: PERFIL Y LORE DEL DUELISTA ====================
+	imgAdventureNPC = env->addImage(Scale(645, 30, 985, 310), wAdventureMode);
 	imgAdventureNPC->setScaleImage(true);
+	imgAdventureNPC->setUseAlphaChannel(true);
 
-	stAdventureNPCName = env->addStaticText(L"", Scale(370, 335, 640, 365), true, true, wAdventureMode);
+	stAdventureNPCName = env->addStaticText(L"", Scale(645, 318, 985, 348), true, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	stAdventureNPCLevel = env->addStaticText(L"", Scale(370, 375, 640, 405), true, true, wAdventureMode);
-	stAdventureNPCLevel->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(645, 355, 985, 375), false, false, wAdventureMode);
+	txtLore->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	stAdventureNPCDeck = env->addStaticText(L"", Scale(370, 415, 640, 445), true, true, wAdventureMode);
-	stAdventureNPCDeck->setOverrideColor(irr::video::SColor(255, 180, 220, 255));
+	stAdventureNPCDesc = env->addStaticText(L"", Scale(645, 380, 985, 465), true, true, wAdventureMode);
+	stAdventureNPCDesc->setWordWrap(true);
+	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 220, 220, 220));
+
+	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(645, 475, 985, 495), false, false, wAdventureMode);
+	txtStrat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	stAdventureDeckDesc = env->addStaticText(L"", Scale(645, 500, 985, 585), true, true, wAdventureMode);
+	stAdventureDeckDesc->setWordWrap(true);
+	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 180, 230, 255));
+
+	// Optional text pointer for backwards compatibility
+	stAdventureNPCLevel = stAdventureNPCName;
+	stAdventureNPCDeck = stAdventureDeckDesc;
+}
+
+void Game::OnAdventureSeriesChanged() {
+	int sel = cbAdventureSeries->getSelected();
+	if (sel < 0 || sel >= (int)adventureSeriesList.size())
+		return;
+
+	const auto& series = adventureSeriesList[sel];
+
+	// Update Series Logo
+	auto utf8Image = Utils::ToUTF8IfNeeded(series.imageFile);
+	auto logoTex = driver->getTexture(epro::format("textures/series/{}", utf8Image).c_str());
+	if(!logoTex) logoTex = driver->getTexture(epro::format("textures/characters/series/{}", utf8Image).c_str());
+	if(logoTex) {
+		imgAdventureSeriesLogo->setImage(logoTex);
+		imgAdventureSeriesLogo->setVisible(true);
+	} else {
+		imgAdventureSeriesLogo->setVisible(false);
+	}
+
+	// Fetch Arcos for selected Series
+	adventureArcList.clear();
+	cbAdventureArc->clear();
+
+	std::string endpoint = epro::format("/api/series/{}/arcos", series.id);
+	auto json = FetchAdventureApi(endpoint);
+	if (json.contains("arcos") && json["arcos"].is_array()) {
+		for (const auto& item : json["arcos"]) {
+			AdventureArcInfo arc;
+			arc.id = item.value("Id", item.value("id", 0));
+			arc.serieId = item.value("SerieId", item.value("serieId", series.id));
+			arc.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
+			arc.description = Utils::ToUnicodeIfNeeded(item.value("Description", item.value("description", "")));
+			adventureArcList.push_back(std::move(arc));
+		}
+	}
+
+	// Fallback Arcos for Duel Monsters if offline
+	if (adventureArcList.empty() && series.id == 1) {
+		static const struct { int id; const wchar_t* name; const wchar_t* desc; } fbArcos[] = {
+			{1, L"Ciudad Domino", L"El inicio del viaje del faraón y sus amigos en las calles de Ciudad Domino."},
+			{2, L"Reino de los Duelistas", L"El torneo en la isla privada de Maximillion Pegasus con las almas en juego."},
+			{3, L"Ciudad Batallas", L"El legendario torneo organizado por Seto Kaiba con las Cartas de los Dioses Egipcios."},
+			{4, L"Mundo Virtual de Noah", L"El rapto digital perpetrado por Noah Kaiba y los Cinco Grandes de KaibaCorp."},
+			{5, L"El Sello de Oricalcos", L"La amenaza milenaria de Dartz y la oscuridad ancestral del Oricalcos."},
+			{6, L"Egipto y Memorias del Faraon", L"El duelo supremo a través de las arenas del tiempo por la memoria eterna de Atem."}
+		};
+		for (const auto& fb : fbArcos) {
+			AdventureArcInfo arc;
+			arc.id = fb.id;
+			arc.serieId = 1;
+			arc.name = fb.name;
+			arc.description = fb.desc;
+			adventureArcList.push_back(std::move(arc));
+		}
+	}
+
+	for (size_t i = 0; i < adventureArcList.size(); ++i) {
+		cbAdventureArc->addItem(adventureArcList[i].name.c_str(), (int)i);
+	}
+	if (cbAdventureArc->getItemCount() > 0)
+		cbAdventureArc->setSelected(0);
+
+	OnAdventureArcChanged();
+}
+
+void Game::OnAdventureArcChanged() {
+	int sel = cbAdventureArc->getSelected();
+	if (sel < 0 || sel >= (int)adventureArcList.size()) {
+		stAdventureArcDesc->setText(L"");
+		adventureNpcList.clear();
+		lstAdventureNPC->clear();
+		cbAdventureNPC->clear();
+		UpdateAdventureNPCDisplay();
+		return;
+	}
+
+	const auto& arc = adventureArcList[sel];
+	stAdventureArcDesc->setText(arc.description.c_str());
+
+	// Fetch NPCs for selected Arc
+	adventureNpcList.clear();
+	lstAdventureNPC->clear();
+	cbAdventureNPC->clear();
+
+	std::string endpoint = epro::format("/api/arcos/{}/npcs", arc.id);
+	auto json = FetchAdventureApi(endpoint);
+	if (json.contains("npcs") && json["npcs"].is_array()) {
+		for (const auto& item : json["npcs"]) {
+			AdventureNpcInfo npc;
+			npc.id = item.value("Id", item.value("id", 0));
+			npc.level = item.value("Level", item.value("level", 1));
+			npc.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
+			npc.avatarFile = Utils::ToUnicodeIfNeeded(item.value("AvatarFile", item.value("avatarFile", "")));
+			npc.deckFile = Utils::ToUnicodeIfNeeded(item.value("DeckFile", item.value("deckFile", "Skull servant 2026.ydk")));
+			npc.serverImagePath = Utils::ToUnicodeIfNeeded(item.value("ServerImagePath", item.value("serverImagePath", "")));
+			npc.difficulty = item.value("Difficulty", item.value("difficulty", 1));
+			npc.description = Utils::ToUnicodeIfNeeded(item.value("Description", item.value("description", "")));
+			npc.deckDescription = Utils::ToUnicodeIfNeeded(item.value("DeckDescription", item.value("deckDescription", "")));
+			adventureNpcList.push_back(std::move(npc));
+		}
+	}
+
+	// Fallback NPCs if offline
+	if (adventureNpcList.empty() && arc.id == 1) {
+		static const struct { int lv; const wchar_t* name; const wchar_t* av; const wchar_t* dk; const wchar_t* desc; const wchar_t* ddesc; } fb[] = {
+			{1, L"Tea Gardner", L"tea_domino.png", L"Npc_Nv1_Tea.ydk", L"La leal amiga de Yugi que siempre cree en el Corazón de las Cartas.", L"Estrategia de monstruos lanzadores de conjuros y hadas con soporte defensivo."},
+			{3, L"Tristan Taylor", L"tristan_domino.png", L"Npc_Nv3_Tristan.ydk", L"El protector incondicional de sus amigos con coraje indomable.", L"Baraja de monstruos tipo Guerrero y Máquina con ataques directos."},
+			{5, L"Joey Wheeler", L"joey_domino.png", L"Npc_Nv5_Joey.ydk", L"Un duelista impulsivo cuyo espíritu competitivo supera cualquier reto.", L"Estrategia guerrera agresiva basada en apuestas de suerte y fusiones clásicas."},
+			{6, L"Solomon Muto", L"solomon_domino.png", L"Npc_Nv6_Solomon.ydk", L"El sabio abuelo de Yugi y dueño de la tienda de juegos Kame.", L"Baraja milenaria con invocaciones pesadas y control defensivo."},
+			{8, L"Yugi Muto", L"yugi_domino.png", L"Npc_Nv8_Yugi.ydk", L"El estudiante que despertó el alma del antiguo faraón.", L"Arquetipo de Mago Oscuro con soporte de cartas mágicas de remoción."},
+			{10, L"Seto Kaiba", L"kaiba_domino.png", L"Npc_Nv10_Kaiba.ydk", L"Presidente de KaibaCorp obsesionado con la victoria suprema.", L"Fuerza destructiva imparable con el Dragón Blanco de Ojos Azules."}
+		};
+		for (const auto& item : fb) {
+			AdventureNpcInfo npc;
+			npc.id = item.lv;
+			npc.level = item.lv;
+			npc.name = item.name;
+			npc.avatarFile = item.av;
+			npc.deckFile = item.dk;
+			npc.description = item.desc;
+			npc.deckDescription = item.ddesc;
+			adventureNpcList.push_back(std::move(npc));
+		}
+	}
+
+	for (size_t i = 0; i < adventureNpcList.size(); ++i) {
+		const auto& npc = adventureNpcList[i];
+		std::wstring entry = epro::format(L"Lv. {:02d} - {}", npc.level, npc.name);
+		lstAdventureNPC->addItem(entry.c_str());
+		cbAdventureNPC->addItem(entry.c_str(), (int)i);
+	}
+
+	if (lstAdventureNPC->getItemCount() > 0) {
+		lstAdventureNPC->setSelected(0);
+		cbAdventureNPC->setSelected(0);
+	}
+
+	UpdateAdventureNPCDisplay();
 }
 
 void Game::UpdateAdventureNPCDisplay() {
-	int selected = cbAdventureNPC->getSelected();
+	int selected = lstAdventureNPC ? lstAdventureNPC->getSelected() : -1;
+	if (selected < 0 && cbAdventureNPC)
+		selected = cbAdventureNPC->getSelected();
+
 	if (selected < 0 || selected >= (int)adventureNpcList.size()) {
 		stAdventureNPCName->setText(L"");
-		stAdventureNPCLevel->setText(L"");
-		stAdventureNPCDeck->setText(L"");
+		stAdventureNPCDesc->setText(L"");
+		stAdventureDeckDesc->setText(L"");
 		imgAdventureNPC->setVisible(false);
+		btnAdventureDuel->setEnabled(false);
 		return;
 	}
-	const auto& npc = adventureNpcList[selected];
-	stAdventureNPCName->setText(epro::format(L"Personaje: {}", npc.name).c_str());
-	stAdventureNPCLevel->setText(epro::format(L"Nivel: {}", npc.level).c_str());
-	stAdventureNPCDeck->setText(epro::format(L"Deck: {}", npc.deckFile).c_str());
-	btnAdventureDuel->setEnabled(true);
 
+	const auto& npc = adventureNpcList[selected];
+	stAdventureNPCName->setText(epro::format(L"[NIVEL {}] {}", npc.level, npc.name).c_str());
+
+	if (!npc.description.empty()) {
+		stAdventureNPCDesc->setText(npc.description.c_str());
+	} else {
+		stAdventureNPCDesc->setText(L"Duelista preparado para poner a prueba tu temple y estrategia.");
+	}
+
+	if (!npc.deckDescription.empty()) {
+		stAdventureDeckDesc->setText(npc.deckDescription.c_str());
+	} else {
+		stAdventureDeckDesc->setText(L"Estrategia balanceada de invocaciones tácticas y hechizos milenarios.");
+	}
+
+	btnAdventureDuel->setEnabled(true);
 	selectedAdventureNPCName = npc.name;
 	selectedAdventureBotDeckName = npc.deckFile;
 	if (selectedAdventureBotDeckName.size() > 4 && 
@@ -1534,10 +1762,10 @@ void Game::UpdateAdventureNPCDisplay() {
 }
 
 void Game::RefreshAdventureMode() {
-	adventureNpcList.clear();
-	cbAdventureNPC->clear();
+	adventureSeriesList.clear();
+	cbAdventureSeries->clear();
 
-	// Check if background image was placed in textures
+	// Check background texture
 	auto bgTex = driver->getTexture("textures/bg_adventure.png");
 	if(!bgTex) bgTex = driver->getTexture("textures/characters/bg_adventure.png");
 	if(bgTex && imgAdventureBg) {
@@ -1545,74 +1773,47 @@ void Game::RefreshAdventureMode() {
 		imgAdventureBg->setVisible(true);
 	}
 
-	// Fetch NPCs from REST API (SQL Server DBAniDimension)
-	std::string retrieved_data;
-	auto curl_handle = curl_easy_init();
-	if (curl_handle) {
-		std::string apiUrl = "http://66.92.168.136:8080/api/npcs";
-		curl_easy_setopt(curl_handle, CURLOPT_URL, apiUrl.c_str());
-		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
-		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 3L);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 5L);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
-		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &retrieved_data);
-		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
-		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
-		auto res = curl_easy_perform(curl_handle);
-		curl_easy_cleanup(curl_handle);
-		if (res == CURLE_OK && !retrieved_data.empty()) {
-			try {
-				auto json = nlohmann::json::parse(retrieved_data);
-				if (json.contains("npcs") && json["npcs"].is_array()) {
-					for (const auto& item : json["npcs"]) {
-						AdventureNpcInfo info;
-						info.id = item.value("Id", item.value("id", 0));
-						info.level = item.value("Level", item.value("level", 1));
-						info.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
-						info.avatarFile = Utils::ToUnicodeIfNeeded(item.value("AvatarFile", item.value("avatarFile", "")));
-						info.deckFile = Utils::ToUnicodeIfNeeded(item.value("DeckFile", item.value("deckFile", "Skull servant 2026.ydk")));
-						info.serverImagePath = Utils::ToUnicodeIfNeeded(item.value("ServerImagePath", item.value("serverImagePath", "")));
-						adventureNpcList.push_back(std::move(info));
-					}
-				}
-			} catch(...) {}
+	// Fetch Series from REST API
+	auto json = FetchAdventureApi("/api/series");
+	if (json.contains("series") && json["series"].is_array()) {
+		for (const auto& item : json["series"]) {
+			AdventureSeriesInfo s;
+			s.id = item.value("Id", item.value("id", 0));
+			s.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
+			s.code = Utils::ToUnicodeIfNeeded(item.value("Code", item.value("code", "")));
+			s.imageFile = Utils::ToUnicodeIfNeeded(item.value("ImageFile", item.value("imageFile", "")));
+			s.imagePath = Utils::ToUnicodeIfNeeded(item.value("ImagePath", item.value("imagePath", "")));
+			adventureSeriesList.push_back(std::move(s));
 		}
 	}
 
-	// Fallback list if API offline
-	if (adventureNpcList.empty()) {
-		static const struct { int lv; const wchar_t* name; const wchar_t* av; } fallback[] = {
-			{1, L"Tea Gardner", L"tea_domino.png"},
-			{2, L"Tristan Taylor", L"tristan_domino.png"},
-			{3, L"Joey Wheeler", L"joey_domino.png"},
-			{4, L"Solomon Muto", L"solomon_domino.png"},
-			{5, L"Yugi Muto", L"yugi_domino.png"},
-			{6, L"Seto Kaiba", L"kaiba_domino.png"},
-			{7, L"Weevil Underwood", L"weevil_kod.png"},
-			{8, L"Rex Raptor", L"rex_kod.png"},
-			{9, L"Mako Tsunami", L"mako_kod.png"},
-			{10, L"Mai Valentine", L"panik_kod.png"},
-			{11, L"Bandit Keith", L"bonz_kod.png"},
-			{12, L"Maximillion Pegasus", L"bakura_kod.png"},
-			{86, L"Faraon Atem", L"atem.png"}
+	// Fallback Series if offline
+	if (adventureSeriesList.empty()) {
+		static const struct { int id; const wchar_t* name; const wchar_t* code; const wchar_t* img; } fbSeries[] = {
+			{1, L"Yu-Gi-Oh! Duel Monsters", L"DM", L"logo_dm.png"},
+			{2, L"Yu-Gi-Oh! GX", L"GX", L"logo_gx.png"},
+			{3, L"Yu-Gi-Oh! 5D's", L"5DS", L"logo_5ds.png"},
+			{4, L"Yu-Gi-Oh! ZEXAL", L"ZEXAL", L"logo_zexal.png"},
+			{5, L"Yu-Gi-Oh! ARC-V", L"ARCV", L"logo_arcv.png"},
+			{6, L"Yu-Gi-Oh! VRAINS", L"VRAINS", L"logo_vrains.png"},
+			{7, L"Yu-Gi-Oh! SEVENS", L"SEVENS", L"logo_sevens.png"}
 		};
-		for (const auto& fb : fallback) {
-			AdventureNpcInfo info;
-			info.id = fb.lv;
-			info.level = fb.lv;
-			info.name = fb.name;
-			info.avatarFile = fb.av;
-			info.deckFile = L"Skull servant 2026.ydk";
-			adventureNpcList.push_back(std::move(info));
+		for (const auto& fb : fbSeries) {
+			AdventureSeriesInfo s;
+			s.id = fb.id;
+			s.name = fb.name;
+			s.code = fb.code;
+			s.imageFile = fb.img;
+			s.imagePath = epro::format(L"textures/series/{}", fb.img);
+			adventureSeriesList.push_back(std::move(s));
 		}
 	}
 
-	for (size_t i = 0; i < adventureNpcList.size(); ++i) {
-		const auto& npc = adventureNpcList[i];
-		cbAdventureNPC->addItem(epro::format(L"Lv.{} - {}", npc.level, npc.name).c_str(), (int)i);
+	for (size_t i = 0; i < adventureSeriesList.size(); ++i) {
+		cbAdventureSeries->addItem(adventureSeriesList[i].name.c_str(), (int)i);
 	}
-	if (cbAdventureNPC->getItemCount() > 0)
-		cbAdventureNPC->setSelected(0);
+	if (cbAdventureSeries->getItemCount() > 0)
+		cbAdventureSeries->setSelected(0);
 
 	RefreshDeck(cbAdventureUserDeck);
 	if (!gGameConfig->lastdeck.empty()) {
@@ -1624,13 +1825,16 @@ void Game::RefreshAdventureMode() {
 		}
 	}
 
-	UpdateAdventureNPCDisplay();
+	OnAdventureSeriesChanged();
 }
 
 void Game::StartAdventureDuel() {
-	int npcIdx = cbAdventureNPC->getSelected();
+	int npcIdx = lstAdventureNPC ? lstAdventureNPC->getSelected() : -1;
+	if (npcIdx < 0 && cbAdventureNPC)
+		npcIdx = cbAdventureNPC->getSelected();
+
 	if (npcIdx < 0 || npcIdx >= (int)adventureNpcList.size()) {
-		PopupMessage(L"Por favor selecciona un NPC.");
+		PopupMessage(L"Por favor selecciona un oponente del catálogo.");
 		return;
 	}
 	int deckIdx = cbAdventureUserDeck->getSelected();

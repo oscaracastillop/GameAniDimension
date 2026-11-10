@@ -1,356 +1,623 @@
-[
+﻿[
     {
-        "name": "Tea Gardner",
-        "deck": "Npc_Nv1_Tea",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "difficulty":  3,
+        "name":  "Yugi Muto (Lv33)",
+        "deck":  "Npc_Nv33_Yugi_Muto",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Tristan Taylor",
-        "deck": "Npc_Nv3_Tristan",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "difficulty":  2,
+        "name":  "Joey Wheeler (Lv31)",
+        "deck":  "Npc_Nv31_Joey",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Joey Wheeler",
-        "deck": "Npc_Nv5_Joey",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Tea Gardner",
+        "deck":  "Npc_Nv1_Tea",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Solomon Muto",
-        "deck": "Npc_Nv6_Solomon",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Tristan Taylor",
+        "deck":  "Npc_Nv3_Tristan",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Yugi Muto",
-        "deck": "Npc_Nv8_Yugi",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Joey Wheeler",
+        "deck":  "Npc_Nv5_Joey",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Seto Kaiba",
-        "deck": "Npc_Nv10_Kaiba",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Solomon Muto",
+        "deck":  "Npc_Nv6_Solomon",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Weevil Underwood",
-        "deck": "Npc_Nv12_Weevil",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Yugi Muto",
+        "deck":  "Npc_Nv8_Yugi",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Rex Raptor",
-        "deck": "Npc_Nv13_Rex_Raptor",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Seto Kaiba",
+        "deck":  "Npc_Nv10_Kaiba",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Mako Tsunami",
-        "deck": "Npc_Nv15_Mako_Tsunami",
-        "difficulty": 1,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Weevil Underwood",
+        "deck":  "Npc_Nv12_Weevil",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Panik",
-        "deck": "Npc_Nv17_Panik",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Rex Raptor",
+        "deck":  "Npc_Nv13_Rex_Raptor",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Bonz",
-        "deck": "Npc_Nv19_Bonz",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Mako Tsunami",
+        "deck":  "Npc_Nv15_Mako_Tsunami",
+        "difficulty":  1,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Mai Valentine",
-        "deck": "Npc_Nv27_Mai_Valentine",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Panik",
+        "deck":  "Npc_Nv17_Panik",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Bandit Keith",
-        "deck": "Npc_Nv29_Bandit_Keith",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Bonz",
+        "deck":  "Npc_Nv19_Bonz",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Yami Bakura",
-        "deck": "Npc_Nv20_Bakura",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Mai Valentine",
+        "deck":  "Npc_Nv27_Mai_Valentine",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Maximillion Pegasus (Toon)",
-        "deck": "Npc_Nv34_Pegasus",
-        "difficulty": 2,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Bandit Keith",
+        "deck":  "Npc_Nv29_Bandit_Keith",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Maximillion Pegasus (Illusion)",
-        "deck": "Npc_Nv36_Pegasus",
-        "difficulty": 3,
-        "masterRules": [ 1, 2, 3, 4, 5 ]
+        "name":  "Yami Bakura",
+        "deck":  "Npc_Nv20_Bakura",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "ABC-Dragon Buster",
-        "deck": "ABC",
-        "difficulty": 3,
-        "masterRules": [ 5 ]
+        "name":  "Maximillion Pegasus (Toon)",
+        "deck":  "Npc_Nv34_Pegasus",
+        "difficulty":  2,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Altergeist",
-        "deck": "Altergeist",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Maximillion Pegasus (Illusion)",
+        "deck":  "Npc_Nv36_Pegasus",
+        "difficulty":  3,
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Blue-Eyes",
-        "deck": "Blue-Eyes",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "ABC-Dragon Buster",
+        "deck":  "ABC",
+        "difficulty":  3,
+        "masterRules":  [
+                            5
+                        ]
     },
     {
-        "name": "Blue-Eyes Ritual",
-        "deck": "BlueEyesMaxDragon",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Altergeist",
+        "deck":  "Altergeist",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Adventurer",
-        "deck": "Brave",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Blue-Eyes",
+        "deck":  "Blue-Eyes",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Burn",
-        "deck": "Burn",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Blue-Eyes Ritual",
+        "deck":  "BlueEyesMaxDragon",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Chain Burn",
-        "deck": "ChainBurn",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Adventurer",
+        "deck":  "Brave",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Cyberse",
-        "deck": "ST1732",
-        "difficulty": 2,
-        "masterRules": [ 4, 5 ]
+        "name":  "Burn",
+        "deck":  "Burn",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Dark Magician",
-        "deck": "DarkMagician",
-        "difficulty": 3,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Chain Burn",
+        "deck":  "ChainBurn",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Dogmatika",
-        "deck": "Dogmatika",
-        "difficulty": 3,
-        "masterRules": [ 5 ]
+        "name":  "Cyberse",
+        "deck":  "ST1732",
+        "difficulty":  2,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Dragun of Red-Eyes",
-        "deck": "Dragun",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Dark Magician",
+        "deck":  "DarkMagician",
+        "difficulty":  3,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Dragunity",
-        "deck": "Dragunity",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Dogmatika",
+        "deck":  "Dogmatika",
+        "difficulty":  3,
+        "masterRules":  [
+                            5
+                        ]
     },
     {
-        "name": "Familiar Possessed",
-        "deck": "FamiliarPossessed",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Dragun of Red-Eyes",
+        "deck":  "Dragun",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Feelin' Lucky",
-        "deck": "Lucky",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Dragunity",
+        "deck":  "Dragunity",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Frog",
-        "deck": "Frog",
-        "difficulty": 1,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Familiar Possessed",
+        "deck":  "FamiliarPossessed",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Gren Maju Stun",
-        "deck": "GrenMajuThunderBoarder",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Feelin\u0027 Lucky",
+        "deck":  "Lucky",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Horus",
-        "deck": "Horus",
-        "difficulty": 1,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Frog",
+        "deck":  "Frog",
+        "difficulty":  1,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Kashtira",
-        "deck": "Kashtira",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Gren Maju Stun",
+        "deck":  "GrenMajuThunderBoarder",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Lightsworn Shaddoll Dino",
-        "deck": "LightswornShaddoldinosour",
-        "difficulty": 3,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Horus",
+        "deck":  "Horus",
+        "difficulty":  1,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Mathmech",
-        "deck": "MathMech",
-        "difficulty": 2,
-        "masterRules": [ 4, 5 ]
+        "name":  "Kashtira",
+        "deck":  "Kashtira",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Normal Monster Mash",
-        "deck": "MokeyMokey",
-        "difficulty": 1,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Lightsworn Shaddoll Dino",
+        "deck":  "LightswornShaddoldinosour",
+        "difficulty":  3,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Normal Monster Mash II",
-        "deck": "MokeyMokeyKing",
-        "difficulty": 1,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Mathmech",
+        "deck":  "MathMech",
+        "difficulty":  2,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Orcust",
-        "deck": "Orcust",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Normal Monster Mash",
+        "deck":  "MokeyMokey",
+        "difficulty":  1,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Phantasm",
-        "deck": "Phantasm",
-        "difficulty": 0,
-        "masterRules": [ 4, 5 ]
+        "name":  "Normal Monster Mash II",
+        "deck":  "MokeyMokeyKing",
+        "difficulty":  1,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Qliphort",
-        "deck": "Qliphort",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Orcust",
+        "deck":  "Orcust",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "R5NK",
-        "deck": "Rank V",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Phantasm",
+        "deck":  "Phantasm",
+        "difficulty":  0,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Rainbow",
-        "deck": "Rainbow",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Qliphort",
+        "deck":  "Qliphort",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Rose Scrap Synchro",
-        "deck": "Level VIII",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "R5NK",
+        "deck":  "Rank V",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Salamangreat",
-        "deck": "Salamangreat",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Rainbow",
+        "deck":  "Rainbow",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Sky Striker",
-        "deck": "SkyStriker",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Rose Scrap Synchro",
+        "deck":  "Level VIII",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Swordsoul",
-        "deck": "Swordsoul",
-        "difficulty": 3,
-        "masterRules": [ 5 ]
+        "name":  "Salamangreat",
+        "deck":  "Salamangreat",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Thunder Dragon",
-        "deck": "ThunderDragon",
-        "difficulty": 2,
-        "masterRules": [ 4, 5 ]
-    },
-	{
-        "name": "Tearlaments",
-        "deck": "Tearlaments",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Sky Striker",
+        "deck":  "SkyStriker",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Time Thief",
-        "deck": "TimeThief",
-        "difficulty": 2,
-        "masterRules": [ 4, 5 ]
+        "name":  "Swordsoul",
+        "deck":  "Swordsoul",
+        "difficulty":  3,
+        "masterRules":  [
+                            5
+                        ]
     },
     {
-        "name": "Toadally Awesome",
-        "deck": "Toadally Awesome",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Thunder Dragon",
+        "deck":  "ThunderDragon",
+        "difficulty":  2,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Trickstar",
-        "deck": "Trickstar",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Tearlaments",
+        "deck":  "Tearlaments",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Windwitch Gusto",
-        "deck": "PureWinds",
-        "difficulty": 1,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Time Thief",
+        "deck":  "TimeThief",
+        "difficulty":  2,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Witchcrafter Grass",
-        "deck": "Witchcraft",
-        "difficulty": 3,
-        "masterRules": [ 4, 5 ]
+        "name":  "Toadally Awesome",
+        "deck":  "Toadally Awesome",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Yosenju",
-        "deck": "Yosenju",
-        "difficulty": 0,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Trickstar",
+        "deck":  "Trickstar",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "ZEXAL Weapon",
-        "deck": "Zexal Weapons",
-        "difficulty": 2,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Windwitch Gusto",
+        "deck":  "PureWinds",
+        "difficulty":  1,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "Zoodiac",
-        "deck": "Zoodiac",
-        "difficulty": 3,
-        "masterRules": [ 3, 4, 5 ]
+        "name":  "Witchcrafter Grass",
+        "deck":  "Witchcraft",
+        "difficulty":  3,
+        "masterRules":  [
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "[Healing JAM]",
-        "deck": "[HealingJAM]",
-        "difficulty": 2,
-        "masterRules": [ 7 ]
+        "name":  "Yosenju",
+        "deck":  "Yosenju",
+        "difficulty":  0,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
     },
     {
-        "name": "[Imaginary Ark]",
-        "deck": "[ImaginaryArk]",
-        "difficulty": 2,
-        "masterRules": [ 7 ]
+        "name":  "ZEXAL Weapon",
+        "deck":  "Zexal Weapons",
+        "difficulty":  2,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "name":  "Zoodiac",
+        "deck":  "Zoodiac",
+        "difficulty":  3,
+        "masterRules":  [
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "name":  "[Healing JAM]",
+        "deck":  "[HealingJAM]",
+        "difficulty":  2,
+        "masterRules":  [
+                            7
+                        ]
+    },
+    {
+        "name":  "[Imaginary Ark]",
+        "deck":  "[ImaginaryArk]",
+        "difficulty":  2,
+        "masterRules":  [
+                            7
+                        ]
     }
 ]

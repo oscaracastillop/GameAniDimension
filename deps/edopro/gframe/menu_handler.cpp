@@ -675,6 +675,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ebJoinPort->setText(epro::to_wstring(selection.port).data());
 				break;
 			}
+			case LISTBOX_ADVENTURE_NPC: {
+				mainGame->UpdateAdventureNPCDisplay();
+				break;
+			}
 			case LISTBOX_REPLAY_LIST: {
 				int sel = mainGame->lstReplayList->getSelected();
 				mainGame->stReplayInfo->setText(L"");
@@ -1052,6 +1056,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case COMBOBOX_BOT_ENGINE: {
 				mainGame->gBot.UpdateDescription();
+				break;
+			}
+			case COMBOBOX_ADVENTURE_SERIES: {
+				mainGame->OnAdventureSeriesChanged();
+				break;
+			}
+			case COMBOBOX_ADVENTURE_ARC: {
+				mainGame->OnAdventureArcChanged();
 				break;
 			}
 			case COMBOBOX_ADVENTURE_NPC: {
