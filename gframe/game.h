@@ -418,6 +418,7 @@ struct AdventureNpcInfo {
 	std::wstring name{};
 	std::wstring avatarFile{};
 	std::wstring deckFile{ L"Skull servant 2026.ydk" };
+	std::wstring deckFileHard{};
 	std::wstring serverImagePath{};
 	int difficulty{ 1 };
 	std::wstring description{};
@@ -459,6 +460,7 @@ struct adventure_mode_panel_elements {
 
 	// User Deck & Buttons
 	irr::gui::IGUIComboBox* cbAdventureUserDeck{ nullptr };
+	irr::gui::IGUIComboBox* cbAdventureDifficulty{ nullptr };
 	irr::gui::IGUIButton* btnAdventureDuel{ nullptr };
 	irr::gui::IGUIButton* btnAdventureBack{ nullptr };
 };

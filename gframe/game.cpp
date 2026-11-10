@@ -1538,11 +1538,19 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureArcDesc->setWordWrap(true);
 	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 225, 255));
 
-	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 370, 292, 392), false, false, wAdventureMode);
+	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 310, 292, 332), false, false, wAdventureMode);
 	txtDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	cbAdventureUserDeck = AddComboBox(env, Scale(25, 395, 292, 423), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	cbAdventureUserDeck = AddComboBox(env, Scale(25, 335, 292, 363), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
+
+	auto txtDiff = env->addStaticText(L"4. DIFICULTAD:", Scale(25, 375, 292, 397), false, false, wAdventureMode);
+	txtDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	cbAdventureDifficulty = AddComboBox(env, Scale(25, 400, 292, 428), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
+	cbAdventureDifficulty->addItem(L"Normal", 0);
+	cbAdventureDifficulty->addItem(L"Leyenda", 1);
+	cbAdventureDifficulty->setSelected(0);
 
 	btnAdventureDuel = env->addButton(Scale(25, 465, 292, 530), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
 	btnAdventureBack = env->addButton(Scale(25, 545, 292, 605), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
@@ -1678,6 +1686,7 @@ void Game::OnAdventureArcChanged() {
 			npc.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
 			npc.avatarFile = Utils::ToUnicodeIfNeeded(item.value("AvatarFile", item.value("avatarFile", "")));
 			npc.deckFile = Utils::ToUnicodeIfNeeded(item.value("DeckFile", item.value("deckFile", "Skull servant 2026.ydk")));
+			npc.deckFileHard = Utils::ToUnicodeIfNeeded(item.value("DeckFileHard", item.value("deckFileHard", "")));
 			npc.serverImagePath = Utils::ToUnicodeIfNeeded(item.value("ServerImagePath", item.value("serverImagePath", "")));
 			npc.difficulty = item.value("Difficulty", item.value("difficulty", 1));
 			npc.description = Utils::ToUnicodeIfNeeded(item.value("Description", item.value("description", "")));
@@ -1755,7 +1764,12 @@ void Game::UpdateAdventureNPCDisplay() {
 
 	btnAdventureDuel->setEnabled(true);
 	selectedAdventureNPCName = npc.name;
-	selectedAdventureBotDeckName = npc.deckFile;
+	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
+	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
+	if (deckToUse.empty()) {
+		deckToUse = npc.deckFile;
+	}
+	selectedAdventureBotDeckName = deckToUse;
 	if (selectedAdventureBotDeckName.size() > 4 && 
 	    selectedAdventureBotDeckName.substr(selectedAdventureBotDeckName.size() - 4) == L".ydk") {
 		selectedAdventureBotDeckName = selectedAdventureBotDeckName.substr(0, selectedAdventureBotDeckName.size() - 4);
@@ -1857,6 +1871,19 @@ void Game::StartAdventureDuel() {
 
 	selectedAdventureBot = npcIdx;
 	selectedAdventureUserDeckName = cbAdventureUserDeck->getItem(deckIdx);
+
+	const auto& npc = adventureNpcList[npcIdx];
+	selectedAdventureNPCName = npc.name;
+	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
+	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
+	if (deckToUse.empty()) {
+		deckToUse = npc.deckFile;
+	}
+	selectedAdventureBotDeckName = deckToUse;
+	if (selectedAdventureBotDeckName.size() > 4 && 
+	    selectedAdventureBotDeckName.substr(selectedAdventureBotDeckName.size() - 4) == L".ydk") {
+		selectedAdventureBotDeckName = selectedAdventureBotDeckName.substr(0, selectedAdventureBotDeckName.size() - 4);
+	}
 
 	// Pre-set Banlist 2026.10
 	adventureLFListHash = 0;
