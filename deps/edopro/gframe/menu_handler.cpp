@@ -1076,6 +1076,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->UpdateAdventureNPCDisplay();
 				break;
 			}
+			case COMBOBOX_ADVENTURE_DIFFICULTY: {
+				mainGame->UpdateAdventureNPCDisplay();
+				break;
+			}
 			case SERVER_CHOICE: {
 				ServerLobby::RefreshRooms();
 				return false;

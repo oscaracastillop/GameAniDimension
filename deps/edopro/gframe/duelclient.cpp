@@ -978,6 +978,33 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				}
 			}
 
+			// Safe fallback: If hard deck file is missing, fall back to normal deck
+			if(!Utils::FileExists(Utils::ToPathString(fullDeckPath)) && mainGame->isAdventureMode) {
+				if(mainGame->selectedAdventureBot >= 0 && mainGame->selectedAdventureBot < (int)mainGame->adventureNpcList.size()) {
+					const auto& anpc = mainGame->adventureNpcList[mainGame->selectedAdventureBot];
+					std::wstring normalDeck = anpc.deckFile;
+					if(normalDeck.size() > 4 && normalDeck.substr(normalDeck.size() - 4) == L".ydk") {
+						normalDeck = normalDeck.substr(0, normalDeck.size() - 4);
+					}
+					if(!normalDeck.empty()) {
+						botDeck = normalDeck;
+						fullDeckPath = epro::format(L"./WindBot/Decks/{}.ydk", botDeck);
+						if(Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+							fullDeckPath = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(Utils::ToPathString(fullDeckPath)));
+						} else {
+							std::wstring deckDir = WindBotPanel::absolute_deck_path;
+							if(deckDir.empty()) {
+								deckDir = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(EPRO_TEXT("./deck")));
+							}
+							fullDeckPath = epro::format(L"{}/{}.ydk", deckDir, botDeck);
+							if(Utils::FileExists(Utils::ToPathString(fullDeckPath))) {
+								fullDeckPath = Utils::ToUnicodeIfNeeded(Utils::GetAbsolutePath(Utils::ToPathString(fullDeckPath)));
+							}
+						}
+					}
+				}
+			}
+
 			WindBot* engineToLaunch = nullptr;
 			// 1. Check if there is a specialized AI bot matching this exact deck name
 			for(auto& bot : mainGame->gBot.bots) {
