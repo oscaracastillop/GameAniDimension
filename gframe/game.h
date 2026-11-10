@@ -453,6 +453,7 @@ struct adventure_mode_panel_elements {
 	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCName{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCLevel{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureNPCDeck{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCDesc{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureDeckDesc{ nullptr };
 
