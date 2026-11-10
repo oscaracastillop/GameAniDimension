@@ -1558,21 +1558,13 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureArcDesc->setWordWrap(true);
 	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 225, 255));
 
-	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 310, 292, 332), false, false, wAdventureMode);
+	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 370, 292, 392), false, false, wAdventureMode);
 	txtDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	cbAdventureUserDeck = AddComboBox(env, Scale(25, 335, 292, 363), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	cbAdventureUserDeck = AddComboBox(env, Scale(25, 395, 292, 423), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	auto txtDiff = env->addStaticText(L"4. DIFICULTAD:", Scale(25, 375, 292, 397), false, false, wAdventureMode);
-	txtDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
-
-	cbAdventureDifficulty = AddComboBox(env, Scale(25, 400, 292, 428), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
-	cbAdventureDifficulty->addItem(L"Normal", 0);
-	cbAdventureDifficulty->addItem(L"Leyenda", 1);
-	cbAdventureDifficulty->setSelected(0);
-
-	btnAdventureDuel = env->addButton(Scale(25, 465, 292, 530), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
+	btnAdventureDuel = env->addButton(Scale(25, 460, 292, 525), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
 	btnAdventureBack = env->addButton(Scale(25, 545, 292, 605), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
 
 	// ==================== PANEL CENTRAL: CATÁLOGO DE DUELISTAS ====================
@@ -1587,24 +1579,33 @@ void Game::PopulateAdventureModeWindow() {
 	cbAdventureNPC->setVisible(false);
 
 	// ==================== PANEL DERECHO: PERFIL Y LORE DEL DUELISTA ====================
-	imgAdventureNPC = env->addImage(Scale(670, 25, 995, 310), wAdventureMode);
+	imgAdventureNPC = env->addImage(Scale(670, 25, 995, 260), wAdventureMode);
 	imgAdventureNPC->setScaleImage(true);
 	imgAdventureNPC->setUseAlphaChannel(true);
 
-	stAdventureNPCName = env->addStaticText(L"", Scale(670, 318, 995, 348), true, true, wAdventureMode);
+	stAdventureNPCName = env->addStaticText(L"", Scale(670, 268, 995, 295), true, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(670, 355, 995, 375), false, false, wAdventureMode);
+	// --- Dificultad NPC (en panel derecho) ---
+	auto txtDiff = env->addStaticText(L"DIFICULTAD NPC:", Scale(670, 302, 820, 322), false, false, wAdventureMode);
+	txtDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+
+	cbAdventureDifficulty = AddComboBox(env, Scale(822, 299, 995, 325), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
+	cbAdventureDifficulty->addItem(L"Normal", 0);
+	cbAdventureDifficulty->addItem(L"Leyenda", 1);
+	cbAdventureDifficulty->setSelected(0);
+
+	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(670, 335, 995, 355), false, false, wAdventureMode);
 	txtLore->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	stAdventureNPCDesc = env->addStaticText(L"", Scale(670, 380, 995, 465), true, true, wAdventureMode);
+	stAdventureNPCDesc = env->addStaticText(L"", Scale(670, 358, 995, 440), true, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
 	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 220, 220, 220));
 
-	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(670, 475, 995, 495), false, false, wAdventureMode);
+	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(670, 450, 995, 470), false, false, wAdventureMode);
 	txtStrat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	stAdventureDeckDesc = env->addStaticText(L"", Scale(670, 500, 995, 605), true, true, wAdventureMode);
+	stAdventureDeckDesc = env->addStaticText(L"", Scale(670, 475, 995, 605), true, true, wAdventureMode);
 	stAdventureDeckDesc->setWordWrap(true);
 	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 180, 230, 255));
 
