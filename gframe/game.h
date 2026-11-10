@@ -397,6 +397,21 @@ struct server_lobby_page_elements {
 	irr::gui::IGUIButton* btnJoinCancel2;
 };
 
+struct AdventureSeriesInfo {
+	int id{ 0 };
+	std::wstring name{};
+	std::wstring code{};
+	std::wstring imageFile{};
+	std::wstring imagePath{};
+};
+
+struct AdventureArcInfo {
+	int id{ 0 };
+	int serieId{ 0 };
+	std::wstring name{};
+	std::wstring description{};
+};
+
 struct AdventureNpcInfo {
 	int id{ 0 };
 	int level{ 1 };
@@ -404,6 +419,9 @@ struct AdventureNpcInfo {
 	std::wstring avatarFile{};
 	std::wstring deckFile{ L"Skull servant 2026.ydk" };
 	std::wstring serverImagePath{};
+	int difficulty{ 1 };
+	std::wstring description{};
+	std::wstring deckDescription{};
 };
 
 struct adventure_mode_panel_elements {
@@ -413,15 +431,33 @@ struct adventure_mode_panel_elements {
 	std::wstring selectedAdventureUserDeckName{};
 	std::wstring selectedAdventureBotDeckName{ L"Skull servant 2026" };
 	uint32_t adventureLFListHash{ 0 };
+
+	std::vector<AdventureSeriesInfo> adventureSeriesList{};
+	std::vector<AdventureArcInfo> adventureArcList{};
 	std::vector<AdventureNpcInfo> adventureNpcList{};
+
 	irr::gui::IGUIWindow* wAdventureMode{ nullptr };
 	irr::gui::IGUIImage* imgAdventureBg{ nullptr };
+
+	// Series & Arc Selection
+	irr::gui::IGUIComboBox* cbAdventureSeries{ nullptr };
+	irr::gui::IGUIImage* imgAdventureSeriesLogo{ nullptr };
+	irr::gui::IGUIComboBox* cbAdventureArc{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureArcDesc{ nullptr };
+
+	// NPC Catalog
+	irr::gui::IGUIListBox* lstAdventureNPC{ nullptr };
 	irr::gui::IGUIComboBox* cbAdventureNPC{ nullptr };
-	irr::gui::IGUIComboBox* cbAdventureUserDeck{ nullptr };
+
+	// NPC Duelist Profile & Lore
 	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCName{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCLevel{ nullptr };
-	irr::gui::IGUIStaticText* stAdventureNPCDeck{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureNPCDesc{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureDeckDesc{ nullptr };
+
+	// User Deck & Buttons
+	irr::gui::IGUIComboBox* cbAdventureUserDeck{ nullptr };
 	irr::gui::IGUIButton* btnAdventureDuel{ nullptr };
 	irr::gui::IGUIButton* btnAdventureBack{ nullptr };
 };
@@ -773,6 +809,8 @@ public:
 	void PopulateAIBotWindow();
 	void PopulateAdventureModeWindow();
 	void RefreshAdventureMode();
+	void OnAdventureSeriesChanged();
+	void OnAdventureArcChanged();
 	void UpdateAdventureNPCDisplay();
 	void StartAdventureDuel();
 	void PopulateTabSettingsWindow();
