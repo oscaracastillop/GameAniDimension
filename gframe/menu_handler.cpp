@@ -178,17 +178,18 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->isAdventureMode = true;
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(false);
-				mainGame->HideElement(mainGame->wMainMenu);
-				mainGame->ShowElement(mainGame->wAdventureMode);
+				mainGame->wMainMenu->setVisible(false);
+				mainGame->wAdventureMode->setVisible(true);
+				mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
 				mainGame->RefreshAdventureMode();
 				break;
 			}
 			case BUTTON_ADVENTURE_BACK: {
 				mainGame->isAdventureMode = false;
-				mainGame->HideElement(mainGame->wAdventureMode);
+				mainGame->wAdventureMode->setVisible(false);
 				mainGame->mTopMenu->setVisible(true);
 				mainGame->wBtnSettings->setVisible(true);
-				mainGame->ShowElement(mainGame->wMainMenu);
+				mainGame->wMainMenu->setVisible(true);
 				break;
 			}
 			case BUTTON_ADVENTURE_DUEL: {
