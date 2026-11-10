@@ -436,7 +436,7 @@ struct adventure_mode_panel_elements {
 	std::vector<AdventureArcInfo> adventureArcList{};
 	std::vector<AdventureNpcInfo> adventureNpcList{};
 
-	irr::gui::IGUIWindow* wAdventureMode{ nullptr };
+	irr::gui::IGUIStaticText* wAdventureMode{ nullptr };
 	irr::gui::IGUIImage* imgAdventureBg{ nullptr };
 
 	// Series & Arc Selection
