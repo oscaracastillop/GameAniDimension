@@ -1489,6 +1489,26 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint) {
 	return {};
 }
 
+static std::string SafeJsonStr(const nlohmann::json& obj, const char* key, const std::string& defVal = "") {
+	if (obj.contains(key) && !obj[key].is_null()) {
+		try {
+			if (obj[key].is_string())
+				return obj[key].get<std::string>();
+		} catch(...) {}
+	}
+	return defVal;
+}
+
+static int SafeJsonInt(const nlohmann::json& obj, const char* key, int defVal = 0) {
+	if (obj.contains(key) && !obj[key].is_null()) {
+		try {
+			if (obj[key].is_number())
+				return obj[key].get<int>();
+		} catch(...) {}
+	}
+	return defVal;
+}
+
 void Game::PopulateAdventureModeWindow() {
 	// Full dedicated native adventure interface: 1024 x 640 full canvas
 	wAdventureMode = env->addStaticText(L"", Scale(0, 0, 1024, 640), false, false, 0, -1, true);
@@ -1615,18 +1635,20 @@ void Game::OnAdventureSeriesChanged() {
 	adventureArcList.clear();
 	cbAdventureArc->clear();
 
-	std::string endpoint = epro::format("/api/series/{}/arcos", series.id);
-	auto json = FetchAdventureApi(endpoint);
-	if (json.contains("arcos") && json["arcos"].is_array()) {
-		for (const auto& item : json["arcos"]) {
-			AdventureArcInfo arc;
-			arc.id = item.value("Id", item.value("id", 0));
-			arc.serieId = item.value("SerieId", item.value("serieId", series.id));
-			arc.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
-			arc.description = Utils::ToUnicodeIfNeeded(item.value("Description", item.value("description", "")));
-			adventureArcList.push_back(std::move(arc));
+	try {
+		std::string endpoint = epro::format("/api/series/{}/arcos", series.id);
+		auto json = FetchAdventureApi(endpoint);
+		if (json.contains("arcos") && json["arcos"].is_array()) {
+			for (const auto& item : json["arcos"]) {
+				AdventureArcInfo arc;
+				arc.id = SafeJsonInt(item, "Id", SafeJsonInt(item, "id", 0));
+				arc.serieId = SafeJsonInt(item, "SerieId", SafeJsonInt(item, "serieId", series.id));
+				arc.name = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Name", SafeJsonStr(item, "name", "")));
+				arc.description = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Description", SafeJsonStr(item, "description", "")));
+				adventureArcList.push_back(std::move(arc));
+			}
 		}
-	}
+	} catch(...) {}
 
 	// Fallback Arcos for Duel Monsters if offline
 	if (adventureArcList.empty() && series.id == 1) {
@@ -1676,24 +1698,26 @@ void Game::OnAdventureArcChanged() {
 	lstAdventureNPC->clear();
 	cbAdventureNPC->clear();
 
-	std::string endpoint = epro::format("/api/arcos/{}/npcs", arc.id);
-	auto json = FetchAdventureApi(endpoint);
-	if (json.contains("npcs") && json["npcs"].is_array()) {
-		for (const auto& item : json["npcs"]) {
-			AdventureNpcInfo npc;
-			npc.id = item.value("Id", item.value("id", 0));
-			npc.level = item.value("Level", item.value("level", 1));
-			npc.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
-			npc.avatarFile = Utils::ToUnicodeIfNeeded(item.value("AvatarFile", item.value("avatarFile", "")));
-			npc.deckFile = Utils::ToUnicodeIfNeeded(item.value("DeckFile", item.value("deckFile", "Skull servant 2026.ydk")));
-			npc.deckFileHard = Utils::ToUnicodeIfNeeded(item.value("DeckFileHard", item.value("deckFileHard", "")));
-			npc.serverImagePath = Utils::ToUnicodeIfNeeded(item.value("ServerImagePath", item.value("serverImagePath", "")));
-			npc.difficulty = item.value("Difficulty", item.value("difficulty", 1));
-			npc.description = Utils::ToUnicodeIfNeeded(item.value("Description", item.value("description", "")));
-			npc.deckDescription = Utils::ToUnicodeIfNeeded(item.value("DeckDescription", item.value("deckDescription", "")));
-			adventureNpcList.push_back(std::move(npc));
+	try {
+		std::string endpoint = epro::format("/api/arcos/{}/npcs", arc.id);
+		auto json = FetchAdventureApi(endpoint);
+		if (json.contains("npcs") && json["npcs"].is_array()) {
+			for (const auto& item : json["npcs"]) {
+				AdventureNpcInfo npc;
+				npc.id = SafeJsonInt(item, "Id", SafeJsonInt(item, "id", 0));
+				npc.level = SafeJsonInt(item, "Level", SafeJsonInt(item, "level", 1));
+				npc.name = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Name", SafeJsonStr(item, "name", "")));
+				npc.avatarFile = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "AvatarFile", SafeJsonStr(item, "avatarFile", "")));
+				npc.deckFile = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "DeckFile", SafeJsonStr(item, "deckFile", "Skull servant 2026.ydk")));
+				npc.deckFileHard = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "DeckFileHard", SafeJsonStr(item, "deckFileHard", "")));
+				npc.serverImagePath = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "ServerImagePath", SafeJsonStr(item, "serverImagePath", "")));
+				npc.difficulty = SafeJsonInt(item, "Difficulty", SafeJsonInt(item, "difficulty", 1));
+				npc.description = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Description", SafeJsonStr(item, "description", "")));
+				npc.deckDescription = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "DeckDescription", SafeJsonStr(item, "deckDescription", "")));
+				adventureNpcList.push_back(std::move(npc));
+			}
 		}
-	}
+	} catch(...) {}
 
 	// Fallback NPCs if offline
 	if (adventureNpcList.empty() && arc.id == 1) {
@@ -1800,18 +1824,20 @@ void Game::RefreshAdventureMode() {
 	}
 
 	// Fetch Series from REST API
-	auto json = FetchAdventureApi("/api/series");
-	if (json.contains("series") && json["series"].is_array()) {
-		for (const auto& item : json["series"]) {
-			AdventureSeriesInfo s;
-			s.id = item.value("Id", item.value("id", 0));
-			s.name = Utils::ToUnicodeIfNeeded(item.value("Name", item.value("name", "")));
-			s.code = Utils::ToUnicodeIfNeeded(item.value("Code", item.value("code", "")));
-			s.imageFile = Utils::ToUnicodeIfNeeded(item.value("ImageFile", item.value("imageFile", "")));
-			s.imagePath = Utils::ToUnicodeIfNeeded(item.value("ImagePath", item.value("imagePath", "")));
-			adventureSeriesList.push_back(std::move(s));
+	try {
+		auto json = FetchAdventureApi("/api/series");
+		if (json.contains("series") && json["series"].is_array()) {
+			for (const auto& item : json["series"]) {
+				AdventureSeriesInfo s;
+				s.id = SafeJsonInt(item, "Id", SafeJsonInt(item, "id", 0));
+				s.name = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Name", SafeJsonStr(item, "name", "")));
+				s.code = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Code", SafeJsonStr(item, "code", "")));
+				s.imageFile = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "ImageFile", SafeJsonStr(item, "imageFile", "")));
+				s.imagePath = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "ImagePath", SafeJsonStr(item, "imagePath", "")));
+				adventureSeriesList.push_back(std::move(s));
+			}
 		}
-	}
+	} catch(...) {}
 
 	// Fallback Series if offline
 	if (adventureSeriesList.empty()) {
