@@ -175,13 +175,19 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_ADVENTURE_MODE: {
+				mainGame->isAdventureMode = true;
+				mainGame->mTopMenu->setVisible(false);
+				mainGame->wBtnSettings->setVisible(false);
 				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->ShowElement(mainGame->wAdventureMode);
 				mainGame->RefreshAdventureMode();
 				break;
 			}
 			case BUTTON_ADVENTURE_BACK: {
+				mainGame->isAdventureMode = false;
 				mainGame->HideElement(mainGame->wAdventureMode);
+				mainGame->mTopMenu->setVisible(true);
+				mainGame->wBtnSettings->setVisible(true);
 				mainGame->ShowElement(mainGame->wMainMenu);
 				break;
 			}

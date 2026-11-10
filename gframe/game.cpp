@@ -1490,56 +1490,68 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint) {
 }
 
 void Game::PopulateAdventureModeWindow() {
-	// Full dedicated adventure interface: 1004 x 620
-	wAdventureMode = env->addWindow(Scale(10, 10, 1014, 630), false, L"");
-	wAdventureMode->getCloseButton()->setVisible(false);
-	wAdventureMode->setDraggable(false);
-	wAdventureMode->setDrawTitlebar(false);
+	// Full dedicated native adventure interface: 1024 x 640 full canvas
+	wAdventureMode = env->addStaticText(L"", Scale(0, 0, 1024, 640), false, false, 0, -1, true);
+	wAdventureMode->setBackgroundColor(irr::video::SColor(255, 12, 14, 22));
 	wAdventureMode->setVisible(false);
 
 	// Dedicated background
-	imgAdventureBg = env->addImage(Scale(0, 0, 1004, 620), wAdventureMode);
+	imgAdventureBg = env->addImage(Scale(0, 0, 1024, 640), wAdventureMode);
 	imgAdventureBg->setScaleImage(true);
-	auto bgTex = driver->getTexture("textures/bg_adventure.png");
-	if(!bgTex) bgTex = driver->getTexture("textures/characters/bg_adventure.png");
-	if(bgTex) imgAdventureBg->setImage(bgTex);
-	else imgAdventureBg->setVisible(false);
+	auto bgTex = driver->getTexture("textures/bg.png");
+	if(!bgTex) bgTex = driver->getTexture("textures/bg_menu.png");
+	if(bgTex) {
+		imgAdventureBg->setImage(bgTex);
+		imgAdventureBg->setColor(irr::video::SColor(160, 255, 255, 255));
+	} else {
+		imgAdventureBg->setVisible(false);
+	}
+
+	// 3 Dark Elegant Translucent Cards/Panels
+	auto pnlLeft = env->addStaticText(L"", Scale(12, 12, 305, 628), true, false, wAdventureMode, -1, true);
+	pnlLeft->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
+
+	auto pnlCenter = env->addStaticText(L"", Scale(315, 12, 645, 628), true, false, wAdventureMode, -1, true);
+	pnlCenter->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
+
+	auto pnlRight = env->addStaticText(L"", Scale(655, 12, 1012, 628), true, false, wAdventureMode, -1, true);
+	pnlRight->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
 
 	// ==================== PANEL IZQUIERDO: SERIE, ARCO Y ACCIONES ====================
-	auto txtSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", Scale(20, 20, 290, 42), false, false, wAdventureMode);
+	auto txtSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", Scale(25, 22, 292, 44), false, false, wAdventureMode);
 	txtSerie->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	cbAdventureSeries = AddComboBox(env, Scale(20, 45, 290, 75), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
+	cbAdventureSeries = AddComboBox(env, Scale(25, 46, 292, 74), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
 	cbAdventureSeries->setMaxSelectionRows(8);
 
-	imgAdventureSeriesLogo = env->addImage(Scale(20, 85, 290, 185), wAdventureMode);
+	imgAdventureSeriesLogo = env->addImage(Scale(25, 82, 292, 185), wAdventureMode);
 	imgAdventureSeriesLogo->setScaleImage(true);
 	imgAdventureSeriesLogo->setUseAlphaChannel(true);
 
-	auto txtArco = env->addStaticText(L"2. ARCO ARGUMENTAL:", Scale(20, 195, 290, 217), false, false, wAdventureMode);
+	auto txtArco = env->addStaticText(L"2. ARCO ARGUMENTAL:", Scale(25, 195, 292, 217), false, false, wAdventureMode);
 	txtArco->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	cbAdventureArc = AddComboBox(env, Scale(20, 220, 290, 250), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
+	cbAdventureArc = AddComboBox(env, Scale(25, 220, 292, 248), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
 	cbAdventureArc->setMaxSelectionRows(10);
 
-	stAdventureArcDesc = env->addStaticText(L"", Scale(20, 258, 290, 360), true, true, wAdventureMode);
+	stAdventureArcDesc = env->addStaticText(L"", Scale(25, 255, 292, 360), true, true, wAdventureMode);
 	stAdventureArcDesc->setWordWrap(true);
 	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 225, 255));
 
-	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(20, 370, 290, 392), false, false, wAdventureMode);
+	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 370, 292, 392), false, false, wAdventureMode);
 	txtDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	cbAdventureUserDeck = AddComboBox(env, Scale(20, 395, 290, 425), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	cbAdventureUserDeck = AddComboBox(env, Scale(25, 395, 292, 423), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	btnAdventureDuel = env->addButton(Scale(20, 460, 290, 520), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
-	btnAdventureBack = env->addButton(Scale(20, 535, 290, 585), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENÚ");
+	btnAdventureDuel = env->addButton(Scale(25, 465, 292, 530), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
+	btnAdventureBack = env->addButton(Scale(25, 545, 292, 605), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
 
 	// ==================== PANEL CENTRAL: CATÁLOGO DE DUELISTAS ====================
-	auto txtCat = env->addStaticText(L"CATÁLOGO DE DUELISTAS DEL ARCO:", Scale(310, 20, 625, 42), false, false, wAdventureMode);
+	auto txtCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", Scale(328, 22, 632, 44), false, false, wAdventureMode);
 	txtCat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	lstAdventureNPC = env->addListBox(Scale(310, 45, 625, 585), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
+	lstAdventureNPC = env->addListBox(Scale(328, 48, 632, 608), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
 	lstAdventureNPC->setItemHeight(Scale(26));
 
 	// Invisible fallback combo for backwards compatibility
@@ -1547,24 +1559,24 @@ void Game::PopulateAdventureModeWindow() {
 	cbAdventureNPC->setVisible(false);
 
 	// ==================== PANEL DERECHO: PERFIL Y LORE DEL DUELISTA ====================
-	imgAdventureNPC = env->addImage(Scale(645, 30, 985, 310), wAdventureMode);
+	imgAdventureNPC = env->addImage(Scale(670, 25, 995, 310), wAdventureMode);
 	imgAdventureNPC->setScaleImage(true);
 	imgAdventureNPC->setUseAlphaChannel(true);
 
-	stAdventureNPCName = env->addStaticText(L"", Scale(645, 318, 985, 348), true, true, wAdventureMode);
+	stAdventureNPCName = env->addStaticText(L"", Scale(670, 318, 995, 348), true, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(645, 355, 985, 375), false, false, wAdventureMode);
+	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(670, 355, 995, 375), false, false, wAdventureMode);
 	txtLore->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	stAdventureNPCDesc = env->addStaticText(L"", Scale(645, 380, 985, 465), true, true, wAdventureMode);
+	stAdventureNPCDesc = env->addStaticText(L"", Scale(670, 380, 995, 465), true, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
 	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 220, 220, 220));
 
-	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(645, 475, 985, 495), false, false, wAdventureMode);
+	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(670, 475, 995, 495), false, false, wAdventureMode);
 	txtStrat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
 
-	stAdventureDeckDesc = env->addStaticText(L"", Scale(645, 500, 985, 585), true, true, wAdventureMode);
+	stAdventureDeckDesc = env->addStaticText(L"", Scale(670, 500, 995, 605), true, true, wAdventureMode);
 	stAdventureDeckDesc->setWordWrap(true);
 	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 180, 230, 255));
 
@@ -2617,7 +2629,10 @@ bool Game::MainLoop() {
 		} else { // bottom right of window with a little padding
 			fpsCounter->setRelativePosition(Resize(1024 - fpsCounterWidth, 620, 1024, 640));
 		}
-		wBtnSettings->setVisible(!(is_building || is_siding || dInfo.isInDuel || open_file));
+		wBtnSettings->setVisible(!(is_building || is_siding || dInfo.isInDuel || open_file || (wAdventureMode && wAdventureMode->isVisible())));
+		if(wAdventureMode && wAdventureMode->isVisible()) {
+			mTopMenu->setVisible(false);
+		}
 		EnableMaterial2D(true);
 		DrawGUI();
 		DrawSpec();
@@ -4114,6 +4129,10 @@ void Game::OnResize() {
 		stAbout->setRelativePosition(irr::core::recti(10, 10, minwidth, minheight));
 	}
 	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
+	if(wAdventureMode)
+		wAdventureMode->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
+	if(imgAdventureBg)
+		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 450));
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);
