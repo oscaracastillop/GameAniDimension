@@ -619,5 +619,77 @@
         "masterRules":  [
                             7
                         ]
+    },
+    {
+        "difficulty":  2,
+        "name":  "Hermano Para",
+        "deck":  "Npc_Nv22_Para",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "difficulty":  3,
+        "name":  "Hermano Para (Estructurado)",
+        "deck":  "Npc_Nv22_Para_Estructurado",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "difficulty":  2,
+        "name":  "Hermano Doja",
+        "deck":  "Npc_Nv24_Doja",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "difficulty":  3,
+        "name":  "Hermano Doja (Estructurado)",
+        "deck":  "Npc_Nv24_Doja_Estructurado",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "difficulty":  3,
+        "name":  "Maximillion Pegasus Toon (Estructurado)",
+        "deck":  "Npc_Nv34_Pegasus_Estructurado",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
+    },
+    {
+        "difficulty":  3,
+        "name":  "Maximillion Pegasus Relinquished (Estructurado)",
+        "deck":  "Npc_Nv36_Pegasus_Estructurado",
+        "masterRules":  [
+                            1,
+                            2,
+                            3,
+                            4,
+                            5
+                        ]
     }
 ]
