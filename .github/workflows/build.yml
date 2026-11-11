@@ -41,6 +41,8 @@ jobs:
         ./ci/prepare-full-assets.sh
     - name: Build client
       run: ./ci/build-android.sh
+    - name: Finalize assets
+      run: ./ci/finalize-assets.sh
     - name: Build APK
       run: |
         chmod +x gradlew

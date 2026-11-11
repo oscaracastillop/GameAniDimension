@@ -67,6 +67,13 @@ static void* OpenLibrary(epro::path_stringview path) {
 	if(input == -1) {
 		unlink(dest_path.data());
 		close(output);
+		lib = dlopen("libocgcore.so", RTLD_NOW);
+		if(lib) {
+			auto core = new AndroidCore;
+			core->library = lib;
+			core->fd = -1;
+			return core;
+		}
 		return nullptr;
 	}
 	ygo::Utils::FileCopyFD(input, output);
@@ -87,7 +94,8 @@ static void* OpenLibrary(epro::path_stringview path) {
 static inline void CloseLibrary(void* core) {
 	AndroidCore* acore = static_cast<AndroidCore*>(core);
 	dlclose(acore->library);
-	close(acore->fd);
+	if(acore->fd != -1)
+		close(acore->fd);
 	delete acore;
 }
 

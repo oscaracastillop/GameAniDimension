@@ -118,14 +118,6 @@ public class MainActivity extends Activity {
 				}
 			}
 		}
-		if (!isTaskRoot()) {
-			if (intent.hasCategory(Intent.CATEGORY_LAUNCHER)
-					&& intent.getAction() != null
-					&& intent.getAction().equals(Intent.ACTION_MAIN)) {
-				finish();
-				return;
-			}
-		}
 		parameter = new ArrayList<>();
 		if (intent.getAction() != null
 				&& intent.getAction().equals(Intent.ACTION_VIEW)) {
@@ -651,7 +643,9 @@ public class MainActivity extends Activity {
 	public void copyAssetsPrompt(final String working_dir) {
 		changelog = false;
 		var file = new File(getFilesDir(), "assets_copied");
-		if (file.exists()) {
+		boolean hasCoreFiles = new File(working_dir, "config/strings.conf").exists()
+				&& (new File(working_dir, "cards.cdb").exists() || new File(working_dir, "expansions/cards.cdb").exists());
+		if (file.exists() && hasCoreFiles) {
 			try {
 				var fileReader = new BufferedReader(new FileReader(file));
 				var line = fileReader.readLine();
@@ -665,33 +659,16 @@ public class MainActivity extends Activity {
 						copyAssets(working_dir, true);
 					} catch (Exception ignored) {
 					}
-				} else
+				} else {
 					next();
+				}
 				return;
 			} catch (Exception ignored) {
 			}
 		}
 		copyCertificate();
-		new AlertDialog.Builder(this)
-				.setMessage(getResources().getString(R.string.assets_prompt))
-				.setNegativeButton("No", (dialog, id) -> {
-					try {
-						var file1 = new File(getFilesDir(), "assets_copied");
-						if (!file1.createNewFile()) {
-							Log.e("EDOPro", "error when creating assets_copied file");
-						} else {
-							var wr = (new FileWriter(file1));
-							wr.write("" + BuildConfig.VERSION_CODE);
-							wr.flush();
-						}
-					} catch (Exception e) {
-						Log.e("EDOPro", "error when creating assets_copied file: " + e.getMessage());
-					}
-					next();
-				})
-				.setPositiveButton("Yes", (dialog, id) -> copyAssets(working_dir, false))
-				.setCancelable(false)
-				.show();
+		// Automatically extract/update full game assets if missing core database or on fresh install
+		copyAssets(working_dir, false);
 	}
 
 	public void copyCertificate() {
