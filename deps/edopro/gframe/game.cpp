@@ -1649,6 +1649,16 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 				int drawX = boxX + (boxW - drawW) / 2;
 				int drawY = boxY + (boxH - drawH) / 2;
 				targetRect = irr::core::recti(drawX, drawY, drawX + drawW, drawY + drawH);
+
+				// Anti-aliased high-quality pre-scaled texture using EDOPro's software resampler
+				auto scaledTex = imageManager.guiScalingResizeCached(tex,
+					irr::core::recti(0, 0, orig.Width, orig.Height),
+					irr::core::recti(0, 0, drawW, drawH));
+				if(scaledTex) {
+					imgAdventureNPC->setImage(scaledTex);
+				} else {
+					imgAdventureNPC->setImage(tex);
+				}
 			}
 		}
 	}
@@ -1720,6 +1730,13 @@ void Game::ResizeAdventureMode() {
 			int dX = lx + (lw - dW) / 2;
 			int dY = curY + (logoH - dH) / 2;
 			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(dX, dY, dX + dW, dY + dH));
+
+			auto scaledLogo = imageManager.guiScalingResizeCached(logoTex,
+				irr::core::recti(0, 0, logoTex->getOriginalSize().Width, logoTex->getOriginalSize().Height),
+				irr::core::recti(0, 0, dW, dH));
+			if(scaledLogo) {
+				imgAdventureSeriesLogo->setImage(scaledLogo);
+			}
 		} else {
 			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
 		}
