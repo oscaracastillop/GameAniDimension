@@ -1693,8 +1693,6 @@ void Game::ResizeAdventureMode() {
 	if(pnlAdventureRight)
 		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, pnlBottom));
 
-	const int innerPad = Scale(14);
-
 	// ==================== PANEL IZQUIERDO ====================
 	int lx = xLeft + innerPad;
 	int lw = colLeftW - 2 * innerPad;
@@ -1773,7 +1771,6 @@ void Game::ResizeAdventureMode() {
 	int rw = colRightW - 2 * innerPad;
 
 	// Top ~58% of the panel height dedicated exclusively to the prominent character artwork
-	int avatarStageH = std::max(Scale(220), (int)(pnlH * 0.58f));
 	int avatarBoxTop = pnlTop + innerPad;
 
 	UpdateAdventureNPCImagePosition(rx, avatarBoxTop, rw, avatarStageH);
