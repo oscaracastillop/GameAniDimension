@@ -24,8 +24,7 @@ jobs:
         java-version: '17'
     - name: Install apt deps
       run: |
-        sudo apt update
-        sudo apt install -y lua5.3 p7zip-full
+        for i in {1..3}; do sudo apt update && sudo apt install -y --fix-missing lua5.3 p7zip-full && break || sleep 5; done
         sudo ln -sf /usr/bin/lua5.3 /usr/bin/lua
     - name: Download libwindbot
       run: |
