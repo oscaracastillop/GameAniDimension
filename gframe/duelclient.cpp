@@ -399,8 +399,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->btnJoinHost->setEnabled(true);
 			mainGame->btnJoinCancel->setEnabled(true);
 			if(mainGame->isAdventureMode) {
-				if(!mainGame->wAdventureMode->isVisible())
-					mainGame->ShowElement(mainGame->wAdventureMode);
+				mainGame->wAdventureMode->setVisible(true);
+				mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
 				mainGame->btnAdventureDuel->setEnabled(true);
 				mainGame->RefreshAdventureMode();
 			} else if(mainGame->isHostingOnline) {
@@ -423,7 +423,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->HideElement(mainGame->wHostPrepareR);
 				mainGame->HideElement(mainGame->gBot.window);
 				if(mainGame->isAdventureMode) {
-					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->wAdventureMode->setVisible(true);
+					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
@@ -456,7 +457,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->is_building = false;
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
-					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->wAdventureMode->setVisible(true);
+					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
@@ -1096,7 +1098,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 	case STOC_DUEL_START: {
 		std::unique_lock<epro::mutex> lock(mainGame->gMutex);
 		if(mainGame->isAdventureMode) {
-			mainGame->HideElement(mainGame->wAdventureMode);
+			mainGame->wAdventureMode->setVisible(false);
 		}
 		mainGame->HideElement(mainGame->wHostPrepare);
 		mainGame->HideElement(mainGame->gBot.window);
@@ -1214,7 +1216,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->stTip->setVisible(false);
 			mainGame->device->setEventReceiver(&mainGame->menuHandler);
 			if(mainGame->isAdventureMode) {
-				mainGame->ShowElement(mainGame->wAdventureMode);
+				mainGame->wAdventureMode->setVisible(true);
+				mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+				mainGame->btnAdventureDuel->setEnabled(true);
 				mainGame->RefreshAdventureMode();
 			} else if(mainGame->isHostingOnline) {
 				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
@@ -1555,7 +1559,8 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				gSoundManager->StopSounds();
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
-					mainGame->ShowElement(mainGame->wAdventureMode);
+					mainGame->wAdventureMode->setVisible(true);
+					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
