@@ -38,3 +38,4 @@ with open(output_file, "w", encoding="utf-8") as f:
     f.write("\n  0 };\n\n")
 
 print(f"bin2c.py - Successfully written '{output_file}' ({file_size} bytes).")
+

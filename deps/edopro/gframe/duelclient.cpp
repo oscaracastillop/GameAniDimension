@@ -401,7 +401,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->btnJoinCancel->setEnabled(true);
 			if(mainGame->isAdventureMode) {
 				mainGame->wAdventureMode->setVisible(true);
-				mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+				mainGame->ResizeAdventureMode();
 				mainGame->btnAdventureDuel->setEnabled(true);
 				mainGame->RefreshAdventureMode();
 			} else if(mainGame->isHostingOnline) {
@@ -425,7 +425,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->HideElement(mainGame->gBot.window);
 				if(mainGame->isAdventureMode) {
 					mainGame->wAdventureMode->setVisible(true);
-					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+					mainGame->ResizeAdventureMode();
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
@@ -459,7 +459,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
 					mainGame->wAdventureMode->setVisible(true);
-					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+					mainGame->ResizeAdventureMode();
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
@@ -1225,7 +1225,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->device->setEventReceiver(&mainGame->menuHandler);
 			if(mainGame->isAdventureMode) {
 				mainGame->wAdventureMode->setVisible(true);
-				mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+				mainGame->ResizeAdventureMode();
 				mainGame->btnAdventureDuel->setEnabled(true);
 				mainGame->RefreshAdventureMode();
 			} else if(mainGame->isHostingOnline) {
@@ -1568,7 +1568,7 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				mainGame->device->setEventReceiver(&mainGame->menuHandler);
 				if(mainGame->isAdventureMode) {
 					mainGame->wAdventureMode->setVisible(true);
-					mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+					mainGame->ResizeAdventureMode();
 					mainGame->btnAdventureDuel->setEnabled(true);
 					mainGame->RefreshAdventureMode();
 				} else if(mainGame->isHostingOnline) {
