@@ -8,7 +8,11 @@ mkdir -p "$UPDATES"
 
 echo "=== [1/6] Downloading font ==="
 curl --retry 5 --connect-timeout 30 --location -o NotoSansJP-Regular.otf https://raw.githubusercontent.com/ProjectIgnis/Distribution/master/fonts/NotoSansJP-Regular.otf
-lua ci/bin2c.lua "NotoSansJP-Regular.otf" "deps/edopro/gframe/CGUITTFont/bundled_font.cpp"
+if command -v python3 >/dev/null 2>&1; then
+    python3 ci/bin2c.py "NotoSansJP-Regular.otf" "deps/edopro/gframe/CGUITTFont/bundled_font.cpp"
+elif command -v lua >/dev/null 2>&1; then
+    lua ci/bin2c.lua "NotoSansJP-Regular.otf" "deps/edopro/gframe/CGUITTFont/bundled_font.cpp"
+fi
 
 echo "=== [2/6] Cloning Distribution assets (BGM, sound, textures, expansions, skin, config) ==="
 git clone --depth 1 https://github.com/ProjectIgnis/Distribution.git /tmp/Distribution
