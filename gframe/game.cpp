@@ -1629,9 +1629,14 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 	if(selected >= 0 && selected < (int)adventureNpcList.size()) {
 		const auto& npc = adventureNpcList[selected];
 		auto utf8Avatar = Utils::ToUTF8IfNeeded(npc.avatarFile);
+
+		bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
+		driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 		auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
 		if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
 		if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
 
 		if(tex) {
 			const auto orig = tex->getOriginalSize();
@@ -1650,15 +1655,8 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 				int drawY = boxY + (boxH - drawH) / 2;
 				targetRect = irr::core::recti(drawX, drawY, drawX + drawW, drawY + drawH);
 
-				// Anti-aliased high-quality pre-scaled texture using EDOPro's software resampler
-				auto scaledTex = imageManager.guiScalingResizeCached(tex,
-					irr::core::recti(0, 0, orig.Width, orig.Height),
-					irr::core::recti(0, 0, drawW, drawH));
-				if(scaledTex) {
-					imgAdventureNPC->setImage(scaledTex);
-				} else {
-					imgAdventureNPC->setImage(tex);
-				}
+				// Direct high-definition texture rendering using hardware GPU bilinear/anisotropic filtering
+				imgAdventureNPC->setImage(tex);
 			}
 		}
 	}
@@ -1684,12 +1682,19 @@ void Game::ResizeAdventureMode() {
 	const int pnlBottom = H - padY;
 	const int pnlH = pnlBottom - pnlTop;
 
-	// Right panel (character) sized to match the portrait aspect ratio to eliminate lateral black gaps
-	const int innerPad = Scale(14);
-	const int avatarStageH = std::max(Scale(240), (int)(pnlH * 0.58f));
-	const int colRightW = std::max(Scale(280), std::min((int)(totalW * 0.32f), (int)(avatarStageH * 0.74f) + 2 * innerPad));
-	const int colCenterW = std::max(Scale(250), (int)(totalW * 0.25f));
-	// Left panel gets all the remaining width for wide series presentation
+	const int innerPad = Scale(12);
+
+	// Character stage height expanded now that deck strategy is removed
+	const int avatarStageH = std::max(Scale(260), (int)(pnlH * 0.63f));
+
+	// Right panel sized tightly to the portrait character ratio (896x1200 ~ 0.747) to eliminate black side bars
+	const int targetRightW = (int)(avatarStageH * 0.747f) + 2 * innerPad;
+	const int colRightW = std::max(Scale(230), std::min((int)(totalW * 0.32f), targetRightW));
+
+	// Catalog panel
+	const int colCenterW = std::max(Scale(210), (int)(totalW * 0.23f));
+
+	// Left panel gets all the remaining space to expand series banner and options
 	const int colLeftW = totalW - colCenterW - colRightW;
 
 	const int xLeft = padX;
@@ -1716,7 +1721,8 @@ void Game::ResizeAdventureMode() {
 		cbAdventureSeries->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
 	curY += Scale(34);
 
-	int logoH = std::min(Scale(160), std::max(Scale(90), (int)(pnlH * 0.22f)));
+	// Prominent, wider and larger series banner
+	int logoH = std::min(Scale(220), std::max(Scale(100), (int)(pnlH * 0.26f)));
 	if(imgAdventureSeriesLogo) {
 		auto logoTex = imgAdventureSeriesLogo->getImage();
 		if(logoTex && logoTex->getOriginalSize().Width > 0 && logoTex->getOriginalSize().Height > 0) {
@@ -1730,13 +1736,7 @@ void Game::ResizeAdventureMode() {
 			int dX = lx + (lw - dW) / 2;
 			int dY = curY + (logoH - dH) / 2;
 			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(dX, dY, dX + dW, dY + dH));
-
-			auto scaledLogo = imageManager.guiScalingResizeCached(logoTex,
-				irr::core::recti(0, 0, logoTex->getOriginalSize().Width, logoTex->getOriginalSize().Height),
-				irr::core::recti(0, 0, dW, dH));
-			if(scaledLogo) {
-				imgAdventureSeriesLogo->setImage(scaledLogo);
-			}
+			imgAdventureSeriesLogo->setImage(logoTex);
 		} else {
 			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
 		}
@@ -1751,18 +1751,18 @@ void Game::ResizeAdventureMode() {
 		cbAdventureArc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
 	curY += Scale(34);
 
-	int btnDuelH = Scale(52);
-	int btnBackH = Scale(38);
+	int btnDuelH = Scale(50);
+	int btnBackH = Scale(36);
 	int btnSpacing = Scale(8);
 	int bottomButtonsTop = pnlBottom - innerPad - btnBackH - btnSpacing - btnDuelH;
 
-	int deckY = bottomButtonsTop - Scale(66);
+	int deckY = bottomButtonsTop - Scale(64);
 	if(txtAdventureDeck)
 		txtAdventureDeck->setRelativePosition(irr::core::recti(lx, deckY, lx + lw, deckY + Scale(20)));
 	if(cbAdventureUserDeck)
 		cbAdventureUserDeck->setRelativePosition(irr::core::recti(lx, deckY + Scale(24), lx + lw, deckY + Scale(52)));
 
-	int descH = std::max(Scale(40), deckY - curY - Scale(8));
+	int descH = std::max(Scale(36), deckY - curY - Scale(8));
 	if(stAdventureArcDesc)
 		stAdventureArcDesc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + descH));
 
@@ -1787,27 +1787,27 @@ void Game::ResizeAdventureMode() {
 	int rx = xRight + innerPad;
 	int rw = colRightW - 2 * innerPad;
 
-	// Top ~58% of the panel height dedicated exclusively to the prominent character artwork
+	// Portrait stage hugging character image
 	int avatarBoxTop = pnlTop + innerPad;
 
 	UpdateAdventureNPCImagePosition(rx, avatarBoxTop, rw, avatarStageH);
 
-	int rCurY = avatarBoxTop + avatarStageH + Scale(12);
+	int rCurY = avatarBoxTop + avatarStageH + Scale(10);
 
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(32)));
-	rCurY += Scale(36);
+		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(28)));
+	rCurY += Scale(32);
 
-	int diffLabelW = Scale(130);
+	int diffLabelW = Scale(120);
 	if(txtAdventureDiff)
 		txtAdventureDiff->setRelativePosition(irr::core::recti(rx, rCurY + Scale(4), rx + diffLabelW, rCurY + Scale(26)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(10), rCurY, rx + rw, rCurY + Scale(28)));
-	rCurY += Scale(36);
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(6), rCurY, rx + rw, rCurY + Scale(28)));
+	rCurY += Scale(34);
 
 	if(txtAdventureLore)
 		txtAdventureLore->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(20)));
-	rCurY += Scale(24);
+	rCurY += Scale(22);
 
 	if(stAdventureNPCDesc)
 		stAdventureNPCDesc->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, pnlBottom - innerPad));
