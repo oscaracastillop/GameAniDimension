@@ -147,6 +147,8 @@ void Game::Initialize() {
 	linePatternGL = 0x0f0f;
 	menuHandler.prev_sel = -1;
 	driver = device->getVideoDriver();
+	driver->getMaterial2D().TextureLayer[0].BilinearFilter = true;
+	driver->getMaterial2D().AntiAliasing = irr::video::EAAM_FULL_BASIC;
 	imageManager.SetDevice(device.get());
 	imageManager.Initial();
 	RefreshAiDecks();
@@ -1511,108 +1513,274 @@ static int SafeJsonInt(const nlohmann::json& obj, const char* key, int defVal = 
 }
 
 void Game::PopulateAdventureModeWindow() {
-	// Full dedicated native adventure interface: 1024 x 640 full canvas
-	wAdventureMode = env->addStaticText(L"", Scale(0, 0, 1024, 640), false, false, 0, -1, true);
-	wAdventureMode->setBackgroundColor(irr::video::SColor(255, 12, 14, 22));
+	// Full dedicated native adventure interface canvas
+	wAdventureMode = env->addStaticText(L"", irr::core::recti(0, 0, window_size.Width, window_size.Height), false, false, 0, -1, true);
+	wAdventureMode->setBackgroundColor(irr::video::SColor(255, 10, 12, 18));
 	wAdventureMode->setVisible(false);
 
 	// Dedicated background
-	imgAdventureBg = env->addImage(Scale(0, 0, 1024, 640), wAdventureMode);
+	imgAdventureBg = env->addImage(irr::core::recti(0, 0, window_size.Width, window_size.Height), wAdventureMode);
 	imgAdventureBg->setScaleImage(true);
 	auto bgTex = driver->getTexture("textures/bg.png");
 	if(!bgTex) bgTex = driver->getTexture("textures/bg_menu.png");
 	if(bgTex) {
 		imgAdventureBg->setImage(bgTex);
-		imgAdventureBg->setColor(irr::video::SColor(160, 255, 255, 255));
+		imgAdventureBg->setColor(irr::video::SColor(140, 255, 255, 255));
 	} else {
 		imgAdventureBg->setVisible(false);
 	}
 
-	// 3 Dark Elegant Translucent Cards/Panels
-	auto pnlLeft = env->addStaticText(L"", Scale(12, 12, 305, 628), true, false, wAdventureMode, -1, true);
-	pnlLeft->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
+	// 3 Dark Elegant Translucent Glass Panels
+	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureLeft->setBackgroundColor(irr::video::SColor(230, 14, 18, 28));
 
-	auto pnlCenter = env->addStaticText(L"", Scale(315, 12, 645, 628), true, false, wAdventureMode, -1, true);
-	pnlCenter->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
+	pnlAdventureCenter = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureCenter->setBackgroundColor(irr::video::SColor(230, 14, 18, 28));
 
-	auto pnlRight = env->addStaticText(L"", Scale(655, 12, 1012, 628), true, false, wAdventureMode, -1, true);
-	pnlRight->setBackgroundColor(irr::video::SColor(220, 16, 20, 30));
+	pnlAdventureRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureRight->setBackgroundColor(irr::video::SColor(235, 13, 16, 26));
 
-	// ==================== PANEL IZQUIERDO: SERIE, ARCO Y ACCIONES ====================
-	auto txtSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", Scale(25, 22, 292, 44), false, false, wAdventureMode);
-	txtSerie->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	// ==================== PANEL IZQUIERDO ====================
+	txtAdventureSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureSerie->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	cbAdventureSeries = AddComboBox(env, Scale(25, 46, 292, 74), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
+	cbAdventureSeries = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
 	cbAdventureSeries->setMaxSelectionRows(8);
 
-	imgAdventureSeriesLogo = env->addImage(Scale(25, 82, 292, 185), wAdventureMode);
+	imgAdventureSeriesLogo = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
 	imgAdventureSeriesLogo->setScaleImage(true);
 	imgAdventureSeriesLogo->setUseAlphaChannel(true);
 
-	auto txtArco = env->addStaticText(L"2. ARCO ARGUMENTAL:", Scale(25, 195, 292, 217), false, false, wAdventureMode);
-	txtArco->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	txtAdventureArco = env->addStaticText(L"2. ARCO HISTORICO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureArco->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	cbAdventureArc = AddComboBox(env, Scale(25, 220, 292, 248), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
+	cbAdventureArc = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
 	cbAdventureArc->setMaxSelectionRows(10);
 
-	stAdventureArcDesc = env->addStaticText(L"", Scale(25, 255, 292, 360), true, true, wAdventureMode);
+	stAdventureArcDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureArcDesc->setWordWrap(true);
-	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 225, 255));
+	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 220, 250));
 
-	auto txtDeck = env->addStaticText(L"3. TU BARAJA (DECK):", Scale(25, 370, 292, 392), false, false, wAdventureMode);
-	txtDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	txtAdventureDeck = env->addStaticText(L"3. TU BARAJA (DECK):", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	cbAdventureUserDeck = AddComboBox(env, Scale(25, 395, 292, 423), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
+	cbAdventureUserDeck = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	btnAdventureDuel = env->addButton(Scale(25, 460, 292, 525), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
-	btnAdventureBack = env->addButton(Scale(25, 545, 292, 605), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
+	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
+	btnAdventureBack = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
 
-	// ==================== PANEL CENTRAL: CATÁLOGO DE DUELISTAS ====================
-	auto txtCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", Scale(328, 22, 632, 44), false, false, wAdventureMode);
-	txtCat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	// ==================== PANEL CENTRAL: CATALOGO ====================
+	txtAdventureCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureCat->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	lstAdventureNPC = env->addListBox(Scale(328, 48, 632, 608), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
-	lstAdventureNPC->setItemHeight(Scale(26));
+	lstAdventureNPC = env->addListBox(irr::core::recti(0, 0, 10, 10), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
+	lstAdventureNPC->setItemHeight(Scale(28));
 
-	// Invisible fallback combo for backwards compatibility
-	cbAdventureNPC = AddComboBox(env, Scale(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
+	// Fallback combo for backwards compatibility
+	cbAdventureNPC = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
 	cbAdventureNPC->setVisible(false);
 
-	// ==================== PANEL DERECHO: PERFIL Y LORE DEL DUELISTA ====================
-	imgAdventureNPC = env->addImage(Scale(670, 25, 995, 260), wAdventureMode);
+	// ==================== PANEL DERECHO: GRAN PROTAGONISMO ====================
+	imgAdventureNPC = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
 	imgAdventureNPC->setScaleImage(true);
 	imgAdventureNPC->setUseAlphaChannel(true);
 
-	stAdventureNPCName = env->addStaticText(L"", Scale(670, 268, 995, 295), true, true, wAdventureMode);
+	stAdventureNPCName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	// --- Dificultad NPC (en panel derecho) ---
-	auto txtDiff = env->addStaticText(L"DIFICULTAD NPC:", Scale(670, 302, 820, 322), false, false, wAdventureMode);
-	txtDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	txtAdventureDiff = env->addStaticText(L"DIFICULTAD NPC:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	cbAdventureDifficulty = AddComboBox(env, Scale(822, 299, 995, 325), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
+	cbAdventureDifficulty = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
 	cbAdventureDifficulty->addItem(L"Normal", 0);
 	cbAdventureDifficulty->addItem(L"Leyenda", 1);
 	cbAdventureDifficulty->setSelected(0);
 
-	auto txtLore = env->addStaticText(L"LEYENDA DEL PERSONAJE:", Scale(670, 335, 995, 355), false, false, wAdventureMode);
-	txtLore->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	txtAdventureLore = env->addStaticText(L"HISTORIA Y LEYENDA DEL DUELISTA:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	stAdventureNPCDesc = env->addStaticText(L"", Scale(670, 358, 995, 440), true, true, wAdventureMode);
+	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
-	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 220, 220, 220));
+	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 225, 230, 240));
 
-	auto txtStrat = env->addStaticText(L"ESTRATEGIA DEL DECK:", Scale(670, 450, 995, 470), false, false, wAdventureMode);
-	txtStrat->setOverrideColor(irr::video::SColor(255, 255, 215, 0));
+	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	stAdventureDeckDesc->setVisible(false);
 
-	stAdventureDeckDesc = env->addStaticText(L"", Scale(670, 475, 995, 605), true, true, wAdventureMode);
-	stAdventureDeckDesc->setWordWrap(true);
-	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 180, 230, 255));
-
-	// Optional text pointer for backwards compatibility
 	stAdventureNPCLevel = stAdventureNPCName;
 	stAdventureNPCDeck = stAdventureDeckDesc;
+
+	ResizeAdventureMode();
+}
+
+void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int boxH) {
+	if(!imgAdventureNPC)
+		return;
+
+	irr::core::recti targetRect(boxX, boxY, boxX + boxW, boxY + boxH);
+
+	int selected = -1;
+	if(lstAdventureNPC)
+		selected = lstAdventureNPC->getSelected();
+	if(selected < 0 && cbAdventureNPC)
+		selected = cbAdventureNPC->getSelected();
+
+	if(selected >= 0 && selected < (int)adventureNpcList.size()) {
+		const auto& npc = adventureNpcList[selected];
+		auto utf8Avatar = Utils::ToUTF8IfNeeded(npc.avatarFile);
+		auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
+		if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
+		if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+
+		if(tex) {
+			const auto orig = tex->getOriginalSize();
+			if(orig.Width > 0 && orig.Height > 0 && boxW > 0 && boxH > 0) {
+				float imgAspect = (float)orig.Width / (float)orig.Height;
+				float boxAspect = (float)boxW / (float)boxH;
+				int drawW, drawH;
+				if(imgAspect > boxAspect) {
+					drawW = boxW;
+					drawH = (int)(boxW / imgAspect);
+				} else {
+					drawH = boxH;
+					drawW = (int)(boxH * imgAspect);
+				}
+				int drawX = boxX + (boxW - drawW) / 2;
+				int drawY = boxY + (boxH - drawH) / 2;
+				targetRect = irr::core::recti(drawX, drawY, drawX + drawW, drawY + drawH);
+			}
+		}
+	}
+	imgAdventureNPC->setRelativePosition(targetRect);
+}
+
+void Game::ResizeAdventureMode() {
+	if(!wAdventureMode)
+		return;
+
+	const int W = window_size.Width;
+	const int H = window_size.Height;
+	wAdventureMode->setRelativePosition(irr::core::recti(0, 0, W, H));
+	if(imgAdventureBg)
+		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, W, H));
+
+	const int padX = std::max(12, (int)(W * 0.015f));
+	const int padY = std::max(12, (int)(H * 0.02f));
+	const int gap = std::max(12, (int)(W * 0.012f));
+
+	const int totalW = W - 2 * padX - 2 * gap;
+	// Responsive column widths: 25% Left, 27% Center, 48% Right (Massive Character Stage)
+	const int colLeftW = std::max(Scale(270), (int)(totalW * 0.25f));
+	const int colCenterW = std::max(Scale(270), (int)(totalW * 0.27f));
+	const int colRightW = totalW - colLeftW - colCenterW;
+
+	const int pnlTop = padY;
+	const int pnlBottom = H - padY;
+	const int pnlH = pnlBottom - pnlTop;
+
+	const int xLeft = padX;
+	const int xCenter = xLeft + colLeftW + gap;
+	const int xRight = xCenter + colCenterW + gap;
+
+	if(pnlAdventureLeft)
+		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + colLeftW, pnlBottom));
+	if(pnlAdventureCenter)
+		pnlAdventureCenter->setRelativePosition(irr::core::recti(xCenter, pnlTop, xCenter + colCenterW, pnlBottom));
+	if(pnlAdventureRight)
+		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, pnlBottom));
+
+	const int innerPad = Scale(14);
+
+	// ==================== PANEL IZQUIERDO ====================
+	int lx = xLeft + innerPad;
+	int lw = colLeftW - 2 * innerPad;
+	int curY = pnlTop + innerPad;
+
+	if(txtAdventureSerie)
+		txtAdventureSerie->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(20)));
+	curY += Scale(22);
+
+	if(cbAdventureSeries)
+		cbAdventureSeries->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
+	curY += Scale(34);
+
+	int logoH = std::min(Scale(110), std::max(Scale(65), (int)(pnlH * 0.15f)));
+	if(imgAdventureSeriesLogo)
+		imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
+	curY += logoH + Scale(10);
+
+	if(txtAdventureArco)
+		txtAdventureArco->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(20)));
+	curY += Scale(22);
+
+	if(cbAdventureArc)
+		cbAdventureArc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
+	curY += Scale(34);
+
+	int btnDuelH = Scale(52);
+	int btnBackH = Scale(38);
+	int btnSpacing = Scale(8);
+	int bottomButtonsTop = pnlBottom - innerPad - btnBackH - btnSpacing - btnDuelH;
+
+	int deckY = bottomButtonsTop - Scale(66);
+	if(txtAdventureDeck)
+		txtAdventureDeck->setRelativePosition(irr::core::recti(lx, deckY, lx + lw, deckY + Scale(20)));
+	if(cbAdventureUserDeck)
+		cbAdventureUserDeck->setRelativePosition(irr::core::recti(lx, deckY + Scale(24), lx + lw, deckY + Scale(52)));
+
+	int descH = std::max(Scale(40), deckY - curY - Scale(8));
+	if(stAdventureArcDesc)
+		stAdventureArcDesc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + descH));
+
+	if(btnAdventureDuel)
+		btnAdventureDuel->setRelativePosition(irr::core::recti(lx, bottomButtonsTop, lx + lw, bottomButtonsTop + btnDuelH));
+	if(btnAdventureBack)
+		btnAdventureBack->setRelativePosition(irr::core::recti(lx, bottomButtonsTop + btnDuelH + btnSpacing, lx + lw, bottomButtonsTop + btnDuelH + btnSpacing + btnBackH));
+
+	// ==================== PANEL CENTRAL: CATALOGO ====================
+	int cx = xCenter + innerPad;
+	int cw = colCenterW - 2 * innerPad;
+	int cCurY = pnlTop + innerPad;
+
+	if(txtAdventureCat)
+		txtAdventureCat->setRelativePosition(irr::core::recti(cx, cCurY, cx + cw, cCurY + Scale(22)));
+	cCurY += Scale(26);
+
+	if(lstAdventureNPC)
+		lstAdventureNPC->setRelativePosition(irr::core::recti(cx, cCurY, cx + cw, pnlBottom - innerPad));
+
+	// ==================== PANEL DERECHO: GRAN PROTAGONISMO ====================
+	int rx = xRight + innerPad;
+	int rw = colRightW - 2 * innerPad;
+
+	// Top ~58% of the panel height dedicated exclusively to the prominent character artwork
+	int avatarStageH = std::max(Scale(220), (int)(pnlH * 0.58f));
+	int avatarBoxTop = pnlTop + innerPad;
+
+	UpdateAdventureNPCImagePosition(rx, avatarBoxTop, rw, avatarStageH);
+
+	int rCurY = avatarBoxTop + avatarStageH + Scale(12);
+
+	if(stAdventureNPCName)
+		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(32)));
+	rCurY += Scale(36);
+
+	int diffLabelW = Scale(130);
+	if(txtAdventureDiff)
+		txtAdventureDiff->setRelativePosition(irr::core::recti(rx, rCurY + Scale(4), rx + diffLabelW, rCurY + Scale(26)));
+	if(cbAdventureDifficulty)
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(10), rCurY, rx + rw, rCurY + Scale(28)));
+	rCurY += Scale(36);
+
+	if(txtAdventureLore)
+		txtAdventureLore->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(20)));
+	rCurY += Scale(24);
+
+	if(stAdventureNPCDesc)
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, pnlBottom - innerPad));
+
+	if(stAdventureDeckDesc)
+		stAdventureDeckDesc->setVisible(false);
 }
 
 void Game::OnAdventureSeriesChanged() {
@@ -1802,15 +1970,22 @@ void Game::UpdateAdventureNPCDisplay() {
 	}
 
 	auto utf8Avatar = Utils::ToUTF8IfNeeded(npc.avatarFile);
+	bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
+	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 	auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
 	if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
 	if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
+
 	if(tex) {
 		imgAdventureNPC->setImage(tex);
 		imgAdventureNPC->setVisible(true);
 	} else {
 		imgAdventureNPC->setVisible(false);
 	}
+
+	ResizeAdventureMode();
 }
 
 void Game::RefreshAdventureMode() {
@@ -4192,9 +4367,7 @@ void Game::OnResize() {
 	}
 	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	if(wAdventureMode)
-		wAdventureMode->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
-	if(imgAdventureBg)
-		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
+		ResizeAdventureMode();
 	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 450));
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);

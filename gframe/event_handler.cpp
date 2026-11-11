@@ -173,7 +173,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->btnJoinCancel->setEnabled(true);
 					if(mainGame->isAdventureMode) {
 						mainGame->wAdventureMode->setVisible(true);
-						mainGame->wAdventureMode->setRelativePosition(irr::core::recti(0, 0, mainGame->window_size.Width, mainGame->window_size.Height));
+						mainGame->ResizeAdventureMode();
 						mainGame->btnAdventureDuel->setEnabled(true);
 						mainGame->RefreshAdventureMode();
 					} else if(mainGame->isHostingOnline) {

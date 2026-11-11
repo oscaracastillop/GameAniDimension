@@ -463,6 +463,18 @@ struct adventure_mode_panel_elements {
 	irr::gui::IGUIComboBox* cbAdventureDifficulty{ nullptr };
 	irr::gui::IGUIButton* btnAdventureDuel{ nullptr };
 	irr::gui::IGUIButton* btnAdventureBack{ nullptr };
+
+	// Dedicated Adventure Mode Panels & Labels for Responsive Layout
+	irr::gui::IGUIStaticText* pnlAdventureLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlAdventureCenter{ nullptr };
+	irr::gui::IGUIStaticText* pnlAdventureRight{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureSerie{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureArco{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureDeck{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureCat{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureDiff{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureLore{ nullptr };
+	irr::gui::IGUIStaticText* txtAdventureStrat{ nullptr };
 };
 
 struct game_field_elements {
@@ -816,6 +828,8 @@ public:
 	void OnAdventureArcChanged();
 	void UpdateAdventureNPCDisplay();
 	void StartAdventureDuel();
+	void ResizeAdventureMode();
+	void UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int boxH);
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;
