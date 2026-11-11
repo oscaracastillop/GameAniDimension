@@ -1,4 +1,5 @@
 #include <sstream>
+#include <fstream>
 #include <nlohmann/json.hpp>
 #include <irrlicht.h>
 #include <curl/curl.h>
@@ -3526,6 +3527,13 @@ void Game::AddLog(epro::wstringview msg, int param) {
 	if(!env->hasFocus(lstLog)) {
 		lstLog->setSelected(-1);
 	}
+	try {
+		std::ofstream logFile("duel.log", std::ios::app);
+		if(logFile.is_open()) {
+			logFile << Utils::ToUTF8IfNeeded(msg) << "\n";
+			logFile.flush();
+		}
+	} catch(...) {}
 }
 void Game::ClearChatMsg() {
 	for(int i = 7; i >= 0; --i) {
