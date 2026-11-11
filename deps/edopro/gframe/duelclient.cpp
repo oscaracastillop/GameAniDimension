@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <fstream>
 #include "config.h"
 #if EDOPRO_WINDOWS
 #include <ws2tcpip.h>
@@ -1097,6 +1098,13 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 	}
 	case STOC_DUEL_START: {
 		std::unique_lock<epro::mutex> lock(mainGame->gMutex);
+		try {
+			std::ofstream logFile("duel.log", std::ios::trunc);
+			if(logFile.is_open()) {
+				logFile << "=== DUEL STARTED ===" << "\n";
+				logFile.flush();
+			}
+		} catch(...) {}
 		if(mainGame->isAdventureMode) {
 			mainGame->wAdventureMode->setVisible(false);
 		}
