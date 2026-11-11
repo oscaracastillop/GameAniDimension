@@ -4,7 +4,10 @@ obj/
 release/
 bugreports/
 src/main/assets/**
-|src/main/assets/cacert.pem
+!src/main/assets/cacert.pem
+!src/main/assets/deck/**
+!src/main/assets/WindBot/**
+!src/main/assets/textures/**
 .gradle/
 .id*/
 *vs/

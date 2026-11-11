@@ -25,9 +25,16 @@ touch .nomedia
 find -L . ! -path . -type d | sed -E "s|^\./||" > ../index.txt
 find -L . ! -path . | sed -E "s|^\./||" > ../filelist.txt
 
+filelist_count=$(wc -l < ../filelist.txt)
+echo "filelist.txt entry count: $filelist_count"
+if [ "$filelist_count" -lt 10000 ]; then
+    echo "ERROR: filelist.txt has only $filelist_count lines! Assets were not properly generated!"
+    exit 1
+fi
+
 cd ../update
 touch .nomedia
 find -L . ! -path . -type d | sed -E "s|^\./||" > ../indexu.txt
 find -L . ! -path . | sed -E "s|^\./||" > ../filelistu.txt
 
-echo "=== Finalize assets complete! ==="
+echo "=== Finalize assets complete! Verified $filelist_count core assets. ==="
