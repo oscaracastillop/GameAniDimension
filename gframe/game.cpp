@@ -44,12 +44,11 @@
 
 #if EDOPRO_ANDROID || EDOPRO_IOS
 #include "CGUICustomComboBox/CGUICustomComboBox.h"
-#define EnableMaterial2D(enable) driver->enableMaterial2D(enable)
 #define DispatchQueue() porting::dispatchQueuedMessages()
 #else
-#define EnableMaterial2D(enable) ((void)0)
 #define DispatchQueue() ((void)0)
 #endif
+#define EnableMaterial2D(enable) driver->enableMaterial2D(enable)
 
 #if IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9
 #define ClearZBuffer(driver) do {driver->clearBuffers(irr::video::ECBF_DEPTH);} while(0)
@@ -148,6 +147,8 @@ void Game::Initialize() {
 	menuHandler.prev_sel = -1;
 	driver = device->getVideoDriver();
 	driver->getMaterial2D().TextureLayer[0].BilinearFilter = true;
+	driver->getMaterial2D().TextureLayer[0].TrilinearFilter = true;
+	driver->getMaterial2D().TextureLayer[0].AnisotropicFilter = 4;
 	driver->getMaterial2D().AntiAliasing = irr::video::EAAM_FULL_BASIC;
 	imageManager.SetDevice(device.get());
 	imageManager.Initial();
@@ -1669,14 +1670,17 @@ void Game::ResizeAdventureMode() {
 	const int gap = std::max(12, (int)(W * 0.012f));
 
 	const int totalW = W - 2 * padX - 2 * gap;
-	// Responsive column widths: 25% Left, 27% Center, 48% Right (Massive Character Stage)
-	const int colLeftW = std::max(Scale(270), (int)(totalW * 0.25f));
-	const int colCenterW = std::max(Scale(270), (int)(totalW * 0.27f));
-	const int colRightW = totalW - colLeftW - colCenterW;
-
 	const int pnlTop = padY;
 	const int pnlBottom = H - padY;
 	const int pnlH = pnlBottom - pnlTop;
+
+	// Right panel (character) sized to match the portrait aspect ratio to eliminate lateral black gaps
+	const int innerPad = Scale(14);
+	const int avatarStageH = std::max(Scale(240), (int)(pnlH * 0.58f));
+	const int colRightW = std::max(Scale(280), std::min((int)(totalW * 0.32f), (int)(avatarStageH * 0.74f) + 2 * innerPad));
+	const int colCenterW = std::max(Scale(250), (int)(totalW * 0.25f));
+	// Left panel gets all the remaining width for wide series presentation
+	const int colLeftW = totalW - colCenterW - colRightW;
 
 	const int xLeft = padX;
 	const int xCenter = xLeft + colLeftW + gap;
@@ -1704,9 +1708,24 @@ void Game::ResizeAdventureMode() {
 		cbAdventureSeries->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
 	curY += Scale(34);
 
-	int logoH = std::min(Scale(110), std::max(Scale(65), (int)(pnlH * 0.15f)));
-	if(imgAdventureSeriesLogo)
-		imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
+	int logoH = std::min(Scale(160), std::max(Scale(90), (int)(pnlH * 0.22f)));
+	if(imgAdventureSeriesLogo) {
+		auto logoTex = imgAdventureSeriesLogo->getImage();
+		if(logoTex && logoTex->getOriginalSize().Width > 0 && logoTex->getOriginalSize().Height > 0) {
+			float lAspect = (float)logoTex->getOriginalSize().Width / (float)logoTex->getOriginalSize().Height;
+			int dW = lw;
+			int dH = (int)(lw / lAspect);
+			if(dH > logoH) {
+				dH = logoH;
+				dW = (int)(logoH * lAspect);
+			}
+			int dX = lx + (lw - dW) / 2;
+			int dY = curY + (logoH - dH) / 2;
+			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(dX, dY, dX + dW, dY + dH));
+		} else {
+			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
+		}
+	}
 	curY += logoH + Scale(10);
 
 	if(txtAdventureArco)
@@ -1792,14 +1811,19 @@ void Game::OnAdventureSeriesChanged() {
 
 	// Update Series Logo
 	auto utf8Image = Utils::ToUTF8IfNeeded(series.imageFile);
+	bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
+	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 	auto logoTex = driver->getTexture(epro::format("textures/series/{}", utf8Image).c_str());
 	if(!logoTex) logoTex = driver->getTexture(epro::format("textures/characters/series/{}", utf8Image).c_str());
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
 	if(logoTex) {
 		imgAdventureSeriesLogo->setImage(logoTex);
 		imgAdventureSeriesLogo->setVisible(true);
 	} else {
 		imgAdventureSeriesLogo->setVisible(false);
 	}
+	ResizeAdventureMode();
 
 	// Fetch Arcos for selected Series
 	adventureArcList.clear();
