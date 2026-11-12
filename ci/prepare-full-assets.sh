@@ -105,6 +105,16 @@ if [ -f "$ASSETS/config/strings.conf" ]; then
     cp "$ASSETS/config/strings.conf" "$ASSETS/expansions/strings.conf" 2>/dev/null || true
 fi
 
+# 8. Ani Dimension Config Overrides (Exclusive Server, No Repos, Salas Duelos)
+if [ -d "src/main/assets/config" ]; then
+    echo "Applying Ani Dimension custom config overrides..."
+    mkdir -p "$ASSETS/config" "$UPDATES/config"
+    cp -r src/main/assets/config/* "$ASSETS/config/"
+    cp -r src/main/assets/config/* "$UPDATES/config/" 2>/dev/null || true
+    cp "$ASSETS/config/strings.conf" "$ASSETS/expansions/strings.conf" 2>/dev/null || true
+    cp "$ASSETS/config/strings.conf" "$ASSETS/strings.conf" 2>/dev/null || true
+fi
+
 echo "=== [6/6] Generating initial index and filelist ==="
 cd "$ASSETS"
 touch .nomedia

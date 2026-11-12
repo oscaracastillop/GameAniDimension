@@ -318,7 +318,16 @@ public class MainActivity extends Activity {
 	}
 
 	public void next() {
-		checkRemoteUpdates(new Runnable() {
+		setContentView(R.layout.assetcopy);
+		final ProgressBar progressBar = findViewById(R.id.progressBar1);
+		final TextView statusText = findViewById(R.id.textView1);
+		if (statusText != null) {
+			statusText.setText("Ani Dimension: Conectando al servidor...");
+		}
+		if (progressBar != null) {
+			progressBar.setIndeterminate(true);
+		}
+		checkRemoteUpdates(progressBar, statusText, new Runnable() {
 			@Override
 			public void run() {
 				launchGame();
@@ -326,7 +335,7 @@ public class MainActivity extends Activity {
 		});
 	}
 
-	private void checkRemoteUpdates(final Runnable onComplete) {
+	private void checkRemoteUpdates(final ProgressBar progressBar, final TextView statusText, final Runnable onComplete) {
 		new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -349,13 +358,13 @@ public class MainActivity extends Activity {
 						JSONObject json = new JSONObject(sb.toString());
 						JSONArray files = json.optJSONArray("files");
 						if (files != null && working_directory != null) {
+							List<JSONObject> filesToDownload = new ArrayList<>();
 							for (int i = 0; i < files.length(); i++) {
 								JSONObject fileObj = files.getJSONObject(i);
 								String relPath = fileObj.getString("path");
 								if (relPath.endsWith(".apk") || relPath.endsWith(".exe") || relPath.endsWith(".zip") || relPath.contains("AniDimension-Android")) {
 									continue;
 								}
-								String fileUrl = fileObj.getString("url");
 								String remoteMd5 = fileObj.getString("md5");
 								File localFile = new File(working_directory, relPath);
 								boolean needsDownload = !localFile.exists();
@@ -366,13 +375,76 @@ public class MainActivity extends Activity {
 									}
 								}
 								if (needsDownload) {
+									filesToDownload.add(fileObj);
+								}
+							}
+
+							if (!filesToDownload.isEmpty()) {
+								final int total = filesToDownload.size();
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										if (progressBar != null) {
+											progressBar.setIndeterminate(false);
+											progressBar.setMax(total);
+											progressBar.setProgress(0);
+										}
+									}
+								});
+
+								for (int i = 0; i < total; i++) {
+									final int current = i + 1;
+									JSONObject fileObj = filesToDownload.get(i);
+									String relPath = fileObj.getString("path");
+									String fileUrl = fileObj.getString("url");
+									File localFile = new File(working_directory, relPath);
+									runOnUiThread(new Runnable() {
+										@Override
+										public void run() {
+											if (statusText != null) {
+												statusText.setText("Actualizando Ani Dimension (" + current + "/" + total + "):\n" + new File(relPath).getName());
+											}
+											if (progressBar != null) {
+												progressBar.setProgress(current);
+											}
+										}
+									});
 									downloadFile(apiUrl + fileUrl, localFile);
 								}
+
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										if (statusText != null) {
+											statusText.setText("¡Actualización completada! Iniciando...");
+										}
+									}
+								});
+								try { Thread.sleep(600); } catch (Exception ignored) {}
+							} else {
+								runOnUiThread(new Runnable() {
+									@Override
+									public void run() {
+										if (statusText != null) {
+											statusText.setText("Juego al día. Iniciando...");
+										}
+									}
+								});
+								try { Thread.sleep(400); } catch (Exception ignored) {}
 							}
 						}
 					}
 				} catch (Exception e) {
 					Log.w("AniDimensionUpdate", "Android Auto-update check skipped/offline: " + e.getMessage());
+					runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							if (statusText != null) {
+								statusText.setText("Modo sin conexión. Iniciando...");
+							}
+						}
+					});
+					try { Thread.sleep(500); } catch (Exception ignored) {}
 				}
 				runOnUiThread(onComplete);
 			}
@@ -440,10 +512,16 @@ public class MainActivity extends Activity {
 		} else {
 			try {
 				/*
-				 * windbot loading might fail, for whatever reason,
-				 * disable it if that's the case
+				 * Attempt to initialize Mono Embeddinator safely in Android context
 				 */
+				try {
+					mono.embeddinator.Runtime.setImplementation(new mono.embeddinator.AndroidImpl(getApplicationContext()));
+					Class.forName("libwindbot.Native_libWindbot");
+				} catch (Throwable t) {
+					Log.w("EDOPro", "Mono embeddinator runtime init warning: " + t.getMessage());
+				}
 				WindBot.initAndroid(working_directory + "/WindBot");
+				Log.i("EDOPro", "WindBot initialized successfully!");
 			} catch (Throwable e) {
 				Log.e("EDOPro", "WindBot init failed: " + e.getMessage());
 				CrashReporter.report(e, "WindBot initAndroid failed");

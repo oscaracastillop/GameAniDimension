@@ -8,6 +8,7 @@ src/main/assets/**
 !src/main/assets/deck/**
 !src/main/assets/WindBot/**
 !src/main/assets/textures/**
+!src/main/assets/config/**
 .gradle/
 .id*/
 *vs/

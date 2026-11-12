@@ -114,15 +114,30 @@ public class EpNativeActivity extends NativeActivity {
 		public void onReceive(Context context, Intent intent) {
 			switch (Objects.requireNonNull(intent.getAction())) {
 				case "RUN_WINDBOT": {
-					final var args = intent.getStringExtra("args");
-					Log.i("EDOProWindBotIgnite", "Launching WindBot Ignite with " + args + " as parameters.");
-					WindBot.runAndroid(args);
+					try {
+						final var args = intent.getStringExtra("args");
+						Log.i("EDOProWindBotIgnite", "Launching WindBot Ignite with " + args + " as parameters.");
+						if (use_windbot) {
+							WindBot.runAndroid(args);
+						} else {
+							Log.w("EDOProWindBotIgnite", "WindBot is disabled or unavailable on this device.");
+						}
+					} catch (Throwable t) {
+						Log.e("EDOProWindBotIgnite", "WindBot runAndroid crash caught: " + t.getMessage(), t);
+						CrashReporter.report(t, "WindBot runAndroid error");
+					}
 					break;
 				}
 				case "ATTACH_WINDBOT_DATABASE": {
-					final var args = intent.getStringExtra("args");
-					Log.i("EDOProWindBotIgnite", "Loading database: " + args + ".");
-					WindBot.addDatabase(args);
+					try {
+						final var args = intent.getStringExtra("args");
+						Log.i("EDOProWindBotIgnite", "Loading database: " + args + ".");
+						if (use_windbot) {
+							WindBot.addDatabase(args);
+						}
+					} catch (Throwable t) {
+						Log.e("EDOProWindBotIgnite", "WindBot addDatabase crash caught: " + t.getMessage(), t);
+					}
 					break;
 				}
 				case "INPUT_TEXT": {
@@ -226,12 +241,18 @@ public class EpNativeActivity extends NativeActivity {
 
 	@SuppressWarnings({"unused", "deprecation"})
 	public void launchWindbot(String parameters) {
-		if (!use_windbot)
+		if (!use_windbot) {
+			Log.w("EDOPro", "launchWindbot requested but use_windbot is disabled.");
 			return;
-		var intent = new Intent();
-		intent.putExtra("args", parameters);
-		intent.setAction("RUN_WINDBOT");
-		LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+		}
+		try {
+			var intent = new Intent();
+			intent.putExtra("args", parameters);
+			intent.setAction("RUN_WINDBOT");
+			LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+		} catch (Throwable t) {
+			Log.e("EDOPro", "launchWindbot broadcast failed: " + t.getMessage(), t);
+		}
 	}
 
 	@SuppressWarnings({"unused", "deprecation"})
