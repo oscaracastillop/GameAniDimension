@@ -352,6 +352,9 @@ public class MainActivity extends Activity {
 							for (int i = 0; i < files.length(); i++) {
 								JSONObject fileObj = files.getJSONObject(i);
 								String relPath = fileObj.getString("path");
+								if (relPath.endsWith(".apk") || relPath.endsWith(".exe") || relPath.endsWith(".zip") || relPath.contains("AniDimension-Android")) {
+									continue;
+								}
 								String fileUrl = fileObj.getString("url");
 								String remoteMd5 = fileObj.getString("md5");
 								File localFile = new File(working_directory, relPath);
