@@ -47,20 +47,18 @@ public class EpNativeActivity extends NativeActivity {
 	private StorageOperations storage;
 
 	static {
-		//on 4.2 libraries aren't properly loaded automatically
-		//https://stackoverflow.com/questions/28806373/android-4-2-ndk-library-loading-crash-load-librarylinker-cpp750-soinfo-l/28817942
-		/*if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP){
-			System.loadLibrary("hidapi");
-			System.loadLibrary("SDL2");
-			System.loadLibrary("mpg123");
-			System.loadLibrary("SDL2_mixer");
-		}*/
-		System.loadLibrary("EDOProClient");
+		try {
+			System.loadLibrary("EDOProClient");
+		} catch (Throwable t) {
+			Log.e("EpNativeActivity", "Failed to load EDOProClient: " + t.getMessage());
+			CrashReporter.report(t, "System.loadLibrary(EDOProClient) failed");
+		}
 	}
 
 	@Override
 	@SuppressWarnings("deprecation")
 	public void onCreate(Bundle savedInstanceState) {
+		CrashReporter.init(this);
 		super.onCreate(savedInstanceState);
 		final var ex = Objects.requireNonNull(getIntent().getExtras());
 		use_windbot = ex.getBoolean("USE_WINDBOT", true);

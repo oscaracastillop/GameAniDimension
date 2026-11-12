@@ -70,7 +70,8 @@ public class MainActivity extends Activity {
 		final var DOCUMENT_URI_ANDROID_DATA = DocumentsContract.buildDocumentUriUsingTree(TREE_URI_PRIMARY_ANDROID, DOCUMENT_ID_PRIMARY_ANDROID_DATA);
 
 		final var EDOPRO_PROVIDER_AUTHORITY = getApplicationContext().getPackageName() + ".document_provider";
-		final var filePath = getExternalFilesDir("EDOPro").getPath();
+		final var extDir = getExternalFilesDir("EDOPro");
+		final var filePath = extDir != null ? extDir.getPath() : new File(getFilesDir(), "EDOPro").getPath();
 		final var EDOPRO_TREE_URI_PRIMARY_ANDROID = DocumentsContract.buildTreeDocumentUri(EDOPRO_PROVIDER_AUTHORITY, filePath);
 		final var EDOPRO_DOCUMENT_URI_ANDROID_DATA = DocumentsContract.buildDocumentUriUsingTree(EDOPRO_TREE_URI_PRIMARY_ANDROID, filePath);
 		final var intents = Arrays.asList(new Intent()
@@ -106,6 +107,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		CrashReporter.init(this);
 		super.onCreate(savedInstanceState);
 		var intent = getIntent();
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -439,7 +441,9 @@ public class MainActivity extends Activity {
 				 * disable it if that's the case
 				 */
 				WindBot.initAndroid(working_directory + "/WindBot");
-			} catch (Exception e) {
+			} catch (Throwable e) {
+				Log.e("EDOPro", "WindBot init failed: " + e.getMessage());
+				CrashReporter.report(e, "WindBot initAndroid failed");
 				use_windbot = false;
 			}
 		}
@@ -460,12 +464,17 @@ public class MainActivity extends Activity {
 		for (int i = 0; i < array.length; i++) {
 			strArr[i] = array[i].toString();
 		}
-		var intent = new Intent(this, EpNativeActivity.class);
-		intent.putExtra("ARGUMENTS", strArr);
-		intent.putExtra("USE_WINDBOT", use_windbot);
-		intent.putExtra("SCOPED_STORAGE_DIR", data_directory);
-		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-		startActivity(intent);
+		try {
+			var intent = new Intent(this, EpNativeActivity.class);
+			intent.putExtra("ARGUMENTS", strArr);
+			intent.putExtra("USE_WINDBOT", use_windbot);
+			intent.putExtra("SCOPED_STORAGE_DIR", data_directory);
+			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			startActivity(intent);
+		} catch (Throwable t) {
+			Log.e("EDOPro", "startActivity(EpNativeActivity) failed: " + t.getMessage());
+			CrashReporter.report(t, "startActivity(EpNativeActivity) failed");
+		}
 	}
 
 	public void getWorkingDirectory() {
@@ -508,48 +517,24 @@ public class MainActivity extends Activity {
 	public void getDefaultPath() {
 		final File path;
 		if (wantsScopedStorage) {
-			path = new File(getExternalFilesDir("EDOPro").getPath());
+			File ext = getExternalFilesDir("EDOPro");
+			if (ext == null) {
+				ext = new File(getFilesDir(), "EDOPro");
+			}
+			path = ext;
 		} else {
-			path = new File(Environment.getExternalStorageDirectory() + "/EDOPro");
+			File ext = Environment.getExternalStorageDirectory();
+			if (ext == null) {
+				ext = getFilesDir();
+			}
+			path = new File(ext, "EDOPro");
 		}
 		final String dest_dir = path.getAbsolutePath();
 		if (!dest_dir.isEmpty()) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(this);
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-				Toast.makeText(this, String.format(getResources().getString(R.string.default_dir), dest_dir), Toast.LENGTH_LONG).show();
-				builder.setMessage(String.format(getResources().getString(R.string.default_dir), dest_dir))
-						.setCancelable(false)
-						.setPositiveButton("OK", (dialog, id) -> {
-							if (!path.exists()) {
-								path.mkdirs();
-							}
-							setWorkingDir(dest_dir);
-						});
-			} else if (!wantsScopedStorage) {
-				builder.setMessage(String.format(getResources().getString(R.string.default_dir_changeable), dest_dir))
-						.setCancelable(false)
-						.setPositiveButton(getResources().getString(R.string.keep_game_folder), (dialog, id) -> {
-							if (!path.exists()) {
-								path.mkdirs();
-							}
-							setWorkingDir(dest_dir);
-						})
-						.setNeutralButton(getResources().getString(R.string.change_game_folder), (dialog, id) -> chooseWorkingDir());
-			} else {
-				if (!path.exists()) {
-					path.mkdirs();
-				}
-				builder.setMessage(String.format(getResources().getString(R.string.separate_data_dir), dest_dir))
-						.setCancelable(false)
-						.setPositiveButton("Yes", (dialog, id) -> {
-							chooseDataDir(dest_dir);
-						})
-						.setNeutralButton("No", (dialog, id) -> {
-							setWorkingDir(dest_dir);
-						});
+			if (!path.exists()) {
+				path.mkdirs();
 			}
-			AlertDialog alert = builder.create();
-			alert.show();
+			setWorkingDir(dest_dir);
 		}
 	}
 

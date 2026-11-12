@@ -17,11 +17,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Vector;
 
 public class AssetCopy extends Activity {
+	private static boolean sNativeCopierLoaded = false;
 	static {
-		System.loadLibrary("assetcopier");
+		try {
+			System.loadLibrary("assetcopier");
+			sNativeCopierLoaded = true;
+		} catch (Throwable t) {
+			Log.e("AssetCopy", "assetcopier library failed to load, fallback to pure Java: " + t.getMessage());
+			sNativeCopierLoaded = false;
+		}
 	}
 
 	public static native boolean makeDirectory(String path);
@@ -29,6 +40,26 @@ public class AssetCopy extends Activity {
 	public static native boolean fileDelete(String path);
 
 	public static native boolean copyAssetToDestination(AssetManager assetManager, String source, String destination);
+
+	public static boolean safeMakeDirectory(String path) {
+		if (sNativeCopierLoaded) {
+			try {
+				return makeDirectory(path);
+			} catch (Throwable ignored) {}
+		}
+		File f = new File(path);
+		return f.exists() || f.mkdirs();
+	}
+
+	public static boolean safeFileDelete(String path) {
+		if (sNativeCopierLoaded) {
+			try {
+				return fileDelete(path);
+			} catch (Throwable ignored) {}
+		}
+		File f = new File(path);
+		return !f.exists() || f.delete();
+	}
 
 	private ProgressBar m_ProgressBar;
 	private TextView m_Filename;
@@ -38,11 +69,48 @@ public class AssetCopy extends Activity {
 	//private static native void assetsMutexUnlock();
 
 	public boolean copyAsset(String source, String destination) {
-		return copyAssetToDestination(getAssets(), source, destination);
+		if (sNativeCopierLoaded) {
+			try {
+				if (copyAssetToDestination(getAssets(), source, destination)) {
+					return true;
+				}
+			} catch (Throwable t) {
+				Log.w("AssetCopy", "Native copy failed, using Java copy fallback: " + t.getMessage());
+			}
+		}
+		return copyAssetJava(source, destination);
+	}
+
+	private boolean copyAssetJava(String source, String destination) {
+		InputStream in = null;
+		FileOutputStream out = null;
+		try {
+			File destFile = new File(destination);
+			File parent = destFile.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
+			in = getAssets().open(source);
+			out = new FileOutputStream(destFile);
+			byte[] buffer = new byte[8192];
+			int read;
+			while ((read = in.read(buffer)) != -1) {
+				out.write(buffer, 0, read);
+			}
+			out.flush();
+			return true;
+		} catch (Throwable e) {
+			Log.e("AssetCopy", "Java copyAsset failed for " + source + ": " + e.getMessage());
+			return false;
+		} finally {
+			if (in != null) try { in.close(); } catch (Throwable ignored) {}
+			if (out != null) try { out.close(); } catch (Throwable ignored) {}
+		}
 	}
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		CrashReporter.init(this);
 		Log.e("AssetCopy", "AssetCopy on create");
 		super.onCreate(savedInstanceState);
 		getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -179,8 +247,8 @@ public class AssetCopy extends Activity {
 						m_Foldername = "defaults/" + current_path;
 					publishProgress(0);
 					/* open file in order to check if it's a folder */
-					makeDirectory(FlashPath);
-					if (!makeDirectory(FlashPath)) {
+					safeMakeDirectory(FlashPath);
+					if (!safeMakeDirectory(FlashPath)) {
 						Log.e("AssetCopy", "\t failed create folder: " +
 								FlashPath);
 					} else {
@@ -190,7 +258,7 @@ public class AssetCopy extends Activity {
 					continue;
 				}
 				if (isUpdate)
-					fileDelete(FlashPath);
+					safeFileDelete(FlashPath);
 				m_tocopy.add(current_path);
 			}
 		}
