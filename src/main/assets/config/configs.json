@@ -1,0 +1,28 @@
+{
+	"repos": [],
+	"urls": [
+		{
+			"url": "https://images.ygoprodeck.com/images/cards/{}.jpg",
+			"type": "pic"
+		},
+		{
+			"url": "https://images.ygoprodeck.com/images/cards_cropped/{}.jpg",
+			"type": "field"
+		},
+		{
+			"url": "default",
+			"type": "cover"
+		}
+	],
+	"servers": [
+		{
+			"name": "Ani Dimension",
+			"address": "66.92.168.136",
+			"duelport": 7911,
+			"roomaddress": "66.92.168.136",
+			"roomlistprotocol": "http",
+			"roomlistport": 7922
+		}
+	],
+	"posixPathExtension": "/usr/local/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands"
+}
