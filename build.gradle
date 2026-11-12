@@ -27,13 +27,13 @@ android {
 		targetCompatibility JavaVersion.VERSION_17
 	}
 
-	compileSdk = 36
+	compileSdk = 34
 
 	defaultConfig {
-		versionCode 23
-		versionName "41.0.4"
+		versionCode 24
+		versionName "41.0.5"
 		minSdkVersion 16
-		targetSdkVersion 36
+		targetSdkVersion 34
 		applicationId "io.github.edo9300.edopro"
 		manifestPlaceholders = [project: project.name]
 		ndk {

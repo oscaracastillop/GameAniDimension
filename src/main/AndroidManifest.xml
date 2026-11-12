@@ -205,5 +205,10 @@
 					android:name="android.content.action.DOCUMENTS_PROVIDER"/>
 			</intent-filter>
 		</provider>
+
+		<provider
+			android:name="mono.embeddinator.AndroidRuntimeProvider"
+			android:authorities="${applicationId}.mono.embeddinator.AndroidRuntimeProvider.__mono_init__"
+			tools:node="remove" />
 	</application>
 </manifest>
