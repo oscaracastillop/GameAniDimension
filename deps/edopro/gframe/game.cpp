@@ -196,6 +196,7 @@ void Game::Initialize() {
 	chkCommitLogExpand = env->addCheckBox(false, Scale(295, 435, 500, 460), wCommitsLog, BUTTON_REPO_CHANGELOG_EXPAND, gDataManager->GetSysString(1447).data());
 	defaultStrings.emplace_back(chkCommitLogExpand, 1447);
 	mTopMenu = irr::gui::CGUICustomMenu::addCustomMenu(env);
+	mTopMenu->setVisible(false);
 	mRepositoriesInfo = mTopMenu->getSubMenu(mTopMenu->addItem(gDataManager->GetSysString(2045).data(), 1, true, true));
 	mAbout = mTopMenu->getSubMenu(mTopMenu->addItem(gDataManager->GetSysString(1970).data(), 2, true, true));
 	wAbout = env->addWindow(Scale(0, 0, 450, 700), false, L"", mAbout);
@@ -252,7 +253,8 @@ void Game::Initialize() {
 	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
 	mainMenuLeftX = 510 - mainMenuWidth / 2;
 	mainMenuRightX = 510 + mainMenuWidth / 2;
-	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 470), false, EDOPRO_VERSION_STRING);
+	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 470), false, L"");
+	wMainMenu->setDrawTitlebar(false);
 	wMainMenu->getCloseButton()->setVisible(false);
 	//wMainMenu->setVisible(!is_from_discord);
 #define OFFSET(x1, y1, x2, y2) Scale(10, 30 + offset, mainMenuWidth - 10, 60 + offset)
@@ -1107,7 +1109,7 @@ void Game::Initialize() {
 		ApplyLocale(selectedLocale, true);
 
 	env->getRootGUIElement()->bringToFront(wBtnSettings);
-	env->getRootGUIElement()->bringToFront(mTopMenu);
+	mTopMenu->setVisible(false);
 	env->setFocus(wMainMenu);
 }
 
@@ -3775,7 +3777,7 @@ void Game::CloseDuelWindow() {
 		if(wit->isFadein)
 			wit->autoFadeoutFrame = 1;
 	}
-	mTopMenu->setVisible(true);
+	mTopMenu->setVisible(false);
 	wACMessage->setVisible(false);
 	wANAttribute->setVisible(false);
 	wANCard->setVisible(false);

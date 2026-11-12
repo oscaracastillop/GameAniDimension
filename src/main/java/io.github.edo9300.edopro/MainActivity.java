@@ -342,13 +342,27 @@ public class MainActivity extends Activity {
 			@Override
 			public void run() {
 				try {
-					String apiUrl = "http://66.92.168.136:8080";
+					String apiUrl = "https://anidimension.online";
 					String manifestUrl = apiUrl + "/api/updates/manifest?platform=android";
 					URL url = new URL(manifestUrl);
-					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-					conn.setConnectTimeout(3000);
-					conn.setReadTimeout(5000);
-					conn.setRequestMethod("GET");
+					HttpURLConnection conn = null;
+					try {
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setConnectTimeout(3500);
+						conn.setReadTimeout(5000);
+						conn.setRequestMethod("GET");
+						if (conn.getResponseCode() != 200) {
+							throw new Exception("HTTP " + conn.getResponseCode());
+						}
+					} catch (Exception exFallback) {
+						Log.w("AniDimensionUpdate", "Domain fallback: " + exFallback.getMessage());
+						apiUrl = "http://66.92.168.136:8080";
+						url = new URL(apiUrl + "/api/updates/manifest?platform=android");
+						conn = (HttpURLConnection) url.openConnection();
+						conn.setConnectTimeout(3500);
+						conn.setReadTimeout(5000);
+						conn.setRequestMethod("GET");
+					}
 					if (conn.getResponseCode() == 200) {
 						BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
 						StringBuilder sb = new StringBuilder();
@@ -517,6 +531,16 @@ public class MainActivity extends Activity {
 				 * Attempt to initialize Mono Embeddinator safely in Android context
 				 */
 				try {
+					Class<?> arpClass = Class.forName("mono.embeddinator.AndroidRuntimeProvider");
+					java.lang.reflect.Field ctxField = arpClass.getDeclaredField("context");
+					ctxField.setAccessible(true);
+					if (ctxField.get(null) == null) {
+						ctxField.set(null, getApplicationContext());
+					}
+				} catch (Throwable ignored) {
+				}
+
+				try {
 					mono.embeddinator.Runtime.setImplementation(new mono.embeddinator.AndroidImpl(getApplicationContext()));
 					Class.forName("libwindbot.Native_libWindbot");
 				} catch (Throwable t) {
@@ -552,8 +576,9 @@ public class MainActivity extends Activity {
 			intent.putExtra("ARGUMENTS", strArr);
 			intent.putExtra("USE_WINDBOT", use_windbot);
 			intent.putExtra("SCOPED_STORAGE_DIR", data_directory);
-			intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);
+			finish();
 		} catch (Throwable t) {
 			Log.e("EDOPro", "startActivity(EpNativeActivity) failed: " + t.getMessage());
 			CrashReporter.report(t, "startActivity(EpNativeActivity) failed");
