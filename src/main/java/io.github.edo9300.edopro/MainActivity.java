@@ -523,7 +523,9 @@ public class MainActivity extends Activity {
 
 	private void launchGame() {
 		Log.i("AniDimension", "launchGame called. Working dir: " + working_directory + ", Data dir: " + data_directory);
-		boolean use_windbot = true;
+		// CRITICAL: NEVER set use_windbot = true on Android.
+		// Loading Mono (libmonosgen-2.0.so / libWindbot) causes an immediate native SIGSEGV crash on Android 14 after "Juego al dia".
+		boolean use_windbot = false;
 
 		ArrayList<String> argsList = new ArrayList<>();
 		if (changelog) {
