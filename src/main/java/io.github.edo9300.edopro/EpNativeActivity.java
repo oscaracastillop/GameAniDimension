@@ -43,6 +43,7 @@ public class EpNativeActivity extends NativeActivity {
 	public static native void errorDialogReturn();
 
 	private boolean use_windbot;
+	private String workingDirectory;
 
 	private StorageOperations storage;
 
@@ -62,6 +63,10 @@ public class EpNativeActivity extends NativeActivity {
 		super.onCreate(savedInstanceState);
 		final var ex = Objects.requireNonNull(getIntent().getExtras());
 		use_windbot = ex.getBoolean("USE_WINDBOT", true);
+		workingDirectory = ex.getString("WORKING_DIR", "");
+		if (workingDirectory == null || workingDirectory.isEmpty()) {
+			workingDirectory = getFilesDir().getAbsolutePath();
+		}
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
 			final String scoped_storage_dir = ex.getString("SCOPED_STORAGE_DIR", "");
 			storage = new StorageOperations(this, scoped_storage_dir);
@@ -118,7 +123,16 @@ public class EpNativeActivity extends NativeActivity {
 						final var args = intent.getStringExtra("args");
 						Log.i("EDOProWindBotIgnite", "Launching WindBot Ignite with " + args + " as parameters.");
 						if (use_windbot) {
-							WindBotBridge.run(args);
+							new Thread(() -> {
+								try {
+									if (!WindBotBridge.isInitialized() && workingDirectory != null) {
+										WindBotBridge.init(getApplicationContext(), workingDirectory);
+									}
+									WindBotBridge.run(args);
+								} catch (Throwable t) {
+									Log.e("EDOProWindBotIgnite", "WindBot run worker error: " + t.getMessage(), t);
+								}
+							}, "WindBotWorkerThread").start();
 						} else {
 							Log.w("EDOProWindBotIgnite", "WindBot is disabled or unavailable on this device.");
 						}
@@ -133,7 +147,16 @@ public class EpNativeActivity extends NativeActivity {
 						final var args = intent.getStringExtra("args");
 						Log.i("EDOProWindBotIgnite", "Loading database: " + args + ".");
 						if (use_windbot) {
-							WindBotBridge.addDb(args);
+							new Thread(() -> {
+								try {
+									if (!WindBotBridge.isInitialized() && workingDirectory != null) {
+										WindBotBridge.init(getApplicationContext(), workingDirectory);
+									}
+									WindBotBridge.addDb(args);
+								} catch (Throwable t) {
+									Log.e("EDOProWindBotIgnite", "WindBot addDb worker error: " + t.getMessage(), t);
+								}
+							}, "WindBotDbThread").start();
 						}
 					} catch (Throwable t) {
 						Log.e("EDOProWindBotIgnite", "WindBot addDatabase crash caught: " + t.getMessage(), t);

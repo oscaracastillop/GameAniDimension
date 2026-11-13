@@ -523,9 +523,7 @@ public class MainActivity extends Activity {
 
 	private void launchGame() {
 		Log.i("AniDimension", "launchGame called. Working dir: " + working_directory + ", Data dir: " + data_directory);
-		// Local WindBot is disabled on startup to prevent Mono/SELinux SIGSEGV crashes on modern Android (Android 11-14+).
-		// Online duels against NPCs run entirely on the VPS multirole server.
-		boolean use_windbot = false;
+		boolean use_windbot = true;
 
 		ArrayList<String> argsList = new ArrayList<>();
 		if (changelog) {
@@ -545,6 +543,7 @@ public class MainActivity extends Activity {
 			var intent = new Intent(this, EpNativeActivity.class);
 			intent.putExtra("ARGUMENTS", strArr);
 			intent.putExtra("USE_WINDBOT", use_windbot);
+			intent.putExtra("WORKING_DIR", working_directory);
 			intent.putExtra("SCOPED_STORAGE_DIR", data_directory);
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			startActivity(intent);

@@ -4,10 +4,23 @@ import android.content.Context;
 import android.util.Log;
 
 public class WindBotBridge {
-    private static boolean sInitialized = false;
+    private static volatile boolean sInitialized = false;
 
-    public static boolean init(Context context, String workingDirectory) {
+    public static boolean isInitialized() {
+        return sInitialized;
+    }
+
+    public static synchronized boolean init(Context context, String workingDirectory) {
+        if (sInitialized) return true;
         try {
+            if (context == null) {
+                Log.w("WindBotBridge", "Cannot initialize WindBot without context");
+                return false;
+            }
+            if (workingDirectory == null || workingDirectory.isEmpty()) {
+                workingDirectory = context.getFilesDir().getAbsolutePath();
+            }
+
             try {
                 Class<?> arpClass = Class.forName("mono.embeddinator.AndroidRuntimeProvider");
                 for (java.lang.reflect.Field f : arpClass.getDeclaredFields()) {
@@ -38,10 +51,6 @@ public class WindBotBridge {
     }
 
     public static void run(String args) {
-        if (!sInitialized) {
-            Log.w("WindBotBridge", "WindBot run requested but bridge is not initialized.");
-            return;
-        }
         try {
             libwindbot.windbot.WindBot.runAndroid(args);
         } catch (Throwable t) {
@@ -50,7 +59,6 @@ public class WindBotBridge {
     }
 
     public static void addDb(String args) {
-        if (!sInitialized) return;
         try {
             libwindbot.windbot.WindBot.addDatabase(args);
         } catch (Throwable t) {

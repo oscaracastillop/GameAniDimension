@@ -338,35 +338,44 @@ void displayKeyboard(bool pShow) {
 }
 
 void showInputDialog(epro::path_stringview current) {
-	jmethodID showdialog = jnienv->GetMethodID(nativeActivity, "showDialog", JPARAMS(JSTRING)JVOID);
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return;
+	jmethodID showdialog = jni.env->GetMethodID(nativeActivity, "showDialog", JPARAMS(JSTRING)JVOID);
 
 	if(showdialog == 0) {
-		assert("porting::showInputDialog unable to find java show dialog method" == 0);
+		LOGE("porting::showInputDialog unable to find java show dialog method");
+		return;
 	}
 
-	jstring jcurrent = NewJavaString(jnienv, current);
+	jstring jcurrent = NewJavaString(jni.env, current);
 
-	jnienv->CallVoidMethod(app_global->activity->clazz, showdialog, jcurrent);
+	jni.env->CallVoidMethod(app_global->activity->clazz, showdialog, jcurrent);
 
-	jnienv->DeleteLocalRef(jcurrent);
+	jni.env->DeleteLocalRef(jcurrent);
 }
 
 void showComboBox(const std::vector<std::string>& parameters, int selected) {
 	(void)selected;
-	jmethodID showbox = jnienv->GetMethodID(nativeActivity, "showComboBox", JPARAMS(JARRAY(JSTRING))JVOID);
-
-	jsize len = parameters.size();
-	jobjectArray jlist = jnienv->NewObjectArray(len, jnienv->FindClass("java/lang/String"), 0);
-
-	for(size_t i = 0; i < parameters.size(); i++) {
-		auto jstring = NewJavaString(jnienv, parameters[i]);
-		jnienv->SetObjectArrayElement(jlist, i, jstring);
-		jnienv->DeleteLocalRef(jstring);
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return;
+	jmethodID showbox = jni.env->GetMethodID(nativeActivity, "showComboBox", JPARAMS(JARRAY(JSTRING))JVOID);
+	if(showbox == 0) {
+		LOGE("porting::showComboBox unable to find java showComboBox method");
+		return;
 	}
 
-	jnienv->CallVoidMethod(app_global->activity->clazz, showbox, jlist);
+	jsize len = parameters.size();
+	jobjectArray jlist = jni.env->NewObjectArray(len, jni.env->FindClass("java/lang/String"), 0);
 
-	jnienv->DeleteLocalRef(jlist);
+	for(size_t i = 0; i < parameters.size(); i++) {
+		auto jstring = NewJavaString(jni.env, parameters[i]);
+		jni.env->SetObjectArrayElement(jlist, i, jstring);
+		jni.env->DeleteLocalRef(jstring);
+	}
+
+	jni.env->CallVoidMethod(app_global->activity->clazz, showbox, jlist);
+
+	jni.env->DeleteLocalRef(jlist);
 }
 
 bool transformEvent(const irr::SEvent& event, bool& stopPropagation) {
@@ -431,29 +440,33 @@ bool transformEvent(const irr::SEvent& event, bool& stopPropagation) {
 }
 
 std::vector<epro::Address> getLocalIP() {
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return {};
 	std::vector<epro::Address> addresses;
-	jmethodID getIP = jnienv->GetMethodID(nativeActivity, "getLocalIpAddresses", JPARAMS()JARRAY(JARRAY(JBYTE)));
+	jmethodID getIP = jni.env->GetMethodID(nativeActivity, "getLocalIpAddresses", JPARAMS()JARRAY(JARRAY(JBYTE)));
 	if(getIP == 0) {
-		assert("porting::getLocalIP unable to find java getLocalIpAddresses method" == 0);
+		LOGE("porting::getLocalIP unable to find java getLocalIpAddresses method");
+		return {};
 	}
-	jobjectArray ipArray = (jobjectArray)jnienv->CallObjectMethod(app_global->activity->clazz, getIP);
-	int size = jnienv->GetArrayLength(ipArray);
+	jobjectArray ipArray = (jobjectArray)jni.env->CallObjectMethod(app_global->activity->clazz, getIP);
+	if(!ipArray) return {};
+	int size = jni.env->GetArrayLength(ipArray);
 
 	for(int i = 0; i < size; ++i) {
-		jbyteArray ipBuffer = static_cast<jbyteArray>(jnienv->GetObjectArrayElement(ipArray, i));
-		int ipBufferSize = jnienv->GetArrayLength(ipBuffer);
+		jbyteArray ipBuffer = static_cast<jbyteArray>(jni.env->GetObjectArrayElement(ipArray, i));
+		int ipBufferSize = jni.env->GetArrayLength(ipBuffer);
 		(void)ipBufferSize;
-		jbyte* ipJava = jnienv->GetByteArrayElements(ipBuffer, nullptr);
+		jbyte* ipJava = jni.env->GetByteArrayElements(ipBuffer, nullptr);
 		if(ipBufferSize == 4) {
 			addresses.emplace_back(ipJava, epro::Address::INET);
 		} else {
 			addresses.emplace_back(ipJava, epro::Address::INET6);
 		}
-		jnienv->ReleaseByteArrayElements(ipBuffer, ipJava, JNI_ABORT);
-		jnienv->DeleteLocalRef(ipBuffer);
+		jni.env->ReleaseByteArrayElements(ipBuffer, ipJava, JNI_ABORT);
+		jni.env->DeleteLocalRef(ipBuffer);
 	}
 
-	jnienv->DeleteLocalRef(ipArray);
+	jni.env->DeleteLocalRef(ipArray);
 	return addresses;
 }
 
@@ -511,11 +524,16 @@ std::vector<epro::path_string> listFilesInFolder(epro::path_stringview folderUri
 
 #define JAVAVOIDSTRINGMETHOD(name)\
 void name(epro::path_stringview arg) {\
-jmethodID name = jnienv->GetMethodID(nativeActivity, #name, JPARAMS(JSTRING)JVOID);\
-if(name == 0) assert("porting::" #name " unable to find java " #name " method" == 0);\
-jstring jargs = NewJavaString(jnienv, arg);\
-jnienv->CallVoidMethod(app_global->activity->clazz, name, jargs);\
-jnienv->DeleteLocalRef(jargs);\
+	JniAttacher jni;\
+	if(!jni.env || !nativeActivity) return;\
+	jmethodID mid = jni.env->GetMethodID(nativeActivity, #name, JPARAMS(JSTRING)JVOID);\
+	if(mid == 0) {\
+		LOGE("porting::" #name " unable to find java " #name " method");\
+		return;\
+	}\
+	jstring jargs = NewJavaString(jni.env, arg);\
+	jni.env->CallVoidMethod(app_global->activity->clazz, mid, jargs);\
+	jni.env->DeleteLocalRef(jargs);\
 }
 
 JAVAVOIDSTRINGMETHOD(launchWindbot)
@@ -526,18 +544,22 @@ JAVAVOIDSTRINGMETHOD(openFile)
 JAVAVOIDSTRINGMETHOD(shareFile)
 
 void showErrorDialog(epro::stringview context, epro::stringview message) {
-	jmethodID showDialog = jnienv->GetMethodID(nativeActivity, "showErrorDialog", JPARAMS(JSTRING JSTRING)JVOID);
-	if(showDialog == 0)
-		assert("porting::showErrorDialog unable to find java showErrorDialog method" == 0);
-	jstring jcontext = NewJavaString(jnienv, context);
-	jstring jmessage = NewJavaString(jnienv, message);
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return;
+	jmethodID showDialog = jni.env->GetMethodID(nativeActivity, "showErrorDialog", JPARAMS(JSTRING JSTRING)JVOID);
+	if(showDialog == 0) {
+		LOGE("porting::showErrorDialog unable to find java showErrorDialog method");
+		return;
+	}
+	jstring jcontext = NewJavaString(jni.env, context);
+	jstring jmessage = NewJavaString(jni.env, message);
 
 	error_dialog_returned = false;
 
-	jnienv->CallVoidMethod(app_global->activity->clazz, showDialog, jcontext, jmessage);
+	jni.env->CallVoidMethod(app_global->activity->clazz, showDialog, jcontext, jmessage);
 
-	jnienv->DeleteLocalRef(jcontext);
-	jnienv->DeleteLocalRef(jmessage);
+	jni.env->DeleteLocalRef(jcontext);
+	jni.env->DeleteLocalRef(jmessage);
 
 	//keep parsing events so that the activity is drawn properly
 	int Events = 0;
@@ -551,25 +573,33 @@ void showErrorDialog(epro::stringview context, epro::stringview message) {
 }
 
 void setTextToClipboard(epro::wstringview text) {
-	jmethodID setClip = jnienv->GetMethodID(nativeActivity, "setClipboard", JPARAMS(JSTRING)JVOID);
-	if(setClip == 0)
-		assert("porting::setTextToClipboard unable to find java setClipboard method" == 0);
-	jstring jargs = NewJavaString(jnienv, BufferIO::EncodeUTF8(text));
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return;
+	jmethodID setClip = jni.env->GetMethodID(nativeActivity, "setClipboard", JPARAMS(JSTRING)JVOID);
+	if(setClip == 0) {
+		LOGE("porting::setTextToClipboard unable to find java setClipboard method");
+		return;
+	}
+	jstring jargs = NewJavaString(jni.env, BufferIO::EncodeUTF8(text));
 
-	jnienv->CallVoidMethod(app_global->activity->clazz, setClip, jargs);
+	jni.env->CallVoidMethod(app_global->activity->clazz, setClip, jargs);
 
-	jnienv->DeleteLocalRef(jargs);
+	jni.env->DeleteLocalRef(jargs);
 }
 
 const wchar_t* getTextFromClipboard() {
 	static std::wstring text;
-	jmethodID getClip = jnienv->GetMethodID(nativeActivity, "getClipboard", JPARAMS()JSTRING);
-	if(getClip == 0)
-		assert("porting::getTextFromClipboard unable to find java getClipboard method" == 0);
-	jstring js_clip = (jstring)jnienv->CallObjectMethod(app_global->activity->clazz, getClip);
-	text = JstringtoCW(jnienv, js_clip);
+	JniAttacher jni;
+	if(!jni.env || !nativeActivity) return L"";
+	jmethodID getClip = jni.env->GetMethodID(nativeActivity, "getClipboard", JPARAMS()JSTRING);
+	if(getClip == 0) {
+		LOGE("porting::getTextFromClipboard unable to find java getClipboard method");
+		return L"";
+	}
+	jstring js_clip = (jstring)jni.env->CallObjectMethod(app_global->activity->clazz, getClip);
+	text = JstringtoCW(jni.env, js_clip);
 
-	jnienv->DeleteLocalRef(js_clip);
+	jni.env->DeleteLocalRef(js_clip);
 	return text.c_str();
 }
 
