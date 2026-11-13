@@ -85,8 +85,8 @@ std::shared_ptr<irr::IrrlichtDevice> GUIUtils::CreateDevice(GameConfig* configs)
 #if (IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9)
 	// This correspond to the program's class name, used by window managers and
 	// desktop environments to group multiple instances with their desktop file
-	params.ClassName = EPRO_TEXT("edopro");
-	params.WindowCaption = EPRO_TEXT("Project Ignis: EDOPro");
+	params.ClassName = EPRO_TEXT("anidimension");
+	params.WindowCaption = EPRO_TEXT("Ani Dimension");
 	params.OGLES2ShaderPath = EPRO_TEXT("BUNDLED");
 	params.WindowResizable = true;
 #if EDOPRO_WINDOWS
@@ -151,7 +151,7 @@ std::shared_ptr<irr::IrrlichtDevice> GUIUtils::CreateDevice(GameConfig* configs)
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 #if !(IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9)
-	device->setWindowCaption(L"Project Ignis: EDOPro");
+	device->setWindowCaption(L"Ani Dimension");
 	device->setResizable(true);
 #if EDOPRO_WINDOWS
 	auto hInstance = static_cast<HINSTANCE>(GetModuleHandle(nullptr));

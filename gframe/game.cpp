@@ -196,6 +196,7 @@ void Game::Initialize() {
 	chkCommitLogExpand = env->addCheckBox(false, Scale(295, 435, 500, 460), wCommitsLog, BUTTON_REPO_CHANGELOG_EXPAND, gDataManager->GetSysString(1447).data());
 	defaultStrings.emplace_back(chkCommitLogExpand, 1447);
 	mTopMenu = irr::gui::CGUICustomMenu::addCustomMenu(env);
+	mTopMenu->setVisible(false);
 	mRepositoriesInfo = mTopMenu->getSubMenu(mTopMenu->addItem(gDataManager->GetSysString(2045).data(), 1, true, true));
 	mAbout = mTopMenu->getSubMenu(mTopMenu->addItem(gDataManager->GetSysString(1970).data(), 2, true, true));
 	wAbout = env->addWindow(Scale(0, 0, 450, 700), false, L"", mAbout);
@@ -3775,7 +3776,7 @@ void Game::CloseDuelWindow() {
 		if(wit->isFadein)
 			wit->autoFadeoutFrame = 1;
 	}
-	mTopMenu->setVisible(true);
+	mTopMenu->setVisible(false);
 	wACMessage->setVisible(false);
 	wANAttribute->setVisible(false);
 	wANCard->setVisible(false);
