@@ -2140,6 +2140,37 @@ void Game::StartAdventureDuel() {
 	isAdventureMode = true;
 	isHostingOnline = false;
 
+#if EDOPRO_ANDROID
+	{
+		auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+			std::chrono::steady_clock::now().time_since_epoch()).count();
+		uint32_t rnd = static_cast<uint32_t>(std::rand() % 9000 + 1000);
+		std::string roomPass = epro::format("ADV_{}_{}", nowMs, rnd);
+		dInfo.secret.pass = BufferIO::DecodeUTF8(roomPass);
+
+		bool connected = false;
+		try {
+			auto parsed = epro::Host::resolve(L"anidimension.online", L"7911");
+			connected = DuelClient::StartClient(parsed.address, parsed.port, 0, false);
+		} catch(...) {
+			connected = false;
+		}
+		if(!connected) {
+			try {
+				auto parsedFallback = epro::Host::resolve(L"66.92.168.136", L"7911");
+				connected = DuelClient::StartClient(parsedFallback.address, parsedFallback.port, 0, false);
+			} catch(...) {
+				connected = false;
+			}
+		}
+		if(!connected) {
+			PopupMessage(L"No se pudo conectar al servidor de duelos (anidimension.online:7911).");
+			isAdventureMode = false;
+			return;
+		}
+		DuelClient::is_local_host = false;
+	}
+#else
 	// Standard LAN + AI port configuration (serverport from config, fallback to 7913/7915)
 	uint16_t host_port = 7911;
 	try {
@@ -2169,10 +2200,82 @@ void Game::StartAdventureDuel() {
 	}
 
 	DuelClient::is_local_host = true;
+#endif
 
 	// Keep adventure mode window visible until duel starts to avoid empty screens and ghost windows
 	btnAdventureDuel->setEnabled(false);
 	stAdventureNPCDeck->setText(L"Iniciando duelo...");
+}
+
+void Game::SpawnRemoteAdventureBot() {
+	std::string roomPass = BufferIO::EncodeUTF8(dInfo.secret.pass);
+	std::string botDeck = BufferIO::EncodeUTF8(selectedAdventureBotDeckName);
+	if(botDeck.empty())
+		botDeck = "Skull servant 2026";
+	std::string fallbackDeck;
+	if(selectedAdventureBot >= 0 && selectedAdventureBot < (int)adventureNpcList.size()) {
+		fallbackDeck = BufferIO::EncodeUTF8(adventureNpcList[selectedAdventureBot].deckFile);
+	}
+	std::string botName = BufferIO::EncodeUTF8(selectedAdventureNPCName);
+	if(botName.empty() && selectedAdventureBot >= 0 && selectedAdventureBot < (int)adventureNpcList.size()) {
+		botName = BufferIO::EncodeUTF8(adventureNpcList[selectedAdventureBot].name);
+	}
+	if(botName.empty())
+		botName = "Duelista NPC";
+
+	std::string caPath = gGameConfig ? gGameConfig->ssl_certificate_path : "";
+
+	epro::thread([roomPass, botDeck, fallbackDeck, botName, caPath]() {
+		nlohmann::json bodyJson = {
+			{ "roomPass", roomPass },
+			{ "botDeck", botDeck },
+			{ "fallbackDeck", fallbackDeck },
+			{ "botName", botName },
+			{ "version", CLIENT_VERSION }
+		};
+		std::string payload = bodyJson.dump();
+
+		std::vector<std::string> endpoints = {
+			"https://anidimension.online/api/adventure/spawn_bot",
+			"http://66.92.168.136:8080/api/adventure/spawn_bot"
+		};
+
+		for(const auto& url : endpoints) {
+			auto curl = curl_easy_init();
+			if(!curl) continue;
+
+			struct curl_slist* headers = nullptr;
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+
+			std::string resp;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			curl_easy_setopt(curl, CURLOPT_POST, 1L);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(payload.size()));
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 5L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
+				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
+			} else {
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			}
+
+			CURLcode res = curl_easy_perform(curl);
+			long httpCode = 0;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+			curl_slist_free_all(headers);
+			curl_easy_cleanup(curl);
+
+			if(res == CURLE_OK && httpCode >= 200 && httpCode < 300) {
+				break;
+			}
+		}
+	}).detach();
 }
 
 void Game::PopulateTabSettingsWindow() {

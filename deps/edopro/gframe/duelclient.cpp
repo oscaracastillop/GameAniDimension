@@ -959,6 +959,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			gdeckManager->sent_deck = mainGame->deckBuilder.GetCurrentDeck();
 			DuelClient::SendPacketToServer(CTOS_HS_READY);
 
+#if EDOPRO_ANDROID
+			mainGame->SpawnRemoteAdventureBot();
+#else
 			uint16_t bport = NetServer::GetServerPort();
 			std::wstring botDeck = mainGame->selectedAdventureBotDeckName;
 			if(botDeck.empty())
@@ -1046,6 +1049,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				}
 				engineToLaunch->Launch(bport, L"", true, 0, fullDeckPath.c_str(), botName.empty() ? nullptr : botName.c_str());
 			}
+#endif
 		} else {
 			if(mainGame->wCreateHost->isVisible())
 				mainGame->HideElement(mainGame->wCreateHost);
