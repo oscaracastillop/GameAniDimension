@@ -9,7 +9,14 @@ public class WindBotBridge {
     public static boolean init(Context context, String workingDirectory) {
         try {
             try {
-                mono.embeddinator.AndroidRuntimeProvider.context = context.getApplicationContext();
+                Class<?> arpClass = Class.forName("mono.embeddinator.AndroidRuntimeProvider");
+                for (java.lang.reflect.Field f : arpClass.getDeclaredFields()) {
+                    if (Context.class.isAssignableFrom(f.getType())) {
+                        f.setAccessible(true);
+                        f.set(null, context.getApplicationContext());
+                        Log.i("WindBotBridge", "Set AndroidRuntimeProvider context via field: " + f.getName());
+                    }
+                }
             } catch (Throwable ignored) {
             }
 
