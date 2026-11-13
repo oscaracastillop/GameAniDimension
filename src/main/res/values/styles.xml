@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+	<style name="AppTheme" parent="@style/Theme.AppCompat.NoActionBar">
 		<item name="android:windowAnimationStyle">@null</item>
-		<item name="android:windowBackground">@drawable/bg</item>
+		<item name="android:windowBackground">@drawable/bg_update</item>
 		<item name="android:windowFullscreen">true</item>
 		<item name="android:windowContentOverlay">@null</item>
 	</style>

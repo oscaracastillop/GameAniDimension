@@ -522,29 +522,25 @@ public class MainActivity extends Activity {
 	}
 
 	private void launchGame() {
-		var use_windbot = true;
-		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-			use_windbot = false;
-		} else {
-			use_windbot = WindBotBridge.init(getApplicationContext(), working_directory);
+		Log.i("AniDimension", "launchGame called. Working dir: " + working_directory + ", Data dir: " + data_directory);
+		// Local WindBot is disabled on startup to prevent Mono/SELinux SIGSEGV crashes on modern Android (Android 11-14+).
+		// Online duels against NPCs run entirely on the VPS multirole server.
+		boolean use_windbot = false;
+
+		ArrayList<String> argsList = new ArrayList<>();
+		if (changelog) {
+			argsList.add("-l");
 		}
-		/*
-			pass the working directory via parameters, rather than making
-			the app read the working_dir file
-		*/
-		if (changelog)
-			parameter.add(0, "-l");
-		parameter.add(0, working_directory + "/");
-		parameter.add(0, "-C");
 		if (data_directory != null && !data_directory.isEmpty()) {
-			parameter.add(0, data_directory);
-			parameter.add(0, "-U");
+			argsList.add("-U");
+			argsList.add(data_directory);
 		}
-		var array = parameter.toArray();
-		var strArr = new String[array.length];
-		for (int i = 0; i < array.length; i++) {
-			strArr[i] = array[i].toString();
-		}
+		argsList.add("-C");
+		argsList.add(working_directory + "/");
+
+		String[] strArr = argsList.toArray(new String[0]);
+		Log.i("AniDimension", "Starting EpNativeActivity with arguments: " + Arrays.toString(strArr));
+
 		try {
 			var intent = new Intent(this, EpNativeActivity.class);
 			intent.putExtra("ARGUMENTS", strArr);
@@ -554,7 +550,7 @@ public class MainActivity extends Activity {
 			startActivity(intent);
 			finish();
 		} catch (Throwable t) {
-			Log.e("EDOPro", "startActivity(EpNativeActivity) failed: " + t.getMessage());
+			Log.e("EDOPro", "startActivity(EpNativeActivity) failed: " + t.getMessage(), t);
 			CrashReporter.report(t, "startActivity(EpNativeActivity) failed");
 		}
 	}

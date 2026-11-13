@@ -17,9 +17,9 @@
 	"servers": [
 		{
 			"name": "Ani Dimension",
-			"address": "66.92.168.136",
+			"address": "anidimension.online",
 			"duelport": 7911,
-			"roomaddress": "66.92.168.136",
+			"roomaddress": "anidimension.online",
 			"roomlistprotocol": "http",
 			"roomlistport": 7922
 		}
