@@ -225,8 +225,12 @@ catch(...) { what = def; }
 			mainGame->dInfo.secret.game_id = 0;
 			if(mainGame->isAdventureMode) {
 				BufferIO::EncodeUTF16(L"Ani Dimension", cscg.name, 20);
+#if EDOPRO_ANDROID
+				BufferIO::EncodeUTF16(mainGame->dInfo.secret.pass.data(), cscg.pass, 20);
+#else
 				cscg.pass[0] = 0;
 				mainGame->dInfo.secret.pass = L"";
+#endif
 				cscg.info.rule = 4; // Todo se Vale (4 = All Cards allowed)
 				cscg.info.mode = 0; // 1 vs 1 Single
 				cscg.info.start_hand = 5;

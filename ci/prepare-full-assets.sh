@@ -30,7 +30,6 @@ fi
 echo "=== [3/6] Downloading WindBot base resources ==="
 curl --retry 5 --connect-timeout 30 --location -o /tmp/WindBotIgnite-Resources.7z https://github.com/ProjectIgnis/windbot/releases/download/20250412/WindBotIgnite-Resources.7z
 7z x /tmp/WindBotIgnite-Resources.7z -o"$ASSETS" -y
-7z x /tmp/WindBotIgnite-Resources.7z -o"$UPDATES" -y
 
 echo "=== [4/6] Pre-populating field spell illustrations ==="
 mkdir -p "$ASSETS/pics/field"
@@ -47,9 +46,6 @@ if [ -f "src/main/assets/WindBot/cards.cdb" ]; then
     cp "src/main/assets/WindBot/cards.cdb" "$ASSETS/cards.cdb"
     mkdir -p "$ASSETS/expansions"
     cp "src/main/assets/WindBot/cards.cdb" "$ASSETS/expansions/cards.cdb"
-    mkdir -p "$UPDATES/expansions"
-    cp "src/main/assets/WindBot/cards.cdb" "$UPDATES/cards.cdb" || true
-    cp "src/main/assets/WindBot/cards.cdb" "$UPDATES/expansions/cards.cdb" || true
 fi
 
 # 2. Official Card Lua Scripts
@@ -60,8 +56,6 @@ cp -r /tmp/CardScripts/official "$ASSETS/script/" 2>/dev/null || true
 cp -r /tmp/CardScripts/*.lua "$ASSETS/script/" 2>/dev/null || true
 cp -r /tmp/CardScripts/* "$ASSETS/script/" 2>/dev/null || true
 rm -rf "$ASSETS/script/.git" "$ASSETS/script/.github" 2>/dev/null || true
-mkdir -p "$UPDATES/script"
-cp -r "$ASSETS/script"/* "$UPDATES/script/" 2>/dev/null || true
 
 # 3. LFLists (Forbidden & Limited lists)
 echo "Cloning official LFLists..."
@@ -70,16 +64,12 @@ mkdir -p "$ASSETS/lflists"
 cp /tmp/LFLists/*.conf "$ASSETS/lflists/" 2>/dev/null || true
 cp /tmp/LFLists/*.conf "$ASSETS/" 2>/dev/null || true
 rm -rf "$ASSETS/lflists/.git" 2>/dev/null || true
-mkdir -p "$UPDATES/lflists"
-cp -r "$ASSETS/lflists"/* "$UPDATES/lflists/" 2>/dev/null || true
 
 # 4. Custom Textures (Series logos, background, etc.)
 if [ -d "src/main/assets/textures" ]; then
     echo "Copying custom textures (series logos, bg)..."
     mkdir -p "$ASSETS/textures"
     cp -r src/main/assets/textures/* "$ASSETS/textures/"
-    mkdir -p "$UPDATES/textures"
-    cp -r src/main/assets/textures/* "$UPDATES/textures/" 2>/dev/null || true
 fi
 
 # 5. User and NPC Decks
@@ -87,8 +77,6 @@ if [ -d "src/main/assets/deck" ]; then
     echo "Copying deck collections..."
     mkdir -p "$ASSETS/deck"
     cp -r src/main/assets/deck/* "$ASSETS/deck/"
-    mkdir -p "$UPDATES/deck"
-    cp -r src/main/assets/deck/* "$UPDATES/deck/" 2>/dev/null || true
 fi
 
 # 6. WindBot Ani Dimension Overrides (Decks, bots.json, Executors)
@@ -96,8 +84,6 @@ if [ -d "src/main/assets/WindBot" ]; then
     echo "Copying Ani Dimension WindBot packages..."
     mkdir -p "$ASSETS/WindBot"
     cp -r src/main/assets/WindBot/* "$ASSETS/WindBot/"
-    mkdir -p "$UPDATES/WindBot"
-    cp -r src/main/assets/WindBot/* "$UPDATES/WindBot/" 2>/dev/null || true
 fi
 
 # 7. Strings config copy
@@ -108,9 +94,8 @@ fi
 # 8. Ani Dimension Config Overrides (Exclusive Server, No Repos, Salas Duelos)
 if [ -d "src/main/assets/config" ]; then
     echo "Applying Ani Dimension custom config overrides..."
-    mkdir -p "$ASSETS/config" "$UPDATES/config"
+    mkdir -p "$ASSETS/config"
     cp -r src/main/assets/config/* "$ASSETS/config/"
-    cp -r src/main/assets/config/* "$UPDATES/config/" 2>/dev/null || true
     cp "$ASSETS/config/strings.conf" "$ASSETS/expansions/strings.conf" 2>/dev/null || true
     cp "$ASSETS/config/strings.conf" "$ASSETS/strings.conf" 2>/dev/null || true
 fi

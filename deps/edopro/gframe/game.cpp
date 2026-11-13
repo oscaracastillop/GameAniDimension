@@ -2151,14 +2151,14 @@ void Game::StartAdventureDuel() {
 		bool connected = false;
 		try {
 			auto parsed = epro::Host::resolve(L"anidimension.online", L"7911");
-			connected = DuelClient::StartClient(parsed.address, parsed.port, 0, false);
+			connected = DuelClient::StartClient(parsed.address, parsed.port, 0, true);
 		} catch(...) {
 			connected = false;
 		}
 		if(!connected) {
 			try {
 				auto parsedFallback = epro::Host::resolve(L"66.92.168.136", L"7911");
-				connected = DuelClient::StartClient(parsedFallback.address, parsedFallback.port, 0, false);
+				connected = DuelClient::StartClient(parsedFallback.address, parsedFallback.port, 0, true);
 			} catch(...) {
 				connected = false;
 			}
@@ -2208,6 +2208,7 @@ void Game::StartAdventureDuel() {
 }
 
 void Game::SpawnRemoteAdventureBot() {
+	uint32_t roomId = dInfo.secret.game_id;
 	std::string roomPass = BufferIO::EncodeUTF8(dInfo.secret.pass);
 	std::string botDeck = BufferIO::EncodeUTF8(selectedAdventureBotDeckName);
 	if(botDeck.empty())
@@ -2225,8 +2226,9 @@ void Game::SpawnRemoteAdventureBot() {
 
 	std::string caPath = gGameConfig ? gGameConfig->ssl_certificate_path : "";
 
-	epro::thread([roomPass, botDeck, fallbackDeck, botName, caPath]() {
+	epro::thread([roomId, roomPass, botDeck, fallbackDeck, botName, caPath]() {
 		nlohmann::json bodyJson = {
+			{ "roomId", roomId },
 			{ "roomPass", roomPass },
 			{ "botDeck", botDeck },
 			{ "fallbackDeck", fallbackDeck },
@@ -3078,11 +3080,6 @@ bool Game::MainLoop() {
 				PopupElement(wQuery);
 				update_prompted = true;
 			} else if (show_changelog) {
-				std::lock_guard<epro::mutex> lock(gMutex);
-				menuHandler.prev_operation = ACTION_SHOW_CHANGELOG;
-				stQMessage->setText(gDataManager->GetSysString(1451).data());
-				SetCentered(wQuery);
-				PopupElement(wQuery);
 				show_changelog = false;
 			}
 			else if(needs_to_acknowledge_discord_host) {
