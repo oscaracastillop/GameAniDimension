@@ -209,7 +209,6 @@
 		<provider
 			android:name="mono.embeddinator.AndroidRuntimeProvider"
 			android:authorities="${applicationId}.mono.embeddinator.AndroidRuntimeProvider.__mono_init__"
-			android:exported="false"
-			android:initOrder="2147483647" />
+			tools:node="remove" />
 	</application>
 </manifest>

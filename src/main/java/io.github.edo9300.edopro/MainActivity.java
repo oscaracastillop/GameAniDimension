@@ -46,7 +46,7 @@ import java.util.Objects;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import libwindbot.windbot.WindBot;
+
 
 public class MainActivity extends Activity {
 	private final static boolean wantsScopedStorage = Build.VERSION.SDK_INT > Build.VERSION_CODES.Q;
@@ -526,33 +526,7 @@ public class MainActivity extends Activity {
 		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
 			use_windbot = false;
 		} else {
-			try {
-				/*
-				 * Attempt to initialize Mono Embeddinator safely in Android context
-				 */
-				try {
-					Class<?> arpClass = Class.forName("mono.embeddinator.AndroidRuntimeProvider");
-					java.lang.reflect.Field ctxField = arpClass.getDeclaredField("context");
-					ctxField.setAccessible(true);
-					if (ctxField.get(null) == null) {
-						ctxField.set(null, getApplicationContext());
-					}
-				} catch (Throwable ignored) {
-				}
-
-				try {
-					mono.embeddinator.Runtime.setImplementation(new mono.embeddinator.AndroidImpl(getApplicationContext()));
-					Class.forName("libwindbot.Native_libWindbot");
-				} catch (Throwable t) {
-					Log.w("EDOPro", "Mono embeddinator runtime init warning: " + t.getMessage());
-				}
-				WindBot.initAndroid(working_directory + "/WindBot");
-				Log.i("EDOPro", "WindBot initialized successfully!");
-			} catch (Throwable e) {
-				Log.e("EDOPro", "WindBot init failed: " + e.getMessage());
-				CrashReporter.report(e, "WindBot initAndroid failed");
-				use_windbot = false;
-			}
+			use_windbot = WindBotBridge.init(getApplicationContext(), working_directory);
 		}
 		/*
 			pass the working directory via parameters, rather than making

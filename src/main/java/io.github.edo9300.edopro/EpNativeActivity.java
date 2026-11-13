@@ -32,7 +32,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Objects;
 
-import libwindbot.windbot.WindBot;
+
 
 public class EpNativeActivity extends NativeActivity {
 
@@ -118,7 +118,7 @@ public class EpNativeActivity extends NativeActivity {
 						final var args = intent.getStringExtra("args");
 						Log.i("EDOProWindBotIgnite", "Launching WindBot Ignite with " + args + " as parameters.");
 						if (use_windbot) {
-							WindBot.runAndroid(args);
+							WindBotBridge.run(args);
 						} else {
 							Log.w("EDOProWindBotIgnite", "WindBot is disabled or unavailable on this device.");
 						}
@@ -133,7 +133,7 @@ public class EpNativeActivity extends NativeActivity {
 						final var args = intent.getStringExtra("args");
 						Log.i("EDOProWindBotIgnite", "Loading database: " + args + ".");
 						if (use_windbot) {
-							WindBot.addDatabase(args);
+							WindBotBridge.addDb(args);
 						}
 					} catch (Throwable t) {
 						Log.e("EDOProWindBotIgnite", "WindBot addDatabase crash caught: " + t.getMessage(), t);
