@@ -2142,6 +2142,7 @@ void Game::StartAdventureDuel() {
 
 #if EDOPRO_ANDROID
 	{
+		DuelClient::StopClient();
 		auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
 			std::chrono::steady_clock::now().time_since_epoch()).count();
 		uint32_t rnd = static_cast<uint32_t>(std::rand() % 9000 + 1000);
