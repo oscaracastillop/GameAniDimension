@@ -185,7 +185,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_ADVENTURE_BACK: {
+				DuelClient::StopClient();
 				mainGame->isAdventureMode = false;
+				if(mainGame->btnAdventureDuel)
+					mainGame->btnAdventureDuel->setEnabled(true);
+				if(mainGame->stAdventureNPCDeck)
+					mainGame->stAdventureNPCDeck->setText(L"");
 				mainGame->wAdventureMode->setVisible(false);
 				mainGame->mTopMenu->setVisible(true);
 				mainGame->wBtnSettings->setVisible(true);
@@ -197,6 +202,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_LAN_MODE: {
+				mainGame->isAdventureMode = false;
 				mainGame->isHostingOnline = false;
 				mainGame->btnCreateHost->setEnabled(mainGame->coreloaded);
 				mainGame->btnJoinHost->setEnabled(true);
@@ -247,6 +253,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CREATE_HOST2: {
+				mainGame->isAdventureMode = false;
 				mainGame->isHostingOnline = true;
 				mainGame->btnHostConfirm->setEnabled(true);
 				mainGame->btnHostCancel->setEnabled(true);

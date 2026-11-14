@@ -225,8 +225,7 @@ catch(...) { what = def; }
 			mainGame->dInfo.secret.game_id = 0;
 			if(mainGame->isAdventureMode) {
 				BufferIO::EncodeUTF16(L"Ani Dimension", cscg.name, 20);
-				cscg.pass[0] = 0;
-				mainGame->dInfo.secret.pass = L"";
+				BufferIO::EncodeUTF16(mainGame->dInfo.secret.pass.data(), cscg.pass, 20);
 				cscg.info.rule = 4; // Todo se Vale (4 = All Cards allowed)
 				cscg.info.mode = 0; // 1 vs 1 Single
 				cscg.info.start_hand = 5;
@@ -959,6 +958,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			gdeckManager->sent_deck = mainGame->deckBuilder.GetCurrentDeck();
 			DuelClient::SendPacketToServer(CTOS_HS_READY);
 
+			mainGame->SpawnRemoteAdventureBot();
+#if 0
 			uint16_t bport = NetServer::GetServerPort();
 			std::wstring botDeck = mainGame->selectedAdventureBotDeckName;
 			if(botDeck.empty())
@@ -1046,6 +1047,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				}
 				engineToLaunch->Launch(bport, L"", true, 0, fullDeckPath.c_str(), botName.empty() ? nullptr : botName.c_str());
 			}
+#endif
 		} else {
 			if(mainGame->wCreateHost->isVisible())
 				mainGame->HideElement(mainGame->wCreateHost);

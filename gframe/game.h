@@ -828,6 +828,7 @@ public:
 	void OnAdventureArcChanged();
 	void UpdateAdventureNPCDisplay();
 	void StartAdventureDuel();
+	void SpawnRemoteAdventureBot();
 	void ResizeAdventureMode();
 	void UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int boxH);
 	void PopulateTabSettingsWindow();
