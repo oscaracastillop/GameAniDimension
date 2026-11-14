@@ -133,8 +133,20 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			break;
 		}
+		case irr::gui::EGET_EDITBOX_ENTER: {
+			if(id == EDIT_LOGIN_PASS || id == EDIT_LOGIN_USER) {
+				mainGame->SubmitLogin();
+				return true;
+			}
+			break;
+		}
 		case irr::gui::EGET_BUTTON_CLICKED: {
 			switch(id) {
+			case BUTTON_LOGIN_SUBMIT: {
+				mainGame->SubmitLogin();
+				break;
+			}
+			case BUTTON_LOGIN_EXIT:
 			case BUTTON_MODE_EXIT: {
 				mainGame->device->closeDevice();
 				break;
