@@ -841,6 +841,24 @@ public:
 	std::unordered_map<uint32_t, std::wstring> spanishCardTexts;
 	std::atomic<bool> spanishCardTextsStarted{ false };
 	std::atomic<bool> spanishCardTextsLoaded{ false };
+
+	irr::gui::IGUIWindow* wLogin{ nullptr };
+	irr::gui::IGUIEditBox* ebLoginUser{ nullptr };
+	irr::gui::IGUIEditBox* ebLoginPass{ nullptr };
+	irr::gui::IGUIStaticText* stLoginStatus{ nullptr };
+	irr::gui::IGUIButton* btnLoginSubmit{ nullptr };
+	irr::gui::IGUIButton* btnLoginExit{ nullptr };
+	bool isLoggedIn{ false };
+	std::wstring loggedInUser{};
+	std::string sessionToken{};
+	epro::mutex loginResultMutex;
+	std::atomic<bool> loginResultReady{ false };
+	bool loginPendingSuccess{ false };
+	std::wstring loginPendingUser{};
+	std::string loginPendingToken{};
+	std::wstring loginPendingError{};
+	void SubmitLogin();
+	void ProcessPendingLoginResult();
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;

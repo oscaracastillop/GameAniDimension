@@ -256,7 +256,7 @@ void Game::Initialize() {
 	mainMenuRightX = 510 + mainMenuWidth / 2;
 	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 435), false, EDOPRO_VERSION_STRING);
 	wMainMenu->getCloseButton()->setVisible(false);
-	//wMainMenu->setVisible(!is_from_discord);
+	wMainMenu->setVisible(false);
 #define OFFSET(x1, y1, x2, y2) Scale(10, 30 + offset, mainMenuWidth - 10, 60 + offset)
 	int offset = 0;
 	btnOnlineMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ONLINE_MULTIPLAYER, gDataManager->GetSysString(2042).data());
@@ -282,6 +282,17 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnModeExit, 1210);
 	offset += 35;
 #undef OFFSET
+	wLogin = env->addWindow(Scale(342, 165, 682, 435), false, L"Ani Dimension - Iniciar Sesion");
+	wLogin->getCloseButton()->setVisible(false);
+	wLogin->setDraggable(false);
+	env->addStaticText(L"Usuario o Correo:", Scale(20, 35, 320, 55), false, false, wLogin);
+	ebLoginUser = env->addEditBox(L"", Scale(20, 58, 320, 86), true, wLogin, EDIT_LOGIN_USER);
+	env->addStaticText(L"Contrasena:", Scale(20, 96, 320, 116), false, false, wLogin);
+	ebLoginPass = env->addEditBox(L"", Scale(20, 119, 320, 147), true, wLogin, EDIT_LOGIN_PASS);
+	ebLoginPass->setPasswordBox(true, L'*');
+	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", Scale(20, 155, 320, 190), false, true, wLogin);
+	btnLoginSubmit = env->addButton(Scale(20, 200, 185, 235), wLogin, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
+	btnLoginExit = env->addButton(Scale(195, 200, 320, 235), wLogin, BUTTON_LOGIN_EXIT, L"SALIR");
 	//lan mode
 	wLanWindow = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1200).data());
 	defaultStrings.emplace_back(wLanWindow, 1200);
@@ -1111,7 +1122,7 @@ void Game::Initialize() {
 
 	env->getRootGUIElement()->bringToFront(wBtnSettings);
 	env->getRootGUIElement()->bringToFront(mTopMenu);
-	env->setFocus(wMainMenu);
+	env->setFocus(ebLoginUser ? static_cast<irr::gui::IGUIElement*>(ebLoginUser) : static_cast<irr::gui::IGUIElement*>(wLogin));
 }
 
 bool Game::LoadCore() {
@@ -2346,6 +2357,141 @@ std::wstring Game::GetSpanishCardText(uint32_t code) {
 	return L"";
 }
 
+void Game::SubmitLogin() {
+	if(!ebLoginUser || !ebLoginPass || !btnLoginSubmit || !stLoginStatus)
+		return;
+	std::string loginStr = BufferIO::EncodeUTF8(ebLoginUser->getText());
+	std::string passStr = BufferIO::EncodeUTF8(ebLoginPass->getText());
+	if(loginStr.empty() || passStr.empty()) {
+		stLoginStatus->setOverrideColor(irr::video::SColor(255, 255, 100, 100));
+		stLoginStatus->setText(L"Ingresa tu usuario/correo y contrasena.");
+		return;
+	}
+	btnLoginSubmit->setEnabled(false);
+	stLoginStatus->setOverrideColor(irr::video::SColor(255, 255, 220, 120));
+	stLoginStatus->setText(L"Verificando credenciales...");
+
+	std::string caPath = gGameConfig ? gGameConfig->ssl_certificate_path : "";
+#if EDOPRO_ANDROID
+	std::string plataforma = "android";
+#else
+	std::string plataforma = "pc";
+#endif
+
+	epro::thread([this, loginStr, passStr, plataforma, caPath]() {
+		nlohmann::json bodyJson = {
+			{ "login", loginStr },
+			{ "password", passStr },
+			{ "plataforma", plataforma }
+		};
+		std::string payload = bodyJson.dump();
+		std::vector<std::string> endpoints = {
+			"https://anidimension.online/api/auth/login",
+			"http://66.92.168.136:8080/api/auth/login"
+		};
+
+		bool ok = false;
+		std::wstring userW;
+		std::string tokenStr;
+		std::wstring errW = L"No se pudo conectar con el servidor.";
+
+		for(const auto& url : endpoints) {
+			auto curl = curl_easy_init();
+			if(!curl) continue;
+			struct curl_slist* headers = nullptr;
+			headers = curl_slist_append(headers, "Content-Type: application/json");
+			std::string resp;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+			curl_easy_setopt(curl, CURLOPT_POST, 1L);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(payload.size()));
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 6L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
+				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
+			} else {
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			}
+			CURLcode res = curl_easy_perform(curl);
+			long httpCode = 0;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+			curl_slist_free_all(headers);
+			curl_easy_cleanup(curl);
+
+			if(res == CURLE_OK && !resp.empty()) {
+				auto j = nlohmann::json::parse(resp, nullptr, false);
+				if(!j.is_discarded() && j.is_object()) {
+					if(j.value("success", false) && j.contains("user") && j["user"].is_object()) {
+						ok = true;
+						userW = BufferIO::DecodeUTF8(j["user"].value("usuario", ""));
+						tokenStr = j.value("token", "");
+						break;
+					} else {
+						std::string e = j.value("error", "Usuario o contrasena incorrectos.");
+						errW = BufferIO::DecodeUTF8(e);
+						if(httpCode >= 400 && httpCode < 500)
+							break;
+					}
+				}
+			}
+		}
+
+		{
+			std::lock_guard<epro::mutex> lk(loginResultMutex);
+			loginPendingSuccess = ok;
+			loginPendingUser = std::move(userW);
+			loginPendingToken = std::move(tokenStr);
+			loginPendingError = std::move(errW);
+		}
+		loginResultReady = true;
+	}).detach();
+}
+
+void Game::ProcessPendingLoginResult() {
+	if(!loginResultReady.exchange(false))
+		return;
+	bool ok = false;
+	std::wstring userW;
+	std::string tokenStr;
+	std::wstring errW;
+	{
+		std::lock_guard<epro::mutex> lk(loginResultMutex);
+		ok = loginPendingSuccess;
+		userW = loginPendingUser;
+		tokenStr = loginPendingToken;
+		errW = loginPendingError;
+	}
+	if(btnLoginSubmit)
+		btnLoginSubmit->setEnabled(true);
+	if(ok && !userW.empty()) {
+		isLoggedIn = true;
+		loggedInUser = userW;
+		sessionToken = tokenStr;
+		if(ebNickName) {
+			ebNickName->setText(loggedInUser.c_str());
+			ebNickName->setEnabled(false);
+		}
+		if(gGameConfig)
+			gGameConfig->nickname = loggedInUser;
+		if(ebLoginPass)
+			ebLoginPass->setText(L"");
+		if(wLogin)
+			wLogin->setVisible(false);
+		if(wMainMenu) {
+			wMainMenu->setVisible(true);
+			env->setFocus(wMainMenu);
+		}
+	} else if(stLoginStatus) {
+		stLoginStatus->setOverrideColor(irr::video::SColor(255, 255, 100, 100));
+		stLoginStatus->setText(errW.c_str());
+	}
+}
+
 void Game::PopulateTabSettingsWindow() {
 	//tab
 	infosExpanded = 0;
@@ -2948,6 +3094,7 @@ bool Game::MainLoop() {
 		prev_time = now;
 		cur_time += delta_time;
 		gJWrapper->ProcessEvents();
+		ProcessPendingLoginResult();
 		bool resized = false;
 		auto size = driver->getScreenSize();
 #if EDOPRO_LINUX
@@ -4587,6 +4734,8 @@ void Game::OnResize() {
 	if(wAdventureMode)
 		ResizeAdventureMode();
 	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 415));
+	if(wLogin)
+		wLogin->setRelativePosition(ResizeWin(342, 165, 682, 435));
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);
 	SetCentered(updateWindow, false);
