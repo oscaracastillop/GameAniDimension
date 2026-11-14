@@ -423,6 +423,10 @@ struct AdventureNpcInfo {
 	int difficulty{ 1 };
 	std::wstring description{};
 	std::wstring deckDescription{};
+	int premioNormalStarShips{ 0 };
+	bool activoNormal{ false };
+	std::wstring premioLeyenda{};
+	bool activoLeyenda{ false };
 };
 
 struct adventure_mode_panel_elements {
