@@ -104,6 +104,7 @@ Game::~Game() {
 void Game::Initialize() {
 	dpi_scale = gGameConfig->dpi_scale;
 	duel_param = gGameConfig->lastDuelParam;
+	LoadSpanishCardTextsAsync();
 	if(!device)
 		device = GUIUtils::CreateDevice(gGameConfig);
 #if !EDOPRO_ANDROID && !EDOPRO_IOS
@@ -2249,6 +2250,83 @@ void Game::SpawnRemoteAdventureBot() {
 	}).detach();
 }
 
+void Game::LoadSpanishCardTextsAsync() {
+	if(spanishCardTextsStarted.exchange(true))
+		return;
+	std::string caPath = gGameConfig ? gGameConfig->ssl_certificate_path : "";
+	epro::thread([this, caPath]() {
+		std::vector<std::string> endpoints = {
+			"https://anidimension.online/api/cards/es",
+			"http://66.92.168.136:8080/api/cards/es"
+		};
+		for(const auto& url : endpoints) {
+			auto curl = curl_easy_init();
+			if(!curl) continue;
+			std::string resp;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 8L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 25L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
+				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
+			} else {
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			}
+			CURLcode res = curl_easy_perform(curl);
+			long httpCode = 0;
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+			curl_easy_cleanup(curl);
+			if(res == CURLE_OK && httpCode >= 200 && httpCode < 300 && !resp.empty()) {
+				auto j = nlohmann::json::parse(resp, nullptr, false);
+				if(!j.is_discarded() && j.is_object()) {
+					std::unordered_map<uint32_t, std::wstring> parsed;
+					parsed.reserve(j.size());
+					for(auto it = j.begin(); it != j.end(); ++it) {
+						if(!it.value().is_string()) continue;
+						try {
+							uint32_t passcode = static_cast<uint32_t>(std::stoul(it.key()));
+							std::wstring wdesc = BufferIO::DecodeUTF8(it.value().get<std::string>());
+							if(!wdesc.empty()) {
+								parsed.emplace(passcode, std::move(wdesc));
+							}
+						} catch(...) {}
+					}
+					if(!parsed.empty()) {
+						std::lock_guard<epro::mutex> lk(spanishCardTextsMutex);
+						spanishCardTexts.swap(parsed);
+						spanishCardTextsLoaded = true;
+						break;
+					}
+				}
+			}
+		}
+	}).detach();
+}
+
+std::wstring Game::GetSpanishCardText(uint32_t code) {
+	if(!spanishCardTextsStarted.load()) {
+		LoadSpanishCardTextsAsync();
+	}
+	if(!spanishCardTextsLoaded.load())
+		return L"";
+	std::lock_guard<epro::mutex> lk(spanishCardTextsMutex);
+	auto it = spanishCardTexts.find(code);
+	if(it != spanishCardTexts.end())
+		return it->second;
+	auto cd = gDataManager->GetCardData(code);
+	if(cd && cd->alias) {
+		auto itAlias = spanishCardTexts.find(cd->alias);
+		if(itAlias != spanishCardTexts.end())
+			return itAlias->second;
+	}
+	return L"";
+}
+
 void Game::PopulateTabSettingsWindow() {
 	//tab
 	infosExpanded = 0;
@@ -3717,7 +3795,14 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 			stDataInfo->setText(L"");
 	}
 	RefreshCardInfoTextPositions();
-	stText->setText(gDataManager->GetText(code).data());
+	std::wstring englishDesc(gDataManager->GetText(code));
+	std::wstring spanishDesc = GetSpanishCardText(code);
+	if(!spanishDesc.empty()) {
+		std::wstring combined = L"[ESPA\u00d1OL]\n" + spanishDesc + L"\n\n[ENGLISH]\n" + englishDesc;
+		stText->setText(combined.data());
+	} else {
+		stText->setText(englishDesc.data());
+	}
 }
 void Game::RefreshCardInfoTextPositions() {
 	const int xLeft = Scale(15);

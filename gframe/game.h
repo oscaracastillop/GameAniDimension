@@ -831,6 +831,12 @@ public:
 	void SpawnRemoteAdventureBot();
 	void ResizeAdventureMode();
 	void UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int boxH);
+	void LoadSpanishCardTextsAsync();
+	std::wstring GetSpanishCardText(uint32_t code);
+	epro::mutex spanishCardTextsMutex;
+	std::unordered_map<uint32_t, std::wstring> spanishCardTexts;
+	std::atomic<bool> spanishCardTextsStarted{ false };
+	std::atomic<bool> spanishCardTextsLoaded{ false };
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;
