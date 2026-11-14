@@ -253,7 +253,7 @@ void Game::Initialize() {
 	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
 	mainMenuLeftX = 510 - mainMenuWidth / 2;
 	mainMenuRightX = 510 + mainMenuWidth / 2;
-	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 470), false, EDOPRO_VERSION_STRING);
+	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 435), false, EDOPRO_VERSION_STRING);
 	wMainMenu->getCloseButton()->setVisible(false);
 	//wMainMenu->setVisible(!is_from_discord);
 #define OFFSET(x1, y1, x2, y2) Scale(10, 30 + offset, mainMenuWidth - 10, 60 + offset)
@@ -267,9 +267,10 @@ void Game::Initialize() {
 	// btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
 	// defaultStrings.emplace_back(btnLanMode, 1200);
 	// offset += 35;
+	// Puzzles button disabled as requested
 	btnSingleMode = env->addButton(OFFSET(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, gDataManager->GetSysString(1201).data());
-	defaultStrings.emplace_back(btnSingleMode, 1201);
-	offset += 35;
+	btnSingleMode->setVisible(false);
+	btnSingleMode->setEnabled(false);
 	btnReplayMode = env->addButton(OFFSET(10, 100, 270, 130), wMainMenu, BUTTON_REPLAY_MODE, gDataManager->GetSysString(1202).data());
 	defaultStrings.emplace_back(btnReplayMode, 1202);
 	offset += 35;
@@ -4407,7 +4408,7 @@ void Game::OnResize() {
 	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	if(wAdventureMode)
 		ResizeAdventureMode();
-	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 450));
+	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 415));
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);
 	SetCentered(updateWindow, false);
