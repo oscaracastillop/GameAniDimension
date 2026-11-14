@@ -1925,6 +1925,10 @@ void Game::OnAdventureArcChanged() {
 				npc.difficulty = SafeJsonInt(item, "Difficulty", SafeJsonInt(item, "difficulty", 1));
 				npc.description = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "Description", SafeJsonStr(item, "description", "")));
 				npc.deckDescription = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "DeckDescription", SafeJsonStr(item, "deckDescription", "")));
+				npc.premioNormalStarShips = SafeJsonInt(item, "PremioNormalStarShips", 0);
+				npc.activoNormal = item.contains("ActivoNormal") && item["ActivoNormal"].is_boolean() ? item["ActivoNormal"].get<bool>() : (npc.premioNormalStarShips > 0);
+				npc.premioLeyenda = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "PremioLeyenda", ""));
+				npc.activoLeyenda = item.contains("ActivoLeyenda") && item["ActivoLeyenda"].is_boolean() ? item["ActivoLeyenda"].get<bool>() : false;
 				adventureNpcList.push_back(std::move(npc));
 			}
 		}
@@ -1985,11 +1989,26 @@ void Game::UpdateAdventureNPCDisplay() {
 	const auto& npc = adventureNpcList[selected];
 	stAdventureNPCName->setText(epro::format(L"[NIVEL {}] {}", npc.level, npc.name).c_str());
 
-	if (!npc.description.empty()) {
-		stAdventureNPCDesc->setText(npc.description.c_str());
-	} else {
-		stAdventureNPCDesc->setText(L"Duelista preparado para poner a prueba tu temple y estrategia.");
-	}
+	auto formatStarShips = [](int val) -> std::wstring {
+		std::wstring s = std::to_wstring(val);
+		int n = static_cast<int>(s.length()) - 3;
+		while (n > 0) {
+			s.insert(n, L",");
+			n -= 3;
+		}
+		return s;
+	};
+	std::wstring baseDesc = !npc.description.empty()
+		? npc.description
+		: L"Duelista preparado para poner a prueba tu temple y estrategia.";
+	std::wstring premioNormalStr = npc.activoNormal
+		? epro::format(L"{} StarShips", formatStarShips(npc.premioNormalStarShips))
+		: L"Desactivado";
+	std::wstring premioLeyendaStr = (npc.activoLeyenda && !npc.premioLeyenda.empty())
+		? npc.premioLeyenda
+		: L"Por definir";
+	std::wstring fullNpcInfo = epro::format(L"{}\n\nPremio Normal: {}\nPremio Leyenda: {}", baseDesc, premioNormalStr, premioLeyendaStr);
+	stAdventureNPCDesc->setText(fullNpcInfo.c_str());
 
 	if (!npc.deckDescription.empty()) {
 		stAdventureDeckDesc->setText(npc.deckDescription.c_str());
