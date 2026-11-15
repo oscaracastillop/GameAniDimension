@@ -59,6 +59,7 @@ void DeckBuilder::Initialize(bool refresh) {
 	mainGame->wInfos->setVisible(true);
 	mainGame->wCardImg->setVisible(true);
 	mainGame->wDeckEdit->setVisible(true);
+	if(mainGame->btnSellCard) mainGame->btnSellCard->setVisible(true);
 	mainGame->wFilter->setVisible(true);
 	mainGame->wSort->setVisible(true);
 	mainGame->btnLeaveGame->setVisible(true);
@@ -99,6 +100,7 @@ void DeckBuilder::Terminate(bool showmenu) {
 		mainGame->mTopMenu->setVisible(true);
 	}
 	mainGame->wDeckEdit->setVisible(false);
+	if(mainGame->btnSellCard) mainGame->btnSellCard->setVisible(false);
 	mainGame->wCategories->setVisible(false);
 	mainGame->wFilter->setVisible(false);
 	mainGame->wSort->setVisible(false);
@@ -126,6 +128,23 @@ void DeckBuilder::Terminate(bool showmenu) {
 	gGameConfig->lastlflist = gdeckManager->_lfList[mainGame->cbDBLFList->getSelected()].hash;
 }
 bool DeckBuilder::SetCurrentDeckFromFile(epro::path_stringview file, bool separated, RITUAL_LOCATION rituals_in_extra) {
+	if(mainGame->isLoggedIn) {
+		std::wstring targetName = Utils::ToUnicodeIfNeeded(file);
+		std::lock_guard<epro::mutex> lk(mainGame->inventoryMutex);
+		for(const auto& s : mainGame->userDeckSlots) {
+			if(s.name == targetName) {
+				Deck tmp = s.deck;
+				SetCurrentDeck(std::move(tmp));
+				return true;
+			}
+		}
+		if(!mainGame->userDeckSlots.empty()) {
+			Deck tmp = mainGame->userDeckSlots[0].deck;
+			SetCurrentDeck(std::move(tmp));
+			return true;
+		}
+		return false;
+	}
 	Deck tmp;
 	if(!DeckManager::LoadDeckFromFile(file, tmp, separated, rituals_in_extra))
 		return false;
@@ -259,6 +278,19 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_SAVE_DECK: {
 				int sel = mainGame->cbDBDecks->getSelected();
+				if(mainGame->isLoggedIn) {
+					if(sel >= 0) {
+						std::wstring errOut;
+						if(mainGame->SaveUserDeckToServer(sel + 1, mainGame->cbDBDecks->getItem(sel), current_deck, errOut)) {
+							mainGame->stACMessage->setText(gDataManager->GetSysString(1335).data());
+							mainGame->PopupElement(mainGame->wACMessage, 20);
+						} else {
+							mainGame->stACMessage->setText(errOut.c_str());
+							mainGame->PopupElement(mainGame->wACMessage, 50);
+						}
+					}
+					break;
+				}
 				if(sel >= 0 && DeckManager::SaveDeck(Utils::ToPathString(mainGame->cbDBDecks->getItem(sel)), current_deck)) {
 					mainGame->stACMessage->setText(gDataManager->GetSysString(1335).data());
 					mainGame->PopupElement(mainGame->wACMessage, 20);
@@ -283,10 +315,28 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 					mainGame->stACMessage->setText(gDataManager->GetSysString(1339).data());
 					mainGame->PopupElement(mainGame->wACMessage, 40);
 					break;
-				} else {
-					mainGame->cbDBDecks->addItem(dname.data());
-					mainGame->cbDBDecks->setSelected(mainGame->cbDBDecks->getItemCount() - 1);
 				}
+				if(mainGame->isLoggedIn) {
+					if(mainGame->cbDBDecks->getItemCount() >= 3) {
+						mainGame->stACMessage->setText(L"Máximo 3 slots de deck por usuario.");
+						mainGame->PopupElement(mainGame->wACMessage, 50);
+						break;
+					}
+					int newSlot = static_cast<int>(mainGame->cbDBDecks->getItemCount()) + 1;
+					std::wstring errOut;
+					if(mainGame->SaveUserDeckToServer(newSlot, std::wstring(dname.data(), dname.size()), current_deck, errOut)) {
+						mainGame->cbDBDecks->addItem(dname.data());
+						mainGame->cbDBDecks->setSelected(mainGame->cbDBDecks->getItemCount() - 1);
+						mainGame->stACMessage->setText(gDataManager->GetSysString(1335).data());
+						mainGame->PopupElement(mainGame->wACMessage, 20);
+					} else {
+						mainGame->stACMessage->setText(errOut.c_str());
+						mainGame->PopupElement(mainGame->wACMessage, 50);
+					}
+					break;
+				}
+				mainGame->cbDBDecks->addItem(dname.data());
+				mainGame->cbDBDecks->setSelected(mainGame->cbDBDecks->getItemCount() - 1);
 				if(DeckManager::SaveDeck(Utils::ToPathString(dname), current_deck)) {
 					mainGame->stACMessage->setText(gDataManager->GetSysString(1335).data());
 					mainGame->PopupElement(mainGame->wACMessage, 20);
@@ -294,6 +344,11 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_DELETE_DECK: {
+				if(mainGame->isLoggedIn) {
+					mainGame->stACMessage->setText(L"Los 3 slots se editan o renombran (no se eliminan).");
+					mainGame->PopupElement(mainGame->wACMessage, 40);
+					break;
+				}
 				int sel = mainGame->cbDBDecks->getSelected();
 				if(sel == -1)
 					break;
@@ -316,12 +371,35 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 						return false;
 					}
 				}
+				if(mainGame->isLoggedIn) {
+					std::wstring errOut;
+					if(mainGame->SaveUserDeckToServer(sel + 1, dname, current_deck, errOut)) {
+						mainGame->cbDBDecks->removeItem(sel);
+						mainGame->cbDBDecks->setSelected(mainGame->cbDBDecks->addItem(dname));
+						mainGame->stACMessage->setText(gDataManager->GetSysString(1335).data());
+						mainGame->PopupElement(mainGame->wACMessage, 20);
+					} else {
+						mainGame->stACMessage->setText(errOut.c_str());
+						mainGame->PopupElement(mainGame->wACMessage, 40);
+					}
+					break;
+				}
 				if(DeckManager::RenameDeck(Utils::ToPathString(mainGame->cbDBDecks->getItem(sel)), Utils::ToPathString(dname))) {
 					mainGame->cbDBDecks->removeItem(sel);
 					mainGame->cbDBDecks->setSelected(mainGame->cbDBDecks->addItem(dname));
 				} else {
 					mainGame->stACMessage->setText(gDataManager->GetSysString(1364).data());
 					mainGame->PopupElement(mainGame->wACMessage, 30);
+				}
+				break;
+			}
+			case BUTTON_SELL_CARD: {
+				if(mainGame->isLoggedIn && mainGame->showingcard) {
+					std::wstring msgOut;
+					mainGame->SellCardFromInventory(mainGame->showingcard->code, 1, msgOut);
+					mainGame->stACMessage->setText(msgOut.c_str());
+					mainGame->PopupElement(mainGame->wACMessage, 40);
+					FilterCards(true);
 				}
 				break;
 			}
@@ -1080,7 +1158,8 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 		int trycode = BufferIO::GetVal(term_.data());
 		const CardDataC* data = nullptr;
 		if(trycode && (data = gDataManager->GetCardData(trycode))) {
-			searched_terms[term_] = { data };
+			if(!mainGame->isLoggedIn || mainGame->cardInventory[data->code] > 0)
+				searched_terms[term_] = { data };
 			continue;
 		}
 		auto subterms = Utils::TokenizeString<epro::wstringview>(term_, L"&&");
@@ -1126,6 +1205,11 @@ void DeckBuilder::FilterCards(bool force_refresh) {
 			continue;
 		std::vector<const CardDataC*> searchterm_results;
 		for(const auto& card : gDataManager->cards) {
+			if(mainGame->isLoggedIn) {
+				auto invIt = mainGame->cardInventory.find(card.first);
+				if(invIt == mainGame->cardInventory.end() || invIt->second <= 0)
+					continue;
+			}
 			if(!CheckCardProperties(card.second))
 				continue;
 			for(const auto& search_parameter : search_parameters) {
@@ -1631,6 +1715,11 @@ bool DeckBuilder::check_limit(const CardDataC* pointer) {
 	auto it = filterList->GetLimitationIterator(pointer);
 	if(it != endit)
 		limit = it->second;
+	if(mainGame->isLoggedIn) {
+		auto invIt = mainGame->cardInventory.find(pointer->code);
+		int owned = (invIt != mainGame->cardInventory.end()) ? invIt->second : 0;
+		limit = std::min(limit, owned);
+	}
 	if(limit == 0)
 		return false;
 	const auto& deck = current_deck;

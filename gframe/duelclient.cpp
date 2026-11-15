@@ -1821,6 +1821,16 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				mainGame->dInfo.vic_string = gDataManager->GetVictoryString(type).data();
 		}
 		mainGame->showcard = 101;
+		if(player == 0 && mainGame->isLoggedIn) {
+			bool isAdv = mainGame->isAdventureMode;
+			int npcId = 0;
+			if(isAdv && mainGame->selectedAdventureBot >= 0 && mainGame->selectedAdventureBot < (int)mainGame->adventureNpcList.size())
+				npcId = mainGame->adventureNpcList[mainGame->selectedAdventureBot].id;
+			std::string oppName = !mainGame->dInfo.opponames.empty() ? BufferIO::EncodeUTF8(mainGame->dInfo.opponames[0]) : "Jugador";
+			std::thread([isAdv, npcId, oppName]() {
+				mainGame->NotifyDuelWinToServer(isAdv, npcId, oppName);
+			}).detach();
+		}
 		mainGame->WaitFrameSignal(120, lock);
 		mainGame->dInfo.vic_string = L"";
 		mainGame->showcard = 0;
