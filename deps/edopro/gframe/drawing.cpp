@@ -1436,8 +1436,27 @@ void Game::DrawDeckBd() {
 					return epro::format(L"[{}]", scope);
 				return L"";
 			};
-			DrawShadowTextPos(textFont, GetScopeString(), Resize(859, height_offset + 208 + i * 66, 955, height_offset + 229 + i * 66),
+			std::wstring scopeLine = GetScopeString();
+			if(isLoggedIn) {
+				auto invIt = cardInventory.find(ptr->code);
+				int owned = (invIt != cardInventory.end()) ? invIt->second : 0;
+				scopeLine = scopeLine.empty() ? epro::format(L"[x{}]", owned) : epro::format(L"{} [x{}]", scopeLine, owned);
+			}
+			DrawShadowTextPos(textFont, scopeLine, Resize(859, height_offset + 208 + i * 66, 955, height_offset + 229 + i * 66),
 							  Resize(860, height_offset + 209 + i * 66, 955, height_offset + 229 + i * 66), 0xffffffff, 0xff000000, false, false, &rect);
+		}
+		if(isLoggedIn) {
+			DrawShadowText(textFont, epro::format(L"Nv.{} | {}*", playerLevel, playerStarShips), Resize(445, 136, 610, 156), Resize(1, 1, 1, 1), 0xffffd700, 0xff000000, false, true);
+			if(btnSellCard) {
+				if(showingcard && cardInventory[showingcard->code] > 3) {
+					long long price = cardSellPrices[showingcard->code];
+					btnSellCard->setEnabled(true);
+					btnSellCard->setText(epro::format(L"Vender (+{})", price).c_str());
+				} else {
+					btnSellCard->setEnabled(false);
+					btnSellCard->setText(L"Vender (>3)");
+				}
+			}
 		}
 	}
 	if(deckBuilder.is_draging)

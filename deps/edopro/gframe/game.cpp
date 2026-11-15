@@ -597,6 +597,9 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnClearDeck, 1304);
 	btnDeleteDeck = AlignElementWithParent(env->addButton(Scale(225, 95, 290, 120), wDeckEdit, BUTTON_DELETE_DECK, gDataManager->GetSysString(1308).data()));
 	defaultStrings.emplace_back(btnDeleteDeck, 1308);
+	btnSellCard = AlignElementWithParent(env->addButton(Scale(918, 136, 1020, 158), nullptr, BUTTON_SELL_CARD, L"Vender"));
+	btnSellCard->setVisible(false);
+	btnSellCard->setEnabled(false);
 	btnSideOK = AlignElementWithParent(env->addButton(Scale(510, 40, 820, 80), nullptr, BUTTON_SIDE_OK, gDataManager->GetSysString(1334).data()));
 	defaultStrings.emplace_back(btnSideOK, 1334);
 	btnSideOK->setVisible(false);
@@ -2148,6 +2151,17 @@ void Game::StartAdventureDuel() {
 	selectedAdventureUserDeckName = cbAdventureUserDeck->getItem(deckIdx);
 
 	const auto& npc = adventureNpcList[npcIdx];
+	if (isLoggedIn) {
+		if (playerLevel < npc.level) {
+			PopupMessage(epro::format(L"Necesitas Nivel {} para retar a {} (tu nivel: {}).", npc.level, npc.name, playerLevel));
+			return;
+		}
+		std::wstring challengeErr;
+		if (!ValidateNpcChallengeOnServer(npc.id, challengeErr)) {
+			PopupMessage(challengeErr);
+			return;
+		}
+	}
 	selectedAdventureNPCName = npc.name;
 	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
 	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
@@ -2505,6 +2519,7 @@ void Game::ProcessPendingLoginResult() {
 		isLoggedIn = true;
 		loggedInUser = userW;
 		sessionToken = tokenStr;
+		FetchUserInventoryAndDecks();
 		if(ebNickName) {
 			ebNickName->setText(loggedInUser.c_str());
 			ebNickName->setEnabled(false);
@@ -2526,6 +2541,220 @@ void Game::ProcessPendingLoginResult() {
 	} else if(stLoginStatus) {
 		stLoginStatus->setOverrideColor(irr::video::SColor(255, 255, 100, 100));
 		stLoginStatus->setText(errW.c_str());
+	}
+}
+
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "") {
+	if(token.empty()) return {};
+	auto curl_handle = curl_easy_init();
+	if(!curl_handle) return {};
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	struct curl_slist* headers = nullptr;
+	std::string authHeader = "Authorization: Bearer " + token;
+	headers = curl_slist_append(headers, authHeader.c_str());
+	if(!postJson.empty())
+		headers = curl_slist_append(headers, "Content-Type: application/json");
+	std::string resp;
+	for(const auto& host : hosts) {
+		std::string url = host + endpoint;
+		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
+		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 3L);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 8L);
+		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &resp);
+		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
+		if(!postJson.empty()) {
+			curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
+			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, postJson.c_str());
+			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDSIZE, (long)postJson.size());
+		} else {
+			curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1L);
+		}
+		resp.clear();
+		auto res = curl_easy_perform(curl_handle);
+		if(res == CURLE_OK && !resp.empty()) {
+			try {
+				auto j = nlohmann::json::parse(resp);
+				curl_slist_free_all(headers);
+				curl_easy_cleanup(curl_handle);
+				return j;
+			} catch(...) {}
+		}
+	}
+	curl_slist_free_all(headers);
+	curl_easy_cleanup(curl_handle);
+	return {};
+}
+
+void Game::FetchUserInventoryAndDecks() {
+	if(!isLoggedIn || sessionToken.empty()) return;
+	auto invJson = CallSessionApi("/api/user/inventory", sessionToken);
+	if(invJson.contains("success") && invJson["success"].is_boolean() && invJson["success"].get<bool>()) {
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		if(invJson.contains("profile") && invJson["profile"].is_object()) {
+			const auto& prof = invJson["profile"];
+			playerLevel = SafeJsonInt(prof, "nivel", 1);
+			playerExp = SafeJsonInt(prof, "exp", 1);
+			if(prof.contains("starShips") && prof["starShips"].is_number())
+				playerStarShips = prof["starShips"].get<long long>();
+		}
+		cardInventory.clear();
+		cardSellPrices.clear();
+		if(invJson.contains("cards") && invJson["cards"].is_array()) {
+			for(const auto& c : invJson["cards"]) {
+				uint32_t code = static_cast<uint32_t>(SafeJsonInt(c, "passcode", 0));
+				int qty = SafeJsonInt(c, "cantidad", 0);
+				long long sellPrice = 0;
+				if(c.contains("precioRecompra") && c["precioRecompra"].is_number())
+					sellPrice = c["precioRecompra"].get<long long>();
+				if(code > 0 && qty > 0) {
+					cardInventory[code] = qty;
+					cardSellPrices[code] = sellPrice;
+				}
+			}
+		}
+	}
+	auto decksJson = CallSessionApi("/api/user/decks", sessionToken);
+	if(decksJson.contains("success") && decksJson["success"].is_boolean() && decksJson["success"].get<bool>()) {
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		userDeckSlots.clear();
+		if(decksJson.contains("decks") && decksJson["decks"].is_array()) {
+			for(const auto& d : decksJson["decks"]) {
+				UserDeckSlot slotObj;
+				slotObj.slot = SafeJsonInt(d, "slot", 1);
+				slotObj.name = BufferIO::DecodeUTF8(SafeJsonStr(d, "nombreDeck", "Deck"));
+				auto loadVec = [](const nlohmann::json& arr, Deck::Vector& out) {
+					if(!arr.is_array()) return;
+					for(const auto& item : arr) {
+						if(item.is_number()) {
+							uint32_t code = item.get<uint32_t>();
+							if(auto* cd = gDataManager->GetCardData(code))
+								out.push_back(cd);
+						}
+					}
+				};
+				if(d.contains("main")) loadVec(d["main"], slotObj.deck.main);
+				if(d.contains("extra")) loadVec(d["extra"], slotObj.deck.extra);
+				if(d.contains("side")) loadVec(d["side"], slotObj.deck.side);
+				userDeckSlots.push_back(std::move(slotObj));
+			}
+		}
+	}
+}
+
+bool Game::SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut) {
+	if(!isLoggedIn || sessionToken.empty()) {
+		errOut = L"Debes iniciar sesión para guardar el deck.";
+		return false;
+	}
+	nlohmann::json body;
+	body["slot"] = slot;
+	body["nombreDeck"] = BufferIO::EncodeUTF8(name);
+	nlohmann::json mainArr = nlohmann::json::array();
+	nlohmann::json extraArr = nlohmann::json::array();
+	nlohmann::json sideArr = nlohmann::json::array();
+	for(const auto* c : deck.main) if(c) mainArr.push_back(c->code);
+	for(const auto* c : deck.extra) if(c) extraArr.push_back(c->code);
+	for(const auto* c : deck.side) if(c) sideArr.push_back(c->code);
+	body["main"] = mainArr;
+	body["extra"] = extraArr;
+	body["side"] = sideArr;
+	auto resp = CallSessionApi("/api/user/decks/save", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		bool found = false;
+		for(auto& s : userDeckSlots) {
+			if(s.slot == slot) {
+				s.name = name;
+				s.deck = deck;
+				found = true;
+				break;
+			}
+		}
+		if(!found) {
+			UserDeckSlot s;
+			s.slot = slot;
+			s.name = name;
+			s.deck = deck;
+			userDeckSlots.push_back(std::move(s));
+		}
+		return true;
+	}
+	errOut = BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "Error al guardar el deck en el servidor."));
+	return false;
+}
+
+bool Game::SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut) {
+	if(!isLoggedIn || sessionToken.empty()) {
+		msgOut = L"Debes iniciar sesión.";
+		return false;
+	}
+	nlohmann::json body;
+	body["passcode"] = passcode;
+	body["cantidad"] = qty;
+	auto resp = CallSessionApi("/api/user/inventory/sell", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		int newQty = SafeJsonInt(resp, "nuevaCantidad", 0);
+		long long gained = resp.contains("starShipsGanados") && resp["starShipsGanados"].is_number() ? resp["starShipsGanados"].get<long long>() : 0;
+		long long totalSS = resp.contains("starShipsTotales") && resp["starShipsTotales"].is_number() ? resp["starShipsTotales"].get<long long>() : playerStarShips;
+		{
+			std::lock_guard<epro::mutex> lk(inventoryMutex);
+			if(newQty > 0) cardInventory[passcode] = newQty;
+			else cardInventory.erase(passcode);
+			playerStarShips = totalSS;
+		}
+		msgOut = epro::format(L"Vendida(s) {}x (+{} StarShips)", qty, gained);
+		return true;
+	}
+	msgOut = BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo vender la carta."));
+	return false;
+}
+
+bool Game::ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut) {
+	if(!isLoggedIn || sessionToken.empty()) return true;
+	nlohmann::json body;
+	body["npcId"] = npcId;
+	auto resp = CallSessionApi("/api/adventure/challenge", sessionToken, body.dump());
+	if(resp.contains("allowed") && resp["allowed"].is_boolean()) {
+		if(resp["allowed"].get<bool>()) return true;
+		errOut = BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "Nivel insuficiente para retar a este NPC."));
+		return false;
+	}
+	return true;
+}
+
+void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string& opponentName) {
+	if(!isLoggedIn || sessionToken.empty()) return;
+	nlohmann::json body;
+	nlohmann::json resp;
+	if(isAdventure) {
+		body["npcId"] = npcId;
+		body["dificultad"] = "Normal";
+		resp = CallSessionApi("/api/adventure/win", sessionToken, body.dump());
+	} else {
+		body["oponente"] = opponentName;
+		resp = CallSessionApi("/api/duel/online/win", sessionToken, body.dump());
+	}
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		uint32_t cardCode = static_cast<uint32_t>(SafeJsonInt(resp, "cartaGanadaPasscode", 0));
+		std::string cardName = SafeJsonStr(resp, "cartaGanadaNombre", "");
+		long long ssGained = resp.contains("starShipsGanados") && resp["starShipsGanados"].is_number() ? resp["starShipsGanados"].get<long long>() : 0;
+		{
+			std::lock_guard<epro::mutex> lk(inventoryMutex);
+			if(cardCode > 0) cardInventory[cardCode] = cardInventory[cardCode] + 1;
+			if(resp.contains("starShipsTotales") && resp["starShipsTotales"].is_number())
+				playerStarShips = resp["starShipsTotales"].get<long long>();
+		}
+		std::wstring msg = L"¡Victoria!";
+		if(!cardName.empty())
+			msg += L"\nCarta ganada: " + BufferIO::DecodeUTF8(cardName);
+		if(ssGained > 0)
+			msg += epro::format(L"\nPremio primera victoria: +{} StarShips", ssGained);
+		PopupMessage(msg);
 	}
 }
 
@@ -3542,9 +3771,16 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 }
 void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 	cbDeck->clear();
-	for(auto& file : Utils::FindFiles(EPRO_TEXT("./deck/"), { EPRO_TEXT("ydk") })) {
-		file.erase(file.size() - 4);
-		cbDeck->addItem(Utils::ToUnicodeIfNeeded(file).data());
+	if(isLoggedIn) {
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		for(const auto& slot : userDeckSlots) {
+			cbDeck->addItem(slot.name.c_str());
+		}
+	} else {
+		for(auto& file : Utils::FindFiles(EPRO_TEXT("./deck/"), { EPRO_TEXT("ydk") })) {
+			file.erase(file.size() - 4);
+			cbDeck->addItem(Utils::ToUnicodeIfNeeded(file).data());
+		}
 	}
 	for(irr::u32 i = 0; i < cbDeck->getItemCount(); ++i) {
 		if(gGameConfig->lastdeck == cbDeck->getItem(i)) {

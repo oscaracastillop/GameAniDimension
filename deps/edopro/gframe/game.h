@@ -859,6 +859,24 @@ public:
 	std::wstring loginPendingError{};
 	void SubmitLogin();
 	void ProcessPendingLoginResult();
+	struct UserDeckSlot {
+		int slot{ 1 };
+		std::wstring name;
+		Deck deck;
+	};
+	int playerLevel{ 1 };
+	int playerExp{ 1 };
+	long long playerStarShips{ 10000 };
+	std::unordered_map<uint32_t, int> cardInventory;
+	std::unordered_map<uint32_t, long long> cardSellPrices;
+	std::vector<UserDeckSlot> userDeckSlots;
+	epro::mutex inventoryMutex;
+	irr::gui::IGUIButton* btnSellCard{ nullptr };
+	void FetchUserInventoryAndDecks();
+	bool SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut);
+	bool SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut);
+	bool ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut);
+	void NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;
