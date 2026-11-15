@@ -41,11 +41,20 @@ done
 echo "=== [5/6] Integrating Ani Dimension Game Assets (cards.cdb, scripts, banlists, decks, series) ==="
 
 # 1. Master card database
-if [ -f "src/main/assets/WindBot/cards.cdb" ]; then
-    echo "Installing cards.cdb into defaults/ and expansions/..."
-    cp "src/main/assets/WindBot/cards.cdb" "$ASSETS/cards.cdb"
+CARD_DB_SRC=""
+if [ -f "src/main/assets/cards.cdb" ]; then
+    CARD_DB_SRC="src/main/assets/cards.cdb"
+elif [ -f "src/main/assets/WindBot/cards.cdb" ]; then
+    CARD_DB_SRC="src/main/assets/WindBot/cards.cdb"
+fi
+if [ -n "$CARD_DB_SRC" ]; then
+    echo "Installing cards.cdb from $CARD_DB_SRC into defaults/ and expansions/..."
+    cp "$CARD_DB_SRC" "$ASSETS/cards.cdb"
     mkdir -p "$ASSETS/expansions"
-    cp "src/main/assets/WindBot/cards.cdb" "$ASSETS/expansions/cards.cdb"
+    cp "$CARD_DB_SRC" "$ASSETS/expansions/cards.cdb"
+else
+    echo "ERROR: cards.cdb not found in src/main/assets/!"
+    exit 1
 fi
 
 # 2. Official Card Lua Scripts
