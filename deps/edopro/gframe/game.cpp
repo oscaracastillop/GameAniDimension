@@ -2743,17 +2743,27 @@ void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string&
 		uint32_t cardCode = static_cast<uint32_t>(SafeJsonInt(resp, "cartaGanadaPasscode", 0));
 		std::string cardName = SafeJsonStr(resp, "cartaGanadaNombre", "");
 		long long ssGained = resp.contains("starShipsGanados") && resp["starShipsGanados"].is_number() ? resp["starShipsGanados"].get<long long>() : 0;
+		int expGained = SafeJsonInt(resp, "expGanada", 0);
+		int expTotal = SafeJsonInt(resp, "expTotal", playerExp);
+		int newLevel = SafeJsonInt(resp, "nivelNuevo", playerLevel);
+		bool leveledUp = resp.contains("subioDeNivel") && resp["subioDeNivel"].is_boolean() && resp["subioDeNivel"].get<bool>();
 		{
 			std::lock_guard<epro::mutex> lk(inventoryMutex);
 			if(cardCode > 0) cardInventory[cardCode] = cardInventory[cardCode] + 1;
 			if(resp.contains("starShipsTotales") && resp["starShipsTotales"].is_number())
 				playerStarShips = resp["starShipsTotales"].get<long long>();
+			playerExp = expTotal;
+			playerLevel = newLevel;
 		}
 		std::wstring msg = L"¡Victoria!";
+		if(expGained > 0)
+			msg += epro::format(L"\nEXP ganada: +{}", expGained);
+		if(leveledUp)
+			msg += epro::format(L"\n¡Subiste a Nivel {}!", newLevel);
+		if(ssGained > 0)
+			msg += epro::format(L"\nStarShips ganados: +{}", ssGained);
 		if(!cardName.empty())
 			msg += L"\nCarta ganada: " + BufferIO::DecodeUTF8(cardName);
-		if(ssGained > 0)
-			msg += epro::format(L"\nPremio primera victoria: +{} StarShips", ssGained);
 		PopupMessage(msg);
 	}
 }
