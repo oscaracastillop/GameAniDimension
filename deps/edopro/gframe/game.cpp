@@ -2509,6 +2509,10 @@ void Game::ProcessPendingLoginResult() {
 			ebNickName->setText(loggedInUser.c_str());
 			ebNickName->setEnabled(false);
 		}
+		if(ebNickNameOnline) {
+			ebNickNameOnline->setText(loggedInUser.c_str());
+			ebNickNameOnline->setEnabled(false);
+		}
 		if(gGameConfig)
 			gGameConfig->nickname = loggedInUser;
 		if(ebLoginPass)
