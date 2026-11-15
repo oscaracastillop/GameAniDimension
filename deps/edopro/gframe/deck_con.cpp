@@ -396,7 +396,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			case BUTTON_SELL_CARD: {
 				if(mainGame->isLoggedIn && mainGame->showingcard) {
 					std::wstring msgOut;
-					mainGame->SellCardFromInventory(mainGame->showingcard->code, 1, msgOut);
+					mainGame->SellCardFromInventory(mainGame->showingcard, 1, msgOut);
 					mainGame->stACMessage->setText(msgOut.c_str());
 					mainGame->PopupElement(mainGame->wACMessage, 40);
 					FilterCards(true);

@@ -1448,8 +1448,8 @@ void Game::DrawDeckBd() {
 		if(isLoggedIn) {
 			DrawShadowText(textFont, epro::format(L"Nv.{} | {}*", playerLevel, playerStarShips), Resize(445, 136, 610, 156), Resize(1, 1, 1, 1), 0xffffd700, 0xff000000, false, true);
 			if(btnSellCard) {
-				if(showingcard && cardInventory[showingcard->code] > 3) {
-					long long price = cardSellPrices[showingcard->code];
+				if(showingcard && cardInventory[showingcard] > 3) {
+					long long price = cardSellPrices[showingcard];
 					btnSellCard->setEnabled(true);
 					btnSellCard->setText(epro::format(L"Vender (+{})", price).c_str());
 				} else {
