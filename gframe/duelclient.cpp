@@ -1821,14 +1821,17 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 				mainGame->dInfo.vic_string = gDataManager->GetVictoryString(type).data();
 		}
 		mainGame->showcard = 101;
-		if(player == 0 && mainGame->isLoggedIn) {
+		if((player == 0 || player == 1) && mainGame->isLoggedIn) {
 			bool isAdv = mainGame->isAdventureMode;
 			int npcId = 0;
 			if(isAdv && mainGame->selectedAdventureBot >= 0 && mainGame->selectedAdventureBot < (int)mainGame->adventureNpcList.size())
 				npcId = mainGame->adventureNpcList[mainGame->selectedAdventureBot].id;
 			std::string oppName = !mainGame->dInfo.opponames.empty() ? BufferIO::EncodeUTF8(mainGame->dInfo.opponames[0]) : "Jugador";
-			std::thread([isAdv, npcId, oppName]() {
-				mainGame->NotifyDuelWinToServer(isAdv, npcId, oppName);
+			bool isWin = (player == 0);
+			int turnos = mainGame->dInfo.turn;
+			std::string tipoFin = (type == 0x0) ? "SURRENDER" : (type == 0x2 ? "TIMEOUT" : "NORMAL");
+			std::thread([isAdv, npcId, oppName, isWin, turnos, tipoFin]() {
+				mainGame->NotifyDuelResultToServer(isAdv, npcId, oppName, isWin, turnos, tipoFin);
 			}).detach();
 		}
 		mainGame->WaitFrameSignal(120, lock);
@@ -1890,6 +1893,16 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 		mainGame->dField.Initial(mainGame->LocalPlayer(1), deckc, extrac);
 		mainGame->dInfo.turn = 0;
 		mainGame->dInfo.is_shuffling = false;
+		if(mainGame->isLoggedIn && !mainGame->dInfo.isCatchingUp) {
+			bool isAdv = mainGame->isAdventureMode;
+			int npcId = 0;
+			if(isAdv && mainGame->selectedAdventureBot >= 0 && mainGame->selectedAdventureBot < (int)mainGame->adventureNpcList.size())
+				npcId = mainGame->adventureNpcList[mainGame->selectedAdventureBot].id;
+			std::string oppName = !mainGame->dInfo.opponames.empty() ? BufferIO::EncodeUTF8(mainGame->dInfo.opponames[0]) : "Jugador";
+			std::thread([isAdv, npcId, oppName]() {
+				mainGame->StartDuelSessionOnServer(isAdv, npcId, oppName);
+			}).detach();
+		}
 		return true;
 	}
 	case MSG_UPDATE_DATA: {

@@ -2694,18 +2694,35 @@ bool Game::ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut) {
 	return true;
 }
 
-void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string& opponentName) {
+void Game::StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName) {
 	if(!isLoggedIn || sessionToken.empty()) return;
 	nlohmann::json body;
-	nlohmann::json resp;
-	if(isAdventure) {
-		body["npcId"] = npcId;
-		body["dificultad"] = "Normal";
-		resp = CallSessionApi("/api/adventure/win", sessionToken, body.dump());
-	} else {
-		body["oponente"] = opponentName;
-		resp = CallSessionApi("/api/duel/online/win", sessionToken, body.dump());
+	body["modalidad"] = isAdventure ? "ADVENTURE" : "ONLINE";
+	body["oponenteRef"] = isAdventure ? std::to_string(npcId) : (opponentName.empty() ? "Jugador" : opponentName);
+	auto resp = CallSessionApi("/api/duel/start", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		long long sid = resp.contains("duelSessionId") && resp["duelSessionId"].is_number() ? resp["duelSessionId"].get<long long>() : 0;
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		activeDuelSessionId = sid;
 	}
+}
+
+void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin) {
+	if(!isLoggedIn || sessionToken.empty()) return;
+	long long sid = 0;
+	{
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		sid = activeDuelSessionId;
+		activeDuelSessionId = 0;
+	}
+	nlohmann::json body;
+	body["duelSessionId"] = sid;
+	body["modalidad"] = isAdventure ? "ADVENTURE" : "ONLINE";
+	body["oponenteRef"] = isAdventure ? std::to_string(npcId) : (opponentName.empty() ? "Jugador" : opponentName);
+	body["resultado"] = isWin ? "WIN" : "LOSS";
+	body["turnos"] = turnos;
+	body["tipoFin"] = tipoFin;
+	auto resp = CallSessionApi("/api/duel/finish", sessionToken, body.dump());
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		uint32_t cardCode = static_cast<uint32_t>(SafeJsonInt(resp, "cartaGanadaPasscode", 0));
 		std::string cardName = SafeJsonStr(resp, "cartaGanadaNombre", "");
@@ -2714,6 +2731,7 @@ void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string&
 		int expTotal = SafeJsonInt(resp, "expTotal", playerExp);
 		int newLevel = SafeJsonInt(resp, "nivelNuevo", playerLevel);
 		bool leveledUp = resp.contains("subioDeNivel") && resp["subioDeNivel"].is_boolean() && resp["subioDeNivel"].get<bool>();
+		std::string statusMsg = SafeJsonStr(resp, "mensajeEstado", "");
 		{
 			std::lock_guard<epro::mutex> lk(inventoryMutex);
 			if(cardCode > 0) cardInventory[cardCode] = cardInventory[cardCode] + 1;
@@ -2722,7 +2740,7 @@ void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string&
 			playerExp = expTotal;
 			playerLevel = newLevel;
 		}
-		std::wstring msg = L"¡Victoria!";
+		std::wstring msg = isWin ? L"¡Victoria!" : L"Derrota";
 		if(expGained > 0)
 			msg += epro::format(L"\nEXP ganada: +{}", expGained);
 		if(leveledUp)
@@ -2731,7 +2749,10 @@ void Game::NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string&
 			msg += epro::format(L"\nStarShips ganados: +{}", ssGained);
 		if(!cardName.empty())
 			msg += L"\nCarta ganada: " + BufferIO::DecodeUTF8(cardName);
-		PopupMessage(msg);
+		if(!statusMsg.empty() && statusMsg != "OK")
+			msg += L"\n" + BufferIO::DecodeUTF8(statusMsg);
+		if(expGained > 0 || ssGained > 0 || !cardName.empty() || leveledUp || (!statusMsg.empty() && statusMsg != "OK"))
+			PopupMessage(msg);
 	}
 }
 

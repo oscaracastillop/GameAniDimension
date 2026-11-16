@@ -876,7 +876,9 @@ public:
 	bool SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut);
 	bool SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut);
 	bool ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut);
-	void NotifyDuelWinToServer(bool isAdventure, int npcId, const std::string& opponentName);
+	long long activeDuelSessionId{ 0 };
+	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
+	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;
