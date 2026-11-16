@@ -879,6 +879,139 @@ public:
 	long long activeDuelSessionId{ 0 };
 	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);
+
+	// Dedicated Economy Interfaces (Store, Store Avatars, Store Boosters, Player Profile, Mailbox)
+	struct StoreAvatarItem {
+		int id{ 0 };
+		std::string codigo;
+		std::wstring nombre;
+		std::string archivo;
+		double expPct{ 0.0 };
+		double starShipsPct{ 0.0 };
+		double luckPct{ 0.0 };
+		long long precio{ 0 };
+	};
+	struct StoreBoosterItem {
+		int id{ 0 };
+		std::string tipoStat;
+		std::wstring nombre;
+		double porcentaje{ 0.0 };
+		long long precio{ 0 };
+	};
+	struct UserAvatarItem {
+		int usuarioAvatarId{ 0 };
+		int avatarId{ 0 };
+		std::string codigo;
+		std::wstring nombre;
+		std::string archivo;
+		double baseExp{ 0.0 }, baseSS{ 0.0 }, baseLuck{ 0.0 };
+		double bonusExp{ 0.0 }, bonusSS{ 0.0 }, bonusLuck{ 0.0 };
+		double totalExp{ 0.0 }, totalSS{ 0.0 }, totalLuck{ 0.0 };
+		bool esActivo{ false };
+		std::wstring origen;
+	};
+	struct MailboxEntry {
+		long long id{ 0 };
+		std::string tipoItem;
+		int referenciaId{ 0 };
+		std::wstring titulo;
+		std::wstring descripcion;
+		std::wstring origen;
+		std::string estado;
+	};
+
+	irr::gui::IGUIButton* btnStoreMode{ nullptr };
+	irr::gui::IGUIButton* btnProfileMode{ nullptr };
+	irr::gui::IGUIButton* btnMailboxMode{ nullptr };
+
+	// 1. Store Main Menu (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStoreMenu{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreMenu{ nullptr };
+	irr::gui::IGUIStaticText* stStoreTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBalance{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvatars{ nullptr };
+	irr::gui::IGUIButton* btnStoreBoosters{ nullptr };
+	irr::gui::IGUIButton* btnStoreBack{ nullptr };
+
+	// 2. Store Avatars (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStoreAvatars{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreAvaLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreAvaRight{ nullptr };
+	irr::gui::IGUIStaticText* stStoreAvaTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreAvaBalance{ nullptr };
+	irr::gui::IGUIListBox* lstStoreAvatars{ nullptr };
+	irr::gui::IGUIImage* imgStoreAvatarPreview{ nullptr };
+	irr::gui::IGUIStaticText* stStoreAvatarInfo{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaBack{ nullptr };
+
+	// 3. Store Boosters (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStoreBoosters{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreBstLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreBstRight{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBstTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBstBalance{ nullptr };
+	irr::gui::IGUIListBox* lstStoreBoosters{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBoosterInfo{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstBack{ nullptr };
+
+	// 4. Player Profile (Full-screen canvas)
+	irr::gui::IGUIStaticText* wPlayerProfile{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfileLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfileRight{ nullptr };
+	irr::gui::IGUIStaticText* stProfileTitle{ nullptr };
+	irr::gui::IGUIImage* imgProfileAvatar{ nullptr };
+	irr::gui::IGUIStaticText* stProfileHeader{ nullptr };
+	irr::gui::IGUIStaticText* stProfileActiveStats{ nullptr };
+	irr::gui::IGUIListBox* lstProfileAvatars{ nullptr };
+	irr::gui::IGUIStaticText* stProfileSelectedInfo{ nullptr };
+	irr::gui::IGUIButton* btnProfileActivateAva{ nullptr };
+	irr::gui::IGUIButton* btnProfileMailbox{ nullptr };
+	irr::gui::IGUIButton* btnProfileBack{ nullptr };
+
+	// 5. Mailbox (Full-screen canvas)
+	irr::gui::IGUIStaticText* wMailbox{ nullptr };
+	irr::gui::IGUIStaticText* pnlMailboxLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlMailboxRight{ nullptr };
+	irr::gui::IGUIStaticText* stMailboxTitle{ nullptr };
+	irr::gui::IGUIListBox* lstMailboxItems{ nullptr };
+	irr::gui::IGUIStaticText* stMailboxDetail{ nullptr };
+	irr::gui::IGUIButton* btnMailboxClaim{ nullptr };
+	irr::gui::IGUIButton* btnMailboxDiscard{ nullptr };
+	irr::gui::IGUIButton* btnMailboxBack{ nullptr };
+
+	// Purchase confirmation box
+	irr::gui::IGUIWindow* wConfirmPurchase{ nullptr };
+	irr::gui::IGUIStaticText* stConfirmPurchaseMsg{ nullptr };
+	irr::gui::IGUIButton* btnConfirmYes{ nullptr };
+	irr::gui::IGUIButton* btnConfirmNo{ nullptr };
+	int pendingConfirmType{ 0 }; // 1 = avatar, 2 = booster
+	int pendingConfirmId{ 0 };
+	int mailboxReturnTarget{ 0 }; // 0 = MainMenu, 1 = PlayerProfile
+
+	std::vector<StoreAvatarItem> storeAvatars;
+	std::vector<StoreBoosterItem> storeBoosters;
+	std::vector<UserAvatarItem> profileAvatars;
+	std::vector<MailboxEntry> mailboxItems;
+
+	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
+	void PopulateEconomyScreens();
+	void ResizeEconomyScreens();
+	void OpenStoreMenu();
+	void OpenStoreAvatars();
+	void OpenStoreBoosters();
+	void OpenPlayerProfile();
+	void OpenMailbox(int returnTo = 0);
+	void SelectStoreAvatar(int idx);
+	void SelectStoreBooster(int idx);
+	void SelectProfileAvatar(int idx);
+	void SelectMailboxItem(int idx);
+	void RequestBuySelectedAvatar();
+	void RequestBuySelectedBooster();
+	void ExecuteConfirmedPurchase();
+	void ActivateSelectedAvatar();
+	void ResolveSelectedMailboxItem(bool claim);
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();
 	SettingsWindow gSettings;

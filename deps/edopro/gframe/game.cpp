@@ -254,7 +254,7 @@ void Game::Initialize() {
 	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
 	mainMenuLeftX = 510 - mainMenuWidth / 2;
 	mainMenuRightX = 510 + mainMenuWidth / 2;
-	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 180, mainMenuRightX, 435), false, L"");
+	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 145, mainMenuRightX, 505), false, L"");
 	wMainMenu->setDrawTitlebar(false);
 	wMainMenu->getCloseButton()->setVisible(false);
 	wMainMenu->setVisible(false);
@@ -264,6 +264,12 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnOnlineMode, 2042);
 	offset += 35;
 	btnAdventureMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ADVENTURE_MODE, L"Modo Aventura");
+	offset += 35;
+	btnStoreMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
+	offset += 35;
+	btnProfileMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_PROFILE_OPEN, L"Perfil Jugador");
+	offset += 35;
+	btnMailboxMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_MAILBOX_OPEN, L"Buzon");
 	offset += 35;
 	// LAN + AI disabled as requested
 	// btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
@@ -327,6 +333,7 @@ void Game::Initialize() {
 	PopulateGameHostWindows();
 	PopulateAIBotWindow();
 	PopulateAdventureModeWindow();
+	PopulateEconomyScreens();
 
 	//img
 	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), true, false, 0, -1, true);
@@ -2789,6 +2796,572 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 	}
 }
 
+irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
+	if(filename.empty() || !driver) return nullptr;
+	std::string localRel = "textures/avatars/" + filename;
+	auto tex = driver->getTexture(localRel.c_str());
+	if(tex) return tex;
+
+	std::filesystem::create_directories("textures/avatars");
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto curl = curl_easy_init();
+	if(curl) {
+		for(const auto& host : hosts) {
+			std::string url = host + "/api/avatars/" + filename;
+			std::string bytes;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			long code = 0;
+			auto res = curl_easy_perform(curl);
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+			if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+				std::ofstream out(localRel, std::ios::binary);
+				if(out) {
+					out.write(bytes.data(), bytes.size());
+					out.close();
+					tex = driver->getTexture(localRel.c_str());
+					if(tex) break;
+				}
+			}
+		}
+		curl_easy_cleanup(curl);
+	}
+	return tex;
+}
+
+void Game::PopulateEconomyScreens() {
+	auto makeCanvas = [&](irr::gui::IGUIStaticText*& canvas) {
+		canvas = env->addStaticText(L"", irr::core::recti(0, 0, window_size.Width, window_size.Height), false, false, 0, -1, true);
+		canvas->setBackgroundColor(irr::video::SColor(255, 10, 12, 18));
+		canvas->setVisible(false);
+	};
+	auto makePanel = [&](irr::gui::IGUIElement* parent) {
+		auto p = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, parent, -1, true);
+		p->setBackgroundColor(irr::video::SColor(235, 16, 20, 32));
+		return p;
+	};
+
+	// 1. Store Menu (dedicated full-screen)
+	makeCanvas(wStoreMenu);
+	pnlStoreMenu = makePanel(wStoreMenu);
+	stStoreTitle = env->addStaticText(L"TIENDA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
+	stStoreTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	stStoreTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stStoreBalance = env->addStaticText(L"StarShips: 0", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
+	stStoreBalance->setOverrideColor(irr::video::SColor(255, 120, 230, 255));
+	stStoreBalance->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	btnStoreAvatars = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_AVATARS, L"AVATARES");
+	btnStoreBoosters = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BOOSTERS, L"POTENCIADORES");
+	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"VOLVER AL MENU");
+
+	// 2. Store Avatars (dedicated full-screen)
+	makeCanvas(wStoreAvatars);
+	pnlStoreAvaLeft = makePanel(wStoreAvatars);
+	pnlStoreAvaRight = makePanel(wStoreAvatars);
+	stStoreAvaTitle = env->addStaticText(L"TIENDA DE AVATARES", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
+	stStoreAvaTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	stStoreAvaBalance = env->addStaticText(L"StarShips: 0", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
+	stStoreAvaBalance->setOverrideColor(irr::video::SColor(255, 120, 230, 255));
+	lstStoreAvatars = env->addListBox(irr::core::recti(0, 0, 10, 10), wStoreAvatars, LISTBOX_STORE_AVATARS, true);
+	lstStoreAvatars->setItemHeight(Scale(28));
+	imgStoreAvatarPreview = env->addImage(irr::core::recti(0, 0, 10, 10), wStoreAvatars);
+	imgStoreAvatarPreview->setScaleImage(true);
+	stStoreAvatarInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wStoreAvatars);
+	stStoreAvatarInfo->setWordWrap(true);
+	stStoreAvatarInfo->setOverrideColor(irr::video::SColor(255, 235, 240, 255));
+	btnStoreAvaBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BUY, L"COMPRAR AVATAR");
+	btnStoreAvaBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BACK, L"VOLVER A TIENDA");
+
+	// 3. Store Boosters (dedicated full-screen)
+	makeCanvas(wStoreBoosters);
+	pnlStoreBstLeft = makePanel(wStoreBoosters);
+	pnlStoreBstRight = makePanel(wStoreBoosters);
+	stStoreBstTitle = env->addStaticText(L"TIENDA DE POTENCIADORES", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
+	stStoreBstTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	stStoreBstBalance = env->addStaticText(L"StarShips: 0", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
+	stStoreBstBalance->setOverrideColor(irr::video::SColor(255, 120, 230, 255));
+	lstStoreBoosters = env->addListBox(irr::core::recti(0, 0, 10, 10), wStoreBoosters, LISTBOX_STORE_BOOSTERS, true);
+	lstStoreBoosters->setItemHeight(Scale(28));
+	stStoreBoosterInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wStoreBoosters);
+	stStoreBoosterInfo->setWordWrap(true);
+	stStoreBoosterInfo->setOverrideColor(irr::video::SColor(255, 235, 240, 255));
+	btnStoreBstBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BUY, L"COMPRAR POTENCIADOR");
+	btnStoreBstBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BACK, L"VOLVER A TIENDA");
+
+	// 4. Player Profile (dedicated full-screen)
+	makeCanvas(wPlayerProfile);
+	pnlProfileLeft = makePanel(wPlayerProfile);
+	pnlProfileRight = makePanel(wPlayerProfile);
+	stProfileTitle = env->addStaticText(L"PERFIL DEL JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, wPlayerProfile);
+	stProfileTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	imgProfileAvatar = env->addImage(irr::core::recti(0, 0, 10, 10), wPlayerProfile);
+	imgProfileAvatar->setScaleImage(true);
+	stProfileHeader = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPlayerProfile);
+	stProfileHeader->setWordWrap(true);
+	stProfileHeader->setOverrideColor(irr::video::SColor(255, 235, 245, 255));
+	stProfileActiveStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPlayerProfile);
+	stProfileActiveStats->setWordWrap(true);
+	stProfileActiveStats->setOverrideColor(irr::video::SColor(255, 130, 245, 170));
+	lstProfileAvatars = env->addListBox(irr::core::recti(0, 0, 10, 10), wPlayerProfile, LISTBOX_PROFILE_AVATARS, true);
+	lstProfileAvatars->setItemHeight(Scale(28));
+	stProfileSelectedInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPlayerProfile);
+	stProfileSelectedInfo->setWordWrap(true);
+	stProfileSelectedInfo->setOverrideColor(irr::video::SColor(255, 220, 230, 250));
+	btnProfileActivateAva = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_ACTIVATE_AVA, L"ACTIVAR AVATAR");
+	btnProfileMailbox = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_MAILBOX, L"BUZON");
+	btnProfileBack = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_BACK, L"VOLVER AL MENU");
+
+	// 5. Mailbox (dedicated full-screen)
+	makeCanvas(wMailbox);
+	pnlMailboxLeft = makePanel(wMailbox);
+	pnlMailboxRight = makePanel(wMailbox);
+	stMailboxTitle = env->addStaticText(L"BUZON DE RECOMPENSAS Y COMPRAS", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
+	stMailboxTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	lstMailboxItems = env->addListBox(irr::core::recti(0, 0, 10, 10), wMailbox, LISTBOX_MAILBOX_ITEMS, true);
+	lstMailboxItems->setItemHeight(Scale(28));
+	stMailboxDetail = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wMailbox);
+	stMailboxDetail->setWordWrap(true);
+	stMailboxDetail->setOverrideColor(irr::video::SColor(255, 235, 240, 255));
+	btnMailboxClaim = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_CLAIM, L"RECLAMAR");
+	btnMailboxDiscard = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_DISCARD, L"DESCARTAR");
+	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"VOLVER");
+
+	// Confirmation dialog for purchases
+	wConfirmPurchase = env->addWindow(Scale(312, 220, 712, 390), true, L"Confirmar Compra");
+	wConfirmPurchase->getCloseButton()->setVisible(false);
+	wConfirmPurchase->setVisible(false);
+	stConfirmPurchaseMsg = env->addStaticText(L"", Scale(20, 35, 380, 110), false, true, wConfirmPurchase);
+	stConfirmPurchaseMsg->setWordWrap(true);
+	btnConfirmYes = env->addButton(Scale(35, 120, 185, 155), wConfirmPurchase, BUTTON_CONFIRM_YES, L"SI, COMPRAR");
+	btnConfirmNo = env->addButton(Scale(215, 120, 365, 155), wConfirmPurchase, BUTTON_CONFIRM_NO, L"CANCELAR");
+
+	ResizeEconomyScreens();
+}
+
+void Game::ResizeEconomyScreens() {
+	const irr::s32 W = window_size.Width;
+	const irr::s32 H = window_size.Height;
+	const irr::s32 pad = std::max<irr::s32>(16, W / 50);
+
+	if(wStoreMenu) {
+		wStoreMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
+		irr::s32 bw = std::min<irr::s32>(380, W - pad * 4);
+		irr::s32 bh = 280;
+		irr::s32 cx = (W - bw) / 2;
+		irr::s32 cy = (H - bh) / 2;
+		pnlStoreMenu->setRelativePosition(irr::core::recti(cx - 24, cy - 24, cx + bw + 24, cy + bh + 24));
+		stStoreTitle->setRelativePosition(irr::core::recti(cx, cy, cx + bw, cy + 32));
+		stStoreBalance->setRelativePosition(irr::core::recti(cx, cy + 36, cx + bw, cy + 64));
+		btnStoreAvatars->setRelativePosition(irr::core::recti(cx, cy + 82, cx + bw, cy + 132));
+		btnStoreBoosters->setRelativePosition(irr::core::recti(cx, cy + 146, cx + bw, cy + 196));
+		btnStoreBack->setRelativePosition(irr::core::recti(cx, cy + 216, cx + bw, cy + 264));
+	}
+
+	irr::s32 splitX = (W * 48) / 100;
+	if(wStoreAvatars) {
+		wStoreAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
+		pnlStoreAvaLeft->setRelativePosition(irr::core::recti(pad, pad, splitX - pad / 2, H - pad));
+		pnlStoreAvaRight->setRelativePosition(irr::core::recti(splitX + pad / 2, pad, W - pad, H - pad));
+		stStoreAvaTitle->setRelativePosition(irr::core::recti(pad * 2, pad + 12, splitX - pad, pad + 42));
+		stStoreAvaBalance->setRelativePosition(irr::core::recti(pad * 2, pad + 46, splitX - pad, pad + 72));
+		lstStoreAvatars->setRelativePosition(irr::core::recti(pad * 2, pad + 80, splitX - pad, H - pad * 2 - 56));
+		btnStoreAvaBack->setRelativePosition(irr::core::recti(pad * 2, H - pad * 2 - 46, splitX - pad, H - pad * 2));
+
+		irr::s32 rx = splitX + pad + 12;
+		irr::s32 rw = W - pad * 2 - rx;
+		irr::s32 imgS = std::min<irr::s32>(200, std::min<irr::s32>(rw, H / 3));
+		imgStoreAvatarPreview->setRelativePosition(irr::core::recti(rx + (rw - imgS) / 2, pad + 20, rx + (rw + imgS) / 2, pad + 20 + imgS));
+		stStoreAvatarInfo->setRelativePosition(irr::core::recti(rx, pad + 34 + imgS, rx + rw, H - pad * 2 - 60));
+		btnStoreAvaBuy->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 46, rx + rw, H - pad * 2));
+	}
+
+	if(wStoreBoosters) {
+		wStoreBoosters->setRelativePosition(irr::core::recti(0, 0, W, H));
+		pnlStoreBstLeft->setRelativePosition(irr::core::recti(pad, pad, splitX - pad / 2, H - pad));
+		pnlStoreBstRight->setRelativePosition(irr::core::recti(splitX + pad / 2, pad, W - pad, H - pad));
+		stStoreBstTitle->setRelativePosition(irr::core::recti(pad * 2, pad + 12, splitX - pad, pad + 42));
+		stStoreBstBalance->setRelativePosition(irr::core::recti(pad * 2, pad + 46, splitX - pad, pad + 72));
+		lstStoreBoosters->setRelativePosition(irr::core::recti(pad * 2, pad + 80, splitX - pad, H - pad * 2 - 56));
+		btnStoreBstBack->setRelativePosition(irr::core::recti(pad * 2, H - pad * 2 - 46, splitX - pad, H - pad * 2));
+
+		irr::s32 rx = splitX + pad + 12;
+		irr::s32 rw = W - pad * 2 - rx;
+		stStoreBoosterInfo->setRelativePosition(irr::core::recti(rx, pad + 30, rx + rw, H - pad * 2 - 60));
+		btnStoreBstBuy->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 46, rx + rw, H - pad * 2));
+	}
+
+	if(wPlayerProfile) {
+		wPlayerProfile->setRelativePosition(irr::core::recti(0, 0, W, H));
+		pnlProfileLeft->setRelativePosition(irr::core::recti(pad, pad, splitX - pad / 2, H - pad));
+		pnlProfileRight->setRelativePosition(irr::core::recti(splitX + pad / 2, pad, W - pad, H - pad));
+		stProfileTitle->setRelativePosition(irr::core::recti(pad * 2, pad + 12, splitX - pad, pad + 40));
+		irr::s32 imgS = std::min<irr::s32>(160, H / 4);
+		imgProfileAvatar->setRelativePosition(irr::core::recti(pad * 2, pad + 48, pad * 2 + imgS, pad + 48 + imgS));
+		stProfileHeader->setRelativePosition(irr::core::recti(pad * 2 + imgS + 14, pad + 48, splitX - pad, pad + 48 + imgS));
+		stProfileActiveStats->setRelativePosition(irr::core::recti(pad * 2, pad + 60 + imgS, splitX - pad, H - pad * 2 - 108));
+		btnProfileMailbox->setRelativePosition(irr::core::recti(pad * 2, H - pad * 2 - 100, splitX - pad, H - pad * 2 - 54));
+		btnProfileBack->setRelativePosition(irr::core::recti(pad * 2, H - pad * 2 - 46, splitX - pad, H - pad * 2));
+
+		irr::s32 rx = splitX + pad + 12;
+		irr::s32 rw = W - pad * 2 - rx;
+		lstProfileAvatars->setRelativePosition(irr::core::recti(rx, pad + 20, rx + rw, H / 2 + 20));
+		stProfileSelectedInfo->setRelativePosition(irr::core::recti(rx, H / 2 + 30, rx + rw, H - pad * 2 - 56));
+		btnProfileActivateAva->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 46, rx + rw, H - pad * 2));
+	}
+
+	if(wMailbox) {
+		wMailbox->setRelativePosition(irr::core::recti(0, 0, W, H));
+		pnlMailboxLeft->setRelativePosition(irr::core::recti(pad, pad, splitX - pad / 2, H - pad));
+		pnlMailboxRight->setRelativePosition(irr::core::recti(splitX + pad / 2, pad, W - pad, H - pad));
+		stMailboxTitle->setRelativePosition(irr::core::recti(pad * 2, pad + 12, splitX - pad, pad + 42));
+		lstMailboxItems->setRelativePosition(irr::core::recti(pad * 2, pad + 50, splitX - pad, H - pad * 2 - 56));
+		btnMailboxBack->setRelativePosition(irr::core::recti(pad * 2, H - pad * 2 - 46, splitX - pad, H - pad * 2));
+
+		irr::s32 rx = splitX + pad + 12;
+		irr::s32 rw = W - pad * 2 - rx;
+		stMailboxDetail->setRelativePosition(irr::core::recti(rx, pad + 24, rx + rw, H - pad * 2 - 110));
+		btnMailboxClaim->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 100, rx + rw, H - pad * 2 - 54));
+		btnMailboxDiscard->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 46, rx + rw, H - pad * 2));
+	}
+	if(wConfirmPurchase) SetCentered(wConfirmPurchase, false);
+}
+
+void Game::OpenStoreMenu() {
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	if(wMainMenu) wMainMenu->setVisible(false);
+	if(wStoreAvatars) wStoreAvatars->setVisible(false);
+	if(wStoreBoosters) wStoreBoosters->setVisible(false);
+	if(wPlayerProfile) wPlayerProfile->setVisible(false);
+	if(wMailbox) wMailbox->setVisible(false);
+
+	auto resp = CallSessionApi("/api/store", sessionToken);
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		playerStarShips = resp.contains("starShips") && resp["starShips"].is_number() ? resp["starShips"].get<long long>() : playerStarShips;
+		storeAvatars.clear();
+		if(resp.contains("avatars") && resp["avatars"].is_array()) {
+			for(const auto& a : resp["avatars"]) {
+				StoreAvatarItem it;
+				it.id = SafeJsonInt(a, "id", 0);
+				it.codigo = SafeJsonStr(a, "codigo", "");
+				it.nombre = BufferIO::DecodeUTF8(SafeJsonStr(a, "nombre", ""));
+				it.archivo = SafeJsonStr(a, "archivo", "");
+				it.starShipsPct = a.contains("starShipsPct") && a["starShipsPct"].is_number() ? a["starShipsPct"].get<double>() : 0.0;
+				it.expPct = a.contains("expPct") && a["expPct"].is_number() ? a["expPct"].get<double>() : 0.0;
+				it.luckPct = a.contains("luckPct") && a["luckPct"].is_number() ? a["luckPct"].get<double>() : 0.0;
+				it.precio = a.contains("precio") && a["precio"].is_number() ? a["precio"].get<long long>() : 0;
+				storeAvatars.push_back(it);
+			}
+		}
+		storeBoosters.clear();
+		if(resp.contains("potenciadores") && resp["potenciadores"].is_array()) {
+			for(const auto& p : resp["potenciadores"]) {
+				StoreBoosterItem it;
+				it.id = SafeJsonInt(p, "id", 0);
+				it.tipoStat = SafeJsonStr(p, "tipoStat", "");
+				it.nombre = BufferIO::DecodeUTF8(SafeJsonStr(p, "nombre", ""));
+				it.porcentaje = p.contains("porcentaje") && p["porcentaje"].is_number() ? p["porcentaje"].get<double>() : 0.0;
+				it.precio = p.contains("precio") && p["precio"].is_number() ? p["precio"].get<long long>() : 0;
+				storeBoosters.push_back(it);
+			}
+		}
+	}
+	stStoreBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+	ResizeEconomyScreens();
+	wStoreMenu->setVisible(true);
+}
+
+void Game::OpenStoreAvatars() {
+	if(wStoreMenu) wStoreMenu->setVisible(false);
+	stStoreAvaBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+	lstStoreAvatars->clear();
+	for(const auto& a : storeAvatars) {
+		lstStoreAvatars->addItem(epro::format(L"{} - {} SS", a.nombre, a.precio).c_str());
+	}
+	if(!storeAvatars.empty()) {
+		lstStoreAvatars->setSelected(0);
+		SelectStoreAvatar(0);
+	} else {
+		imgStoreAvatarPreview->setImage(nullptr);
+		stStoreAvatarInfo->setText(L"No hay avatares en venta actualmente.");
+	}
+	ResizeEconomyScreens();
+	wStoreAvatars->setVisible(true);
+}
+
+void Game::SelectStoreAvatar(int idx) {
+	if(idx < 0 || idx >= (int)storeAvatars.size()) return;
+	const auto& a = storeAvatars[idx];
+	auto tex = LoadAvatarTexture(a.archivo);
+	imgStoreAvatarPreview->setImage(tex);
+	std::wstring info = epro::format(
+		L"{} ({})\n\nPrecio: {} StarShips\n\nEstadisticas Base:\n- EXP: +{:.2f}%\n- StarShips: +{:.2f}%\n- Luck: +{:.2f}%\n\nAl comprar, el avatar llegara a tu Buzon para reclamarlo como instancia unica en tu perfil.",
+		a.nombre, BufferIO::DecodeUTF8(a.codigo), a.precio, a.expPct, a.starShipsPct, a.luckPct
+	);
+	stStoreAvatarInfo->setText(info.c_str());
+}
+
+void Game::OpenStoreBoosters() {
+	if(wStoreMenu) wStoreMenu->setVisible(false);
+	stStoreBstBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+	lstStoreBoosters->clear();
+	for(const auto& p : storeBoosters) {
+		lstStoreBoosters->addItem(epro::format(L"{} - {} SS", p.nombre, p.precio).c_str());
+	}
+	if(!storeBoosters.empty()) {
+		lstStoreBoosters->setSelected(0);
+		SelectStoreBooster(0);
+	} else {
+		stStoreBoosterInfo->setText(L"No hay potenciadores disponibles.");
+	}
+	ResizeEconomyScreens();
+	wStoreBoosters->setVisible(true);
+}
+
+void Game::SelectStoreBooster(int idx) {
+	if(idx < 0 || idx >= (int)storeBoosters.size()) return;
+	const auto& p = storeBoosters[idx];
+	std::wstring info = epro::format(
+		L"{}\n\nTipo: {}\nIncremento: +{:.2f}%\nPrecio: {} StarShips\n\nLimites maximos por Avatar (Base + Potenciadores):\n- EXP: 300%\n- StarShips: 300%\n- Luck: 100%\n\nAl comprar, se envia a tu Buzon para potenciar exclusivamente tu Avatar Activo.",
+		p.nombre, BufferIO::DecodeUTF8(p.tipoStat), p.porcentaje, p.precio
+	);
+	stStoreBoosterInfo->setText(info.c_str());
+}
+
+void Game::RequestBuySelectedAvatar() {
+	int idx = lstStoreAvatars ? lstStoreAvatars->getSelected() : -1;
+	if(idx < 0 || idx >= (int)storeAvatars.size()) return;
+	const auto& a = storeAvatars[idx];
+	auto chk = CallSessionApi("/api/store", sessionToken);
+	if(chk.contains("starShips") && chk["starShips"].is_number())
+		playerStarShips = chk["starShips"].get<long long>();
+	stStoreAvaBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+	if(playerStarShips < a.precio) {
+		PopupMessage(epro::format(L"StarShips insuficientes.\nNecesitas {} SS y tienes {} SS.", a.precio, playerStarShips));
+		return;
+	}
+	pendingConfirmType = 1;
+	pendingConfirmId = a.id;
+	stConfirmPurchaseMsg->setText(epro::format(L"¿Estas seguro de comprar {} por {} StarShips?", a.nombre, a.precio).c_str());
+	SetCentered(wConfirmPurchase, false);
+	wConfirmPurchase->setVisible(true);
+	env->setFocus(wConfirmPurchase);
+}
+
+void Game::RequestBuySelectedBooster() {
+	int idx = lstStoreBoosters ? lstStoreBoosters->getSelected() : -1;
+	if(idx < 0 || idx >= (int)storeBoosters.size()) return;
+	const auto& p = storeBoosters[idx];
+	auto chk = CallSessionApi("/api/store", sessionToken);
+	if(chk.contains("starShips") && chk["starShips"].is_number())
+		playerStarShips = chk["starShips"].get<long long>();
+	stStoreBstBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+	if(playerStarShips < p.precio) {
+		PopupMessage(epro::format(L"StarShips insuficientes.\nNecesitas {} SS y tienes {} SS.", p.precio, playerStarShips));
+		return;
+	}
+	pendingConfirmType = 2;
+	pendingConfirmId = p.id;
+	stConfirmPurchaseMsg->setText(epro::format(L"¿Estas seguro de comprar {} por {} StarShips?", p.nombre, p.precio).c_str());
+	SetCentered(wConfirmPurchase, false);
+	wConfirmPurchase->setVisible(true);
+	env->setFocus(wConfirmPurchase);
+}
+
+void Game::ExecuteConfirmedPurchase() {
+	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
+	if(pendingConfirmType != 1 && pendingConfirmType != 2) return;
+	nlohmann::json body;
+	std::string ep;
+	if(pendingConfirmType == 1) {
+		body["avatarId"] = pendingConfirmId;
+		ep = "/api/store/buy-avatar";
+	} else {
+		body["potenciadorId"] = pendingConfirmId;
+		ep = "/api/store/buy-booster";
+	}
+	pendingConfirmType = 0;
+	pendingConfirmId = 0;
+	auto resp = CallSessionApi(ep, sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		if(resp.contains("starShipsTotales") && resp["starShipsTotales"].is_number())
+			playerStarShips = resp["starShipsTotales"].get<long long>();
+		if(stStoreBalance) stStoreBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+		if(stStoreAvaBalance) stStoreAvaBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+		if(stStoreBstBalance) stStoreBstBalance->setText(epro::format(L"StarShips disponibles: {}", playerStarShips).c_str());
+		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "mensaje", "Compra exitosa. Revisa tu Buzon.")));
+	} else {
+		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo completar la compra.")));
+	}
+}
+
+void Game::OpenPlayerProfile() {
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	if(wMainMenu) wMainMenu->setVisible(false);
+	if(wStoreMenu) wStoreMenu->setVisible(false);
+	if(wMailbox) wMailbox->setVisible(false);
+
+	auto resp = CallSessionApi("/api/profile", sessionToken);
+	profileAvatars.clear();
+	lstProfileAvatars->clear();
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		playerLevel = SafeJsonInt(resp, "nivel", playerLevel);
+		playerExp = SafeJsonInt(resp, "exp", playerExp);
+		playerStarShips = resp.contains("starShips") && resp["starShips"].is_number() ? resp["starShips"].get<long long>() : playerStarShips;
+		int conducta = SafeJsonInt(resp, "puntosConducta", 100);
+		int pend = SafeJsonInt(resp, "buzonPendientes", 0);
+		std::wstring uname = BufferIO::DecodeUTF8(SafeJsonStr(resp, "usuario", ""));
+		stProfileHeader->setText(epro::format(
+			L"Usuario: {}\nNivel: {}\nEXP: {}\nStarShips: {}\nConducta: {}/100",
+			uname, playerLevel, playerExp, playerStarShips, conducta
+		).c_str());
+		btnProfileMailbox->setText(pend > 0 ? epro::format(L"BUZON ({} PEND.)", pend).c_str() : L"BUZON");
+
+		const UserAvatarItem* activePtr = nullptr;
+		if(resp.contains("avatars") && resp["avatars"].is_array()) {
+			for(const auto& a : resp["avatars"]) {
+				UserAvatarItem it;
+				it.usuarioAvatarId = SafeJsonInt(a, "usuarioAvatarId", 0);
+				it.avatarId = SafeJsonInt(a, "avatarId", 0);
+				it.codigo = SafeJsonStr(a, "codigo", "");
+				it.nombre = BufferIO::DecodeUTF8(SafeJsonStr(a, "nombre", ""));
+				it.archivo = SafeJsonStr(a, "archivo", "");
+				it.baseExp = a.value("baseExp", 0.0);
+				it.baseSS = a.value("baseStarShips", 0.0);
+				it.baseLuck = a.value("baseLuck", 0.0);
+				it.bonusExp = a.value("bonusExp", 0.0);
+				it.bonusSS = a.value("bonusStarShips", 0.0);
+				it.bonusLuck = a.value("bonusLuck", 0.0);
+				it.totalExp = a.value("totalExp", 0.0);
+				it.totalSS = a.value("totalStarShips", 0.0);
+				it.totalLuck = a.value("totalLuck", 0.0);
+				it.esActivo = a.value("esActivo", false);
+				it.origen = BufferIO::DecodeUTF8(SafeJsonStr(a, "origen", ""));
+				profileAvatars.push_back(it);
+				lstProfileAvatars->addItem(epro::format(L"{}{} (#{})", it.esActivo ? L"[ACTIVO] " : L"", it.nombre, it.usuarioAvatarId).c_str());
+				if(it.esActivo) activePtr = &profileAvatars.back();
+			}
+		}
+		if(activePtr) {
+			imgProfileAvatar->setImage(LoadAvatarTexture(activePtr->archivo));
+			stProfileActiveStats->setText(epro::format(
+				L"Avatar Activo: {} ({})\n- EXP: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 300%\n- StarShips: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 300%\n- Luck: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 100%",
+				activePtr->nombre, BufferIO::DecodeUTF8(activePtr->codigo),
+				activePtr->totalExp, activePtr->baseExp, activePtr->bonusExp,
+				activePtr->totalSS, activePtr->baseSS, activePtr->bonusSS,
+				activePtr->totalLuck, activePtr->baseLuck, activePtr->bonusLuck
+			).c_str());
+		} else {
+			imgProfileAvatar->setImage(nullptr);
+			stProfileActiveStats->setText(L"Sin avatar activo.");
+		}
+		if(!profileAvatars.empty()) {
+			lstProfileAvatars->setSelected(0);
+			SelectProfileAvatar(0);
+		}
+	}
+	ResizeEconomyScreens();
+	wPlayerProfile->setVisible(true);
+}
+
+void Game::SelectProfileAvatar(int idx) {
+	if(idx < 0 || idx >= (int)profileAvatars.size()) return;
+	const auto& it = profileAvatars[idx];
+	stProfileSelectedInfo->setText(epro::format(
+		L"Instancia #{} - {} ({})\nOrigen: {} | Estado: {}\nEXP: {:.2f}% / 300% | SS: {:.2f}% / 300% | Luck: {:.2f}% / 100%",
+		it.usuarioAvatarId, it.nombre, BufferIO::DecodeUTF8(it.codigo), it.origen,
+		it.esActivo ? L"ACTIVO" : L"Inactivo", it.totalExp, it.totalSS, it.totalLuck
+	).c_str());
+	if(btnProfileActivateAva) btnProfileActivateAva->setEnabled(!it.esActivo);
+}
+
+void Game::ActivateSelectedAvatar() {
+	int idx = lstProfileAvatars ? lstProfileAvatars->getSelected() : -1;
+	if(idx < 0 || idx >= (int)profileAvatars.size()) return;
+	nlohmann::json body;
+	body["usuarioAvatarId"] = profileAvatars[idx].usuarioAvatarId;
+	auto resp = CallSessionApi("/api/profile/avatar/activate", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		OpenPlayerProfile();
+	} else {
+		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo activar el avatar.")));
+	}
+}
+
+void Game::OpenMailbox(int returnTo) {
+	mailboxReturnTarget = returnTo;
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	if(wMainMenu) wMainMenu->setVisible(false);
+	if(wPlayerProfile) wPlayerProfile->setVisible(false);
+
+	auto resp = CallSessionApi("/api/mailbox", sessionToken);
+	mailboxItems.clear();
+	lstMailboxItems->clear();
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		if(resp.contains("items") && resp["items"].is_array()) {
+			for(const auto& x : resp["items"]) {
+				MailboxEntry it;
+				it.id = x.value("id", 0LL);
+				it.tipoItem = SafeJsonStr(x, "tipoItem", "");
+				it.referenciaId = SafeJsonInt(x, "referenciaId", 0);
+				it.titulo = BufferIO::DecodeUTF8(SafeJsonStr(x, "titulo", ""));
+				it.descripcion = BufferIO::DecodeUTF8(SafeJsonStr(x, "descripcion", ""));
+				it.origen = BufferIO::DecodeUTF8(SafeJsonStr(x, "origen", ""));
+				it.estado = SafeJsonStr(x, "estado", "PENDIENTE");
+				mailboxItems.push_back(it);
+				lstMailboxItems->addItem(epro::format(L"[{}] {}", BufferIO::DecodeUTF8(it.estado), it.titulo).c_str());
+			}
+		}
+	}
+	if(!mailboxItems.empty()) {
+		lstMailboxItems->setSelected(0);
+		SelectMailboxItem(0);
+	} else {
+		stMailboxDetail->setText(L"Tu buzon esta vacio.");
+		btnMailboxClaim->setEnabled(false);
+		btnMailboxDiscard->setEnabled(false);
+	}
+	ResizeEconomyScreens();
+	wMailbox->setVisible(true);
+}
+
+void Game::SelectMailboxItem(int idx) {
+	if(idx < 0 || idx >= (int)mailboxItems.size()) return;
+	const auto& it = mailboxItems[idx];
+	bool pend = (it.estado == "PENDIENTE");
+	stMailboxDetail->setText(epro::format(
+		L"{}\n\nTipo: {} | Origen: {} | Estado: {}\n\n{}",
+		it.titulo, BufferIO::DecodeUTF8(it.tipoItem), it.origen, BufferIO::DecodeUTF8(it.estado), it.descripcion
+	).c_str());
+	btnMailboxClaim->setText(it.tipoItem == "POTENCIADOR" ? L"RECLAMAR Y POTENCIAR AVATAR" : L"RECLAMAR");
+	btnMailboxClaim->setEnabled(pend);
+	btnMailboxDiscard->setEnabled(pend);
+}
+
+void Game::ResolveSelectedMailboxItem(bool claim) {
+	int idx = lstMailboxItems ? lstMailboxItems->getSelected() : -1;
+	if(idx < 0 || idx >= (int)mailboxItems.size()) return;
+	nlohmann::json body;
+	body["buzonId"] = mailboxItems[idx].id;
+	body["accion"] = claim ? "RECLAMAR" : "DESCARTAR";
+	auto resp = CallSessionApi("/api/mailbox/resolve", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "mensaje", "Procesado.")));
+		OpenMailbox(mailboxReturnTarget);
+	} else {
+		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo procesar el elemento.")));
+	}
+}
+
 void Game::PopulateTabSettingsWindow() {
 	//tab
 	infosExpanded = 0;
@@ -5032,7 +5605,9 @@ void Game::OnResize() {
 	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	if(wAdventureMode)
 		ResizeAdventureMode();
-	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 200, mainMenuRightX, 415));
+	if(wStoreMenu)
+		ResizeEconomyScreens();
+	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 145, mainMenuRightX, 505));
 	if(wLogin)
 		wLogin->setRelativePosition(ResizeWin(342, 165, 682, 435));
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));

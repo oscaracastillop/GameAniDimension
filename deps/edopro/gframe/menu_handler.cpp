@@ -213,6 +213,95 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->StartAdventureDuel();
 				break;
 			}
+			case BUTTON_STORE_OPEN: {
+				mainGame->OpenStoreMenu();
+				break;
+			}
+			case BUTTON_PROFILE_OPEN: {
+				mainGame->OpenPlayerProfile();
+				break;
+			}
+			case BUTTON_MAILBOX_OPEN: {
+				mainGame->OpenMailbox(0);
+				break;
+			}
+			case BUTTON_STORE_AVATARS: {
+				mainGame->OpenStoreAvatars();
+				break;
+			}
+			case BUTTON_STORE_BOOSTERS: {
+				mainGame->OpenStoreBoosters();
+				break;
+			}
+			case BUTTON_STORE_BACK: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				mainGame->mTopMenu->setVisible(true);
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_STORE_AVA_BUY: {
+				mainGame->RequestBuySelectedAvatar();
+				break;
+			}
+			case BUTTON_STORE_AVA_BACK: {
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_STORE_BST_BUY: {
+				mainGame->RequestBuySelectedBooster();
+				break;
+			}
+			case BUTTON_STORE_BST_BACK: {
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_PROFILE_ACTIVATE_AVA: {
+				mainGame->ActivateSelectedAvatar();
+				break;
+			}
+			case BUTTON_PROFILE_MAILBOX: {
+				mainGame->OpenMailbox(1);
+				break;
+			}
+			case BUTTON_PROFILE_BACK: {
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				mainGame->mTopMenu->setVisible(true);
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_MAILBOX_CLAIM: {
+				mainGame->ResolveSelectedMailboxItem(true);
+				break;
+			}
+			case BUTTON_MAILBOX_DISCARD: {
+				mainGame->ResolveSelectedMailboxItem(false);
+				break;
+			}
+			case BUTTON_MAILBOX_BACK: {
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				if(mainGame->mailboxReturnTarget == 1) {
+					mainGame->OpenPlayerProfile();
+				} else {
+					mainGame->mTopMenu->setVisible(true);
+					mainGame->wBtnSettings->setVisible(true);
+					mainGame->wMainMenu->setVisible(true);
+				}
+				break;
+			}
+			case BUTTON_CONFIRM_YES: {
+				mainGame->ExecuteConfirmedPurchase();
+				break;
+			}
+			case BUTTON_CONFIRM_NO: {
+				mainGame->pendingConfirmType = 0;
+				mainGame->pendingConfirmId = 0;
+				if(mainGame->wConfirmPurchase) mainGame->wConfirmPurchase->setVisible(false);
+				break;
+			}
 			case BUTTON_LAN_MODE: {
 				mainGame->isAdventureMode = false;
 				mainGame->isHostingOnline = false;
@@ -703,6 +792,22 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case LISTBOX_ADVENTURE_NPC: {
 				mainGame->UpdateAdventureNPCDisplay();
+				break;
+			}
+			case LISTBOX_STORE_AVATARS: {
+				if(mainGame->lstStoreAvatars) mainGame->SelectStoreAvatar(mainGame->lstStoreAvatars->getSelected());
+				break;
+			}
+			case LISTBOX_STORE_BOOSTERS: {
+				if(mainGame->lstStoreBoosters) mainGame->SelectStoreBooster(mainGame->lstStoreBoosters->getSelected());
+				break;
+			}
+			case LISTBOX_PROFILE_AVATARS: {
+				if(mainGame->lstProfileAvatars) mainGame->SelectProfileAvatar(mainGame->lstProfileAvatars->getSelected());
+				break;
+			}
+			case LISTBOX_MAILBOX_ITEMS: {
+				if(mainGame->lstMailboxItems) mainGame->SelectMailboxItem(mainGame->lstMailboxItems->getSelected());
 				break;
 			}
 			case LISTBOX_REPLAY_LIST: {
