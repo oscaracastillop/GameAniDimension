@@ -2802,7 +2802,8 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	auto tex = driver->getTexture(localRel.c_str());
 	if(tex) return tex;
 
-	std::filesystem::create_directories("textures/avatars");
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/avatars"));
 	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
 	auto curl = curl_easy_init();
 	if(curl) {
