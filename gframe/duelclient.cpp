@@ -1208,8 +1208,10 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->HideElement(mainGame->wANNumber);
 			if(mainGame->wANCard->isVisible())
 				mainGame->HideElement(mainGame->wANCard);
-			mainGame->PopupElement(mainGame->wMessage);
-			mainGame->actionSignal.Wait(lock);
+			if(!mainGame->isLoggedIn) {
+				mainGame->PopupElement(mainGame->wMessage);
+				mainGame->actionSignal.Wait(lock);
+			}
 			mainGame->closeDuelWindow = true;
 			mainGame->closeDoneSignal.Wait(lock);
 			mainGame->dInfo.isInLobby = false;
@@ -1236,6 +1238,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->ShowElement(mainGame->wLanWindow);
 			}
 			mainGame->SetMessageWindow();
+			if(mainGame->isLoggedIn) {
+				mainGame->ShowDuelRewardWindow();
+			}
 		}
 		connect_state |= 0x100;
 		event_base_loopbreak(client_base);
@@ -4853,13 +4858,17 @@ void DuelClient::ReplayPrompt(bool local_stream) {
 	mainGame->btnChainAlways->setVisible(false);
 	mainGame->btnChainWhenAvail->setVisible(false);
 	mainGame->btnCancelOrFinish->setVisible(false);
-	auto now = std::time(nullptr);
-	mainGame->PopupSaveWindow(gDataManager->GetSysString(1340), epro::format(L"{:%Y-%m-%d %H-%M-%S}", fmt::localtime(now)), gDataManager->GetSysString(1342));
-	mainGame->replaySignal.Wait(lock);
-	if(mainGame->saveReplay || !is_local_host) {
-		if(mainGame->saveReplay)
-			last_replay.SaveReplay(Utils::ToPathString(mainGame->ebFileSaveName->getText()));
-		else last_replay.SaveReplay(EPRO_TEXT("_LastReplay"));
+	if(!mainGame->isLoggedIn) {
+		auto now = std::time(nullptr);
+		mainGame->PopupSaveWindow(gDataManager->GetSysString(1340), epro::format(L"{:%Y-%m-%d %H-%M-%S}", fmt::localtime(now)), gDataManager->GetSysString(1342));
+		mainGame->replaySignal.Wait(lock);
+		if(mainGame->saveReplay || !is_local_host) {
+			if(mainGame->saveReplay)
+				last_replay.SaveReplay(Utils::ToPathString(mainGame->ebFileSaveName->getText()));
+			else last_replay.SaveReplay(EPRO_TEXT("_LastReplay"));
+		}
+	} else {
+		last_replay.SaveReplay(EPRO_TEXT("_LastReplay"));
 	}
 }
 }
