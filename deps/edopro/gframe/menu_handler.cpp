@@ -304,6 +304,27 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->wConfirmPurchase) mainGame->wConfirmPurchase->setVisible(false);
 				break;
 			}
+			case BUTTON_DUEL_REWARD_SAVE_REPLAY: {
+				auto now = std::time(nullptr);
+				auto rname = epro::format(L"{:%Y-%m-%d %H-%M-%S}", fmt::localtime(now));
+				DuelClient::last_replay.SaveReplay(Utils::ToPathString(rname));
+				if(mainGame->btnDuelRewardSaveReplay) {
+					mainGame->btnDuelRewardSaveReplay->setText(L"REPETICION GUARDADA");
+					mainGame->btnDuelRewardSaveReplay->setEnabled(false);
+				}
+				break;
+			}
+			case BUTTON_DUEL_REWARD_ACCEPT: {
+				if(mainGame->wDuelReward) mainGame->wDuelReward->setVisible(false);
+				mainGame->pendingDuelReward.valid = false;
+				if(mainGame->isAdventureMode && mainGame->wAdventureMode) {
+					mainGame->wAdventureMode->setVisible(true);
+					mainGame->ResizeAdventureMode();
+					mainGame->btnAdventureDuel->setEnabled(true);
+					mainGame->RefreshAdventureMode();
+				}
+				break;
+			}
 			case BUTTON_LAN_MODE: {
 				mainGame->isAdventureMode = false;
 				mainGame->isHostingOnline = false;

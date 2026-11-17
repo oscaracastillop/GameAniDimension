@@ -457,6 +457,47 @@ struct adventure_mode_panel_elements {
 	// NPC Duelist Profile & Lore
 	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
 	irr::gui::IGUIImage* imgAdventureMedal{ nullptr };
+
+	struct DuelRewardData {
+		bool valid{ false };
+		bool isWin{ false };
+		int expBase{ 0 };
+		int ssBase{ 0 };
+		int expTotalGained{ 0 };
+		long long ssTotalGained{ 0 };
+		int ssFirstWin{ 0 };
+		double avaExpPct{ 0.0 };
+		double avaSSPct{ 0.0 };
+		double medExpPct{ 0.0 };
+		double medSSPct{ 0.0 };
+		double totalLuckPct{ 0.0 };
+		int newLevel{ 1 };
+		bool leveledUp{ false };
+		uint32_t cardCode{ 0 };
+		std::string cardName;
+		std::string cardRareza;
+		bool puzzleActive{ false };
+		bool puzzleDropped{ false };
+		int puzzlePiece{ 0 };
+		std::string puzzleTitle;
+		std::string puzzleCarpeta;
+		std::string medalTitle;
+		std::string medalFile;
+		std::string statusMsg;
+	};
+	DuelRewardData pendingDuelReward;
+	irr::gui::IGUIStaticText* wDuelReward{ nullptr };
+	irr::gui::IGUIImage* imgDuelRewardBg{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardHeader{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardTable{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardTotal{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardEventBox{ nullptr };
+	irr::gui::IGUIImage* imgDuelRewardEvent{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardLuck{ nullptr };
+	irr::gui::IGUIImage* imgDuelRewardCard{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardCardInfo{ nullptr };
+	irr::gui::IGUIButton* btnDuelRewardSaveReplay{ nullptr };
+	irr::gui::IGUIButton* btnDuelRewardAccept{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCName{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCLevel{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCDeck{ nullptr };
@@ -998,6 +1039,10 @@ public:
 
 	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
 	irr::video::ITexture* LoadMedalTexture(int npcLevel);
+	irr::video::ITexture* LoadRewardBgTexture();
+	irr::video::ITexture* LoadPuzzlePieceTexture(const std::string& carpeta, int pieceNum);
+	void ShowDuelRewardWindow();
+	void ResizeDuelRewardScreen();
 	void PopulateEconomyScreens();
 	void ResizeEconomyScreens();
 	void OpenStoreMenu();

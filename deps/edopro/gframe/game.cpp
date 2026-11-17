@@ -2791,7 +2791,9 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		uint32_t cardCode = static_cast<uint32_t>(SafeJsonInt(resp, "cartaGanadaPasscode", 0));
 		std::string cardName = SafeJsonStr(resp, "cartaGanadaNombre", "");
+		std::string cardRareza = SafeJsonStr(resp, "cartaGanadaRareza", "Comun");
 		std::string medalTitle = SafeJsonStr(resp, "medallaGanadaTitulo", "");
+		std::string medalFile = SafeJsonStr(resp, "medallaGanadaArchivo", "");
 		long long ssGained = resp.contains("starShipsGanados") && resp["starShipsGanados"].is_number() ? resp["starShipsGanados"].get<long long>() : 0;
 		int expGained = SafeJsonInt(resp, "expGanada", 0);
 		int expTotal = SafeJsonInt(resp, "expTotal", playerExp);
@@ -2806,30 +2808,37 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 			playerExp = expTotal;
 			playerLevel = newLevel;
 		}
-		std::wstring msg = isWin ? L"¡Victoria!" : L"Derrota";
-		if(expGained > 0)
-			msg += epro::format(L"\nEXP ganada: +{}", expGained);
-		if(leveledUp)
-			msg += epro::format(L"\n¡Subiste a Nivel {}!", newLevel);
-		if(ssGained > 0)
-			msg += epro::format(L"\nStarShips ganados: +{}", ssGained);
-		if(!cardName.empty())
-			msg += L"\nCarta ganada: " + BufferIO::DecodeUTF8(cardName);
-		if(!medalTitle.empty())
-			msg += L"\n¡Medalla desbloqueada!: " + BufferIO::DecodeUTF8(medalTitle);
-		bool puzzleActive = resp.contains("puzzleEventActive") && resp["puzzleEventActive"].is_boolean() && resp["puzzleEventActive"].get<bool>();
-		if(isWin && puzzleActive) {
-			bool puzzleDropped = resp.contains("puzzleDropped") && resp["puzzleDropped"].is_boolean() && resp["puzzleDropped"].get<bool>();
-			int puzzlePiece = SafeJsonInt(resp, "puzzlePieceNumber", 0);
-			if(puzzleDropped && puzzlePiece > 0)
-				msg += epro::format(L"\nRompecabezas: ¡Obtuviste la ficha #{}!", puzzlePiece);
-			else
-				msg += L"\nRompecabezas: No se obtuvo ficha en este duelo.";
+		{
+			std::lock_guard<epro::mutex> glk(gMutex);
+			pendingDuelReward = DuelRewardData{};
+			pendingDuelReward.valid = true;
+			pendingDuelReward.isWin = isWin;
+			pendingDuelReward.expBase = SafeJsonInt(resp, "expBaseGanada", 0);
+			pendingDuelReward.ssBase = SafeJsonInt(resp, "ssBaseGanado", 0);
+			pendingDuelReward.expTotalGained = expGained;
+			pendingDuelReward.ssTotalGained = ssGained;
+			pendingDuelReward.ssFirstWin = SafeJsonInt(resp, "starShipsPrimeraVictoria", 0);
+			pendingDuelReward.avaExpPct = resp.contains("avaExpPct") && resp["avaExpPct"].is_number() ? resp["avaExpPct"].get<double>() : 0.0;
+			pendingDuelReward.avaSSPct = resp.contains("avaSSPct") && resp["avaSSPct"].is_number() ? resp["avaSSPct"].get<double>() : 0.0;
+			pendingDuelReward.medExpPct = resp.contains("medExpPct") && resp["medExpPct"].is_number() ? resp["medExpPct"].get<double>() : 0.0;
+			pendingDuelReward.medSSPct = resp.contains("medSSPct") && resp["medSSPct"].is_number() ? resp["medSSPct"].get<double>() : 0.0;
+			pendingDuelReward.totalLuckPct = resp.contains("totalLuckPct") && resp["totalLuckPct"].is_number() ? resp["totalLuckPct"].get<double>() : 0.0;
+			pendingDuelReward.newLevel = newLevel;
+			pendingDuelReward.leveledUp = leveledUp;
+			pendingDuelReward.cardCode = cardCode;
+			pendingDuelReward.cardName = cardName;
+			pendingDuelReward.cardRareza = cardRareza;
+			pendingDuelReward.puzzleActive = resp.contains("puzzleEventActive") && resp["puzzleEventActive"].is_boolean() && resp["puzzleEventActive"].get<bool>();
+			pendingDuelReward.puzzleDropped = resp.contains("puzzleDropped") && resp["puzzleDropped"].is_boolean() && resp["puzzleDropped"].get<bool>();
+			pendingDuelReward.puzzlePiece = SafeJsonInt(resp, "puzzlePieceNumber", 0);
+			pendingDuelReward.puzzleTitle = SafeJsonStr(resp, "puzzleEventTitle", "");
+			pendingDuelReward.puzzleCarpeta = SafeJsonStr(resp, "puzzleCarpeta", "");
+			pendingDuelReward.medalTitle = medalTitle;
+			pendingDuelReward.medalFile = medalFile;
+			pendingDuelReward.statusMsg = statusMsg;
+			if(!dInfo.isInDuel)
+				ShowDuelRewardWindow();
 		}
-		if(!statusMsg.empty() && statusMsg != "OK")
-			msg += L"\n" + BufferIO::DecodeUTF8(statusMsg);
-		if(expGained > 0 || ssGained > 0 || !cardName.empty() || !medalTitle.empty() || leveledUp || (isWin && puzzleActive) || (!statusMsg.empty() && statusMsg != "OK"))
-			PopupMessage(msg);
 	}
 }
 
@@ -3022,6 +3031,58 @@ void Game::PopulateEconomyScreens() {
 	btnConfirmYes = env->addButton(Scale(35, 120, 185, 155), wConfirmPurchase, BUTTON_CONFIRM_YES, L"SI, COMPRAR");
 	btnConfirmNo = env->addButton(Scale(215, 120, 365, 155), wConfirmPurchase, BUTTON_CONFIRM_NO, L"CANCELAR");
 
+	// Unified Post-Duel Reward Window (uses bg_reward.jpg)
+	wDuelReward = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, 0, -1, true);
+	wDuelReward->setBackgroundColor(irr::video::SColor(245, 10, 14, 24));
+	wDuelReward->setVisible(false);
+
+	imgDuelRewardBg = env->addImage(irr::core::recti(0, 0, 10, 10), wDuelReward);
+	imgDuelRewardBg->setScaleImage(true);
+	imgDuelRewardBg->setUseAlphaChannel(false);
+
+	stDuelRewardHeader = env->addStaticText(L"¡¡ VICTORIA EN DUELO !!", irr::core::recti(0, 0, 10, 10), false, false, wDuelReward, -1, true);
+	stDuelRewardHeader->setBackgroundColor(irr::video::SColor(210, 16, 22, 38));
+	stDuelRewardHeader->setOverrideColor(irr::video::SColor(255, 255, 215, 80));
+	stDuelRewardHeader->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+
+	stDuelRewardTable = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
+	stDuelRewardTable->setBackgroundColor(irr::video::SColor(200, 10, 16, 28));
+	stDuelRewardTable->setOverrideColor(irr::video::SColor(255, 230, 240, 255));
+	stDuelRewardTable->setWordWrap(true);
+
+	stDuelRewardTotal = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
+	stDuelRewardTotal->setBackgroundColor(irr::video::SColor(220, 12, 42, 58));
+	stDuelRewardTotal->setOverrideColor(irr::video::SColor(255, 110, 245, 200));
+	stDuelRewardTotal->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+
+	imgDuelRewardEvent = env->addImage(irr::core::recti(0, 0, 10, 10), wDuelReward);
+	imgDuelRewardEvent->setScaleImage(true);
+	imgDuelRewardEvent->setUseAlphaChannel(true);
+	imgDuelRewardEvent->setVisible(false);
+
+	stDuelRewardEventBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
+	stDuelRewardEventBox->setBackgroundColor(irr::video::SColor(200, 12, 18, 32));
+	stDuelRewardEventBox->setOverrideColor(irr::video::SColor(255, 252, 225, 130));
+	stDuelRewardEventBox->setWordWrap(true);
+
+	stDuelRewardLuck = env->addStaticText(L"SUERTE TOTAL: +0.0%", irr::core::recti(0, 0, 10, 10), true, false, wDuelReward, -1, true);
+	stDuelRewardLuck->setBackgroundColor(irr::video::SColor(210, 14, 24, 42));
+	stDuelRewardLuck->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
+	stDuelRewardLuck->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+
+	imgDuelRewardCard = env->addImage(irr::core::recti(0, 0, 10, 10), wDuelReward);
+	imgDuelRewardCard->setScaleImage(true);
+	imgDuelRewardCard->setUseAlphaChannel(true);
+
+	stDuelRewardCardInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
+	stDuelRewardCardInfo->setBackgroundColor(irr::video::SColor(210, 12, 16, 26));
+	stDuelRewardCardInfo->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stDuelRewardCardInfo->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stDuelRewardCardInfo->setWordWrap(true);
+
+	btnDuelRewardSaveReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_SAVE_REPLAY, L"GUARDAR REPETICION");
+	btnDuelRewardAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_ACCEPT, L"ACEPTAR");
+
 	ResizeEconomyScreens();
 }
 
@@ -3111,6 +3172,223 @@ void Game::ResizeEconomyScreens() {
 		btnMailboxDiscard->setRelativePosition(irr::core::recti(rx, H - pad * 2 - 46, rx + rw, H - pad * 2));
 	}
 	if(wConfirmPurchase) SetCentered(wConfirmPurchase, false);
+	ResizeDuelRewardScreen();
+}
+
+irr::video::ITexture* Game::LoadRewardBgTexture() {
+	if(!driver) return nullptr;
+	const std::string localRel = "textures/bg_reward.jpg";
+	auto tex = driver->getTexture(localRel.c_str());
+	if(tex) return tex;
+
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto curl = curl_easy_init();
+	if(curl) {
+		for(const auto& host : hosts) {
+			std::string url = host + "/api/textures/bg_reward.jpg";
+			std::string bytes;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			long code = 0;
+			auto res = curl_easy_perform(curl);
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+			if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+				std::ofstream out(localRel, std::ios::binary);
+				if(out) {
+					out.write(bytes.data(), bytes.size());
+					out.close();
+					tex = driver->getTexture(localRel.c_str());
+					if(tex) break;
+				}
+			}
+		}
+		curl_easy_cleanup(curl);
+	}
+	return tex;
+}
+
+irr::video::ITexture* Game::LoadPuzzlePieceTexture(const std::string& carpeta, int pieceNum) {
+	if(carpeta.empty() || pieceNum <= 0 || !driver) return nullptr;
+	std::string filename = "pieza_" + std::to_string(pieceNum) + ".png";
+	std::string localRel = "textures/puzzles/" + carpeta + "/" + filename;
+	auto tex = driver->getTexture(localRel.c_str());
+	if(tex) return tex;
+
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/puzzles"));
+	Utils::MakeDirectory(Utils::ToPathString("textures/puzzles/" + carpeta));
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto curl = curl_easy_init();
+	if(curl) {
+		for(const auto& host : hosts) {
+			std::string url = host + "/api/puzzles/" + carpeta + "/" + filename;
+			std::string bytes;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			long code = 0;
+			auto res = curl_easy_perform(curl);
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+			if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+				std::ofstream out(localRel, std::ios::binary);
+				if(out) {
+					out.write(bytes.data(), bytes.size());
+					out.close();
+					tex = driver->getTexture(localRel.c_str());
+					if(tex) break;
+				}
+			}
+		}
+		curl_easy_cleanup(curl);
+	}
+	return tex;
+}
+
+void Game::ResizeDuelRewardScreen() {
+	if(!wDuelReward) return;
+	const irr::s32 W = window_size.Width;
+	const irr::s32 H = window_size.Height;
+	irr::s32 rw = std::min((irr::s32)(W * 0.84f), Scale(820));
+	irr::s32 rh = std::min((irr::s32)(H * 0.84f), Scale(510));
+	irr::s32 rx = (W - rw) / 2;
+	irr::s32 ry = (H - rh) / 2;
+	wDuelReward->setRelativePosition(irr::core::recti(rx, ry, rx + rw, ry + rh));
+	if(imgDuelRewardBg) imgDuelRewardBg->setRelativePosition(irr::core::recti(0, 0, rw, rh));
+	if(stDuelRewardHeader) stDuelRewardHeader->setRelativePosition(irr::core::recti(Scale(10), Scale(10), rw - Scale(10), Scale(46)));
+
+	irr::s32 rightW = std::max(Scale(195), (irr::s32)(rw * 0.28f));
+	irr::s32 leftW = rw - rightW - Scale(34);
+	irr::s32 lx = Scale(14);
+	irr::s32 rcolX = lx + leftW + Scale(12);
+
+	if(stDuelRewardTable) stDuelRewardTable->setRelativePosition(irr::core::recti(lx, Scale(56), lx + leftW, Scale(235)));
+	if(stDuelRewardTotal) stDuelRewardTotal->setRelativePosition(irr::core::recti(lx, Scale(242), lx + leftW, Scale(278)));
+
+	irr::s32 evTop = Scale(286);
+	irr::s32 evBottom = rh - Scale(64);
+	if(imgDuelRewardEvent) {
+		irr::s32 ico = std::min(Scale(72), evBottom - evTop - Scale(8));
+		imgDuelRewardEvent->setRelativePosition(irr::core::recti(lx + Scale(8), evTop + Scale(8), lx + Scale(8) + ico, evTop + Scale(8) + ico));
+	}
+	if(stDuelRewardEventBox) stDuelRewardEventBox->setRelativePosition(irr::core::recti(lx, evTop, lx + leftW, evBottom));
+
+	if(stDuelRewardLuck) stDuelRewardLuck->setRelativePosition(irr::core::recti(rcolX, Scale(56), rw - Scale(14), Scale(88)));
+	irr::s32 cardAreaTop = Scale(96);
+	irr::s32 cardAreaBot = rh - Scale(126);
+	irr::s32 cardH = std::max(Scale(120), cardAreaBot - cardAreaTop);
+	irr::s32 cardW = (irr::s32)(cardH * 0.686f);
+	irr::s32 cardX = rcolX + ((rw - Scale(14) - rcolX) - cardW) / 2;
+	if(imgDuelRewardCard) imgDuelRewardCard->setRelativePosition(irr::core::recti(cardX, cardAreaTop, cardX + cardW, cardAreaTop + cardH));
+	if(stDuelRewardCardInfo) stDuelRewardCardInfo->setRelativePosition(irr::core::recti(rcolX, cardAreaBot + Scale(6), rw - Scale(14), rh - Scale(64)));
+
+	irr::s32 btnY = rh - Scale(52);
+	irr::s32 btnW = Scale(205);
+	irr::s32 btnGap = Scale(24);
+	irr::s32 btnStart = (rw - (btnW * 2 + btnGap)) / 2;
+	if(btnDuelRewardSaveReplay) btnDuelRewardSaveReplay->setRelativePosition(irr::core::recti(btnStart, btnY, btnStart + btnW, btnY + Scale(38)));
+	if(btnDuelRewardAccept) btnDuelRewardAccept->setRelativePosition(irr::core::recti(btnStart + btnW + btnGap, btnY, btnStart + btnW * 2 + btnGap, btnY + Scale(38)));
+}
+
+void Game::ShowDuelRewardWindow() {
+	if(!wDuelReward || !pendingDuelReward.valid) return;
+	const auto& d = pendingDuelReward;
+	ResizeDuelRewardScreen();
+
+	if(imgDuelRewardBg) {
+		auto bg = LoadRewardBgTexture();
+		if(bg) imgDuelRewardBg->setImage(bg);
+	}
+	if(stDuelRewardHeader) {
+		stDuelRewardHeader->setText(d.isWin ? L"¡¡ VICTORIA EN DUELO !!" : L"DERROTA EN DUELO");
+		stDuelRewardHeader->setOverrideColor(d.isWin ? irr::video::SColor(255, 255, 215, 80) : irr::video::SColor(255, 252, 165, 165));
+	}
+
+	int avaExpBonus = (int)std::round(d.expBase * (d.avaExpPct / 100.0));
+	int avaSSBonus = (int)std::round(d.ssBase * (d.avaSSPct / 100.0));
+	int medExpBonus = (int)std::round(d.expBase * (d.medExpPct / 100.0));
+	int medSSBonus = (int)std::round(d.ssBase * (d.medSSPct / 100.0));
+
+	std::wstring tbl = L" ◆ RECOMPENSAS DE DUELO ◆\n";
+	tbl += L" CONCEPTO               EXP.                  STARSHIPS\n";
+	tbl += epro::format(L" • Base:                +{} EXP              +{} SS\n", d.expBase, d.ssBase);
+	tbl += epro::format(L" • Avatar Activo:       +{:.1f}% (+{} EXP)    +{:.1f}% (+{} SS)\n", d.avaExpPct, avaExpBonus, d.avaSSPct, avaSSBonus);
+	tbl += epro::format(L" • Medallas & Logros:   +{:.1f}% (+{} EXP)    +{:.1f}% (+{} SS)\n", d.medExpPct, medExpBonus, d.medSSPct, medSSBonus);
+	if(d.ssFirstWin > 0)
+		tbl += epro::format(L" • Primera Victoria:    —                     +{} SS\n", d.ssFirstWin);
+	else
+		tbl += L" • Membresía VIP:       Sin VIP activo        Sin VIP activo";
+	if(stDuelRewardTable) stDuelRewardTable->setText(tbl.c_str());
+
+	std::wstring tot = epro::format(L"TOTAL GANADO: +{} EXP  |  +{} STARSHIPS", d.expTotalGained, d.ssTotalGained);
+	if(d.leveledUp) tot += epro::format(L"  (¡NIVEL {}!)", d.newLevel);
+	if(stDuelRewardTotal) stDuelRewardTotal->setText(tot.c_str());
+
+	if(stDuelRewardLuck) {
+		stDuelRewardLuck->setText(epro::format(L"SUERTE TOTAL: +{:.1f}%", d.totalLuckPct).c_str());
+	}
+
+	if(imgDuelRewardCard) {
+		auto cTex = d.cardCode > 0 ? imageManager.GetTexture(d.cardCode) : imageManager.tCover[0];
+		imgDuelRewardCard->setImage(cTex ? cTex : imageManager.tCover[0]);
+	}
+	if(stDuelRewardCardInfo) {
+		if(d.cardCode > 0 && !d.cardName.empty()) {
+			stDuelRewardCardInfo->setText(epro::format(L"[{}]\n{}", BufferIO::DecodeUTF8(d.cardRareza), BufferIO::DecodeUTF8(d.cardName)).c_str());
+		} else {
+			stDuelRewardCardInfo->setText(L"Sin carta obtenida");
+		}
+	}
+
+	if(imgDuelRewardEvent) imgDuelRewardEvent->setVisible(false);
+	std::wstring evTxt = L" ◆ RECOMPENSAS DE EVENTOS ◆\n";
+	if(d.isWin && d.puzzleActive) {
+		if(d.puzzleDropped && d.puzzlePiece > 0) {
+			evTxt += epro::format(L"          ★ ¡NUEVA PIEZA DE ROMPECABEZAS! ★\n          Desbloqueaste la Pieza #{} de 20 ({})\n          ¡Revisa tu Álbum de Rompecabezas en la Web!", d.puzzlePiece, BufferIO::DecodeUTF8(d.puzzleTitle));
+			if(imgDuelRewardEvent) {
+				auto pTex = LoadPuzzlePieceTexture(d.puzzleCarpeta, d.puzzlePiece);
+				if(pTex) {
+					imgDuelRewardEvent->setImage(pTex);
+					imgDuelRewardEvent->setVisible(true);
+				}
+			}
+		} else {
+			evTxt += L" • Rompecabezas: No se obtuvo ficha en este duelo.";
+		}
+	} else {
+		evTxt += L" • Sin eventos de rompecabezas activos.";
+	}
+	if(!d.medalTitle.empty()) {
+		evTxt += epro::format(L"\n ★ ¡MEDALLA DESBLOQUEADA!: {} ★", BufferIO::DecodeUTF8(d.medalTitle));
+	}
+	if(!d.statusMsg.empty() && d.statusMsg != "OK") {
+		evTxt += L"\n • " + BufferIO::DecodeUTF8(d.statusMsg);
+	}
+	if(stDuelRewardEventBox) stDuelRewardEventBox->setText(evTxt.c_str());
+
+	if(btnDuelRewardSaveReplay) {
+		btnDuelRewardSaveReplay->setText(L"GUARDAR REPETICION");
+		btnDuelRewardSaveReplay->setEnabled(true);
+	}
+
+	wDuelReward->setVisible(true);
+	env->getRootGUIElement()->bringToFront(wDuelReward);
+	if(imgDuelRewardEvent && imgDuelRewardEvent->isVisible()) {
+		wDuelReward->bringToFront(imgDuelRewardEvent);
+	}
 }
 
 void Game::OpenStoreMenu() {
