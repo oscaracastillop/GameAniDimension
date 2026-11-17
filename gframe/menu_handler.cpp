@@ -152,6 +152,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_ONLINE_MULTIPLAYER: {
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->isHostingOnline = true;
 				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
@@ -187,6 +188,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_ADVENTURE_MODE: {
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->isAdventureMode = true;
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(false);
@@ -662,6 +664,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_DECK_EDIT: {
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->RefreshDeck(mainGame->cbDBDecks);
 				if(open_file && mainGame->deckBuilder.SetCurrentDeckFromFile(open_file_name, true)) {
 					auto name = Utils::GetFileName(open_file_name);
