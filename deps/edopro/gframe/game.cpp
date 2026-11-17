@@ -1612,6 +1612,11 @@ void Game::PopulateAdventureModeWindow() {
 	imgAdventureNPC->setScaleImage(true);
 	imgAdventureNPC->setUseAlphaChannel(true);
 
+	imgAdventureMedal = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
+	imgAdventureMedal->setScaleImage(true);
+	imgAdventureMedal->setUseAlphaChannel(true);
+	imgAdventureMedal->setVisible(false);
+
 	stAdventureNPCName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
@@ -1816,6 +1821,10 @@ void Game::ResizeAdventureMode() {
 	int avatarBoxTop = pnlTop + innerPad;
 
 	UpdateAdventureNPCImagePosition(rx, avatarBoxTop, rw, avatarStageH);
+	if(imgAdventureMedal) {
+		int mSize = Scale(52);
+		imgAdventureMedal->setRelativePosition(irr::core::recti(rx + rw - mSize - Scale(4), avatarBoxTop + Scale(4), rx + rw - Scale(4), avatarBoxTop + Scale(4) + mSize));
+	}
 
 	int rCurY = avatarBoxTop + avatarStageH + Scale(10);
 
@@ -2065,6 +2074,20 @@ void Game::UpdateAdventureNPCDisplay() {
 		imgAdventureNPC->setVisible(true);
 	} else {
 		imgAdventureNPC->setVisible(false);
+	}
+
+	if(imgAdventureMedal) {
+		if(npc.activoLeyenda) {
+			auto mTex = LoadMedalTexture(npc.level);
+			if(mTex) {
+				imgAdventureMedal->setImage(mTex);
+				imgAdventureMedal->setVisible(true);
+			} else {
+				imgAdventureMedal->setVisible(false);
+			}
+		} else {
+			imgAdventureMedal->setVisible(false);
+		}
 	}
 
 	ResizeAdventureMode();
@@ -2737,7 +2760,8 @@ bool Game::ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut) {
 void Game::StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName) {
 	if(!isLoggedIn || sessionToken.empty()) return;
 	nlohmann::json body;
-	body["modalidad"] = isAdventure ? "ADVENTURE" : "ONLINE";
+	bool isLeyenda = isAdventure && cbAdventureDifficulty && cbAdventureDifficulty->getSelected() == 1;
+	body["modalidad"] = isAdventure ? (isLeyenda ? "NPC_LEYENDA" : "NPC_NORMAL") : "ONLINE";
 	body["oponenteRef"] = isAdventure ? std::to_string(npcId) : (opponentName.empty() ? "Jugador" : opponentName);
 	auto resp = CallSessionApi("/api/duel/start", sessionToken, body.dump());
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
@@ -2756,8 +2780,9 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 		activeDuelSessionId = 0;
 	}
 	nlohmann::json body;
+	bool isLeyenda = isAdventure && cbAdventureDifficulty && cbAdventureDifficulty->getSelected() == 1;
 	body["duelSessionId"] = sid;
-	body["modalidad"] = isAdventure ? "ADVENTURE" : "ONLINE";
+	body["modalidad"] = isAdventure ? (isLeyenda ? "NPC_LEYENDA" : "NPC_NORMAL") : "ONLINE";
 	body["oponenteRef"] = isAdventure ? std::to_string(npcId) : (opponentName.empty() ? "Jugador" : opponentName);
 	body["resultado"] = isWin ? "WIN" : "LOSS";
 	body["turnos"] = turnos;
@@ -2766,6 +2791,7 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		uint32_t cardCode = static_cast<uint32_t>(SafeJsonInt(resp, "cartaGanadaPasscode", 0));
 		std::string cardName = SafeJsonStr(resp, "cartaGanadaNombre", "");
+		std::string medalTitle = SafeJsonStr(resp, "medallaGanadaTitulo", "");
 		long long ssGained = resp.contains("starShipsGanados") && resp["starShipsGanados"].is_number() ? resp["starShipsGanados"].get<long long>() : 0;
 		int expGained = SafeJsonInt(resp, "expGanada", 0);
 		int expTotal = SafeJsonInt(resp, "expTotal", playerExp);
@@ -2789,9 +2815,20 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 			msg += epro::format(L"\nStarShips ganados: +{}", ssGained);
 		if(!cardName.empty())
 			msg += L"\nCarta ganada: " + BufferIO::DecodeUTF8(cardName);
+		if(!medalTitle.empty())
+			msg += L"\n¡Medalla desbloqueada!: " + BufferIO::DecodeUTF8(medalTitle);
+		bool puzzleActive = resp.contains("puzzleEventActive") && resp["puzzleEventActive"].is_boolean() && resp["puzzleEventActive"].get<bool>();
+		if(isWin && puzzleActive) {
+			bool puzzleDropped = resp.contains("puzzleDropped") && resp["puzzleDropped"].is_boolean() && resp["puzzleDropped"].get<bool>();
+			int puzzlePiece = SafeJsonInt(resp, "puzzlePieceNumber", 0);
+			if(puzzleDropped && puzzlePiece > 0)
+				msg += epro::format(L"\nRompecabezas: ¡Obtuviste la ficha #{}!", puzzlePiece);
+			else
+				msg += L"\nRompecabezas: No se obtuvo ficha en este duelo.";
+		}
 		if(!statusMsg.empty() && statusMsg != "OK")
 			msg += L"\n" + BufferIO::DecodeUTF8(statusMsg);
-		if(expGained > 0 || ssGained > 0 || !cardName.empty() || leveledUp || (!statusMsg.empty() && statusMsg != "OK"))
+		if(expGained > 0 || ssGained > 0 || !cardName.empty() || !medalTitle.empty() || leveledUp || (isWin && puzzleActive) || (!statusMsg.empty() && statusMsg != "OK"))
 			PopupMessage(msg);
 	}
 }
@@ -2809,6 +2846,48 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	if(curl) {
 		for(const auto& host : hosts) {
 			std::string url = host + "/api/avatars/" + filename;
+			std::string bytes;
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			long code = 0;
+			auto res = curl_easy_perform(curl);
+			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+			if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+				std::ofstream out(localRel, std::ios::binary);
+				if(out) {
+					out.write(bytes.data(), bytes.size());
+					out.close();
+					tex = driver->getTexture(localRel.c_str());
+					if(tex) break;
+				}
+			}
+		}
+		curl_easy_cleanup(curl);
+	}
+	return tex;
+}
+
+irr::video::ITexture* Game::LoadMedalTexture(int npcLevel) {
+	if(npcLevel <= 0 || !driver) return nullptr;
+	std::string filename = "Npc_" + std::to_string(npcLevel) + ".png";
+	std::string localRel = "textures/medals/" + filename;
+	auto tex = driver->getTexture(localRel.c_str());
+	if(tex) return tex;
+
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/medals"));
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto curl = curl_easy_init();
+	if(curl) {
+		for(const auto& host : hosts) {
+			std::string url = host + "/api/medals/img/" + filename;
 			std::string bytes;
 			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);

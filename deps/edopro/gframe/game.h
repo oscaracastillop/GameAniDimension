@@ -456,6 +456,7 @@ struct adventure_mode_panel_elements {
 
 	// NPC Duelist Profile & Lore
 	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
+	irr::gui::IGUIImage* imgAdventureMedal{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCName{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCLevel{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureNPCDeck{ nullptr };
@@ -996,6 +997,7 @@ public:
 	std::vector<MailboxEntry> mailboxItems;
 
 	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
+	irr::video::ITexture* LoadMedalTexture(int npcLevel);
 	void PopulateEconomyScreens();
 	void ResizeEconomyScreens();
 	void OpenStoreMenu();
