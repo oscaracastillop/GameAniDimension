@@ -1397,24 +1397,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		break;
 	}
 	case STOC_REMATCH: {
-		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
-		mainGame->dInfo.checkRematch = true;
-		if(mainGame->wQuery->isVisible())
-			mainGame->HideElement(mainGame->wQuery);
-		if(mainGame->wOptions->isVisible())
-			mainGame->HideElement(mainGame->wOptions);
-		if(mainGame->wPosSelect->isVisible())
-			mainGame->HideElement(mainGame->wPosSelect);
-		if(mainGame->wCardSelect->isVisible())
-			mainGame->HideElement(mainGame->wCardSelect);
-		if(mainGame->wCardDisplay->isVisible())
-			mainGame->HideElement(mainGame->wCardDisplay);
-		if(mainGame->wANNumber->isVisible())
-			mainGame->HideElement(mainGame->wANNumber);
-		if(mainGame->wANCard->isVisible())
-			mainGame->HideElement(mainGame->wANCard);
-		mainGame->stQMessage->setText(gDataManager->GetSysString(1989).data());
-		mainGame->PopupElement(mainGame->wQuery);
+		CTOS_RematchResponse crr;
+		crr.rematch = false;
+		DuelClient::SendPacketToServer(CTOS_REMATCH_RESPONSE, crr);
 		break;
 	}
 	}
