@@ -428,6 +428,7 @@ struct AdventureNpcInfo {
 	bool activoNormal{ false };
 	std::wstring premioLeyenda{};
 	bool activoLeyenda{ false };
+	int duelosNormal{ 0 };
 };
 
 struct adventure_mode_panel_elements {
@@ -931,7 +932,7 @@ public:
 	bool SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut);
 	bool SetActiveUserDeckOnServer(int slot, std::wstring& errOut);
 	bool SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut);
-	bool ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut);
+	bool ValidateNpcChallengeOnServer(int npcId, bool isLeyenda, std::wstring& errOut);
 	long long activeDuelSessionId{ 0 };
 	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);

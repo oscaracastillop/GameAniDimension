@@ -1488,11 +1488,16 @@ static size_t NpcHttpCallback(void* contents, size_t size, size_t nmemb, void* u
 	return realsize;
 }
 
-static nlohmann::json FetchAdventureApi(const std::string& endpoint) {
+static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::string& authToken = "") {
 	std::string retrieved_data;
 	auto curl_handle = curl_easy_init();
 	if(!curl_handle)
 		return {};
+	struct curl_slist* headers = nullptr;
+	if(!authToken.empty()) {
+		headers = curl_slist_append(headers, ("Authorization: Bearer " + authToken).c_str());
+		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
+	}
 	std::vector<std::string> hosts = { "http://127.0.0.1:8080", "http://localhost:8080", "http://66.92.168.136:8080" };
 	for(const auto& host : hosts) {
 		std::string apiUrl = host + endpoint;
@@ -1509,11 +1514,13 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint) {
 		if(res == CURLE_OK && !retrieved_data.empty()) {
 			try {
 				auto j = nlohmann::json::parse(retrieved_data);
+				if(headers) curl_slist_free_all(headers);
 				curl_easy_cleanup(curl_handle);
 				return j;
 			} catch(...) {}
 		}
 	}
+	if(headers) curl_slist_free_all(headers);
 	curl_easy_cleanup(curl_handle);
 	return {};
 }
@@ -1942,7 +1949,7 @@ void Game::OnAdventureArcChanged() {
 
 	try {
 		std::string endpoint = epro::format("/api/arcos/{}/npcs", arc.id);
-		auto json = FetchAdventureApi(endpoint);
+		auto json = FetchAdventureApi(endpoint, isLoggedIn ? sessionToken : "");
 		if (json.contains("npcs") && json["npcs"].is_array()) {
 			for (const auto& item : json["npcs"]) {
 				AdventureNpcInfo npc;
@@ -1960,6 +1967,7 @@ void Game::OnAdventureArcChanged() {
 				npc.activoNormal = item.contains("ActivoNormal") && item["ActivoNormal"].is_boolean() ? item["ActivoNormal"].get<bool>() : (npc.premioNormalStarShips > 0);
 				npc.premioLeyenda = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "PremioLeyenda", ""));
 				npc.activoLeyenda = item.contains("ActivoLeyenda") && item["ActivoLeyenda"].is_boolean() ? item["ActivoLeyenda"].get<bool>() : false;
+				npc.duelosNormal = SafeJsonInt(item, "DuelosNormal", 0);
 				adventureNpcList.push_back(std::move(npc));
 			}
 		}
@@ -2038,7 +2046,11 @@ void Game::UpdateAdventureNPCDisplay() {
 	std::wstring premioLeyendaStr = (npc.activoLeyenda && !npc.premioLeyenda.empty())
 		? npc.premioLeyenda
 		: L"Por definir";
-	std::wstring fullNpcInfo = epro::format(L"{}\n\nPremio Normal: {}\nPremio Leyenda: {}", baseDesc, premioNormalStr, premioLeyendaStr);
+	int faltanLeyenda = std::max(0, 10 - npc.duelosNormal);
+	std::wstring reqLeyendaStr = (faltanLeyenda == 0)
+		? epro::format(L"Desbloqueado ({}/10 duelos en Normal)", npc.duelosNormal)
+		: epro::format(L"Nivel {}+ y 10 duelos en Normal (llevas {}/10, te faltan {})", npc.level, npc.duelosNormal, faltanLeyenda);
+	std::wstring fullNpcInfo = epro::format(L"{}\n\nPremio Normal: {}\nPremio Leyenda: {}\nRequisito Leyenda: {}", baseDesc, premioNormalStr, premioLeyendaStr, reqLeyendaStr);
 	stAdventureNPCDesc->setText(fullNpcInfo.c_str());
 
 	if (!npc.deckDescription.empty()) {
@@ -2184,19 +2196,20 @@ void Game::StartAdventureDuel() {
 	selectedAdventureUserDeckName = cbAdventureUserDeck->getItem(deckIdx);
 
 	const auto& npc = adventureNpcList[npcIdx];
+	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
+	bool isLeyenda = (diff == 1);
 	if (isLoggedIn) {
 		if (playerLevel < npc.level) {
 			PopupMessage(epro::format(L"Necesitas Nivel {} para retar a {} (tu nivel: {}).", npc.level, npc.name, playerLevel));
 			return;
 		}
 		std::wstring challengeErr;
-		if (!ValidateNpcChallengeOnServer(npc.id, challengeErr)) {
+		if (!ValidateNpcChallengeOnServer(npc.id, isLeyenda, challengeErr)) {
 			PopupMessage(challengeErr);
 			return;
 		}
 	}
 	selectedAdventureNPCName = npc.name;
-	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
 	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
 	if (deckToUse.empty()) {
 		deckToUse = npc.deckFile;
@@ -2743,10 +2756,11 @@ bool Game::SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOu
 	return false;
 }
 
-bool Game::ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut) {
+bool Game::ValidateNpcChallengeOnServer(int npcId, bool isLeyenda, std::wstring& errOut) {
 	if(!isLoggedIn || sessionToken.empty()) return true;
 	nlohmann::json body;
 	body["npcId"] = npcId;
+	body["modalidad"] = isLeyenda ? "NPC_LEYENDA" : "NPC_NORMAL";
 	auto resp = CallSessionApi("/api/adventure/challenge", sessionToken, body.dump());
 	if(resp.contains("allowed") && resp["allowed"].is_boolean()) {
 		if(resp["allowed"].get<bool>()) return true;
