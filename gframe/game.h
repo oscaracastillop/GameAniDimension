@@ -391,7 +391,6 @@ struct server_lobby_page_elements {
 		std::string avatarFile{ "AVA-001.png" };
 	};
 	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
-	void UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName);
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
 	irr::gui::IGUIComboBox* serverChoice;
@@ -951,6 +950,7 @@ public:
 	long long activeDuelSessionId{ 0 };
 	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);
+	void UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName);
 
 	// Dedicated Economy Interfaces (Store, Store Avatars, Store Boosters, Player Profile, Mailbox)
 	struct StoreAvatarItem {

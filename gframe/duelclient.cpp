@@ -297,8 +297,8 @@ catch(...) { what = def; }
 				cscg.info.forbiddentypes = mainGame->forbiddentypes;
 				cscg.info.extra_rules = mainGame->extra_rules;
 				int minLv = 1, maxLv = 300;
-				if(mainGame->ebHostMinLevel) { TOI(minLv, mainGame->ebHostMinLevel->getText(), 1); }
-				if(mainGame->ebHostMaxLevel) { TOI(maxLv, mainGame->ebHostMaxLevel->getText(), 300); }
+				if(mainGame->ebHostMinLevel) { try { minLv = std::stoi(mainGame->ebHostMinLevel->getText()); } catch(...) { minLv = 1; } }
+				if(mainGame->ebHostMaxLevel) { try { maxLv = std::stoi(mainGame->ebHostMaxLevel->getText()); } catch(...) { maxLv = 300; } }
 				if(minLv < 1) minLv = 1;
 				if(maxLv > 300) maxLv = 300;
 				if(minLv > maxLv) std::swap(minLv, maxLv);
