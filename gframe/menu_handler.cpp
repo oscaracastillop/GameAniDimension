@@ -206,7 +206,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->stAdventureNPCDeck)
 					mainGame->stAdventureNPCDeck->setText(L"");
 				mainGame->wAdventureMode->setVisible(false);
-				mainGame->mTopMenu->setVisible(true);
+				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				break;
@@ -237,7 +237,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_STORE_BACK: {
 				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				mainGame->mTopMenu->setVisible(true);
+				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				break;
@@ -270,7 +270,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_PROFILE_BACK: {
 				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				mainGame->mTopMenu->setVisible(true);
+				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				break;
@@ -288,7 +288,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->mailboxReturnTarget == 1) {
 					mainGame->OpenPlayerProfile();
 				} else {
-					mainGame->mTopMenu->setVisible(true);
+					mainGame->mTopMenu->setVisible(false);
 					mainGame->wBtnSettings->setVisible(true);
 					mainGame->wMainMenu->setVisible(true);
 				}

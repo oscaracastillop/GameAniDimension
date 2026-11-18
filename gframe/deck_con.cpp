@@ -70,7 +70,8 @@ void DeckBuilder::Initialize(bool refresh) {
 	mainGame->btnSideReload->setVisible(false);
 	mainGame->btnHandTest->setVisible(true);
 	mainGame->btnHandTestSettings->setVisible(true);
-	mainGame->btnYdkeManage->setVisible(true);
+	mainGame->btnYdkeManage->setVisible(false);
+	mainGame->btnYdkeManage->setEnabled(false);
 	filterList = &gdeckManager->_lfList[mainGame->cbDBLFList->getSelected()];
 	if(refresh) {
 		ClearSearch();
@@ -97,7 +98,7 @@ void DeckBuilder::Terminate(bool showmenu) {
 	mainGame->is_siding = false;
 	if(showmenu) {
 		mainGame->ClearCardInfo();
-		mainGame->mTopMenu->setVisible(true);
+		mainGame->mTopMenu->setVisible(false);
 	}
 	mainGame->wDeckEdit->setVisible(false);
 	if(mainGame->btnSellCard) mainGame->btnSellCard->setVisible(false);

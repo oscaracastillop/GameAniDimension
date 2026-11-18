@@ -254,7 +254,7 @@ void Game::Initialize() {
 	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
 	mainMenuLeftX = 510 - mainMenuWidth / 2;
 	mainMenuRightX = 510 + mainMenuWidth / 2;
-	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 145, mainMenuRightX, 505), false, EDOPRO_VERSION_STRING);
+	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 145, mainMenuRightX, 400), false, EDOPRO_VERSION_STRING);
 	wMainMenu->getCloseButton()->setVisible(false);
 	wMainMenu->setVisible(false);
 #define OFFSET(x1, y1, x2, y2) Scale(10, 30 + offset, mainMenuWidth - 10, 60 + offset)
@@ -265,11 +265,14 @@ void Game::Initialize() {
 	btnAdventureMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ADVENTURE_MODE, L"Modo Aventura");
 	offset += 35;
 	btnStoreMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
-	offset += 35;
+	btnStoreMode->setVisible(false);
+	btnStoreMode->setEnabled(false);
 	btnProfileMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_PROFILE_OPEN, L"Perfil Jugador");
-	offset += 35;
+	btnProfileMode->setVisible(false);
+	btnProfileMode->setEnabled(false);
 	btnMailboxMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_MAILBOX_OPEN, L"Buzon");
-	offset += 35;
+	btnMailboxMode->setVisible(false);
+	btnMailboxMode->setEnabled(false);
 	// LAN + AI disabled as requested
 	// btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
 	// defaultStrings.emplace_back(btnLanMode, 1200);
@@ -3936,10 +3939,11 @@ void Game::PopulateTabSettingsWindow() {
 		defaultStrings.emplace_back(btnTabShowSettings, 2059);
 		/* padding = */ env->addStaticText(L"", Scale(20, cur_y, 280, cur_y + 10), false, true, tabPanel, -1, false);
 	}
-	//repositories
+	//repositories (oculta del tab bar)
 	{
-		tabRepositories = wInfos->addTab(gDataManager->GetSysString(2045).data());
-		defaultStrings.emplace_back(tabRepositories, 2045);
+		tabRepositories = env->addTab(Scale(0, 0, 1, 1), wInfos, -1);
+		tabRepositories->setVisible(false);
+		tabRepositories->setEnabled(false);
 		mTabRepositories = irr::gui::CGUICustomContextMenu::addCustomContextMenu(env, tabRepositories, -1, Scale(1, 275, 301, 639));
 		mTabRepositories->setCloseHandling(irr::gui::ECONTEXT_MENU_CLOSE::ECMC_HIDE);
 	}

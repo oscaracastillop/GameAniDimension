@@ -159,7 +159,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 					mainGame->dInfo.isStarted = false;
 					gSoundManager->StopSounds();
 					mainGame->device->setEventReceiver(&mainGame->menuHandler);
-					mainGame->mTopMenu->setVisible(true);
+					mainGame->mTopMenu->setVisible(false);
 					mainGame->stTip->setVisible(false);
 					mainGame->stHintMsg->setVisible(false);
 					mainGame->wCardImg->setVisible(false);
