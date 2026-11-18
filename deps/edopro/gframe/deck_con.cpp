@@ -310,7 +310,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 						mainGame->PopupElement(mainGame->wACMessage, 50);
 					}
 				} else {
-					mainGame->gGameConfig->lastdeck = mainGame->cbDBDecks->getItem(sel);
+					gGameConfig->lastdeck = mainGame->cbDBDecks->getItem(sel);
 					mainGame->stACMessage->setText(L"Deck activo actualizado.");
 					mainGame->PopupElement(mainGame->wACMessage, 30);
 				}
