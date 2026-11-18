@@ -3373,7 +3373,7 @@ void Game::ShowDuelRewardWindow() {
 
 	activeDuelRewardCardCode = d.cardCode;
 	if(imgDuelRewardCard) {
-		auto cTex = d.cardCode > 0 ? imageManager.GetTextureCard(d.cardCode, CARD, false, true) : imageManager.tCover[0];
+		auto cTex = d.cardCode > 0 ? imageManager.GetTextureCard(d.cardCode, ART, false, true) : imageManager.tCover[0];
 		imgDuelRewardCard->setImage(cTex ? cTex : imageManager.tCover[0]);
 		if(cTex && cTex != imageManager.tCover[0]) activeDuelRewardCardCode = 0;
 	}
@@ -4362,7 +4362,7 @@ bool Game::MainLoop() {
 			pendingDuelReward.valid = false;
 		}
 		if(wDuelReward && wDuelReward->isVisible() && activeDuelRewardCardCode > 0 && imgDuelRewardCard) {
-			auto cTex = imageManager.GetTextureCard(activeDuelRewardCardCode, CARD, false, true);
+			auto cTex = imageManager.GetTextureCard(activeDuelRewardCardCode, ART, false, true);
 			if(cTex && cTex != imageManager.tCover[0]) {
 				imgDuelRewardCard->setImage(cTex);
 				activeDuelRewardCardCode = 0;
