@@ -297,6 +297,25 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
+			case BUTTON_SET_ACTIVE_DECK: {
+				int sel = mainGame->cbDBDecks->getSelected();
+				if(sel < 0) break;
+				if(mainGame->isLoggedIn) {
+					std::wstring errOut;
+					if(mainGame->SetActiveUserDeckOnServer(sel + 1, errOut)) {
+						mainGame->stACMessage->setText(L"Deck activo actualizado.");
+						mainGame->PopupElement(mainGame->wACMessage, 30);
+					} else {
+						mainGame->stACMessage->setText(errOut.c_str());
+						mainGame->PopupElement(mainGame->wACMessage, 50);
+					}
+				} else {
+					mainGame->gGameConfig->lastdeck = mainGame->cbDBDecks->getItem(sel);
+					mainGame->stACMessage->setText(L"Deck activo actualizado.");
+					mainGame->PopupElement(mainGame->wACMessage, 30);
+				}
+				break;
+			}
 			case BUTTON_SAVE_DECK_AS: {
 				epro::wstringview dname(mainGame->ebDeckname->getText());
 				if(dname.empty())

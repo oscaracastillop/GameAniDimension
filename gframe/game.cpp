@@ -582,6 +582,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(stBanlist, 1300);
 	cbDBLFList = AlignElementWithParent(AddComboBox(env, Scale(80, 5, 220, 30), wDeckEdit, COMBOBOX_DBLFLIST));
 	cbDBLFList->setMaxSelectionRows(10);
+	btnSetActiveDeck = AlignElementWithParent(env->addButton(Scale(225, 5, 290, 30), wDeckEdit, BUTTON_SET_ACTIVE_DECK, L"Activo"));
 	stDeck = env->addStaticText(gDataManager->GetSysString(1301).data(), Scale(10, 39, 100, 59), false, false, wDeckEdit);
 	defaultStrings.emplace_back(stDeck, 1301);
 	cbDBDecks = AlignElementWithParent(AddComboBox(env, Scale(80, 35, 220, 60), wDeckEdit, COMBOBOX_DBDECKS));
@@ -2150,12 +2151,15 @@ void Game::RefreshAdventureMode() {
 
 	RefreshDeck(cbAdventureUserDeck);
 	if (!gGameConfig->lastdeck.empty()) {
+	{
+		std::wstring preferred = (isLoggedIn && !activeUserDeckName.empty()) ? activeUserDeckName : gGameConfig->lastdeck;
 		for (size_t d = 0; d < cbAdventureUserDeck->getItemCount(); ++d) {
-			if (gGameConfig->lastdeck == cbAdventureUserDeck->getItem(d)) {
+			if (preferred == cbAdventureUserDeck->getItem(d)) {
 				cbAdventureUserDeck->setSelected((int)d);
 				break;
 			}
 		}
+	}
 	}
 
 	OnAdventureSeriesChanged();
@@ -2619,11 +2623,14 @@ void Game::FetchUserInventoryAndDecks() {
 	if(decksJson.contains("success") && decksJson["success"].is_boolean() && decksJson["success"].get<bool>()) {
 		std::lock_guard<epro::mutex> lk(inventoryMutex);
 		userDeckSlots.clear();
+		std::string srvActiveName = SafeJsonStr(decksJson, "activeDeckName", "");
 		if(decksJson.contains("decks") && decksJson["decks"].is_array()) {
 			for(const auto& d : decksJson["decks"]) {
 				UserDeckSlot slotObj;
 				slotObj.slot = SafeJsonInt(d, "slot", 1);
 				slotObj.name = BufferIO::DecodeUTF8(SafeJsonStr(d, "nombreDeck", "Deck"));
+				if(srvActiveName.empty() && d.contains("esActivo") && d["esActivo"].is_boolean() && d["esActivo"].get<bool>())
+					srvActiveName = SafeJsonStr(d, "nombreDeck", "");
 				auto loadVec = [](const nlohmann::json& arr, Deck::Vector& out) {
 					if(!arr.is_array()) return;
 					for(const auto& item : arr) {
@@ -2640,7 +2647,32 @@ void Game::FetchUserInventoryAndDecks() {
 				userDeckSlots.push_back(std::move(slotObj));
 			}
 		}
+		if(!srvActiveName.empty()) {
+			activeUserDeckName = BufferIO::DecodeUTF8(srvActiveName);
+			gGameConfig->lastdeck = activeUserDeckName;
+		}
 	}
+}
+
+bool Game::SetActiveUserDeckOnServer(int slot, std::wstring& errOut) {
+	if(!isLoggedIn || sessionToken.empty()) {
+		errOut = L"Debes iniciar sesi\u00F3n para fijar el deck activo.";
+		return false;
+	}
+	nlohmann::json body;
+	body["slot"] = slot;
+	auto resp = CallSessionApi("/api/user/decks/set-active", sessionToken, body.dump());
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		std::string nm = SafeJsonStr(resp, "nombreDeck", "");
+		std::lock_guard<epro::mutex> lk(inventoryMutex);
+		if(!nm.empty()) {
+			activeUserDeckName = BufferIO::DecodeUTF8(nm);
+			gGameConfig->lastdeck = activeUserDeckName;
+		}
+		return true;
+	}
+	errOut = BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "Guarda el deck en este slot antes de dejarlo activo."));
+	return false;
 }
 
 bool Game::SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut) {
@@ -4763,8 +4795,9 @@ void Game::RefreshDeck(irr::gui::IGUIComboBox* cbDeck) {
 			cbDeck->addItem(Utils::ToUnicodeIfNeeded(file).data());
 		}
 	}
+	std::wstring preferred = (isLoggedIn && !activeUserDeckName.empty()) ? activeUserDeckName : gGameConfig->lastdeck;
 	for(irr::u32 i = 0; i < cbDeck->getItemCount(); ++i) {
-		if(gGameConfig->lastdeck == cbDeck->getItem(i)) {
+		if(preferred == cbDeck->getItem(i)) {
 			cbDeck->setSelected(static_cast<irr::s32>(i));
 			break;
 		}

@@ -325,6 +325,7 @@ struct deck_edit_page_elements {
 	irr::gui::IGUIButton* btnSortDeck;
 	irr::gui::IGUIButton* btnShuffleDeck;
 	irr::gui::IGUIButton* btnSaveDeck;
+	irr::gui::IGUIButton* btnSetActiveDeck{ nullptr };
 	irr::gui::IGUIButton* btnDeleteDeck;
 	irr::gui::IGUIButton* btnSaveDeckAs;
 	irr::gui::IGUIButton* btnRenameDeck;
@@ -920,7 +921,9 @@ public:
 	epro::mutex inventoryMutex;
 	irr::gui::IGUIButton* btnSellCard{ nullptr };
 	void FetchUserInventoryAndDecks();
+	std::wstring activeUserDeckName;
 	bool SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut);
+	bool SetActiveUserDeckOnServer(int slot, std::wstring& errOut);
 	bool SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut);
 	bool ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut);
 	long long activeDuelSessionId{ 0 };
