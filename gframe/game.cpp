@@ -2803,8 +2803,6 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 			pendingDuelReward.medalTitle = medalTitle;
 			pendingDuelReward.medalFile = medalFile;
 			pendingDuelReward.statusMsg = statusMsg;
-			if(!dInfo.isInDuel)
-				ShowDuelRewardWindow();
 		}
 	}
 }
@@ -3311,7 +3309,7 @@ void Game::ShowDuelRewardWindow() {
 	}
 
 	if(imgDuelRewardCard) {
-		auto cTex = d.cardCode > 0 ? imageManager.GetTexture(d.cardCode) : imageManager.tCover[0];
+		auto cTex = d.cardCode > 0 ? imageManager.GetTextureCard(d.cardCode, ART, true) : imageManager.tCover[0];
 		imgDuelRewardCard->setImage(cTex ? cTex : imageManager.tCover[0]);
 	}
 	if(stDuelRewardCardInfo) {
@@ -4292,6 +4290,10 @@ bool Game::MainLoop() {
 		cur_time += delta_time;
 		gJWrapper->ProcessEvents();
 		ProcessPendingLoginResult();
+		if(!dInfo.isInDuel && pendingDuelReward.valid) {
+			ShowDuelRewardWindow();
+			pendingDuelReward.valid = false;
+		}
 		bool resized = false;
 		auto size = driver->getScreenSize();
 #if EDOPRO_LINUX
