@@ -486,12 +486,17 @@ struct adventure_mode_panel_elements {
 		std::string statusMsg;
 	};
 	DuelRewardData pendingDuelReward;
+	uint32_t activeDuelRewardCardCode{ 0 };
 	irr::gui::IGUIStaticText* wDuelReward{ nullptr };
 	irr::gui::IGUIImage* imgDuelRewardBg{ nullptr };
 	irr::gui::IGUIStaticText* stDuelRewardHeader{ nullptr };
 	irr::gui::IGUIStaticText* stDuelRewardTable{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardColConcept{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardColExp{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardColSS{ nullptr };
 	irr::gui::IGUIStaticText* stDuelRewardTotal{ nullptr };
 	irr::gui::IGUIStaticText* stDuelRewardEventBox{ nullptr };
+	irr::gui::IGUIStaticText* stDuelRewardEventText{ nullptr };
 	irr::gui::IGUIImage* imgDuelRewardEvent{ nullptr };
 	irr::gui::IGUIStaticText* stDuelRewardLuck{ nullptr };
 	irr::gui::IGUIImage* imgDuelRewardCard{ nullptr };
