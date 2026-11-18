@@ -2821,6 +2821,12 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 			pendingDuelReward.avaSSPct = resp.contains("avaSSPct") && resp["avaSSPct"].is_number() ? resp["avaSSPct"].get<double>() : 0.0;
 			pendingDuelReward.medExpPct = resp.contains("medExpPct") && resp["medExpPct"].is_number() ? resp["medExpPct"].get<double>() : 0.0;
 			pendingDuelReward.medSSPct = resp.contains("medSSPct") && resp["medSSPct"].is_number() ? resp["medSSPct"].get<double>() : 0.0;
+			pendingDuelReward.clanExpPct = resp.contains("clanExpPct") && resp["clanExpPct"].is_number() ? resp["clanExpPct"].get<double>() : 0.0;
+			pendingDuelReward.clanSSPct = resp.contains("clanSSPct") && resp["clanSSPct"].is_number() ? resp["clanSSPct"].get<double>() : 0.0;
+			pendingDuelReward.clanName = SafeJsonStr(resp, "clanNombre", "");
+			pendingDuelReward.vipExpPct = resp.contains("vipExpPct") && resp["vipExpPct"].is_number() ? resp["vipExpPct"].get<double>() : 0.0;
+			pendingDuelReward.vipSSPct = resp.contains("vipSSPct") && resp["vipSSPct"].is_number() ? resp["vipSSPct"].get<double>() : 0.0;
+			pendingDuelReward.vipName = SafeJsonStr(resp, "vipNombre", "");
 			pendingDuelReward.totalLuckPct = resp.contains("totalLuckPct") && resp["totalLuckPct"].is_number() ? resp["totalLuckPct"].get<double>() : 0.0;
 			pendingDuelReward.newLevel = newLevel;
 			pendingDuelReward.leveledUp = leveledUp;
@@ -3344,21 +3350,35 @@ void Game::ShowDuelRewardWindow() {
 	int avaSSBonus = (int)std::round(d.ssBase * (d.avaSSPct / 100.0));
 	int medExpBonus = (int)std::round(d.expBase * (d.medExpPct / 100.0));
 	int medSSBonus = (int)std::round(d.ssBase * (d.medSSPct / 100.0));
+	int clanExpBonus = (int)std::round(d.expBase * (d.clanExpPct / 100.0));
+	int clanSSBonus = (int)std::round(d.ssBase * (d.clanSSPct / 100.0));
+	int vipExpBonus = (int)std::round(d.expBase * (d.vipExpPct / 100.0));
+	int vipSSBonus = (int)std::round(d.ssBase * (d.vipSSPct / 100.0));
 
 	if(stDuelRewardTable) stDuelRewardTable->setText(L" \u25C6 RECOMPENSAS DE DUELO \u25C6");
-	std::wstring cConcept = L"CONCEPTO\n\n\u2022 Base:\n\u2022 Avatar Activo:\n\u2022 Medallas & Logros:\n";
+	std::wstring cConcept = L"CONCEPTO\n\n\u2022 Base:\n\u2022 Avatar Activo:\n\u2022 Medallas & Logros:\n\u2022 Clan:\n\u2022 Membres\u00EDa VIP:";
 	std::wstring cExp = epro::format(L"EXP.\n\n+{} EXP\n+{:.1f}% (+{} EXP)\n+{:.1f}% (+{} EXP)\n",
 		d.expBase, d.avaExpPct, avaExpBonus, d.medExpPct, medExpBonus);
 	std::wstring cSS = epro::format(L"STARSHIPS\n\n+{} SS\n+{:.1f}% (+{} SS)\n+{:.1f}% (+{} SS)\n",
 		d.ssBase, d.avaSSPct, avaSSBonus, d.medSSPct, medSSBonus);
-	if(d.ssFirstWin > 0) {
-		cConcept += L"\u2022 Primera Victoria:";
-		cExp += L"\u2014";
-		cSS += epro::format(L"+{} SS", d.ssFirstWin);
+	if(d.clanExpPct > 0.0 || d.clanSSPct > 0.0 || !d.clanName.empty()) {
+		cExp += epro::format(L"+{:.1f}% (+{} EXP)\n", d.clanExpPct, clanExpBonus);
+		cSS += epro::format(L"+{:.1f}% (+{} SS)\n", d.clanSSPct, clanSSBonus);
 	} else {
-		cConcept += L"\u2022 Membres\u00EDa VIP:";
+		cExp += L"Sin clan activo\n";
+		cSS += L"Sin clan activo\n";
+	}
+	if(d.vipExpPct > 0.0 || d.vipSSPct > 0.0 || !d.vipName.empty()) {
+		cExp += epro::format(L"+{:.1f}% (+{} EXP)", d.vipExpPct, vipExpBonus);
+		cSS += epro::format(L"+{:.1f}% (+{} SS)", d.vipSSPct, vipSSBonus);
+	} else {
 		cExp += L"Sin VIP activo";
 		cSS += L"Sin VIP activo";
+	}
+	if(d.ssFirstWin > 0) {
+		cConcept += L"\n\u2022 Primera Victoria:";
+		cExp += L"\n\u2014";
+		cSS += epro::format(L"\n+{} SS", d.ssFirstWin);
 	}
 	if(stDuelRewardColConcept) stDuelRewardColConcept->setText(cConcept.c_str());
 	if(stDuelRewardColExp) stDuelRewardColExp->setText(cExp.c_str());
@@ -3376,7 +3396,7 @@ void Game::ShowDuelRewardWindow() {
 	if(imgDuelRewardCard) {
 		auto cTex = d.cardCode > 0 ? imageManager.GetTextureCard(d.cardCode, ART, false, true) : imageManager.tCover[0];
 		imgDuelRewardCard->setImage(cTex ? cTex : imageManager.tCover[0]);
-		if(cTex && cTex != imageManager.tCover[0]) activeDuelRewardCardCode = 0;
+		if(cTex && cTex != imageManager.tCover[0] && cTex != imageManager.tUnknown) activeDuelRewardCardCode = 0;
 	}
 	if(stDuelRewardCardInfo) {
 		if(d.cardCode > 0 && !d.cardName.empty()) {
@@ -4364,7 +4384,7 @@ bool Game::MainLoop() {
 		}
 		if(wDuelReward && wDuelReward->isVisible() && activeDuelRewardCardCode > 0 && imgDuelRewardCard) {
 			auto cTex = imageManager.GetTextureCard(activeDuelRewardCardCode, ART, false, true);
-			if(cTex && cTex != imageManager.tCover[0]) {
+			if(cTex && cTex != imageManager.tCover[0] && cTex != imageManager.tUnknown) {
 				imgDuelRewardCard->setImage(cTex);
 				activeDuelRewardCardCode = 0;
 			}

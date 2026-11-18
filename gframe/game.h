@@ -471,6 +471,12 @@ struct adventure_mode_panel_elements {
 		double avaSSPct{ 0.0 };
 		double medExpPct{ 0.0 };
 		double medSSPct{ 0.0 };
+		double clanExpPct{ 0.0 };
+		double clanSSPct{ 0.0 };
+		std::string clanName;
+		double vipExpPct{ 0.0 };
+		double vipSSPct{ 0.0 };
+		std::string vipName;
 		double totalLuckPct{ 0.0 };
 		int newLevel{ 1 };
 		bool leveledUp{ false };
