@@ -236,6 +236,9 @@ struct host_creation_panel_elements {
 	irr::gui::IGUIEditBox* ebHostPort;
 	irr::gui::IGUIStaticText* stHostNotes;
 	irr::gui::IGUIEditBox* ebHostNotes;
+	irr::gui::IGUIEditBox* ebHostMinLevel{ nullptr };
+	irr::gui::IGUIEditBox* ebHostMaxLevel{ nullptr };
+	irr::gui::IGUIComboBox* cbHostDuelType{ nullptr };
 	irr::gui::IGUIStaticText* stVersus;
 	irr::gui::IGUIStaticText* stBestof;
 	//deck options
@@ -261,6 +264,9 @@ struct host_panel_elements {
 	irr::gui::IGUIButton* btnHostPrepWindBot;
 	irr::gui::IGUIButton* btnHostPrepOB;
 	irr::gui::IGUIStaticText* stHostPrepDuelist[6];
+	irr::gui::IGUIImage* imgHostPrepAvatar[6]{ nullptr };
+	irr::gui::IGUIStaticText* stHostPrepTeamLeft{ nullptr };
+	irr::gui::IGUIStaticText* stHostPrepTeamRight{ nullptr };
 	irr::gui::IGUICheckBox* chkHostPrepReady[6];
 	irr::gui::IGUIButton* btnHostPrepKick[6];
 	irr::gui::IGUIComboBox* cbDeckSelect;
@@ -377,6 +383,15 @@ struct deck_edit_page_elements {
 struct server_lobby_page_elements {
 	//server lobby
 	bool isHostingOnline;
+	bool currentRoomIsRanked{ true };
+	int currentRoomMinLv{ 1 };
+	int currentRoomMaxLv{ 300 };
+	struct PlayerCardCacheEntry {
+		int level{ 1 };
+		std::string avatarFile{ "AVA-001.png" };
+	};
+	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
+	void UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName);
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
 	irr::gui::IGUIComboBox* serverChoice;

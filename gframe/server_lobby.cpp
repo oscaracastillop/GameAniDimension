@@ -289,6 +289,30 @@ void ServerLobby::JoinServer(bool host) {
 		auto room = static_cast<RoomInfo*>(mainGame->roomListTable->getCellData(mainGame->roomListTable->getSelected(), 1));
 		if(!room)
 			return;
+		// Parsear [RANKED|Nv.X-Y] o [AMISTOSO|Nv.X-Y] de room->description
+		bool isRanked = true;
+		int minLv = 1, maxLv = 300;
+		const std::wstring& desc = room->description;
+		if(desc.find(L"[AMISTOSO") != std::wstring::npos) isRanked = false;
+		auto nvPos = desc.find(L"|Nv.");
+		if(nvPos != std::wstring::npos) {
+			try {
+				size_t p1 = nvPos + 4;
+				size_t dash = desc.find(L'-', p1);
+				size_t br = desc.find(L']', p1);
+				if(dash != std::wstring::npos && br != std::wstring::npos && dash < br) {
+					minLv = std::stoi(desc.substr(p1, dash - p1));
+					maxLv = std::stoi(desc.substr(dash + 1, br - (dash + 1)));
+				}
+			} catch(...) {}
+		}
+		if(mainGame->isLoggedIn && (mainGame->playerLevel < minLv || mainGame->playerLevel > maxLv)) {
+			mainGame->PopupMessage(epro::format(L"Esta sala requiere Nivel entre {} y {} (tu nivel actual: {}).", minLv, maxLv, mainGame->playerLevel));
+			return;
+		}
+		mainGame->currentRoomIsRanked = isRanked;
+		mainGame->currentRoomMinLv = minLv;
+		mainGame->currentRoomMaxLv = maxLv;
 		if(room->locked) {
 			if(!mainGame->wRoomPassword->isVisible()) {
 				mainGame->wRoomPassword->setVisible(true);
