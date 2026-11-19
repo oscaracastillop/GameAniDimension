@@ -1270,16 +1270,16 @@ static constexpr std::pair<epro::wstringview, irr::video::E_DRIVER_TYPE> support
 
 void Game::PopulateGameHostWindows() {
 	//create host (ventana amplia y limpia sin pestanas extras)
-	wtcCreateHost = irr::gui::CGUIWindowedTabControl::addCGUIWindowedTabControl(env, Scale(260, 75, 764, 515), gDataManager->GetSysString(1224).data(), TAB_CONTROL_CREATE_HOST);
+	wtcCreateHost = irr::gui::CGUIWindowedTabControl::addCGUIWindowedTabControl(env, Scale(260, 75, 764, 515), L"Configuraci\u00F3n Sala Duelos", TAB_CONTROL_CREATE_HOST);
 
 	wCreateHost = wtcCreateHost->getWindow();
-	defaultStrings.emplace_back(wCreateHost, 1224);
 	wCreateHost->getCloseButton()->setVisible(false);
 	wCreateHost->setVisible(false);
 
 	{
-		auto tDuelSettings = wtcCreateHost->addTab(gDataManager->GetSysString(2089).data());
-		defaultStrings.emplace_back(tDuelSettings, 2089);
+		auto tDuelSettings = wtcCreateHost->addTab(L"");
+		if(wtcCreateHost->getTabControl())
+			wtcCreateHost->getTabControl()->setTabHeight(0);
 
 		defaultStrings.emplace_back(env->addStaticText(gDataManager->GetSysString(1226).data(), Scale(18, 12, 150, 32), false, false, tDuelSettings), 1226);
 		cbHostLFList = AddComboBox(env, Scale(155, 8, 480, 33), tDuelSettings, COMBOBOX_HOST_LFLIST);
@@ -1360,15 +1360,18 @@ void Game::PopulateGameHostWindows() {
 				epro::sprintf(gDataManager->GetSysString(1627), gDataManager->GetSysString(limitStrIds[i])).data());
 		}
 
-		defaultStrings.emplace_back(env->addStaticText(gDataManager->GetSysString(1234).data(), Scale(18, 276, 150, 296), false, false, tDuelSettings), 1234);
+		auto hostNameLbl = env->addStaticText(gDataManager->GetSysString(1234).data(), Scale(18, 276, 150, 296), false, false, tDuelSettings);
+		defaultStrings.emplace_back(hostNameLbl, 1234);
+		hostNameLbl->setVisible(false);
 		ebServerName = env->addEditBox(gGameConfig->gamename.data(), Scale(155, 272, 345, 297), true, tDuelSettings);
 		ebServerName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		ebServerName->setVisible(false);
 		btnRuleCards = env->addButton(Scale(0, 0, 1, 1), tDuelSettings, BUTTON_RULE_CARDS, L"");
 		btnRuleCards->setVisible(false);
 		btnRuleCards->setEnabled(false);
 
-		defaultStrings.emplace_back(env->addStaticText(gDataManager->GetSysString(1235).data(), Scale(18, 306, 150, 326), false, false, tDuelSettings), 1235);
-		ebServerPass = env->addEditBox(L"", Scale(155, 302, 345, 327), true, tDuelSettings);
+		defaultStrings.emplace_back(env->addStaticText(gDataManager->GetSysString(1235).data(), Scale(18, 276, 150, 296), false, false, tDuelSettings), 1235);
+		ebServerPass = env->addEditBox(L"", Scale(155, 272, 345, 297), true, tDuelSettings);
 		ebServerPass->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 
 		btnHostConfirm = env->addButton(Scale(365, 280, 480, 312), tDuelSettings, BUTTON_HOST_CONFIRM, gDataManager->GetSysString(1211).data());
