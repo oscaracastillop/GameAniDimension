@@ -251,6 +251,10 @@ void Game::Initialize() {
 		Scale(10, 100, 290, 125), false, true, wVersion);
 	((irr::gui::CGUICustomContextMenu*)mVersion)->addItem(wVersion, -1);
 	// Dedicated full-screen Main Menu Lobby
+	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
+	mainMenuLeftX = 510 - mainMenuWidth / 2;
+	mainMenuRightX = 510 + mainMenuWidth / 2;
+	int offset = 0;
 	wMainMenu = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
 	wMainMenu->setVisible(false);
 	imgMainMenuBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wMainMenu);
