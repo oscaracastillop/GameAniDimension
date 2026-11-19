@@ -177,6 +177,14 @@ void Game::Initialize() {
 	adFont = irr::gui::CGUITTFont::createTTFont(env, numfont, fallbackFonts);
 	numfont.size = Scale(48);
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, numfont, fallbackFonts);
+	{
+		auto ltFont = textfont;
+		ltFont.size = Scale(22);
+		loginTitleFont = irr::gui::CGUITTFont::createTTFont(env, ltFont, fallbackFonts);
+		auto luFont = textfont;
+		luFont.size = Scale(16);
+		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
+	}
 	if(!numFont || !adFont || !lpcFont)
 		throw std::runtime_error("Failed to load numbers font");
 	if(!ApplySkin(gGameConfig->skin, false, true)) {
@@ -334,28 +342,30 @@ void Game::Initialize() {
 	if(auto drRightTex = driver->getTexture("textures/red_eyes_dragon.png"))
 		imgLoginDragonRight->setImage(drRightTex);
 
-	imgLoginLogo = env->addImage(irr::core::recti(0, 0, 360, 200), wLogin);
-	imgLoginLogo->setUseAlphaChannel(true);
-	imgLoginLogo->setScaleImage(true);
-	if(auto logoTex = driver->getTexture("textures/logo_ani.png"))
-		imgLoginLogo->setImage(logoTex);
-
-	wLoginCard = env->addStaticText(L"", irr::core::recti(0, 0, 440, 320), true, false, wLogin, -1, true);
-	wLoginCard->setBackgroundColor(irr::video::SColor(225, 10, 14, 28));
-	stLoginTitle = env->addStaticText(L"INICIAR SESI\u00D3N", irr::core::recti(0, 0, 400, 32), false, false, wLoginCard);
+	wLoginCard = env->addStaticText(L"", irr::core::recti(0, 0, 420, 280), true, false, wLogin, -1, true);
+	wLoginCard->setBackgroundColor(irr::video::SColor(232, 10, 14, 28));
+	stLoginTitle = env->addStaticText(L"INICIAR SESI\u00D3N", irr::core::recti(0, 0, 380, 34), false, false, wLoginCard);
 	stLoginTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	stLoginTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	stLoginUserLbl = env->addStaticText(L"Usuario o Correo:", irr::core::recti(0, 0, 400, 22), false, false, wLoginCard);
+	stLoginTitle->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
+	if(loginTitleFont) stLoginTitle->setOverrideFont(loginTitleFont);
+	stLoginUserLbl = env->addStaticText(L"Usuario o Correo:", irr::core::recti(0, 0, 380, 22), false, false, wLoginCard);
 	stLoginUserLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	ebLoginUser = env->addEditBox(L"", irr::core::recti(0, 0, 400, 38), true, wLoginCard, EDIT_LOGIN_USER);
-	stLoginPassLbl = env->addStaticText(L"Contrase\u00F1a:", irr::core::recti(0, 0, 400, 22), false, false, wLoginCard);
+	if(loginUiFont) stLoginUserLbl->setOverrideFont(loginUiFont);
+	ebLoginUser = env->addEditBox(L"", irr::core::recti(0, 0, 380, 38), true, wLoginCard, EDIT_LOGIN_USER);
+	if(loginUiFont) ebLoginUser->setOverrideFont(loginUiFont);
+	stLoginPassLbl = env->addStaticText(L"Contrase\u00F1a:", irr::core::recti(0, 0, 380, 22), false, false, wLoginCard);
 	stLoginPassLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 400, 38), true, wLoginCard, EDIT_LOGIN_PASS);
+	if(loginUiFont) stLoginPassLbl->setOverrideFont(loginUiFont);
+	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 380, 38), true, wLoginCard, EDIT_LOGIN_PASS);
 	ebLoginPass->setPasswordBox(true, L'*');
-	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 400, 38), false, true, wLoginCard);
+	if(loginUiFont) ebLoginPass->setOverrideFont(loginUiFont);
+	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 380, 34), false, true, wLoginCard);
 	stLoginStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 220, 42), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
-	btnLoginExit = env->addButton(irr::core::recti(0, 0, 160, 42), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
+	if(loginUiFont) stLoginStatus->setOverrideFont(loginUiFont);
+	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 210, 42), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
+	if(loginUiFont) btnLoginSubmit->setOverrideFont(loginUiFont);
+	btnLoginExit = env->addButton(irr::core::recti(0, 0, 150, 42), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
+	if(loginUiFont) btnLoginExit->setOverrideFont(loginUiFont);
 	//lan mode
 	wLanWindow = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1200).data());
 	defaultStrings.emplace_back(wLanWindow, 1200);
@@ -2490,17 +2500,17 @@ void Game::ResizeLoginScreen() {
 	if(imgLoginBg)
 		imgLoginBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	const int logoH = std::max(Scale(85), std::min(Scale(165), (int)(H * 0.21f)));
-	const int logoW = (int)(logoH * (669.0f / 373.0f));
-	const int logoX = (W - logoW) / 2;
-	const int logoY = std::max(Scale(10), (int)(H * 0.035f));
-	if(imgLoginLogo)
-		imgLoginLogo->setRelativePosition(irr::core::recti(logoX, logoY, logoX + logoW, logoY + logoH));
-
-	const int cardW = std::max(Scale(360), std::min(Scale(480), (int)(W * 0.44f)));
-	const int cardH = std::max(Scale(295), std::min(Scale(375), (int)(H * 0.54f)));
+	const int cardW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.40f)));
+	const int pad = Scale(24);
+	const int innerW = cardW - 2 * pad;
+	const int titleH = Scale(34);
+	const int lblH = Scale(22);
+	const int inputH = Scale(38);
+	const int statusH = Scale(34);
+	const int btnH = Scale(42);
+	const int cardH = Scale(16) + titleH + Scale(10) + lblH + Scale(4) + inputH + Scale(10) + lblH + Scale(4) + inputH + Scale(8) + statusH + Scale(10) + btnH + Scale(18);
 	const int cardX = (W - cardW) / 2;
-	const int cardY = std::min(H - cardH - Scale(18), logoY + logoH + Scale(10));
+	const int cardY = std::max(Scale(115), std::min(H - cardH - Scale(20), (H - cardH) / 2 + Scale(44)));
 
 	if(wLoginCard)
 		wLoginCard->setRelativePosition(irr::core::recti(cardX, cardY, cardX + cardW, cardY + cardH));
@@ -2508,43 +2518,39 @@ void Game::ResizeLoginScreen() {
 	const int dragonSize = std::max(Scale(180), std::min((int)(H * 0.68f), (int)(cardX * 1.15f)));
 	const int dragonY = std::max(Scale(20), H - dragonSize - Scale(16));
 	if(imgLoginDragonLeft) {
-		int lx = std::max(Scale(4), cardX - dragonSize + Scale(24));
+		int lx = std::max(Scale(4), cardX - dragonSize + Scale(20));
 		imgLoginDragonLeft->setRelativePosition(irr::core::recti(lx, dragonY, lx + dragonSize, dragonY + dragonSize));
 	}
 	if(imgLoginDragonRight) {
-		int rx = std::min(W - dragonSize - Scale(4), cardX + cardW - Scale(24));
+		int rx = std::min(W - dragonSize - Scale(4), cardX + cardW - Scale(20));
 		imgLoginDragonRight->setRelativePosition(irr::core::recti(rx, dragonY, rx + dragonSize, dragonY + dragonSize));
 	}
 
-	const int pad = Scale(24);
-	const int innerW = cardW - 2 * pad;
-	int y = Scale(14);
+	int y = Scale(16);
 	if(stLoginTitle) {
-		stLoginTitle->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(30)));
-		y += Scale(38);
+		stLoginTitle->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + titleH));
+		y += titleH + Scale(10);
 	}
 	if(stLoginUserLbl) {
-		stLoginUserLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(20)));
-		y += Scale(22);
+		stLoginUserLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + lblH));
+		y += lblH + Scale(4);
 	}
-	const int inputH = std::max(Scale(36), (int)(cardH * 0.12f));
 	if(ebLoginUser) {
 		ebLoginUser->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + inputH));
 		y += inputH + Scale(10);
 	}
 	if(stLoginPassLbl) {
-		stLoginPassLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(20)));
-		y += Scale(22);
+		stLoginPassLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + lblH));
+		y += lblH + Scale(4);
 	}
 	if(ebLoginPass) {
 		ebLoginPass->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + inputH));
-		y += inputH + Scale(10);
+		y += inputH + Scale(8);
 	}
 	if(stLoginStatus) {
-		stLoginStatus->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(36)));
-		y += Scale(42);
+		stLoginStatus->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + statusH));
+		y += statusH + Scale(10);
 	}
-	const int btnH = std::max(Scale(38), cardH - y - Scale(16));
 	const int submitW = (int)(innerW * 0.56f);
 	const int gapBtn = Scale(12);
 	if(btnLoginSubmit)
@@ -4900,11 +4906,6 @@ bool Game::MainLoop() {
 				PopupElement(wQuery);
 				update_prompted = true;
 			} else if (show_changelog) {
-				std::lock_guard<epro::mutex> lock(gMutex);
-				menuHandler.prev_operation = ACTION_SHOW_CHANGELOG;
-				stQMessage->setText(gDataManager->GetSysString(1451).data());
-				SetCentered(wQuery);
-				PopupElement(wQuery);
 				show_changelog = false;
 			}
 			else if(needs_to_acknowledge_discord_host) {

@@ -894,6 +894,8 @@ public:
 	irr::gui::CGUITTFont* numFont;
 	irr::gui::CGUITTFont* adFont;
 	irr::gui::CGUITTFont* lpcFont;
+	irr::gui::CGUITTFont* loginTitleFont{ nullptr };
+	irr::gui::CGUITTFont* loginUiFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;
@@ -920,7 +922,6 @@ public:
 
 	irr::gui::IGUIStaticText* wLogin{ nullptr };
 	irr::gui::IGUIImage* imgLoginBg{ nullptr };
-	irr::gui::IGUIImage* imgLoginLogo{ nullptr };
 	irr::gui::IGUIImage* imgLoginDragonLeft{ nullptr };
 	irr::gui::IGUIImage* imgLoginDragonRight{ nullptr };
 	irr::gui::IGUIStaticText* wLoginCard{ nullptr };
