@@ -919,6 +919,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		mainGame->btnHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(686, 552, 796, 582));
 		mainGame->btnHostPrepWindBot->setRelativePosition(mainGame->Scale<irr::s32>(804, 552, 913, 582));
 		mainGame->gBot.window->setRelativePosition(irr::core::vector2di(mainGame->wHostPrepare->getAbsolutePosition().LowerRightCorner.X, mainGame->wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
+		mainGame->playerCardCache.clear();
 		for(int i = 0; i < 6; i++) {
 			mainGame->chkHostPrepReady[i]->setVisible(false);
 			mainGame->chkHostPrepReady[i]->setChecked(false);

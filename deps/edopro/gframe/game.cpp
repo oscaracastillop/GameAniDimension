@@ -2980,6 +2980,10 @@ void Game::ProcessPendingLoginResult() {
 			wBtnSettings->setVisible(true);
 		if(wMainMenu) {
 			ResizeMainMenuScreen();
+			if(stLobbyUser) {
+				std::wstring uName = loggedInUser.empty() ? L"Duelista" : loggedInUser;
+				stLobbyUser->setText(epro::format(L"Duelista: {}   |   Nivel {}   |   {} SS", uName, playerLevel, playerStarShips).c_str());
+			}
 			FetchLobbyStatsAsync();
 			wMainMenu->setVisible(true);
 			env->getRootGUIElement()->bringToFront(wMainMenu);
@@ -4978,6 +4982,17 @@ bool Game::MainLoop() {
 		gJWrapper->ProcessEvents();
 		ProcessPendingLoginResult();
 		ProcessPendingLobbyStats();
+		{
+			static auto lastLobbyPoll = std::chrono::steady_clock::now();
+			static bool wasMainMenuVisible = false;
+			bool menuVis = (wMainMenu && wMainMenu->isVisible());
+			auto now = std::chrono::steady_clock::now();
+			if(menuVis && (!wasMainMenuVisible || std::chrono::duration_cast<std::chrono::seconds>(now - lastLobbyPoll).count() >= 15)) {
+				lastLobbyPoll = now;
+				FetchLobbyStatsAsync();
+			}
+			wasMainMenuVisible = menuVis;
+		}
 		if(!dInfo.isInDuel && pendingDuelReward.valid) {
 			ShowDuelRewardWindow();
 			pendingDuelReward.valid = false;
