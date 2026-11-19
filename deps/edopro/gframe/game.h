@@ -911,12 +911,21 @@ public:
 	std::atomic<bool> spanishCardTextsStarted{ false };
 	std::atomic<bool> spanishCardTextsLoaded{ false };
 
-	irr::gui::IGUIWindow* wLogin{ nullptr };
+	irr::gui::IGUIStaticText* wLogin{ nullptr };
+	irr::gui::IGUIImage* imgLoginBg{ nullptr };
+	irr::gui::IGUIImage* imgLoginLogo{ nullptr };
+	irr::gui::IGUIImage* imgLoginDragonLeft{ nullptr };
+	irr::gui::IGUIImage* imgLoginDragonRight{ nullptr };
+	irr::gui::IGUIStaticText* wLoginCard{ nullptr };
+	irr::gui::IGUIStaticText* stLoginTitle{ nullptr };
+	irr::gui::IGUIStaticText* stLoginUserLbl{ nullptr };
+	irr::gui::IGUIStaticText* stLoginPassLbl{ nullptr };
 	irr::gui::IGUIEditBox* ebLoginUser{ nullptr };
 	irr::gui::IGUIEditBox* ebLoginPass{ nullptr };
 	irr::gui::IGUIStaticText* stLoginStatus{ nullptr };
 	irr::gui::IGUIButton* btnLoginSubmit{ nullptr };
 	irr::gui::IGUIButton* btnLoginExit{ nullptr };
+	void ResizeLoginScreen();
 	bool isLoggedIn{ false };
 	std::wstring loggedInUser{};
 	std::string sessionToken{};

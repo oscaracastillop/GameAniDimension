@@ -291,17 +291,47 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnModeExit, 1210);
 	offset += 35;
 #undef OFFSET
-	wLogin = env->addWindow(Scale(342, 165, 682, 435), false, L"Ani Dimension - Iniciar Sesion");
-	wLogin->getCloseButton()->setVisible(false);
-	wLogin->setDraggable(false);
-	env->addStaticText(L"Usuario o Correo:", Scale(20, 35, 320, 55), false, false, wLogin);
-	ebLoginUser = env->addEditBox(L"", Scale(20, 58, 320, 86), true, wLogin, EDIT_LOGIN_USER);
-	env->addStaticText(L"Contrasena:", Scale(20, 96, 320, 116), false, false, wLogin);
-	ebLoginPass = env->addEditBox(L"", Scale(20, 119, 320, 147), true, wLogin, EDIT_LOGIN_PASS);
+	// Dedicated full-screen Login interface
+	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
+	imgLoginBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wLogin);
+	imgLoginBg->setScaleImage(true);
+	if(auto bgTex = driver->getTexture("textures/bg_login.png"))
+		imgLoginBg->setImage(bgTex);
+
+	imgLoginDragonLeft = env->addImage(irr::core::recti(0, 0, 320, 320), wLogin);
+	imgLoginDragonLeft->setUseAlphaChannel(true);
+	imgLoginDragonLeft->setScaleImage(true);
+	if(auto drLeftTex = driver->getTexture("textures/blue_eyes_dragon.png"))
+		imgLoginDragonLeft->setImage(drLeftTex);
+
+	imgLoginDragonRight = env->addImage(irr::core::recti(0, 0, 320, 320), wLogin);
+	imgLoginDragonRight->setUseAlphaChannel(true);
+	imgLoginDragonRight->setScaleImage(true);
+	if(auto drRightTex = driver->getTexture("textures/red_eyes_dragon.png"))
+		imgLoginDragonRight->setImage(drRightTex);
+
+	imgLoginLogo = env->addImage(irr::core::recti(0, 0, 360, 200), wLogin);
+	imgLoginLogo->setUseAlphaChannel(true);
+	imgLoginLogo->setScaleImage(true);
+	if(auto logoTex = driver->getTexture("textures/logo_ani.png"))
+		imgLoginLogo->setImage(logoTex);
+
+	wLoginCard = env->addStaticText(L"", irr::core::recti(0, 0, 440, 320), true, false, wLogin, -1, true);
+	wLoginCard->setBackgroundColor(irr::video::SColor(225, 10, 14, 28));
+	stLoginTitle = env->addStaticText(L"INICIAR SESI\u00D3N", irr::core::recti(0, 0, 400, 32), false, false, wLoginCard);
+	stLoginTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stLoginTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stLoginUserLbl = env->addStaticText(L"Usuario o Correo:", irr::core::recti(0, 0, 400, 22), false, false, wLoginCard);
+	stLoginUserLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	ebLoginUser = env->addEditBox(L"", irr::core::recti(0, 0, 400, 38), true, wLoginCard, EDIT_LOGIN_USER);
+	stLoginPassLbl = env->addStaticText(L"Contrase\u00F1a:", irr::core::recti(0, 0, 400, 22), false, false, wLoginCard);
+	stLoginPassLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 400, 38), true, wLoginCard, EDIT_LOGIN_PASS);
 	ebLoginPass->setPasswordBox(true, L'*');
-	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", Scale(20, 155, 320, 190), false, true, wLogin);
-	btnLoginSubmit = env->addButton(Scale(20, 200, 185, 235), wLogin, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
-	btnLoginExit = env->addButton(Scale(195, 200, 320, 235), wLogin, BUTTON_LOGIN_EXIT, L"SALIR");
+	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 400, 38), false, true, wLoginCard);
+	stLoginStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 220, 42), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
+	btnLoginExit = env->addButton(irr::core::recti(0, 0, 160, 42), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
 	//lan mode
 	wLanWindow = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1200).data());
 	defaultStrings.emplace_back(wLanWindow, 1200);
@@ -1134,8 +1164,9 @@ void Game::Initialize() {
 	if(selectedLocale != 0)
 		ApplyLocale(selectedLocale, true);
 
-	env->getRootGUIElement()->bringToFront(wBtnSettings);
-	env->getRootGUIElement()->bringToFront(mTopMenu);
+	ResizeLoginScreen();
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	env->getRootGUIElement()->bringToFront(wLogin);
 	env->setFocus(ebLoginUser ? static_cast<irr::gui::IGUIElement*>(ebLoginUser) : static_cast<irr::gui::IGUIElement*>(wLogin));
 }
 
@@ -2422,6 +2453,81 @@ std::wstring Game::GetSpanishCardText(uint32_t code) {
 	return L"";
 }
 
+void Game::ResizeLoginScreen() {
+	if(!wLogin)
+		return;
+	const int W = (int)window_size.Width;
+	const int H = (int)window_size.Height;
+	if(W <= 0 || H <= 0)
+		return;
+
+	wLogin->setRelativePosition(irr::core::recti(0, 0, W, H));
+	if(imgLoginBg)
+		imgLoginBg->setRelativePosition(irr::core::recti(0, 0, W, H));
+
+	const int logoH = std::max(Scale(85), std::min(Scale(165), (int)(H * 0.21f)));
+	const int logoW = (int)(logoH * (669.0f / 373.0f));
+	const int logoX = (W - logoW) / 2;
+	const int logoY = std::max(Scale(10), (int)(H * 0.035f));
+	if(imgLoginLogo)
+		imgLoginLogo->setRelativePosition(irr::core::recti(logoX, logoY, logoX + logoW, logoY + logoH));
+
+	const int cardW = std::max(Scale(360), std::min(Scale(480), (int)(W * 0.44f)));
+	const int cardH = std::max(Scale(295), std::min(Scale(375), (int)(H * 0.54f)));
+	const int cardX = (W - cardW) / 2;
+	const int cardY = std::min(H - cardH - Scale(18), logoY + logoH + Scale(10));
+
+	if(wLoginCard)
+		wLoginCard->setRelativePosition(irr::core::recti(cardX, cardY, cardX + cardW, cardY + cardH));
+
+	const int dragonSize = std::max(Scale(180), std::min((int)(H * 0.68f), (int)(cardX * 1.15f)));
+	const int dragonY = std::max(Scale(20), H - dragonSize - Scale(16));
+	if(imgLoginDragonLeft) {
+		int lx = std::max(Scale(4), cardX - dragonSize + Scale(24));
+		imgLoginDragonLeft->setRelativePosition(irr::core::recti(lx, dragonY, lx + dragonSize, dragonY + dragonSize));
+	}
+	if(imgLoginDragonRight) {
+		int rx = std::min(W - dragonSize - Scale(4), cardX + cardW - Scale(24));
+		imgLoginDragonRight->setRelativePosition(irr::core::recti(rx, dragonY, rx + dragonSize, dragonY + dragonSize));
+	}
+
+	const int pad = Scale(24);
+	const int innerW = cardW - 2 * pad;
+	int y = Scale(14);
+	if(stLoginTitle) {
+		stLoginTitle->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(30)));
+		y += Scale(38);
+	}
+	if(stLoginUserLbl) {
+		stLoginUserLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(20)));
+		y += Scale(22);
+	}
+	const int inputH = std::max(Scale(36), (int)(cardH * 0.12f));
+	if(ebLoginUser) {
+		ebLoginUser->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + inputH));
+		y += inputH + Scale(10);
+	}
+	if(stLoginPassLbl) {
+		stLoginPassLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(20)));
+		y += Scale(22);
+	}
+	if(ebLoginPass) {
+		ebLoginPass->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + inputH));
+		y += inputH + Scale(10);
+	}
+	if(stLoginStatus) {
+		stLoginStatus->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + Scale(36)));
+		y += Scale(42);
+	}
+	const int btnH = std::max(Scale(38), cardH - y - Scale(16));
+	const int submitW = (int)(innerW * 0.56f);
+	const int gapBtn = Scale(12);
+	if(btnLoginSubmit)
+		btnLoginSubmit->setRelativePosition(irr::core::recti(pad, y, pad + submitW, y + btnH));
+	if(btnLoginExit)
+		btnLoginExit->setRelativePosition(irr::core::recti(pad + submitW + gapBtn, y, pad + innerW, y + btnH));
+}
+
 void Game::SubmitLogin() {
 	if(!ebLoginUser || !ebLoginPass || !btnLoginSubmit || !stLoginStatus)
 		return;
@@ -2552,8 +2658,12 @@ void Game::ProcessPendingLoginResult() {
 			ebLoginPass->setText(L"");
 		if(wLogin)
 			wLogin->setVisible(false);
+		if(wBtnSettings)
+			wBtnSettings->setVisible(true);
 		if(wMainMenu) {
 			wMainMenu->setVisible(true);
+			env->getRootGUIElement()->bringToFront(wMainMenu);
+			if(wBtnSettings) env->getRootGUIElement()->bringToFront(wBtnSettings);
 			env->setFocus(wMainMenu);
 		}
 	} else if(stLoginStatus) {
@@ -6105,8 +6215,7 @@ void Game::OnResize() {
 	if(wStoreMenu)
 		ResizeEconomyScreens();
 	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 145, mainMenuRightX, 505));
-	if(wLogin)
-		wLogin->setRelativePosition(ResizeWin(342, 165, 682, 435));
+	ResizeLoginScreen();
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);
 	SetCentered(updateWindow, false);
