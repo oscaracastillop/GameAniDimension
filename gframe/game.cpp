@@ -1624,24 +1624,31 @@ void Game::PopulateAdventureModeWindow() {
 	// Dedicated background
 	imgAdventureBg = env->addImage(irr::core::recti(0, 0, window_size.Width, window_size.Height), wAdventureMode);
 	imgAdventureBg->setScaleImage(true);
-	auto bgTex = driver->getTexture("textures/bg.png");
+	auto bgTex = driver->getTexture("textures/bg_duel_aventure.jpg");
+	if(!bgTex) bgTex = driver->getTexture("textures/bg.png");
 	if(!bgTex) bgTex = driver->getTexture("textures/bg_menu.png");
 	if(bgTex) {
 		imgAdventureBg->setImage(bgTex);
-		imgAdventureBg->setColor(irr::video::SColor(140, 255, 255, 255));
+		imgAdventureBg->setColor(irr::video::SColor(215, 255, 255, 255));
 	} else {
 		imgAdventureBg->setVisible(false);
 	}
 
-	// 3 Dark Elegant Translucent Glass Panels
+	// 5 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3, 4, 5)
 	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureLeft->setBackgroundColor(irr::video::SColor(230, 14, 18, 28));
+	pnlAdventureLeft->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
 
 	pnlAdventureCenter = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureCenter->setBackgroundColor(irr::video::SColor(230, 14, 18, 28));
+	pnlAdventureCenter->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+
+	pnlAdventureDetails = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureDetails->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
 
 	pnlAdventureRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureRight->setBackgroundColor(irr::video::SColor(235, 13, 16, 26));
+	pnlAdventureRight->setBackgroundColor(irr::video::SColor(230, 13, 16, 26));
+
+	pnlAdventureStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureStats->setBackgroundColor(irr::video::SColor(230, 13, 16, 26));
 
 	// ==================== PANEL IZQUIERDO ====================
 	txtAdventureSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
@@ -1814,10 +1821,18 @@ void Game::ResizeAdventureMode() {
 	const int usableW = W - 2 * padX - gap;
 	const int pnlTop = padY;
 	const int pnlBottom = H - padY;
-	const int pnlH = pnlBottom - pnlTop;
 
-	// Bloque 3 (Derecha) vs Bloque 1+2 (Izquierda)
-	const int colRightW = std::max(Scale(300), std::min(Scale(440), (int)(usableW * 0.36f)));
+	const int actionBtnH = Scale(38);
+	const int statsH = Scale(52);
+	const int bloque5H = innerPad + statsH + Scale(8) + actionBtnH + innerPad;
+	const int bloque5Top = pnlBottom - bloque5H;
+	const int bloque4Bottom = bloque5Top - gap;
+	const int bloque4H = std::max(Scale(180), bloque4Bottom - pnlTop);
+	const int avatarStageH = std::max(Scale(160), bloque4H - 2 * innerPad);
+
+	// Bloque 4 sizing tightly hugs character portrait ratio (896x1200 ~ 0.747) so image stays crisp & large
+	const int targetRightW = (int)(avatarStageH * 0.747f) + 2 * innerPad;
+	const int colRightW = std::max(Scale(280), std::min((int)(usableW * 0.36f), targetRightW));
 	const int leftAreaW = usableW - colRightW;
 
 	const int xLeft = padX;
@@ -1839,44 +1854,44 @@ void Game::ResizeAdventureMode() {
 	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
 	const int selY = pnlTop + innerPad;
 
-	// 1. Serie
 	if(txtAdventureSerie)
 		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + Scale(20)));
 	if(cbAdventureSeries)
 		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + Scale(24), xLeft + innerPad + selW, selY + Scale(54)));
 
-	// 2. Arco Historico
 	const int xCol2 = xLeft + innerPad + selW + selGap;
 	if(txtAdventureArco)
 		txtAdventureArco->setRelativePosition(irr::core::recti(xCol2, selY, xCol2 + selW, selY + Scale(20)));
 	if(cbAdventureArc)
 		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + Scale(24), xCol2 + selW, selY + Scale(54)));
 
-	// 3. Tu Baraja (Deck)
 	const int xCol3 = xCol2 + selW + selGap;
 	if(txtAdventureDeck)
 		txtAdventureDeck->setRelativePosition(irr::core::recti(xCol3, selY, xLeft + leftAreaW - innerPad, selY + Scale(20)));
 	if(cbAdventureUserDeck)
 		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + Scale(24), xLeft + leftAreaW - innerPad, selY + Scale(54)));
 
-	// ==================== BLOQUE 2: CATALOGO 4x5 (MAX 20 NPCs) ====================
+	// ==================== BLOQUE 2: CATALOGO 4x5 (BOTONES MISMO ALTO QUE INICIAR DUELO) ====================
 	const int catTop = pnlTop + topBarH + gap;
+	const int cols = 4;
+	const int rows = 5;
+	const int cellGapX = Scale(8);
+	const int cellGapY = Scale(6);
+	const int btnCellH = actionBtnH; // Exact same height as INICIAR DUELO / VOLVER AL MENU
+	const int gridHeaderH = Scale(26);
+	const int catH = innerPad + gridHeaderH + rows * btnCellH + (rows - 1) * cellGapY + innerPad;
+	const int catBottom = catTop + catH;
+
 	if(pnlAdventureCenter)
-		pnlAdventureCenter->setRelativePosition(irr::core::recti(xLeft, catTop, xLeft + leftAreaW, pnlBottom));
+		pnlAdventureCenter->setRelativePosition(irr::core::recti(xLeft, catTop, xLeft + leftAreaW, catBottom));
 
 	const int cx = xLeft + innerPad;
 	const int cw = leftAreaW - 2 * innerPad;
 	if(txtAdventureCat)
 		txtAdventureCat->setRelativePosition(irr::core::recti(cx, catTop + innerPad, cx + cw, catTop + innerPad + Scale(22)));
 
-	const int gridTop = catTop + innerPad + Scale(28);
-	const int gridH = (pnlBottom - innerPad) - gridTop;
-	const int cols = 4;
-	const int rows = 5;
-	const int cellGapX = Scale(8);
-	const int cellGapY = Scale(8);
+	const int gridTop = catTop + innerPad + gridHeaderH;
 	const int btnCellW = std::max(Scale(60), (cw - (cols - 1) * cellGapX) / cols);
-	const int btnCellH = std::max(Scale(34), (gridH - (rows - 1) * cellGapY) / rows);
 
 	for(int i = 0; i < 20; ++i) {
 		if(!btnAdventureNpcs[i]) continue;
@@ -1887,73 +1902,74 @@ void Game::ResizeAdventureMode() {
 		btnAdventureNpcs[i]->setRelativePosition(irr::core::recti(bx, by, bx + btnCellW, by + btnCellH));
 	}
 
-	// ==================== BLOQUE 3: DETALLE DUELISTA (DERECHA) ====================
+	// ==================== BLOQUE 3: DETALLES (3.1 IZQUIERDA LORE/NOMBRE, 3.2 DERECHA DIFICULTAD/PREMIOS) ====================
+	const int detailsTop = catBottom + gap;
+	if(pnlAdventureDetails)
+		pnlAdventureDetails->setRelativePosition(irr::core::recti(xLeft, detailsTop, xLeft + leftAreaW, pnlBottom));
+
+	const int dx = xLeft + innerPad;
+	const int dw = leftAreaW - 2 * innerPad;
+	const int dy = detailsTop + innerPad;
+	const int dh = std::max(Scale(90), (pnlBottom - innerPad) - dy);
+	const int subGap = Scale(14);
+	const int subLeftW = (int)((dw - subGap) * 0.52f);
+	const int subRightW = (dw - subGap) - subLeftW;
+	const int subRightX = dx + subLeftW + subGap;
+
+	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia del NPC
+	if(stAdventureNPCName)
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + subLeftW, dy + Scale(24)));
+	if(txtAdventureLore)
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(28), dx + subLeftW, dy + Scale(46)));
+	if(stAdventureNPCDesc)
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(48), dx + subLeftW, dy + dh));
+
+	// Bloque 3.2 (Derecha): Dificultad + Premios dinamicos + Estado + Medalla
+	const int diffLabelW = Scale(118);
+	if(txtAdventureDiff)
+		txtAdventureDiff->setRelativePosition(irr::core::recti(subRightX, dy + Scale(3), subRightX + diffLabelW, dy + Scale(25)));
+	if(cbAdventureDifficulty)
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(subRightX + diffLabelW + Scale(6), dy, subRightX + subRightW, dy + Scale(28)));
+
+	const int prizeTop = dy + Scale(36);
+	const int prizeAvailH = std::max(Scale(54), dh - Scale(36));
+	const int mSize = std::min(prizeAvailH, Scale(56));
+	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
+	const int prizeTextW = showMedal ? (subRightW - mSize - Scale(8)) : subRightW;
+
+	if(imgAdventureMedal)
+		imgAdventureMedal->setRelativePosition(irr::core::recti(subRightX + subRightW - mSize, prizeTop, subRightX + subRightW, prizeTop + mSize));
+	if(stAdventurePrize)
+		stAdventurePrize->setRelativePosition(irr::core::recti(subRightX, prizeTop, subRightX + prizeTextW, prizeTop + Scale(34)));
+	if(stAdventurePrizeStatus)
+		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(subRightX, prizeTop + Scale(36), subRightX + prizeTextW, prizeTop + prizeAvailH));
+
+	// ==================== BLOQUE 4: IMAGEN DEL PERSONAJE (SOLO IMAGEN, ALTA CALIDAD) ====================
 	if(pnlAdventureRight)
-		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, pnlBottom));
+		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, bloque4Bottom));
 
 	const int rx = xRight + innerPad;
 	const int rw = colRightW - 2 * innerPad;
+	UpdateAdventureNPCImagePosition(rx, pnlTop + innerPad, rw, avatarStageH);
 
-	// Botones inferiores con exactamente el mismo ancho y alto
-	const int actionBtnH = Scale(38);
-	const int actionBtnGap = Scale(10);
-	const int actionBtnW = (rw - actionBtnGap) / 2;
-	const int actionBtnY = pnlBottom - innerPad - actionBtnH;
+	// ==================== BLOQUE 5: WIN RATE + BOTONES INICIAR DUELO / VOLVER AL MENU ====================
+	if(pnlAdventureStats)
+		pnlAdventureStats->setRelativePosition(irr::core::recti(xRight, bloque5Top, xRight + colRightW, pnlBottom));
 
-	if(btnAdventureDuel)
-		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
-	if(btnAdventureBack)
-		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
-
-	// Bloque estadistico (Win Rate Usuario vs Global) encima de los botones
-	const int statsH = Scale(52);
-	const int statsY = actionBtnY - Scale(8) - statsH;
+	const int statsY = bloque5Top + innerPad;
 	if(wAdventureStatsBox)
 		wAdventureStatsBox->setRelativePosition(irr::core::recti(rx, statsY, rx + rw, statsY + statsH));
 	if(stAdventureStatsText)
 		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(8), statsY + Scale(5), rx + rw - Scale(8), statsY + statsH - Scale(5)));
 
-	// Parte superior: Avatar + Nombre + Dificultad + Lore + Premios + Medalla
-	const int availAboveStats = statsY - (pnlTop + innerPad) - Scale(6);
-	const int avatarStageH = std::max(Scale(120), std::min((int)(pnlH * 0.42f), availAboveStats - Scale(248)));
-	int rCurY = pnlTop + innerPad;
+	const int actionBtnGap = Scale(10);
+	const int actionBtnW = (rw - actionBtnGap) / 2;
+	const int actionBtnY = statsY + statsH + Scale(8);
 
-	UpdateAdventureNPCImagePosition(rx, rCurY, rw, avatarStageH);
-	rCurY += avatarStageH + Scale(6);
-
-	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(24)));
-	rCurY += Scale(26);
-
-	const int diffLabelW = Scale(115);
-	if(txtAdventureDiff)
-		txtAdventureDiff->setRelativePosition(irr::core::recti(rx, rCurY + Scale(3), rx + diffLabelW, rCurY + Scale(25)));
-	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(6), rCurY, rx + rw, rCurY + Scale(26)));
-	rCurY += Scale(30);
-
-	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(18)));
-	rCurY += Scale(20);
-
-	const int midAvail = std::max(Scale(100), (statsY - Scale(6)) - rCurY);
-	const int prizeBlockH = std::min(Scale(76), std::max(Scale(56), (int)(midAvail * 0.46f)));
-	const int loreH = std::max(Scale(40), midAvail - prizeBlockH - Scale(6));
-
-	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + loreH));
-	rCurY += loreH + Scale(6);
-
-	const int mSize = std::min(prizeBlockH, Scale(54));
-	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
-	const int prizeTextW = showMedal ? (rw - mSize - Scale(6)) : rw;
-
-	if(imgAdventureMedal)
-		imgAdventureMedal->setRelativePosition(irr::core::recti(rx + rw - mSize, rCurY, rx + rw, rCurY + mSize));
-	if(stAdventurePrize)
-		stAdventurePrize->setRelativePosition(irr::core::recti(rx, rCurY, rx + prizeTextW, rCurY + Scale(34)));
-	if(stAdventurePrizeStatus)
-		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx, rCurY + Scale(35), rx + prizeTextW, rCurY + prizeBlockH));
+	if(btnAdventureDuel)
+		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
+	if(btnAdventureBack)
+		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
 
 	if(stAdventureDeckDesc)
 		stAdventureDeckDesc->setVisible(false);
@@ -2040,6 +2056,7 @@ void Game::OnAdventureArcChanged() {
 	try {
 		std::string endpoint = epro::format("/api/arcos/{}/npcs", arc.id);
 		auto json = FetchAdventureApi(endpoint, isLoggedIn ? sessionToken : "");
+		isPlayerAdmin = json.contains("isAdmin") && json["isAdmin"].is_boolean() ? json["isAdmin"].get<bool>() : false;
 		if (json.contains("npcs") && json["npcs"].is_array()) {
 			for (const auto& item : json["npcs"]) {
 				AdventureNpcInfo npc;
@@ -2103,8 +2120,10 @@ void Game::OnAdventureArcChanged() {
 		lstAdventureNPC->addItem(entry.c_str());
 		cbAdventureNPC->addItem(entry.c_str(), (int)i);
 		if (i < 20 && btnAdventureNpcs[i]) {
+			bool unlockedByLevel = isPlayerAdmin || !isLoggedIn || (playerLevel >= npc.level);
 			btnAdventureNpcs[i]->setText(entry.c_str());
 			btnAdventureNpcs[i]->setVisible(true);
+			btnAdventureNpcs[i]->setEnabled(unlockedByLevel);
 			btnAdventureNpcs[i]->setPressed(i == 0);
 		}
 	}
@@ -2195,6 +2214,8 @@ void Game::UpdateAdventureNPCDisplay() {
 		if (stAdventurePrizeStatus) {
 			if (npc.medallaDesbloqueada)
 				stAdventurePrizeStatus->setText(L"Estado: Medalla Desbloqueada");
+			else if (isPlayerAdmin)
+				stAdventurePrizeStatus->setText(L"Estado: Acceso Total (Administrador)");
 			else if (faltanLeyenda == 0)
 				stAdventurePrizeStatus->setText(L"Estado: Lista para reclamar en Leyenda");
 			else
@@ -2233,7 +2254,8 @@ void Game::UpdateAdventureNPCDisplay() {
 		stAdventureDeckDesc->setText(L"Estrategia balanceada de invocaciones tácticas y hechizos milenarios.");
 	}
 
-	btnAdventureDuel->setEnabled(true);
+	bool unlockedByLevel = isPlayerAdmin || !isLoggedIn || (playerLevel >= npc.level);
+	btnAdventureDuel->setEnabled(unlockedByLevel);
 	selectedAdventureNPCName = npc.name;
 	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
 	if (deckToUse.empty()) {
@@ -2357,7 +2379,7 @@ void Game::StartAdventureDuel() {
 	const auto& npc = adventureNpcList[npcIdx];
 	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
 	bool isLeyenda = (diff == 1);
-	if (isLoggedIn) {
+	if (isLoggedIn && !isPlayerAdmin) {
 		if (playerLevel < npc.level) {
 			PopupMessage(epro::format(L"Necesitas Nivel {} para retar a {} (tu nivel: {}).", npc.level, npc.name, playerLevel));
 			return;
