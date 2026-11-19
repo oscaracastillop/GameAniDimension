@@ -215,6 +215,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->StartAdventureDuel();
 				break;
 			}
+			default: {
+				if(id >= BUTTON_ADVENTURE_NPC_0 && id <= BUTTON_ADVENTURE_NPC_MAX) {
+					mainGame->SelectAdventureNpc(id - BUTTON_ADVENTURE_NPC_0);
+				}
+				break;
+			}
 			case BUTTON_STORE_OPEN: {
 				mainGame->OpenStoreMenu();
 				break;

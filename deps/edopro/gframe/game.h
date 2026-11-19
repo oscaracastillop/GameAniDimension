@@ -450,6 +450,16 @@ struct AdventureNpcInfo {
 	std::wstring premioLeyenda{};
 	bool activoLeyenda{ false };
 	int duelosNormal{ 0 };
+	int userWins{ 0 };
+	int userLosses{ 0 };
+	int globalWins{ 0 };
+	int globalLosses{ 0 };
+	bool premioNormalEntregado{ false };
+	bool medallaDesbloqueada{ false };
+	double medalExpPct{ 0.0 };
+	double medalSSPct{ 0.0 };
+	double medalLuckPct{ 0.0 };
+	std::wstring medalTitle{};
 };
 
 struct adventure_mode_panel_elements {
@@ -473,9 +483,14 @@ struct adventure_mode_panel_elements {
 	irr::gui::IGUIComboBox* cbAdventureArc{ nullptr };
 	irr::gui::IGUIStaticText* stAdventureArcDesc{ nullptr };
 
-	// NPC Catalog
+	// NPC Catalog (4x5 grid = 20 max)
 	irr::gui::IGUIListBox* lstAdventureNPC{ nullptr };
 	irr::gui::IGUIComboBox* cbAdventureNPC{ nullptr };
+	irr::gui::IGUIButton* btnAdventureNpcs[20]{ nullptr };
+	irr::gui::IGUIStaticText* stAdventurePrize{ nullptr };
+	irr::gui::IGUIStaticText* stAdventurePrizeStatus{ nullptr };
+	irr::gui::IGUIStaticText* wAdventureStatsBox{ nullptr };
+	irr::gui::IGUIStaticText* stAdventureStatsText{ nullptr };
 
 	// NPC Duelist Profile & Lore
 	irr::gui::IGUIImage* imgAdventureNPC{ nullptr };
@@ -908,6 +923,7 @@ public:
 	void RefreshAdventureMode();
 	void OnAdventureSeriesChanged();
 	void OnAdventureArcChanged();
+	void SelectAdventureNpc(int idx);
 	void UpdateAdventureNPCDisplay();
 	void StartAdventureDuel();
 	void SpawnRemoteAdventureBot();
