@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="preparing_media">Preparando archivos&#8230;</string>
-	<string name="not_granted">Permiso requerido no fue otorgado, Project Ignis: EDOPro no puede correr sin el</string>
+	<string name="not_granted">Permiso requerido no fue otorgado, Ani Dimension no puede correr sin el</string>
 	<string name="default_path">Elejiste un directorio en el almacenaje externo, debido a una limitación de Android, la dirección de los archivos del juego será: %s</string>
 	<string name="default_dir">Usando %s como directorio de trabajo</string>
 	<string name="default_dir_changeable">Usando %s como directorio de trabajo. ¿Deseas cambiarlo?</string>
