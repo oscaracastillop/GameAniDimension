@@ -1470,8 +1470,7 @@ void Game::PopulateGameHostWindows() {
 	}
 
 	//host(single) - Sala de duelo amplia y organizada
-	wHostPrepare = env->addWindow(Scale(112, 55, 912, 575), false, gDataManager->GetSysString(1250).data());
-	defaultStrings.emplace_back(wHostPrepare, 1250);
+	wHostPrepare = env->addWindow(Scale(82, 30, 942, 600), false, L"Sala de Duelo");
 	wHostPrepare->getCloseButton()->setVisible(false);
 	wHostPrepare->setVisible(false);
 	wHostPrepareR = env->addWindow(Scale(0, 0, 1, 1), false, L"");
@@ -1483,45 +1482,71 @@ void Game::PopulateGameHostWindows() {
 	stHostPrepRuleR = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepareR, -1, Scale(0, 0, 1, 1));
 	stHostPrepRuleL = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepareL, -1, Scale(0, 0, 1, 1));
 
-	// Top: Datos de la sala y botones principales
-	stHostPrepRule = irr::gui::CGUICustomText::addCustomText(L"", true, env, wHostPrepare, -1, Scale(15, 28, 600, 145));
+	// Top: Titulo Sala de Duelo + Configuracion en 2 columnas + Botones laterales
+	stHostPrepTitle = env->addStaticText(L"SALA DE DUELO", Scale(15, 24, 650, 48), false, false, wHostPrepare);
+	stHostPrepTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stHostPrepTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	if(loginUiFont)
+		stHostPrepTitle->setOverrideFont(loginUiFont);
+
+	pnlHostPrepRules = env->addStaticText(L"", Scale(15, 50, 650, 178), true, false, wHostPrepare, -1, true);
+	pnlHostPrepRules->setBackgroundColor(irr::video::SColor(210, 12, 16, 28));
+
+	stHostPrepRule = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(24, 56, 332, 174));
 	stHostPrepRule->setWordWrap(true);
-	btnHostPrepDuelist = env->addButton(Scale(615, 28, 785, 56), wHostPrepare, BUTTON_HP_DUELIST, gDataManager->GetSysString(1251).data());
+	stHostPrepRule->setOverrideColor(irr::video::SColor(255, 190, 225, 255));
+
+	stHostPrepRule2 = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(342, 56, 642, 174));
+	stHostPrepRule2->setWordWrap(true);
+	stHostPrepRule2->setOverrideColor(irr::video::SColor(255, 253, 230, 138));
+
+	btnHostPrepDuelist = env->addButton(Scale(665, 30, 845, 58), wHostPrepare, BUTTON_HP_DUELIST, gDataManager->GetSysString(1251).data());
 	defaultStrings.emplace_back(btnHostPrepDuelist, 1251);
-	btnHostPrepOB = env->addButton(Scale(615, 62, 785, 90), wHostPrepare, BUTTON_HP_OBSERVER, gDataManager->GetSysString(1252).data());
+	btnHostPrepOB = env->addButton(Scale(665, 66, 845, 94), wHostPrepare, BUTTON_HP_OBSERVER, gDataManager->GetSysString(1252).data());
 	defaultStrings.emplace_back(btnHostPrepOB, 1252);
-	stHostPrepOB = env->addStaticText(epro::format(L"{} 0", gDataManager->GetSysString(1253)).data(), Scale(615, 96, 785, 118), false, false, wHostPrepare);
+	stHostPrepOB = env->addStaticText(epro::format(L"{} 0", gDataManager->GetSysString(1253)).data(), Scale(665, 102, 845, 124), false, false, wHostPrepare);
 	defaultStrings.emplace_back(stHostPrepOB, 1253);
-	btnHostPrepWindBot = env->addButton(Scale(615, 120, 785, 145), wHostPrepare, BUTTON_HP_AI_TOGGLE, gDataManager->GetSysString(2050).data());
+	btnHostPrepWindBot = env->addButton(Scale(665, 132, 845, 160), wHostPrepare, BUTTON_HP_AI_TOGGLE, gDataManager->GetSysString(2050).data());
 	defaultStrings.emplace_back(btnHostPrepWindBot, 2050);
 
-	stDeckSelect = env->addStaticText(gDataManager->GetSysString(1254).data(), Scale(15, 158, 125, 180), false, false, wHostPrepare);
+	stDeckSelect = env->addStaticText(gDataManager->GetSysString(1254).data(), Scale(15, 192, 125, 214), false, false, wHostPrepare);
 	defaultStrings.emplace_back(stDeckSelect, 1254);
-	cbDeckSelect = AddComboBox(env, Scale(130, 154, 360, 182), wHostPrepare);
+	cbDeckSelect = AddComboBox(env, Scale(130, 188, 390, 216), wHostPrepare);
 	cbDeckSelect->setMaxSelectionRows(10);
-	btnHostPrepReady = env->addButton(Scale(375, 154, 495, 182), wHostPrepare, BUTTON_HP_READY, gDataManager->GetSysString(1218).data());
+	btnHostPrepReady = env->addButton(Scale(405, 188, 535, 216), wHostPrepare, BUTTON_HP_READY, gDataManager->GetSysString(1218).data());
 	defaultStrings.emplace_back(btnHostPrepReady, 1218);
-	btnHostPrepNotReady = env->addButton(Scale(375, 154, 495, 182), wHostPrepare, BUTTON_HP_NOTREADY, gDataManager->GetSysString(1219).data());
+	btnHostPrepNotReady = env->addButton(Scale(405, 188, 535, 216), wHostPrepare, BUTTON_HP_NOTREADY, gDataManager->GetSysString(1219).data());
 	defaultStrings.emplace_back(btnHostPrepNotReady, 1219);
 	btnHostPrepNotReady->setVisible(false);
-	btnHostPrepStart = env->addButton(Scale(510, 154, 640, 182), wHostPrepare, BUTTON_HP_START, gDataManager->GetSysString(1215).data());
+	btnHostPrepStart = env->addButton(Scale(550, 188, 690, 216), wHostPrepare, BUTTON_HP_START, gDataManager->GetSysString(1215).data());
 	defaultStrings.emplace_back(btnHostPrepStart, 1215);
-	btnHostPrepCancel = env->addButton(Scale(655, 154, 785, 182), wHostPrepare, BUTTON_HP_CANCEL, gDataManager->GetSysString(1210).data());
+	btnHostPrepCancel = env->addButton(Scale(705, 188, 845, 216), wHostPrepare, BUTTON_HP_CANCEL, gDataManager->GetSysString(1210).data());
 	defaultStrings.emplace_back(btnHostPrepCancel, 1210);
 
 	// Bottom: Izquierda Anfitriones | Derecha Invitados/Rivales
-	stHostPrepTeamLeft = env->addStaticText(L"ANFITRIONES (EQUIPO 1)", Scale(15, 196, 390, 218), false, false, wHostPrepare);
+	stHostPrepTeamLeft = env->addStaticText(L"ANFITRIONES (EQUIPO 1)", Scale(15, 226, 420, 248), false, false, wHostPrepare);
 	stHostPrepTeamLeft->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-	stHostPrepTeamRight = env->addStaticText(L"INVITADOS / RIVALES (EQUIPO 2)", Scale(410, 196, 785, 218), false, false, wHostPrepare);
+	stHostPrepTeamRight = env->addStaticText(L"INVITADOS / RIVALES (EQUIPO 2)", Scale(440, 226, 845, 248), false, false, wHostPrepare);
 	stHostPrepTeamRight->setOverrideColor(irr::video::SColor(255, 252, 165, 165));
 
 	for(int i = 0; i < 6; ++i) {
-		btnHostPrepKick[i] = env->addButton(Scale(15, 224 + i * 45, 37, 246 + i * 45), wHostPrepare, BUTTON_HP_KICK, L"X");
-		imgHostPrepAvatar[i] = env->addImage(Scale(42, 224 + i * 45, 114, 296 + i * 45), wHostPrepare, true);
+		btnHostPrepKick[i] = env->addButton(Scale(15, 254 + i * 102, 37, 278 + i * 102), wHostPrepare, BUTTON_HP_KICK, L"X");
+		imgHostPrepAvatar[i] = env->addImage(Scale(42, 254 + i * 102, 134, 346 + i * 102), wHostPrepare, true);
 		imgHostPrepAvatar[i]->setScaleImage(true);
+		imgHostPrepAvatar[i]->setUseAlphaChannel(true);
 		imgHostPrepAvatar[i]->setVisible(false);
-		stHostPrepDuelist[i] = env->addStaticText(L"", Scale(122, 224 + i * 45, 345, 296 + i * 45), true, true, wHostPrepare);
-		chkHostPrepReady[i] = env->addCheckBox(false, Scale(352, 248 + i * 45, 376, 272 + i * 45), wHostPrepare, CHECKBOX_HP_READY, L"");
+		stHostPrepDuelist[i] = env->addStaticText(L"", Scale(142, 254 + i * 102, 392, 346 + i * 102), true, true, wHostPrepare, -1, true);
+		stHostPrepDuelist[i]->setBackgroundColor(irr::video::SColor(200, 14, 18, 28));
+		stHostPrepDuelist[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		imgHostPrepFlag[i] = env->addImage(Scale(148, 260 + i * 102, 174, 278 + i * 102), wHostPrepare, true);
+		imgHostPrepFlag[i]->setScaleImage(true);
+		imgHostPrepFlag[i]->setVisible(false);
+		stHostPrepName[i] = env->addStaticText(L"", Scale(180, 258 + i * 102, 386, 282 + i * 102), false, false, wHostPrepare);
+		stHostPrepName[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		if(loginUiFont)
+			stHostPrepName[i]->setOverrideFont(loginUiFont);
+		stHostPrepName[i]->setVisible(false);
+		chkHostPrepReady[i] = env->addCheckBox(false, Scale(398, 288 + i * 102, 422, 312 + i * 102), wHostPrepare, CHECKBOX_HP_READY, L"");
 		chkHostPrepReady[i]->setEnabled(false);
 	}
 }
@@ -3264,7 +3289,9 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 	if(pos < 0 || pos >= 6) return;
 	if(playerName.empty()) {
 		if(stHostPrepDuelist[pos]) stHostPrepDuelist[pos]->setText(L"");
+		if(stHostPrepName[pos]) { stHostPrepName[pos]->setText(L""); stHostPrepName[pos]->setVisible(false); }
 		if(imgHostPrepAvatar[pos]) imgHostPrepAvatar[pos]->setVisible(false);
+		if(imgHostPrepFlag[pos]) imgHostPrepFlag[pos]->setVisible(false);
 		return;
 	}
 	auto it = playerCardCache.find(playerName);
@@ -3284,11 +3311,23 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 		if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 			entry.level = SafeJsonInt(resp, "nivel", 1);
 			entry.avatarFile = SafeJsonStr(resp, "avatarArchivo", "AVA-001.png");
+			entry.clanNombre = SafeJsonStr(resp, "clanNombre", "Sin Clan");
+			entry.flagUrl = SafeJsonStr(resp, "flagUrl", "");
+			if(resp.contains("winratePvp") && resp["winratePvp"].is_number())
+				entry.winratePvp = resp["winratePvp"].get<double>();
 		}
 		it = playerCardCache.emplace(playerName, std::move(entry)).first;
 	}
+	if(stHostPrepName[pos]) {
+		stHostPrepName[pos]->setText(playerName.c_str());
+		stHostPrepName[pos]->setVisible(true);
+	}
 	if(stHostPrepDuelist[pos]) {
-		stHostPrepDuelist[pos]->setText(epro::format(L"{}\nNivel {}", playerName, it->second.level).c_str());
+		std::wstring clanW = BufferIO::DecodeUTF8(it->second.clanNombre.empty() ? "Sin Clan" : it->second.clanNombre);
+		stHostPrepDuelist[pos]->setText(epro::format(
+			L"\n\nNivel: {}  |  PvP WR: {:.1f}%\nClan: {}",
+			it->second.level, it->second.winratePvp, clanW
+		).c_str());
 	}
 	if(imgHostPrepAvatar[pos]) {
 		auto tex = LoadAvatarTexture(it->second.avatarFile);
@@ -3299,6 +3338,54 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 			imgHostPrepAvatar[pos]->setVisible(false);
 		}
 	}
+	if(imgHostPrepFlag[pos]) {
+		auto fTex = LoadFlagTexture(it->second.flagUrl);
+		if(fTex) {
+			imgHostPrepFlag[pos]->setImage(fTex);
+			imgHostPrepFlag[pos]->setVisible(true);
+		} else {
+			imgHostPrepFlag[pos]->setVisible(false);
+		}
+	}
+}
+
+irr::video::ITexture* Game::LoadFlagTexture(const std::string& flagUrl) {
+	if(flagUrl.empty() || !driver) return nullptr;
+	auto slash = flagUrl.find_last_of('/');
+	std::string fname = (slash != std::string::npos) ? flagUrl.substr(slash + 1) : flagUrl;
+	if(fname.empty()) return nullptr;
+	std::string localRel = "textures/flags/" + fname;
+	auto tex = driver->getTexture(localRel.c_str());
+	if(tex) return tex;
+
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/flags"));
+	auto curl = curl_easy_init();
+	if(curl) {
+		std::string bytes;
+		curl_easy_setopt(curl, CURLOPT_URL, flagUrl.c_str());
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 6L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+		long code = 0;
+		auto res = curl_easy_perform(curl);
+		curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+		curl_easy_cleanup(curl);
+		if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+			std::ofstream out(localRel, std::ios::binary);
+			if(out) {
+				out.write(bytes.data(), bytes.size());
+				out.close();
+				tex = driver->getTexture(localRel.c_str());
+			}
+		}
+	}
+	return tex;
 }
 
 irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
