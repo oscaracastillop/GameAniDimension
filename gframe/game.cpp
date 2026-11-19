@@ -1634,15 +1634,24 @@ void Game::PopulateAdventureModeWindow() {
 		imgAdventureBg->setVisible(false);
 	}
 
-	// 5 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3, 4, 5)
+	// 6 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3.1, 3.2, 4, 5)
 	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
 	pnlAdventureLeft->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+
+	stAdventureTitle = env->addStaticText(L"MODO AVENTURA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	stAdventureTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stAdventureTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	if(loginUiFont)
+		stAdventureTitle->setOverrideFont(loginUiFont);
 
 	pnlAdventureCenter = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
 	pnlAdventureCenter->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
 
 	pnlAdventureDetails = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
 	pnlAdventureDetails->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+
+	pnlAdventureDetailsRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	pnlAdventureDetailsRight->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
 
 	pnlAdventureRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
 	pnlAdventureRight->setBackgroundColor(irr::video::SColor(230, 13, 16, 26));
@@ -1724,15 +1733,21 @@ void Game::PopulateAdventureModeWindow() {
 	txtAdventureLore = env->addStaticText(L"HISTORIA Y LEYENDA DEL DUELISTA:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
-	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
+	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
 	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 225, 230, 240));
+
+	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
+	stAdventureDeckDesc->setWordWrap(true);
+	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+
+	stAdventureDiffDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
+	stAdventureDiffDesc->setWordWrap(true);
+	stAdventureDiffDesc->setOverrideColor(irr::video::SColor(255, 190, 205, 225));
 
 	stAdventurePrize = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrize->setWordWrap(true);
 	stAdventurePrize->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont)
-		stAdventurePrize->setOverrideFont(loginUiFont);
 
 	stAdventurePrizeStatus = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrizeStatus->setWordWrap(true);
@@ -1744,9 +1759,6 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureStatsText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureStatsText->setWordWrap(true);
 	stAdventureStatsText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-
-	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	stAdventureDeckDesc->setVisible(false);
 
 	stAdventureNPCLevel = stAdventureNPCName;
 	stAdventureNPCDeck = stAdventureDeckDesc;
@@ -1838,10 +1850,14 @@ void Game::ResizeAdventureMode() {
 	const int xLeft = padX;
 	const int xRight = xLeft + leftAreaW + gap;
 
-	// ==================== BLOQUE 1: SELECTORES EN UNA SOLA FILA ====================
-	const int topBarH = innerPad + Scale(20) + Scale(4) + Scale(30) + innerPad;
+	// ==================== BLOQUE 1: TITULO CENTRADO + SELECTORES EN UNA SOLA FILA ====================
+	const int titleH = Scale(26);
+	const int topBarH = innerPad + titleH + Scale(6) + Scale(20) + Scale(4) + Scale(30) + innerPad;
 	if(pnlAdventureLeft)
 		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + leftAreaW, pnlTop + topBarH));
+
+	if(stAdventureTitle)
+		stAdventureTitle->setRelativePosition(irr::core::recti(xLeft + innerPad, pnlTop + innerPad, xLeft + leftAreaW - innerPad, pnlTop + innerPad + titleH));
 
 	if(imgAdventureSeriesLogo)
 		imgAdventureSeriesLogo->setVisible(false);
@@ -1852,7 +1868,7 @@ void Game::ResizeAdventureMode() {
 
 	const int selGap = Scale(10);
 	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
-	const int selY = pnlTop + innerPad;
+	const int selY = pnlTop + innerPad + titleH + Scale(6);
 
 	if(txtAdventureSerie)
 		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + Scale(20)));
@@ -1902,47 +1918,60 @@ void Game::ResizeAdventureMode() {
 		btnAdventureNpcs[i]->setRelativePosition(irr::core::recti(bx, by, bx + btnCellW, by + btnCellH));
 	}
 
-	// ==================== BLOQUE 3: DETALLES (3.1 IZQUIERDA LORE/NOMBRE, 3.2 DERECHA DIFICULTAD/PREMIOS) ====================
+	// ==================== BLOQUES 3.1 y 3.2 SEPARADOS ====================
 	const int detailsTop = catBottom + gap;
+	const int subGap = gap;
+	const int subLeftW = (int)((leftAreaW - subGap) * 0.50f);
+	const int subRightW = (leftAreaW - subGap) - subLeftW;
+	const int subRightPanelX = xLeft + subLeftW + subGap;
+
 	if(pnlAdventureDetails)
-		pnlAdventureDetails->setRelativePosition(irr::core::recti(xLeft, detailsTop, xLeft + leftAreaW, pnlBottom));
+		pnlAdventureDetails->setRelativePosition(irr::core::recti(xLeft, detailsTop, xLeft + subLeftW, pnlBottom));
+	if(pnlAdventureDetailsRight)
+		pnlAdventureDetailsRight->setRelativePosition(irr::core::recti(subRightPanelX, detailsTop, xLeft + leftAreaW, pnlBottom));
 
-	const int dx = xLeft + innerPad;
-	const int dw = leftAreaW - 2 * innerPad;
 	const int dy = detailsTop + innerPad;
-	const int dh = std::max(Scale(90), (pnlBottom - innerPad) - dy);
-	const int subGap = Scale(14);
-	const int subLeftW = (int)((dw - subGap) * 0.52f);
-	const int subRightW = (dw - subGap) - subLeftW;
-	const int subRightX = dx + subLeftW + subGap;
+	const int dh = std::max(Scale(84), (pnlBottom - innerPad) - dy);
 
-	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia del NPC
+	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia + Descripcion sencilla del Deck
+	const int dx = xLeft + innerPad;
+	const int dw = subLeftW - 2 * innerPad;
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + subLeftW, dy + Scale(24)));
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(22)));
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(28), dx + subLeftW, dy + Scale(46)));
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(24), dx + dw, dy + Scale(42)));
+	const int loreAvail = std::max(Scale(44), dh - Scale(44));
+	const int loreH = std::max(Scale(24), (int)(loreAvail * 0.54f));
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(48), dx + subLeftW, dy + dh));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(44), dx + dw, dy + Scale(44) + loreH));
+	if(stAdventureDeckDesc) {
+		stAdventureDeckDesc->setVisible(true);
+		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(48) + loreH, dx + dw, dy + dh));
+	}
 
-	// Bloque 3.2 (Derecha): Dificultad + Premios dinamicos + Estado + Medalla
-	const int diffLabelW = Scale(118);
+	// Bloque 3.2 (Derecha): Dificultad + Descripcion dificultad + Premios + Estado + Medalla grande
+	const int rx32 = subRightPanelX + innerPad;
+	const int rw32 = subRightW - 2 * innerPad;
+	const int diffLabelW = Scale(116);
 	if(txtAdventureDiff)
-		txtAdventureDiff->setRelativePosition(irr::core::recti(subRightX, dy + Scale(3), subRightX + diffLabelW, dy + Scale(25)));
+		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(3), rx32 + diffLabelW, dy + Scale(24)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(subRightX + diffLabelW + Scale(6), dy, subRightX + subRightW, dy + Scale(28)));
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(6), dy, rx32 + rw32, dy + Scale(26)));
+	if(stAdventureDiffDesc)
+		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(30), rx32 + rw32, dy + Scale(62)));
 
-	const int prizeTop = dy + Scale(36);
-	const int prizeAvailH = std::max(Scale(54), dh - Scale(36));
-	const int mSize = std::min(prizeAvailH, Scale(56));
+	const int prizeTop = dy + Scale(66);
+	const int prizeAvailH = std::max(Scale(52), (dy + dh) - prizeTop);
+	const int mSize = std::min(prizeAvailH, Scale(82));
 	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
-	const int prizeTextW = showMedal ? (subRightW - mSize - Scale(8)) : subRightW;
+	const int prizeTextW = showMedal ? (rw32 - mSize - Scale(10)) : rw32;
 
 	if(imgAdventureMedal)
-		imgAdventureMedal->setRelativePosition(irr::core::recti(subRightX + subRightW - mSize, prizeTop, subRightX + subRightW, prizeTop + mSize));
+		imgAdventureMedal->setRelativePosition(irr::core::recti(rx32 + rw32 - mSize, prizeTop, rx32 + rw32, prizeTop + mSize));
 	if(stAdventurePrize)
-		stAdventurePrize->setRelativePosition(irr::core::recti(subRightX, prizeTop, subRightX + prizeTextW, prizeTop + Scale(34)));
+		stAdventurePrize->setRelativePosition(irr::core::recti(rx32, prizeTop, rx32 + prizeTextW, prizeTop + Scale(36)));
 	if(stAdventurePrizeStatus)
-		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(subRightX, prizeTop + Scale(36), subRightX + prizeTextW, prizeTop + prizeAvailH));
+		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx32, prizeTop + Scale(38), rx32 + prizeTextW, prizeTop + prizeAvailH));
 
 	// ==================== BLOQUE 4: IMAGEN DEL PERSONAJE (SOLO IMAGEN, ALTA CALIDAD) ====================
 	if(pnlAdventureRight)
@@ -1970,9 +1999,6 @@ void Game::ResizeAdventureMode() {
 		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
 	if(btnAdventureBack)
 		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
-
-	if(stAdventureDeckDesc)
-		stAdventureDeckDesc->setVisible(false);
 }
 
 void Game::OnAdventureSeriesChanged() {
@@ -2188,6 +2214,8 @@ void Game::UpdateAdventureNPCDisplay() {
 
 	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
 	if (diff == 0) {
+		if (stAdventureDiffDesc)
+			stAdventureDiffDesc->setText(L"Modo Normal: Baraja estandar del duelista, ideal para practicar y sumar victorias.");
 		std::wstring premioNormalStr = npc.activoNormal
 			? epro::format(L"PREMIO NORMAL: {} StarShips", formatStarShips(npc.premioNormalStarShips))
 			: L"PREMIO NORMAL: Desactivado";
@@ -2204,6 +2232,8 @@ void Game::UpdateAdventureNPCDisplay() {
 		if (imgAdventureMedal)
 			imgAdventureMedal->setVisible(false);
 	} else {
+		if (stAdventureDiffDesc)
+			stAdventureDiffDesc->setText(epro::format(L"Modo Leyenda: Baraja maestra potenciada. Req: Nivel {}+ y 10 duelos Normal.", npc.level).c_str());
 		std::wstring premioLeyendaStr = (npc.activoLeyenda && !npc.premioLeyenda.empty())
 			? epro::format(L"PREMIO LEYENDA: {}", npc.premioLeyenda)
 			: L"PREMIO LEYENDA: Por definir";
@@ -2249,9 +2279,9 @@ void Game::UpdateAdventureNPCDisplay() {
 	}
 
 	if (!npc.deckDescription.empty()) {
-		stAdventureDeckDesc->setText(npc.deckDescription.c_str());
+		stAdventureDeckDesc->setText(epro::format(L"Estrategia del Deck: {}", npc.deckDescription).c_str());
 	} else {
-		stAdventureDeckDesc->setText(L"Estrategia balanceada de invocaciones tácticas y hechizos milenarios.");
+		stAdventureDeckDesc->setText(L"Estrategia del Deck: Invocaciones tacticas y hechizos milenarios.");
 	}
 
 	bool unlockedByLevel = isPlayerAdmin || !isLoggedIn || (playerLevel >= npc.level);
