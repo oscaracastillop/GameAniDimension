@@ -400,6 +400,12 @@ struct server_lobby_page_elements {
 	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
+	irr::gui::IGUIStaticText* pnlRoomListTitle{ nullptr };
+	irr::gui::IGUIStaticText* stRoomListTitle{ nullptr };
+	irr::gui::IGUIStaticText* pnlRoomBlock1{ nullptr };
+	irr::gui::IGUIStaticText* pnlRoomBlock2{ nullptr };
+	irr::gui::IGUIStaticText* stRoomServerLbl{ nullptr };
+	irr::gui::IGUIStaticText* stRoomUserLbl{ nullptr };
 	irr::gui::IGUIComboBox* serverChoice;
 	irr::gui::IGUIEditBox* ebNickNameOnline;
 	irr::gui::IGUIButton* btnCreateHost2;
@@ -924,6 +930,7 @@ public:
 	irr::gui::IGUIStaticText* stCardListTip;
 
 	void PopulateGameHostWindows();
+	void ResizeRoomListScreen();
 	void PopulateAIBotWindow();
 	void PopulateAdventureModeWindow();
 	void RefreshAdventureMode();

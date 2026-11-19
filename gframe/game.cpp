@@ -1012,30 +1012,40 @@ void Game::Initialize() {
 
 	auto roomlistcolor = skin::ROOMLIST_TEXTS_COLOR_VAL;
 
+	// Semi-dark translucent panels for Title, Bloque 1 and Bloque 2
+	pnlRoomListTitle = env->addStaticText(L"", Scale(10, 6, 1014, 36), true, false, wRoomListPlaceholder, -1, true);
+	pnlRoomListTitle->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+
+	stRoomListTitle = env->addStaticText(L"SALAS DE DUELO ANI DIMENSION", Scale(10, 6, 1014, 36), false, false, wRoomListPlaceholder);
+	stRoomListTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stRoomListTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	if(loginUiFont)
+		stRoomListTitle->setOverrideFont(loginUiFont);
+
+	pnlRoomBlock1 = env->addStaticText(L"", Scale(10, 42, 320, 142), true, false, wRoomListPlaceholder, -1, true);
+	pnlRoomBlock1->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+
+	pnlRoomBlock2 = env->addStaticText(L"", Scale(328, 42, 880, 142), true, false, wRoomListPlaceholder, -1, true);
+	pnlRoomBlock2->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+
 	//server choice dropdownlist
-	irr::gui::IGUIStaticText* statictext = env->addStaticText(gDataManager->GetSysString(2041).data(), Scale(10, 30, 110, 50), false, false, wRoomListPlaceholder, -1, false); // 2041 = Server:
-	defaultStrings.emplace_back(statictext, 2041);
-	statictext->setOverrideColor(roomlistcolor);
+	stRoomServerLbl = env->addStaticText(gDataManager->GetSysString(2041).data(), Scale(10, 30, 110, 50), false, false, wRoomListPlaceholder, -1, false); // 2041 = Server:
+	defaultStrings.emplace_back(stRoomServerLbl, 2041);
+	stRoomServerLbl->setOverrideColor(roomlistcolor);
 	serverChoice = AddComboBox(env, Scale(90, 25, 385, 50), wRoomListPlaceholder, SERVER_CHOICE);
 
-	//online nickname
-	statictext = env->addStaticText(gDataManager->GetSysString(1220).data(), Scale(10, 60, 110, 80), false, false, wRoomListPlaceholder, -1, false); // 1220 = Nickname:
-	defaultStrings.emplace_back(statictext, 1220);
-	statictext->setOverrideColor(roomlistcolor);
+	//online nickname -> Usuario:
+	stRoomUserLbl = env->addStaticText(L"Usuario:", Scale(10, 60, 110, 80), false, false, wRoomListPlaceholder, -1, false);
+	stRoomUserLbl->setOverrideColor(roomlistcolor);
 	ebNickNameOnline = env->addEditBox(gGameConfig->nickname.data(), Scale(90, 55, 275, 80), true, wRoomListPlaceholder, EDITBOX_NICKNAME);
 
-	//top right host online game button
-	btnCreateHost2 = env->addButton(Scale(904, 25, 1014, 50), wRoomListPlaceholder, BUTTON_CREATE_HOST2, gDataManager->GetSysString(1224).data());
-	defaultStrings.emplace_back(btnCreateHost2, 1224);
-	btnCreateHost2->setAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
+	//top right host online game button -> Crear Sala
+	btnCreateHost2 = env->addButton(Scale(904, 25, 1014, 50), wRoomListPlaceholder, BUTTON_CREATE_HOST2, L"Crear Sala");
 
 	//filter dropdowns
 	cbFilterRule = AddComboBox(env, Scale(392, 25, 532, 50), wRoomListPlaceholder, CB_FILTER_ALLOWED_CARDS);
 	//cbFilterMatchMode = AddComboBox(env, Scale(392, 55, 532, 80), wRoomListPlaceholder, CB_FILTER_MATCH_MODE);
 	cbFilterBanlist = AddComboBox(env, Scale(392, 85, 532, 110), wRoomListPlaceholder, CB_FILTER_BANLIST);
-	cbFilterRule->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
-	//cbFilterMatchMode->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
-	cbFilterBanlist->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 
 	RefreshLFLists();
 	ReloadCBFilterRule();
@@ -1047,27 +1057,21 @@ void Game::Initialize() {
 	//Scale(392, 55, 532, 80)
 	ebOnlineTeam1 = env->addEditBox(L"0", Scale(140 + (392 - 140), 55, 170 + (392 - 140), 80), true, wRoomListPlaceholder, EDITBOX_TEAM_COUNT);
 	ebOnlineTeam1->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebOnlineTeam1->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 	stVersus = env->addStaticText(gDataManager->GetSysString(1380).data(), Scale(175 + (392 - 140), 55, 195 + (392 - 140), 80), true, false, wRoomListPlaceholder);
 	defaultStrings.emplace_back(stVersus, 1380);
 	stVersus->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	stVersus->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 	stVersus->setOverrideColor(roomlistcolor);
 	ebOnlineTeam2 = env->addEditBox(L"0", Scale(200 + (392 - 140), 55, 230 + (392 - 140), 80), true, wRoomListPlaceholder, EDITBOX_TEAM_COUNT);
 	ebOnlineTeam2->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebOnlineTeam2->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 	stBestof = env->addStaticText(gDataManager->GetSysString(1381).data(), Scale(235 + (392 - 140), 55, 280 + (392 - 140), 80), true, false, wRoomListPlaceholder);
 	defaultStrings.emplace_back(stBestof, 1381);
-	stBestof->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
-	stBestof->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
+	stBestof->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stBestof->setOverrideColor(roomlistcolor);
 	ebOnlineBestOf = env->addEditBox(L"0", Scale(285 + (392 - 140), 55, 315 + (392 - 140), 80), true, wRoomListPlaceholder, EDITBOX_NUMERIC);
 	ebOnlineBestOf->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebOnlineBestOf->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 	btnFilterRelayMode = env->addButton(Scale(325 + (392 - 140), 55, 370 + (392 - 140), 80), wRoomListPlaceholder, BUTTON_FILTER_RELAY, gDataManager->GetSysString(1247).data());
 	defaultStrings.emplace_back(btnFilterRelayMode, 1247);
 	btnFilterRelayMode->setIsPushButton(true);
-	btnFilterRelayMode->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 
 	//filter rooms textbox
 	ebRoomNameText = env->addStaticText(gDataManager->GetSysString(2021).data(), Scale(572, 30, 682, 50), false, false, wRoomListPlaceholder); //2021 = Filter:
@@ -1075,20 +1079,16 @@ void Game::Initialize() {
 	ebRoomNameText->setOverrideColor(roomlistcolor);
 	ebRoomName = env->addEditBox(L"", Scale(642, 25, 782, 50), true, wRoomListPlaceholder, EDIT_ONLINE_ROOM_NAME); //filter textbox
 	ebRoomName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	ebRoomNameText->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
-	ebRoomName->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 
 	//show locked rooms checkbox
 	chkShowPassword = irr::gui::CGUICustomCheckBox::addCustomCheckBox(false, env, Scale(642, 55, 1024, 80), wRoomListPlaceholder, CHECK_SHOW_LOCKED_ROOMS, gDataManager->GetSysString(1994).data());
 	defaultStrings.emplace_back(chkShowPassword, 1994);
 	((irr::gui::CGUICustomCheckBox*)chkShowPassword)->setColor(roomlistcolor);
-	chkShowPassword->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 
 	//show active rooms checkbox
 	chkShowActiveRooms = irr::gui::CGUICustomCheckBox::addCustomCheckBox(false, env, Scale(642, 85, 1024, 110), wRoomListPlaceholder, CHECK_SHOW_ACTIVE_ROOMS, gDataManager->GetSysString(1985).data());
 	defaultStrings.emplace_back(chkShowActiveRooms, 1985);
 	((irr::gui::CGUICustomCheckBox*)chkShowActiveRooms)->setColor(roomlistcolor);
-	chkShowActiveRooms->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 
 	//show all rooms in a table
 	roomListTable = irr::gui::CGUICustomTable::addCustomTable(env, Resize(1, 118, 1022, 550), wRoomListPlaceholder, TABLE_ROOMLIST, true);
@@ -1149,6 +1149,7 @@ void Game::Initialize() {
 
 	//load server(s)
 	LoadServers();
+	ResizeRoomListScreen();
 	fpsCounter = env->addStaticText(L"", Scale(950, 620, 1024, 640), false, false);
 	fpsCounter->setOverrideColor(skin::FPS_TEXT_COLOR_VAL);
 	fpsCounter->setVisible(gGameConfig->showFPS);
@@ -6476,6 +6477,121 @@ void Game::ReloadElementsStrings() {
 
 	ReloadCBCurrentSkin();
 }
+void Game::ResizeRoomListScreen() {
+	if(!wRoomListPlaceholder)
+		return;
+	const int W = window_size.Width;
+	const int H = window_size.Height;
+	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, W, H));
+
+	const int padX = std::max(10, (int)(W * 0.012f));
+	const int padY = std::max(8, (int)(H * 0.012f));
+	const int gap = std::max(8, (int)(W * 0.008f));
+	const int innerPad = Scale(10);
+
+	// Titulo superior centrado: SALAS DE DUELO ANI DIMENSION
+	const int titleH = Scale(30);
+	if(pnlRoomListTitle)
+		pnlRoomListTitle->setRelativePosition(irr::core::recti(padX, padY, W - padX, padY + titleH));
+	if(stRoomListTitle)
+		stRoomListTitle->setRelativePosition(irr::core::recti(padX, padY, W - padX, padY + titleH));
+
+	const int topY = padY + titleH + Scale(6);
+	const int rowH = Scale(24);
+	const int rowGap = Scale(6);
+	const int topH = innerPad + 3 * rowH + 2 * rowGap + innerPad;
+
+	// Boton Crear Sala a la derecha
+	const int hostW = Scale(125);
+	const int hostH = Scale(38);
+	const int hostX = W - padX - hostW;
+	const int hostY = topY + (topH - hostH) / 2;
+	if(btnCreateHost2)
+		btnCreateHost2->setRelativePosition(irr::core::recti(hostX, hostY, hostX + hostW, hostY + hostH));
+
+	const int blocksAvailW = (hostX - gap) - padX;
+	const int b1W = std::max(Scale(230), (int)(blocksAvailW * 0.31f));
+	const int b1X = padX;
+	const int b2X = b1X + b1W + gap;
+	const int b2W = std::max(Scale(380), (hostX - gap) - b2X);
+
+	// Bloque 1 (Izquierda): Servidor + Usuario
+	if(pnlRoomBlock1)
+		pnlRoomBlock1->setRelativePosition(irr::core::recti(b1X, topY, b1X + b1W, topY + topH));
+	const int b1InnerX = b1X + innerPad;
+	const int b1LblW = Scale(66);
+	const int b1InputX = b1InnerX + b1LblW + Scale(6);
+	const int b1InputEnd = b1X + b1W - innerPad;
+	const int b1Row1Y = topY + innerPad + Scale(10);
+	const int b1Row2Y = b1Row1Y + Scale(36);
+	if(stRoomServerLbl)
+		stRoomServerLbl->setRelativePosition(irr::core::recti(b1InnerX, b1Row1Y + Scale(3), b1InnerX + b1LblW, b1Row1Y + Scale(25)));
+	if(serverChoice)
+		serverChoice->setRelativePosition(irr::core::recti(b1InputX, b1Row1Y, b1InputEnd, b1Row1Y + Scale(26)));
+	if(stRoomUserLbl)
+		stRoomUserLbl->setRelativePosition(irr::core::recti(b1InnerX, b1Row2Y + Scale(3), b1InnerX + b1LblW, b1Row2Y + Scale(25)));
+	if(ebNickNameOnline)
+		ebNickNameOnline->setRelativePosition(irr::core::recti(b1InputX, b1Row2Y, b1InputEnd, b1Row2Y + Scale(26)));
+
+	// Bloque 2 (Centro): Selects anchos alineados + 0 vs 0 Mejor de 0 Relay + Filtro + Checkboxes
+	if(pnlRoomBlock2)
+		pnlRoomBlock2->setRelativePosition(irr::core::recti(b2X, topY, b2X + b2W, topY + topH));
+	const int bx = b2X + innerPad;
+	const int bw = b2W - 2 * innerPad;
+	const int by = topY + innerPad;
+	const int yRow1 = by;
+	const int yRow2 = by + rowH + rowGap;
+	const int yRow3 = by + 2 * (rowH + rowGap);
+
+	const int left2W = std::max(Scale(240), (int)(bw * 0.52f));
+	if(cbFilterRule)
+		cbFilterRule->setRelativePosition(irr::core::recti(bx, yRow1, bx + left2W, yRow1 + rowH));
+	if(cbFilterBanlist)
+		cbFilterBanlist->setRelativePosition(irr::core::recti(bx, yRow3, bx + left2W, yRow3 + rowH));
+
+	// Fila 2 alineada exactamente al mismo ancho left2W: [0] vs. [0] Mejor de [0] [Relay]
+	const int sp = Scale(4);
+	const int numW = Scale(30);
+	const int vsW = Scale(26);
+	const int bestW = Scale(62);
+	int cx = bx;
+	if(ebOnlineTeam1)
+		ebOnlineTeam1->setRelativePosition(irr::core::recti(cx, yRow2, cx + numW, yRow2 + rowH));
+	cx += numW + sp;
+	if(stVersus)
+		stVersus->setRelativePosition(irr::core::recti(cx, yRow2, cx + vsW, yRow2 + rowH));
+	cx += vsW + sp;
+	if(ebOnlineTeam2)
+		ebOnlineTeam2->setRelativePosition(irr::core::recti(cx, yRow2, cx + numW, yRow2 + rowH));
+	cx += numW + sp;
+	if(stBestof)
+		stBestof->setRelativePosition(irr::core::recti(cx, yRow2, cx + bestW, yRow2 + rowH));
+	cx += bestW + sp;
+	if(ebOnlineBestOf)
+		ebOnlineBestOf->setRelativePosition(irr::core::recti(cx, yRow2, cx + numW, yRow2 + rowH));
+	cx += numW + sp;
+	if(btnFilterRelayMode)
+		btnFilterRelayMode->setRelativePosition(irr::core::recti(cx, yRow2, bx + left2W, yRow2 + rowH));
+
+	// Columna derecha dentro del Bloque 2: Filtro + Checkboxes
+	const int right2X = bx + left2W + Scale(14);
+	const int right2End = bx + bw;
+	const int filterLblW = Scale(48);
+	if(ebRoomNameText)
+		ebRoomNameText->setRelativePosition(irr::core::recti(right2X, yRow1 + Scale(2), right2X + filterLblW, yRow1 + rowH));
+	if(ebRoomName)
+		ebRoomName->setRelativePosition(irr::core::recti(right2X + filterLblW + Scale(4), yRow1, right2End, yRow1 + rowH));
+	if(chkShowPassword)
+		chkShowPassword->setRelativePosition(irr::core::recti(right2X, yRow2, right2End, yRow2 + rowH));
+	if(chkShowActiveRooms)
+		chkShowActiveRooms->setRelativePosition(irr::core::recti(right2X, yRow3, right2End, yRow3 + rowH));
+
+	// Tabla de salas debajo de los bloques
+	const int tableTop = topY + topH + Scale(8);
+	const int tableBottom = H - Scale(72);
+	if(roomListTable)
+		roomListTable->setRelativePosition(irr::core::recti(padX, tableTop, W - padX, tableBottom));
+}
 void Game::OnResize() {
 	env->getRootGUIElement()->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	{
@@ -6487,7 +6603,7 @@ void Game::OnResize() {
 											 min<uint32_t>(stAbout->getTextHeight() + Scale(10), Scale(690)));
 		stAbout->setRelativePosition(irr::core::recti(10, 10, minwidth, minheight));
 	}
-	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
+	ResizeRoomListScreen();
 	if(wAdventureMode)
 		ResizeAdventureMode();
 	if(wStoreMenu)
