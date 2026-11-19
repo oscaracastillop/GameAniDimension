@@ -405,7 +405,6 @@ struct server_lobby_page_elements {
 		std::string clanNombre{ "Sin Clan" };
 		std::string flagUrl{};
 	};
-	irr::video::ITexture* LoadFlagTexture(const std::string& flagUrl);
 	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
@@ -1135,6 +1134,7 @@ public:
 	std::vector<MailboxEntry> mailboxItems;
 
 	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
+	irr::video::ITexture* LoadFlagTexture(const std::string& flagUrl);
 	irr::video::ITexture* LoadMedalTexture(int npcLevel);
 	irr::video::ITexture* LoadRewardBgTexture();
 	irr::video::ITexture* LoadPuzzlePieceTexture(const std::string& carpeta, int pieceNum);
