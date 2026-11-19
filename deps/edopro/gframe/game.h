@@ -562,7 +562,10 @@ struct adventure_mode_panel_elements {
 	// Dedicated Adventure Mode Panels & Labels for Responsive Layout
 	irr::gui::IGUIStaticText* pnlAdventureLeft{ nullptr };
 	irr::gui::IGUIStaticText* pnlAdventureCenter{ nullptr };
+	irr::gui::IGUIStaticText* pnlAdventureDetails{ nullptr };
 	irr::gui::IGUIStaticText* pnlAdventureRight{ nullptr };
+	irr::gui::IGUIStaticText* pnlAdventureStats{ nullptr };
+	bool isPlayerAdmin{ false };
 	irr::gui::IGUIStaticText* txtAdventureSerie{ nullptr };
 	irr::gui::IGUIStaticText* txtAdventureArco{ nullptr };
 	irr::gui::IGUIStaticText* txtAdventureDeck{ nullptr };
