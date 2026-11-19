@@ -236,6 +236,9 @@ struct host_creation_panel_elements {
 	irr::gui::IGUIEditBox* ebHostPort;
 	irr::gui::IGUIStaticText* stHostNotes;
 	irr::gui::IGUIEditBox* ebHostNotes;
+	irr::gui::IGUIEditBox* ebHostMinLevel{ nullptr };
+	irr::gui::IGUIEditBox* ebHostMaxLevel{ nullptr };
+	irr::gui::IGUIComboBox* cbHostDuelType{ nullptr };
 	irr::gui::IGUIStaticText* stVersus;
 	irr::gui::IGUIStaticText* stBestof;
 	//deck options
@@ -261,6 +264,9 @@ struct host_panel_elements {
 	irr::gui::IGUIButton* btnHostPrepWindBot;
 	irr::gui::IGUIButton* btnHostPrepOB;
 	irr::gui::IGUIStaticText* stHostPrepDuelist[6];
+	irr::gui::IGUIImage* imgHostPrepAvatar[6]{ nullptr };
+	irr::gui::IGUIStaticText* stHostPrepTeamLeft{ nullptr };
+	irr::gui::IGUIStaticText* stHostPrepTeamRight{ nullptr };
 	irr::gui::IGUICheckBox* chkHostPrepReady[6];
 	irr::gui::IGUIButton* btnHostPrepKick[6];
 	irr::gui::IGUIComboBox* cbDeckSelect;
@@ -377,6 +383,14 @@ struct deck_edit_page_elements {
 struct server_lobby_page_elements {
 	//server lobby
 	bool isHostingOnline;
+	bool currentRoomIsRanked{ true };
+	int currentRoomMinLv{ 1 };
+	int currentRoomMaxLv{ 300 };
+	struct PlayerCardCacheEntry {
+		int level{ 1 };
+		std::string avatarFile{ "AVA-001.png" };
+	};
+	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
 	irr::gui::IGUIComboBox* serverChoice;
@@ -428,6 +442,7 @@ struct AdventureNpcInfo {
 	bool activoNormal{ false };
 	std::wstring premioLeyenda{};
 	bool activoLeyenda{ false };
+	int duelosNormal{ 0 };
 };
 
 struct adventure_mode_panel_elements {
@@ -471,6 +486,12 @@ struct adventure_mode_panel_elements {
 		double avaSSPct{ 0.0 };
 		double medExpPct{ 0.0 };
 		double medSSPct{ 0.0 };
+		double clanExpPct{ 0.0 };
+		double clanSSPct{ 0.0 };
+		std::string clanName;
+		double vipExpPct{ 0.0 };
+		double vipSSPct{ 0.0 };
+		std::string vipName;
 		double totalLuckPct{ 0.0 };
 		int newLevel{ 1 };
 		bool leveledUp{ false };
@@ -925,10 +946,11 @@ public:
 	bool SaveUserDeckToServer(int slot, const std::wstring& name, const Deck& deck, std::wstring& errOut);
 	bool SetActiveUserDeckOnServer(int slot, std::wstring& errOut);
 	bool SellCardFromInventory(uint32_t passcode, int qty, std::wstring& msgOut);
-	bool ValidateNpcChallengeOnServer(int npcId, std::wstring& errOut);
+	bool ValidateNpcChallengeOnServer(int npcId, bool isLeyenda, std::wstring& errOut);
 	long long activeDuelSessionId{ 0 };
 	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);
+	void UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName);
 
 	// Dedicated Economy Interfaces (Store, Store Avatars, Store Boosters, Player Profile, Mailbox)
 	struct StoreAvatarItem {

@@ -225,12 +225,7 @@ catch(...) { what = def; }
 			mainGame->dInfo.secret.game_id = 0;
 			if(mainGame->isAdventureMode) {
 				BufferIO::EncodeUTF16(L"Ani Dimension", cscg.name, 20);
-#if EDOPRO_ANDROID
 				BufferIO::EncodeUTF16(mainGame->dInfo.secret.pass.data(), cscg.pass, 20);
-#else
-				cscg.pass[0] = 0;
-				mainGame->dInfo.secret.pass = L"";
-#endif
 				cscg.info.rule = 4; // Todo se Vale (4 = All Cards allowed)
 				cscg.info.mode = 0; // 1 vs 1 Single
 				cscg.info.start_hand = 5;
@@ -292,11 +287,31 @@ catch(...) { what = def; }
 					cscg.info.duel_flag_low |= DUEL_RELAY;
 				if(cscg.info.no_shuffle_deck)
 					cscg.info.duel_flag_low |= DUEL_PSEUDO_SHUFFLE;
+				static constexpr uint32_t limits[]{ TYPE_FUSION, TYPE_SYNCHRO, TYPE_XYZ, TYPE_PENDULUM, TYPE_LINK };
+				uint32_t ftypes = 0;
+				for(int ti = 0; ti < 5; ++ti) {
+					if(mainGame->chkTypeLimit[ti] && mainGame->chkTypeLimit[ti]->isChecked())
+						ftypes |= limits[ti];
+				}
+				mainGame->forbiddentypes = ftypes;
 				cscg.info.forbiddentypes = mainGame->forbiddentypes;
 				cscg.info.extra_rules = mainGame->extra_rules;
-				if(mainGame->ebHostNotes->isVisible()) {
-					BufferIO::EncodeUTF8(mainGame->ebHostNotes->getText(), cscg.notes, 200);
+				int minLv = 1, maxLv = 300;
+				if(mainGame->ebHostMinLevel) { try { minLv = std::stoi(mainGame->ebHostMinLevel->getText()); } catch(...) { minLv = 1; } }
+				if(mainGame->ebHostMaxLevel) { try { maxLv = std::stoi(mainGame->ebHostMaxLevel->getText()); } catch(...) { maxLv = 300; } }
+				if(minLv < 1) minLv = 1;
+				if(maxLv > 300) maxLv = 300;
+				if(minLv > maxLv) std::swap(minLv, maxLv);
+				bool isRanked = !mainGame->cbHostDuelType || (mainGame->cbHostDuelType->getSelected() == 1);
+				mainGame->currentRoomIsRanked = isRanked;
+				mainGame->currentRoomMinLv = minLv;
+				mainGame->currentRoomMaxLv = maxLv;
+				std::string userNotes;
+				if(mainGame->ebHostNotes && mainGame->ebHostNotes->isVisible()) {
+					userNotes = BufferIO::EncodeUTF8(mainGame->ebHostNotes->getText());
 				}
+				std::string taggedNotes = epro::format("[{}|Nv.{}-{}]{}", isRanked ? "RANKED" : "AMISTOSO", minLv, maxLv, userNotes.empty() ? "" : (" " + userNotes));
+				BufferIO::EncodeUTF8(BufferIO::DecodeUTF8(taggedNotes).c_str(), cscg.notes, 200);
 				SendPacketToServer(CTOS_CREATE_GAME, cscg);
 			}
 		} else {
@@ -881,19 +896,20 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
 		matManager.SetActiveVertices(mainGame->dInfo.HasFieldFlag(DUEL_3_COLUMNS_FIELD),
 									 !mainGame->dInfo.HasFieldFlag(DUEL_SEPARATE_PZONE));
-		int x = (pkt.info.team1 + pkt.info.team2 >= 5) ? 60 : 0;
-		mainGame->btnHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(10, 180 + x, 110, 205 + x));
-		mainGame->stHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(10, 210 + x, 270, 230 + x));
-		mainGame->stHostPrepRule->setRelativePosition(mainGame->Scale<irr::s32>(280, 30, 460, 270 + x));
-		mainGame->stDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(10, 235 + x, 110, 255 + x));
-		mainGame->cbDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(120, 230 + x, 270, 255 + x));
-		mainGame->btnHostPrepReady->setRelativePosition(mainGame->Scale<irr::s32>(170, 180 + x, 270, 205 + x));
-		mainGame->btnHostPrepNotReady->setRelativePosition(mainGame->Scale<irr::s32>(170, 180 + x, 270, 205 + x));
-		mainGame->btnHostPrepStart->setRelativePosition(mainGame->Scale<irr::s32>(230, 280 + x, 340, 305 + x));
-		mainGame->btnHostPrepCancel->setRelativePosition(mainGame->Scale<irr::s32>(350, 280 + x, 460, 305 + x));
-		mainGame->wHostPrepare->setRelativePosition(mainGame->ResizeWin(270, 120, 750, 440 + x));
-		mainGame->wHostPrepareR->setRelativePosition(mainGame->ResizeWin(750, 120, 950, 440 + x));
-		mainGame->wHostPrepareL->setRelativePosition(mainGame->ResizeWin(70, 120, 270, 440 + x));
+		mainGame->wHostPrepare->setRelativePosition(mainGame->ResizeWin(112, 55, 912, 575));
+		mainGame->wHostPrepareR->setVisible(false);
+		mainGame->wHostPrepareL->setVisible(false);
+		mainGame->stHostPrepRule->setRelativePosition(mainGame->Scale<irr::s32>(15, 28, 600, 145));
+		mainGame->btnHostPrepDuelist->setRelativePosition(mainGame->Scale<irr::s32>(615, 28, 785, 56));
+		mainGame->btnHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(615, 62, 785, 90));
+		mainGame->stHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(615, 96, 785, 118));
+		mainGame->btnHostPrepWindBot->setRelativePosition(mainGame->Scale<irr::s32>(615, 120, 785, 145));
+		mainGame->stDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(15, 158, 125, 180));
+		mainGame->cbDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(130, 154, 360, 182));
+		mainGame->btnHostPrepReady->setRelativePosition(mainGame->Scale<irr::s32>(375, 154, 495, 182));
+		mainGame->btnHostPrepNotReady->setRelativePosition(mainGame->Scale<irr::s32>(375, 154, 495, 182));
+		mainGame->btnHostPrepStart->setRelativePosition(mainGame->Scale<irr::s32>(510, 154, 640, 182));
+		mainGame->btnHostPrepCancel->setRelativePosition(mainGame->Scale<irr::s32>(655, 154, 785, 182));
 		mainGame->gBot.window->setRelativePosition(irr::core::vector2di(mainGame->wHostPrepare->getAbsolutePosition().LowerRightCorner.X, mainGame->wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 		for(int i = 0; i < 6; i++) {
 			mainGame->chkHostPrepReady[i]->setVisible(false);
@@ -901,21 +917,31 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->btnHostPrepKick[i]->setVisible(false);
 			mainGame->stHostPrepDuelist[i]->setVisible(false);
 			mainGame->stHostPrepDuelist[i]->setText(L"");
+			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setVisible(false);
 		}
-		for(int i = 0; i < pkt.info.team1; i++) {
+		for(int i = 0; i < pkt.info.team1 && i < 6; i++) {
+			int y = 224 + i * 92;
 			mainGame->chkHostPrepReady[i]->setVisible(true);
 			mainGame->stHostPrepDuelist[i]->setVisible(true);
-			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(10, 65 + i * 25, 30, 85 + i * 25));
-			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(40, 65 + i * 25, 240, 85 + i * 25));
-			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(250, 65 + i * 25, 270, 85 + i * 25));
+			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(15, y + 24, 37, y + 48));
+			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(42, y, 114, y + 72));
+			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(122, y, 345, y + 72));
+			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(352, y + 24, 376, y + 48));
 		}
-		for(int i = pkt.info.team1; i < pkt.info.team1 + pkt.info.team2; i++) {
+		for(int i = pkt.info.team1; i < pkt.info.team1 + pkt.info.team2 && i < 6; i++) {
+			int rIdx = i - pkt.info.team1;
+			int y = 224 + rIdx * 92;
 			mainGame->chkHostPrepReady[i]->setVisible(true);
 			mainGame->stHostPrepDuelist[i]->setVisible(true);
-			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(10, 10 + 65 + i * 25, 30, 10 + 85 + i * 25));
-			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(40, 10 + 65 + i * 25, 240, 10 + 85 + i * 25));
-			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(250, 10 + 65 + i * 25, 270, 10 + 85 + i * 25));
+			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(410, y + 24, 432, y + 48));
+			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(437, y, 509, y + 72));
+			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(517, y, 740, y + 72));
+			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(747, y + 24, 771, y + 48));
 		}
+		if(!strL.empty()) str += L"\n" + strL;
+		str += epro::format(L"\nTipo: {} | Nivel: {}-{}",
+			mainGame->currentRoomIsRanked ? L"Ranked" : L"Amistoso",
+			mainGame->currentRoomMinLv, mainGame->currentRoomMaxLv);
 		mainGame->dInfo.selfnames.resize(pkt.info.team1);
 		mainGame->dInfo.opponames.resize(pkt.info.team2);
 		mainGame->btnHostPrepReady->setVisible(true);
@@ -963,9 +989,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			gdeckManager->sent_deck = mainGame->deckBuilder.GetCurrentDeck();
 			DuelClient::SendPacketToServer(CTOS_HS_READY);
 
-#if EDOPRO_ANDROID
 			mainGame->SpawnRemoteAdventureBot();
-#else
+#if 0
 			uint16_t bport = NetServer::GetServerPort();
 			std::wstring botDeck = mainGame->selectedAdventureBotDeckName;
 			if(botDeck.empty())
@@ -1316,7 +1341,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->dInfo.selfnames[pkt.pos] = name;
 		else
 			mainGame->dInfo.opponames[pkt.pos - mainGame->dInfo.team1] = name;
-		mainGame->stHostPrepDuelist[pkt.pos]->setText(name);
+		mainGame->UpdateHostPrepPlayerSlot(pkt.pos, name);
 		if(!mainGame->isAdventureMode) {
 			mainGame->btnHostPrepStart->setVisible(is_host);
 			mainGame->btnHostPrepStart->setEnabled(is_host && CheckReady());
@@ -1335,9 +1360,9 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
 		if(state < 8) {
 			gSoundManager->PlaySoundEffect(SoundManager::SFX::PLAYER_ENTER);
-			std::wstring prename = mainGame->stHostPrepDuelist[pos]->getText();
-			mainGame->stHostPrepDuelist[state]->setText(prename.data());
-			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			std::wstring prename = (pos < mainGame->dInfo.team1) ? mainGame->dInfo.selfnames[pos] : mainGame->dInfo.opponames[pos - mainGame->dInfo.team1];
+			mainGame->UpdateHostPrepPlayerSlot(state, prename);
+			mainGame->UpdateHostPrepPlayerSlot(pos, L"");
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 			if(pos < mainGame->dInfo.team1)
 				mainGame->dInfo.selfnames[pos] = L"";
@@ -1360,11 +1385,11 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->btnHostPrepNotReady->setVisible(false);
 			}
 		} else if(state == PLAYERCHANGE_LEAVE) {
-			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			mainGame->UpdateHostPrepPlayerSlot(pos, L"");
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 		} else if(state == PLAYERCHANGE_OBSERVE) {
 			watching++;
-			mainGame->stHostPrepDuelist[pos]->setText(L"");
+			mainGame->UpdateHostPrepPlayerSlot(pos, L"");
 			mainGame->chkHostPrepReady[pos]->setChecked(false);
 			mainGame->stHostPrepOB->setText(epro::format(L"{} {}", gDataManager->GetSysString(1253), watching).data());
 		}
