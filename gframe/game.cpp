@@ -1653,6 +1653,7 @@ void Game::PopulateAdventureModeWindow() {
 	imgAdventureSeriesLogo = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
 	imgAdventureSeriesLogo->setScaleImage(true);
 	imgAdventureSeriesLogo->setUseAlphaChannel(true);
+	imgAdventureSeriesLogo->setVisible(false);
 
 	txtAdventureArco = env->addStaticText(L"2. ARCO HISTORICO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureArco->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
@@ -1663,6 +1664,7 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureArcDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureArcDesc->setWordWrap(true);
 	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 220, 250));
+	stAdventureArcDesc->setVisible(false);
 
 	txtAdventureDeck = env->addStaticText(L"3. TU BARAJA (DECK):", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
@@ -1673,12 +1675,19 @@ void Game::PopulateAdventureModeWindow() {
 	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
 	btnAdventureBack = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
 
-	// ==================== PANEL CENTRAL: CATALOGO ====================
+	// ==================== PANEL CENTRAL: CATALOGO 4x5 ====================
 	txtAdventureCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureCat->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 
+	for(int i = 0; i < 20; ++i) {
+		btnAdventureNpcs[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_NPC_0 + i, L"");
+		btnAdventureNpcs[i]->setIsPushButton(true);
+		btnAdventureNpcs[i]->setVisible(false);
+	}
+
 	lstAdventureNPC = env->addListBox(irr::core::recti(0, 0, 10, 10), wAdventureMode, LISTBOX_ADVENTURE_NPC, true);
 	lstAdventureNPC->setItemHeight(Scale(28));
+	lstAdventureNPC->setVisible(false);
 
 	// Fallback combo for backwards compatibility
 	cbAdventureNPC = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_NPC);
@@ -1711,6 +1720,23 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
 	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 225, 230, 240));
+
+	stAdventurePrize = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
+	stAdventurePrize->setWordWrap(true);
+	stAdventurePrize->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginUiFont)
+		stAdventurePrize->setOverrideFont(loginUiFont);
+
+	stAdventurePrizeStatus = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
+	stAdventurePrizeStatus->setWordWrap(true);
+	stAdventurePrizeStatus->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+
+	wAdventureStatsBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
+	wAdventureStatsBox->setBackgroundColor(irr::video::SColor(210, 10, 16, 32));
+
+	stAdventureStatsText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
+	stAdventureStatsText->setWordWrap(true);
+	stAdventureStatsText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 
 	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	stAdventureDeckDesc->setVisible(false);
@@ -1781,147 +1807,153 @@ void Game::ResizeAdventureMode() {
 		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
 	const int padX = std::max(12, (int)(W * 0.015f));
-	const int padY = std::max(12, (int)(H * 0.02f));
-	const int gap = std::max(12, (int)(W * 0.012f));
+	const int padY = std::max(12, (int)(H * 0.018f));
+	const int gap = std::max(10, (int)(W * 0.010f));
+	const int innerPad = Scale(12);
 
-	const int totalW = W - 2 * padX - 2 * gap;
+	const int usableW = W - 2 * padX - gap;
 	const int pnlTop = padY;
 	const int pnlBottom = H - padY;
 	const int pnlH = pnlBottom - pnlTop;
 
-	const int innerPad = Scale(12);
-
-	// Character stage height expanded now that deck strategy is removed
-	const int avatarStageH = std::max(Scale(260), (int)(pnlH * 0.63f));
-
-	// Right panel sized tightly to the portrait character ratio (896x1200 ~ 0.747) to eliminate black side bars
-	const int targetRightW = (int)(avatarStageH * 0.747f) + 2 * innerPad;
-	const int colRightW = std::max(Scale(230), std::min((int)(totalW * 0.32f), targetRightW));
-
-	// Catalog panel
-	const int colCenterW = std::max(Scale(210), (int)(totalW * 0.23f));
-
-	// Left panel gets all the remaining space to expand series banner and options
-	const int colLeftW = totalW - colCenterW - colRightW;
+	// Bloque 3 (Derecha) vs Bloque 1+2 (Izquierda)
+	const int colRightW = std::max(Scale(300), std::min(Scale(440), (int)(usableW * 0.36f)));
+	const int leftAreaW = usableW - colRightW;
 
 	const int xLeft = padX;
-	const int xCenter = xLeft + colLeftW + gap;
-	const int xRight = xCenter + colCenterW + gap;
+	const int xRight = xLeft + leftAreaW + gap;
 
+	// ==================== BLOQUE 1: SELECTORES EN UNA SOLA FILA ====================
+	const int topBarH = innerPad + Scale(20) + Scale(4) + Scale(30) + innerPad;
 	if(pnlAdventureLeft)
-		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + colLeftW, pnlBottom));
+		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + leftAreaW, pnlTop + topBarH));
+
+	if(imgAdventureSeriesLogo)
+		imgAdventureSeriesLogo->setVisible(false);
+	if(stAdventureArcDesc)
+		stAdventureArcDesc->setVisible(false);
+	if(lstAdventureNPC)
+		lstAdventureNPC->setVisible(false);
+
+	const int selGap = Scale(10);
+	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
+	const int selY = pnlTop + innerPad;
+
+	// 1. Serie
+	if(txtAdventureSerie)
+		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + Scale(20)));
+	if(cbAdventureSeries)
+		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + Scale(24), xLeft + innerPad + selW, selY + Scale(54)));
+
+	// 2. Arco Historico
+	const int xCol2 = xLeft + innerPad + selW + selGap;
+	if(txtAdventureArco)
+		txtAdventureArco->setRelativePosition(irr::core::recti(xCol2, selY, xCol2 + selW, selY + Scale(20)));
+	if(cbAdventureArc)
+		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + Scale(24), xCol2 + selW, selY + Scale(54)));
+
+	// 3. Tu Baraja (Deck)
+	const int xCol3 = xCol2 + selW + selGap;
+	if(txtAdventureDeck)
+		txtAdventureDeck->setRelativePosition(irr::core::recti(xCol3, selY, xLeft + leftAreaW - innerPad, selY + Scale(20)));
+	if(cbAdventureUserDeck)
+		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + Scale(24), xLeft + leftAreaW - innerPad, selY + Scale(54)));
+
+	// ==================== BLOQUE 2: CATALOGO 4x5 (MAX 20 NPCs) ====================
+	const int catTop = pnlTop + topBarH + gap;
 	if(pnlAdventureCenter)
-		pnlAdventureCenter->setRelativePosition(irr::core::recti(xCenter, pnlTop, xCenter + colCenterW, pnlBottom));
+		pnlAdventureCenter->setRelativePosition(irr::core::recti(xLeft, catTop, xLeft + leftAreaW, pnlBottom));
+
+	const int cx = xLeft + innerPad;
+	const int cw = leftAreaW - 2 * innerPad;
+	if(txtAdventureCat)
+		txtAdventureCat->setRelativePosition(irr::core::recti(cx, catTop + innerPad, cx + cw, catTop + innerPad + Scale(22)));
+
+	const int gridTop = catTop + innerPad + Scale(28);
+	const int gridH = (pnlBottom - innerPad) - gridTop;
+	const int cols = 4;
+	const int rows = 5;
+	const int cellGapX = Scale(8);
+	const int cellGapY = Scale(8);
+	const int btnCellW = std::max(Scale(60), (cw - (cols - 1) * cellGapX) / cols);
+	const int btnCellH = std::max(Scale(34), (gridH - (rows - 1) * cellGapY) / rows);
+
+	for(int i = 0; i < 20; ++i) {
+		if(!btnAdventureNpcs[i]) continue;
+		int r = i / cols;
+		int c = i % cols;
+		int bx = cx + c * (btnCellW + cellGapX);
+		int by = gridTop + r * (btnCellH + cellGapY);
+		btnAdventureNpcs[i]->setRelativePosition(irr::core::recti(bx, by, bx + btnCellW, by + btnCellH));
+	}
+
+	// ==================== BLOQUE 3: DETALLE DUELISTA (DERECHA) ====================
 	if(pnlAdventureRight)
 		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, pnlBottom));
 
-	// ==================== PANEL IZQUIERDO ====================
-	int lx = xLeft + innerPad;
-	int lw = colLeftW - 2 * innerPad;
-	int curY = pnlTop + innerPad;
+	const int rx = xRight + innerPad;
+	const int rw = colRightW - 2 * innerPad;
 
-	if(txtAdventureSerie)
-		txtAdventureSerie->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(20)));
-	curY += Scale(22);
-
-	if(cbAdventureSeries)
-		cbAdventureSeries->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
-	curY += Scale(34);
-
-	// Prominent, wider and larger series banner
-	int logoH = std::min(Scale(220), std::max(Scale(100), (int)(pnlH * 0.26f)));
-	if(imgAdventureSeriesLogo) {
-		auto logoTex = imgAdventureSeriesLogo->getImage();
-		if(logoTex && logoTex->getOriginalSize().Width > 0 && logoTex->getOriginalSize().Height > 0) {
-			float lAspect = (float)logoTex->getOriginalSize().Width / (float)logoTex->getOriginalSize().Height;
-			int dW = lw;
-			int dH = (int)(lw / lAspect);
-			if(dH > logoH) {
-				dH = logoH;
-				dW = (int)(logoH * lAspect);
-			}
-			int dX = lx + (lw - dW) / 2;
-			int dY = curY + (logoH - dH) / 2;
-			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(dX, dY, dX + dW, dY + dH));
-			imgAdventureSeriesLogo->setImage(logoTex);
-		} else {
-			imgAdventureSeriesLogo->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + logoH));
-		}
-	}
-	curY += logoH + Scale(10);
-
-	if(txtAdventureArco)
-		txtAdventureArco->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(20)));
-	curY += Scale(22);
-
-	if(cbAdventureArc)
-		cbAdventureArc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + Scale(28)));
-	curY += Scale(34);
-
-	int btnDuelH = Scale(50);
-	int btnBackH = Scale(36);
-	int btnSpacing = Scale(8);
-	int bottomButtonsTop = pnlBottom - innerPad - btnBackH - btnSpacing - btnDuelH;
-
-	int deckY = bottomButtonsTop - Scale(64);
-	if(txtAdventureDeck)
-		txtAdventureDeck->setRelativePosition(irr::core::recti(lx, deckY, lx + lw, deckY + Scale(20)));
-	if(cbAdventureUserDeck)
-		cbAdventureUserDeck->setRelativePosition(irr::core::recti(lx, deckY + Scale(24), lx + lw, deckY + Scale(52)));
-
-	int descH = std::max(Scale(36), deckY - curY - Scale(8));
-	if(stAdventureArcDesc)
-		stAdventureArcDesc->setRelativePosition(irr::core::recti(lx, curY, lx + lw, curY + descH));
+	// Botones inferiores con exactamente el mismo ancho y alto
+	const int actionBtnH = Scale(38);
+	const int actionBtnGap = Scale(10);
+	const int actionBtnW = (rw - actionBtnGap) / 2;
+	const int actionBtnY = pnlBottom - innerPad - actionBtnH;
 
 	if(btnAdventureDuel)
-		btnAdventureDuel->setRelativePosition(irr::core::recti(lx, bottomButtonsTop, lx + lw, bottomButtonsTop + btnDuelH));
+		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
 	if(btnAdventureBack)
-		btnAdventureBack->setRelativePosition(irr::core::recti(lx, bottomButtonsTop + btnDuelH + btnSpacing, lx + lw, bottomButtonsTop + btnDuelH + btnSpacing + btnBackH));
+		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
 
-	// ==================== PANEL CENTRAL: CATALOGO ====================
-	int cx = xCenter + innerPad;
-	int cw = colCenterW - 2 * innerPad;
-	int cCurY = pnlTop + innerPad;
+	// Bloque estadistico (Win Rate Usuario vs Global) encima de los botones
+	const int statsH = Scale(52);
+	const int statsY = actionBtnY - Scale(8) - statsH;
+	if(wAdventureStatsBox)
+		wAdventureStatsBox->setRelativePosition(irr::core::recti(rx, statsY, rx + rw, statsY + statsH));
+	if(stAdventureStatsText)
+		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(8), statsY + Scale(5), rx + rw - Scale(8), statsY + statsH - Scale(5)));
 
-	if(txtAdventureCat)
-		txtAdventureCat->setRelativePosition(irr::core::recti(cx, cCurY, cx + cw, cCurY + Scale(22)));
-	cCurY += Scale(26);
+	// Parte superior: Avatar + Nombre + Dificultad + Lore + Premios + Medalla
+	const int availAboveStats = statsY - (pnlTop + innerPad) - Scale(6);
+	const int avatarStageH = std::max(Scale(120), std::min((int)(pnlH * 0.42f), availAboveStats - Scale(248)));
+	int rCurY = pnlTop + innerPad;
 
-	if(lstAdventureNPC)
-		lstAdventureNPC->setRelativePosition(irr::core::recti(cx, cCurY, cx + cw, pnlBottom - innerPad));
-
-	// ==================== PANEL DERECHO: GRAN PROTAGONISMO ====================
-	int rx = xRight + innerPad;
-	int rw = colRightW - 2 * innerPad;
-
-	// Portrait stage hugging character image
-	int avatarBoxTop = pnlTop + innerPad;
-
-	UpdateAdventureNPCImagePosition(rx, avatarBoxTop, rw, avatarStageH);
-	if(imgAdventureMedal) {
-		int mSize = Scale(52);
-		imgAdventureMedal->setRelativePosition(irr::core::recti(rx + rw - mSize - Scale(4), avatarBoxTop + Scale(4), rx + rw - Scale(4), avatarBoxTop + Scale(4) + mSize));
-	}
-
-	int rCurY = avatarBoxTop + avatarStageH + Scale(10);
+	UpdateAdventureNPCImagePosition(rx, rCurY, rw, avatarStageH);
+	rCurY += avatarStageH + Scale(6);
 
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(28)));
-	rCurY += Scale(32);
+		stAdventureNPCName->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(24)));
+	rCurY += Scale(26);
 
-	int diffLabelW = Scale(120);
+	const int diffLabelW = Scale(115);
 	if(txtAdventureDiff)
-		txtAdventureDiff->setRelativePosition(irr::core::recti(rx, rCurY + Scale(4), rx + diffLabelW, rCurY + Scale(26)));
+		txtAdventureDiff->setRelativePosition(irr::core::recti(rx, rCurY + Scale(3), rx + diffLabelW, rCurY + Scale(25)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(6), rCurY, rx + rw, rCurY + Scale(28)));
-	rCurY += Scale(34);
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx + diffLabelW + Scale(6), rCurY, rx + rw, rCurY + Scale(26)));
+	rCurY += Scale(30);
 
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(20)));
-	rCurY += Scale(22);
+		txtAdventureLore->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + Scale(18)));
+	rCurY += Scale(20);
+
+	const int midAvail = std::max(Scale(100), (statsY - Scale(6)) - rCurY);
+	const int prizeBlockH = std::min(Scale(76), std::max(Scale(56), (int)(midAvail * 0.46f)));
+	const int loreH = std::max(Scale(40), midAvail - prizeBlockH - Scale(6));
 
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, pnlBottom - innerPad));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(rx, rCurY, rx + rw, rCurY + loreH));
+	rCurY += loreH + Scale(6);
+
+	const int mSize = std::min(prizeBlockH, Scale(54));
+	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
+	const int prizeTextW = showMedal ? (rw - mSize - Scale(6)) : rw;
+
+	if(imgAdventureMedal)
+		imgAdventureMedal->setRelativePosition(irr::core::recti(rx + rw - mSize, rCurY, rx + rw, rCurY + mSize));
+	if(stAdventurePrize)
+		stAdventurePrize->setRelativePosition(irr::core::recti(rx, rCurY, rx + prizeTextW, rCurY + Scale(34)));
+	if(stAdventurePrizeStatus)
+		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx, rCurY + Scale(35), rx + prizeTextW, rCurY + prizeBlockH));
 
 	if(stAdventureDeckDesc)
 		stAdventureDeckDesc->setVisible(false);
@@ -1934,20 +1966,8 @@ void Game::OnAdventureSeriesChanged() {
 
 	const auto& series = adventureSeriesList[sel];
 
-	// Update Series Logo
-	auto utf8Image = Utils::ToUTF8IfNeeded(series.imageFile);
-	bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
-	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
-	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
-	auto logoTex = driver->getTexture(epro::format("textures/series/{}", utf8Image).c_str());
-	if(!logoTex) logoTex = driver->getTexture(epro::format("textures/characters/series/{}", utf8Image).c_str());
-	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
-	if(logoTex) {
-		imgAdventureSeriesLogo->setImage(logoTex);
-		imgAdventureSeriesLogo->setVisible(true);
-	} else {
+	if(imgAdventureSeriesLogo)
 		imgAdventureSeriesLogo->setVisible(false);
-	}
 	ResizeAdventureMode();
 
 	// Fetch Arcos for selected Series
@@ -2038,6 +2058,12 @@ void Game::OnAdventureArcChanged() {
 				npc.premioLeyenda = Utils::ToUnicodeIfNeeded(SafeJsonStr(item, "PremioLeyenda", ""));
 				npc.activoLeyenda = item.contains("ActivoLeyenda") && item["ActivoLeyenda"].is_boolean() ? item["ActivoLeyenda"].get<bool>() : false;
 				npc.duelosNormal = SafeJsonInt(item, "DuelosNormal", 0);
+				npc.premioNormalEntregado = item.contains("PremioNormalEntregado") && item["PremioNormalEntregado"].is_boolean() ? item["PremioNormalEntregado"].get<bool>() : false;
+				npc.medallaDesbloqueada = item.contains("MedallaDesbloqueada") && item["MedallaDesbloqueada"].is_boolean() ? item["MedallaDesbloqueada"].get<bool>() : false;
+				npc.userWins = SafeJsonInt(item, "UserWins", 0);
+				npc.userLosses = SafeJsonInt(item, "UserLosses", 0);
+				npc.globalWins = SafeJsonInt(item, "GlobalWins", 0);
+				npc.globalLosses = SafeJsonInt(item, "GlobalLosses", 0);
 				adventureNpcList.push_back(std::move(npc));
 			}
 		}
@@ -2066,11 +2092,21 @@ void Game::OnAdventureArcChanged() {
 		}
 	}
 
+	for (int i = 0; i < 20; ++i) {
+		if (btnAdventureNpcs[i])
+			btnAdventureNpcs[i]->setVisible(false);
+	}
+
 	for (size_t i = 0; i < adventureNpcList.size(); ++i) {
 		const auto& npc = adventureNpcList[i];
-		std::wstring entry = epro::format(L"Lv. {:02d} - {}", npc.level, npc.name);
+		std::wstring entry = epro::format(L"Lv.{:02d} - {}", npc.level, npc.name);
 		lstAdventureNPC->addItem(entry.c_str());
 		cbAdventureNPC->addItem(entry.c_str(), (int)i);
+		if (i < 20 && btnAdventureNpcs[i]) {
+			btnAdventureNpcs[i]->setText(entry.c_str());
+			btnAdventureNpcs[i]->setVisible(true);
+			btnAdventureNpcs[i]->setPressed(i == 0);
+		}
 	}
 
 	if (lstAdventureNPC->getItemCount() > 0) {
@@ -2081,16 +2117,35 @@ void Game::OnAdventureArcChanged() {
 	UpdateAdventureNPCDisplay();
 }
 
+void Game::SelectAdventureNpc(int idx) {
+	if (idx < 0 || idx >= (int)adventureNpcList.size())
+		return;
+	if (lstAdventureNPC)
+		lstAdventureNPC->setSelected(idx);
+	if (cbAdventureNPC)
+		cbAdventureNPC->setSelected(idx);
+	UpdateAdventureNPCDisplay();
+}
+
 void Game::UpdateAdventureNPCDisplay() {
 	int selected = lstAdventureNPC ? lstAdventureNPC->getSelected() : -1;
 	if (selected < 0 && cbAdventureNPC)
 		selected = cbAdventureNPC->getSelected();
 
+	for (int i = 0; i < 20; ++i) {
+		if (btnAdventureNpcs[i])
+			btnAdventureNpcs[i]->setPressed(i == selected);
+	}
+
 	if (selected < 0 || selected >= (int)adventureNpcList.size()) {
 		stAdventureNPCName->setText(L"");
 		stAdventureNPCDesc->setText(L"");
+		if (stAdventurePrize) stAdventurePrize->setText(L"");
+		if (stAdventurePrizeStatus) stAdventurePrizeStatus->setText(L"");
+		if (stAdventureStatsText) stAdventureStatsText->setText(L"");
 		stAdventureDeckDesc->setText(L"");
 		imgAdventureNPC->setVisible(false);
+		if (imgAdventureMedal) imgAdventureMedal->setVisible(false);
 		btnAdventureDuel->setEnabled(false);
 		return;
 	}
@@ -2110,18 +2165,67 @@ void Game::UpdateAdventureNPCDisplay() {
 	std::wstring baseDesc = !npc.description.empty()
 		? npc.description
 		: L"Duelista preparado para poner a prueba tu temple y estrategia.";
-	std::wstring premioNormalStr = npc.activoNormal
-		? epro::format(L"{} StarShips", formatStarShips(npc.premioNormalStarShips))
-		: L"Desactivado";
-	std::wstring premioLeyendaStr = (npc.activoLeyenda && !npc.premioLeyenda.empty())
-		? npc.premioLeyenda
-		: L"Por definir";
-	int faltanLeyenda = std::max(0, 10 - npc.duelosNormal);
-	std::wstring reqLeyendaStr = (faltanLeyenda == 0)
-		? epro::format(L"Desbloqueado ({}/10 duelos en Normal)", npc.duelosNormal)
-		: epro::format(L"Nivel {}+ y 10 duelos en Normal (llevas {}/10, te faltan {})", npc.level, npc.duelosNormal, faltanLeyenda);
-	std::wstring fullNpcInfo = epro::format(L"{}\n\nPremio Normal: {}\nPremio Leyenda: {}\nRequisito Leyenda: {}", baseDesc, premioNormalStr, premioLeyendaStr, reqLeyendaStr);
-	stAdventureNPCDesc->setText(fullNpcInfo.c_str());
+	stAdventureNPCDesc->setText(baseDesc.c_str());
+
+	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
+	if (diff == 0) {
+		std::wstring premioNormalStr = npc.activoNormal
+			? epro::format(L"PREMIO NORMAL: {} StarShips", formatStarShips(npc.premioNormalStarShips))
+			: L"PREMIO NORMAL: Desactivado";
+		if (stAdventurePrize)
+			stAdventurePrize->setText(premioNormalStr.c_str());
+		if (stAdventurePrizeStatus) {
+			if (!npc.activoNormal)
+				stAdventurePrizeStatus->setText(L"Estado: Sin premio activo");
+			else if (npc.premioNormalEntregado)
+				stAdventurePrizeStatus->setText(L"Estado: Reclamado");
+			else
+				stAdventurePrizeStatus->setText(L"Estado: Disponible al ganar");
+		}
+		if (imgAdventureMedal)
+			imgAdventureMedal->setVisible(false);
+	} else {
+		std::wstring premioLeyendaStr = (npc.activoLeyenda && !npc.premioLeyenda.empty())
+			? epro::format(L"PREMIO LEYENDA: {}", npc.premioLeyenda)
+			: L"PREMIO LEYENDA: Por definir";
+		if (stAdventurePrize)
+			stAdventurePrize->setText(premioLeyendaStr.c_str());
+
+		int faltanLeyenda = std::max(0, 10 - npc.duelosNormal);
+		if (stAdventurePrizeStatus) {
+			if (npc.medallaDesbloqueada)
+				stAdventurePrizeStatus->setText(L"Estado: Medalla Desbloqueada");
+			else if (faltanLeyenda == 0)
+				stAdventurePrizeStatus->setText(L"Estado: Lista para reclamar en Leyenda");
+			else
+				stAdventurePrizeStatus->setText(epro::format(L"Requisito: Nivel {}+ y 10 duelos Normal (llevas {}/10, faltan {})", npc.level, npc.duelosNormal, faltanLeyenda).c_str());
+		}
+		if (imgAdventureMedal) {
+			if (npc.activoLeyenda) {
+				auto mTex = LoadMedalTexture(npc.level);
+				if (mTex) {
+					imgAdventureMedal->setImage(mTex);
+					imgAdventureMedal->setVisible(true);
+				} else {
+					imgAdventureMedal->setVisible(false);
+				}
+			} else {
+				imgAdventureMedal->setVisible(false);
+			}
+		}
+	}
+
+	if (stAdventureStatsText) {
+		int userTotal = npc.userWins + npc.userLosses;
+		double userWr = userTotal > 0 ? (npc.userWins * 100.0 / userTotal) : 0.0;
+		int globalTotal = npc.globalWins + npc.globalLosses;
+		double globalWr = globalTotal > 0 ? (npc.globalWins * 100.0 / globalTotal) : 0.0;
+		stAdventureStatsText->setText(epro::format(
+			L"Tu Win Rate: {:.1f}% ({}G - {}P)\nWin Rate Global: {:.1f}% ({}G - {}P)",
+			userWr, npc.userWins, npc.userLosses,
+			globalWr, npc.globalWins, npc.globalLosses
+		).c_str());
+	}
 
 	if (!npc.deckDescription.empty()) {
 		stAdventureDeckDesc->setText(npc.deckDescription.c_str());
@@ -2131,7 +2235,6 @@ void Game::UpdateAdventureNPCDisplay() {
 
 	btnAdventureDuel->setEnabled(true);
 	selectedAdventureNPCName = npc.name;
-	int diff = cbAdventureDifficulty ? cbAdventureDifficulty->getSelected() : 0;
 	std::wstring deckToUse = (diff == 1 && !npc.deckFileHard.empty()) ? npc.deckFileHard : npc.deckFile;
 	if (deckToUse.empty()) {
 		deckToUse = npc.deckFile;
@@ -2156,20 +2259,6 @@ void Game::UpdateAdventureNPCDisplay() {
 		imgAdventureNPC->setVisible(true);
 	} else {
 		imgAdventureNPC->setVisible(false);
-	}
-
-	if(imgAdventureMedal) {
-		if(npc.activoLeyenda) {
-			auto mTex = LoadMedalTexture(npc.level);
-			if(mTex) {
-				imgAdventureMedal->setImage(mTex);
-				imgAdventureMedal->setVisible(true);
-			} else {
-				imgAdventureMedal->setVisible(false);
-			}
-		} else {
-			imgAdventureMedal->setVisible(false);
-		}
 	}
 
 	ResizeAdventureMode();
