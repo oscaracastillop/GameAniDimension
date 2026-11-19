@@ -3436,6 +3436,14 @@ irr::video::ITexture* Game::LoadFlagTexture(const std::string& flagUrl) {
 				out.close();
 				tex = driver->getTexture(localRel.c_str());
 			}
+			if(!tex && device && device->getFileSystem()) {
+				auto* memFile = device->getFileSystem()->createMemoryReadFile(
+					const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
+				if(memFile) {
+					tex = driver->getTexture(memFile);
+					memFile->drop();
+				}
+			}
 		}
 	}
 	return tex;
@@ -3474,8 +3482,16 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 					out.write(bytes.data(), bytes.size());
 					out.close();
 					tex = driver->getTexture(localRel.c_str());
-					if(tex) break;
 				}
+				if(!tex && device && device->getFileSystem()) {
+					auto* memFile = device->getFileSystem()->createMemoryReadFile(
+						const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
+					if(memFile) {
+						tex = driver->getTexture(memFile);
+						memFile->drop();
+					}
+				}
+				if(tex) break;
 			}
 		}
 		curl_easy_cleanup(curl);
@@ -3516,8 +3532,16 @@ irr::video::ITexture* Game::LoadMedalTexture(int npcLevel) {
 					out.write(bytes.data(), bytes.size());
 					out.close();
 					tex = driver->getTexture(localRel.c_str());
-					if(tex) break;
 				}
+				if(!tex && device && device->getFileSystem()) {
+					auto* memFile = device->getFileSystem()->createMemoryReadFile(
+						const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
+					if(memFile) {
+						tex = driver->getTexture(memFile);
+						memFile->drop();
+					}
+				}
+				if(tex) break;
 			}
 		}
 		curl_easy_cleanup(curl);
@@ -3822,8 +3846,16 @@ irr::video::ITexture* Game::LoadRewardBgTexture() {
 					out.write(bytes.data(), bytes.size());
 					out.close();
 					tex = driver->getTexture(localRel.c_str());
-					if(tex) break;
 				}
+				if(!tex && device && device->getFileSystem()) {
+					auto* memFile = device->getFileSystem()->createMemoryReadFile(
+						const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
+					if(memFile) {
+						tex = driver->getTexture(memFile);
+						memFile->drop();
+					}
+				}
+				if(tex) break;
 			}
 		}
 		curl_easy_cleanup(curl);
@@ -3865,8 +3897,16 @@ irr::video::ITexture* Game::LoadPuzzlePieceTexture(const std::string& carpeta, i
 					out.write(bytes.data(), bytes.size());
 					out.close();
 					tex = driver->getTexture(localRel.c_str());
-					if(tex) break;
 				}
+				if(!tex && device && device->getFileSystem()) {
+					auto* memFile = device->getFileSystem()->createMemoryReadFile(
+						const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
+					if(memFile) {
+						tex = driver->getTexture(memFile);
+						memFile->drop();
+					}
+				}
+				if(tex) break;
 			}
 		}
 		curl_easy_cleanup(curl);
