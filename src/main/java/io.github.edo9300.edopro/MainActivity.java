@@ -432,21 +432,19 @@ public class MainActivity extends Activity {
 									@Override
 									public void run() {
 										if (statusText != null) {
-											statusText.setText("¡Actualización completada! Iniciando...");
+											statusText.setText("¡Juego actualizado! Conectando al servidor...");
 										}
 									}
 								});
-								try { Thread.sleep(600); } catch (Exception ignored) {}
 							} else {
 								runOnUiThread(new Runnable() {
 									@Override
 									public void run() {
 										if (statusText != null) {
-											statusText.setText("Juego al día. Iniciando...");
+											statusText.setText("Juego actualizado. Conectando al servidor...");
 										}
 									}
 								});
-								try { Thread.sleep(400); } catch (Exception ignored) {}
 							}
 						}
 					}

@@ -25,11 +25,14 @@
 namespace ygo {
 
 void DataHandler::LoadDatabases() {
-	if(Utils::FileExists(EPRO_TEXT("./cards.cdb"))) {
+	bool hasRootCardsDb = Utils::FileExists(EPRO_TEXT("./cards.cdb"));
+	if(hasRootCardsDb) {
 		if(dataManager->LoadDB(EPRO_TEXT("./cards.cdb")))
 			WindBot::AddDatabase(EPRO_TEXT("./cards.cdb"));
 	}
 	for(auto& file : Utils::FindFiles(EPRO_TEXT("./expansions/"), { EPRO_TEXT("cdb") }, 2)) {
+		if(hasRootCardsDb && file == EPRO_TEXT("cards.cdb"))
+			continue;
 		epro::path_string db = EPRO_TEXT("./expansions/") + file;
 		if(dataManager->LoadDB(db))
 			WindBot::AddDatabase(db);
