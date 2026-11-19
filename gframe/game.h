@@ -271,13 +271,18 @@ struct host_panel_elements {
 	irr::gui::IGUIButton* btnHostPrepWindBot;
 	irr::gui::IGUIButton* btnHostPrepOB;
 	irr::gui::IGUIStaticText* stHostPrepDuelist[6];
+	irr::gui::IGUIStaticText* stHostPrepName[6]{ nullptr };
 	irr::gui::IGUIImage* imgHostPrepAvatar[6]{ nullptr };
+	irr::gui::IGUIImage* imgHostPrepFlag[6]{ nullptr };
 	irr::gui::IGUIStaticText* stHostPrepTeamLeft{ nullptr };
 	irr::gui::IGUIStaticText* stHostPrepTeamRight{ nullptr };
 	irr::gui::IGUICheckBox* chkHostPrepReady[6];
 	irr::gui::IGUIButton* btnHostPrepKick[6];
 	irr::gui::IGUIComboBox* cbDeckSelect;
+	irr::gui::IGUIStaticText* stHostPrepTitle{ nullptr };
+	irr::gui::IGUIStaticText* pnlHostPrepRules{ nullptr };
 	irr::gui::IGUIStaticText* stHostPrepRule;
+	irr::gui::IGUIStaticText* stHostPrepRule2{ nullptr };
 	irr::gui::IGUIStaticText* stHostPrepRuleR;
 	irr::gui::IGUIStaticText* stHostPrepRuleL;
 	irr::gui::IGUIStaticText* stHostPrepOB;
@@ -396,7 +401,11 @@ struct server_lobby_page_elements {
 	struct PlayerCardCacheEntry {
 		int level{ 1 };
 		std::string avatarFile{ "AVA-001.png" };
+		double winratePvp{ 0.0 };
+		std::string clanNombre{ "Sin Clan" };
+		std::string flagUrl{};
 	};
+	irr::video::ITexture* LoadFlagTexture(const std::string& flagUrl);
 	std::unordered_map<std::wstring, PlayerCardCacheEntry> playerCardCache;
 	irr::gui::IGUITable* roomListTable;
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
