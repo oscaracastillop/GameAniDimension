@@ -263,18 +263,15 @@ catch(...) { what = def; }
 				cscg.info.duel_rule = 0;
 				cscg.info.duel_flag_low = mainGame->duel_param & 0xffffffff;
 				cscg.info.duel_flag_high = (mainGame->duel_param >> 32) & 0xffffffff;
-				cscg.info.no_check_deck_content = mainGame->chkNoCheckDeckContent->isChecked();
+				cscg.info.no_check_deck_content = false;
 				cscg.info.no_shuffle_deck = mainGame->chkNoShuffleDeck->isChecked();
 				cscg.info.handshake = SERVER_HANDSHAKE;
 				cscg.info.version = { EXPAND_VERSION(CLIENT_VERSION) };
 				TOI(cscg.info.team1, mainGame->ebTeam1->getText(), 1);
 				TOI(cscg.info.team2, mainGame->ebTeam2->getText(), 1);
 				TOI(cscg.info.best_of, mainGame->ebBestOf->getText(), 1);
-				static constexpr DeckSizes nolimit_deck_sizes{ {0,999},{0,999},{0,999} };
 				auto& sizes = cscg.info.sizes;
-				if(mainGame->chkNoCheckDeckSize->isChecked()) {
-					sizes = nolimit_deck_sizes;
-				} else {
+				{
 					TOI(sizes.main.min, mainGame->ebMainMin->getText(), 40);
 					TOI(sizes.main.max, mainGame->ebMainMax->getText(), 60);
 					TOI(sizes.extra.min, mainGame->ebExtraMin->getText(), 0);
@@ -895,26 +892,32 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
 		matManager.SetActiveVertices(mainGame->dInfo.HasFieldFlag(DUEL_3_COLUMNS_FIELD),
 									 !mainGame->dInfo.HasFieldFlag(DUEL_SEPARATE_PZONE));
-		mainGame->wHostPrepare->setRelativePosition(mainGame->ResizeWin(82, 30, 942, 600));
+		mainGame->wHostPrepare->setRelativePosition(mainGame->ResizeWin(48, 22, 976, 618));
 		mainGame->wHostPrepareR->setVisible(false);
 		mainGame->wHostPrepareL->setVisible(false);
 		if(mainGame->stHostPrepTitle)
-			mainGame->stHostPrepTitle->setRelativePosition(mainGame->Scale<irr::s32>(15, 24, 650, 48));
+			mainGame->stHostPrepTitle->setRelativePosition(mainGame->Scale<irr::s32>(15, 22, 913, 46));
 		if(mainGame->pnlHostPrepRules)
-			mainGame->pnlHostPrepRules->setRelativePosition(mainGame->Scale<irr::s32>(15, 50, 650, 178));
-		mainGame->stHostPrepRule->setRelativePosition(mainGame->Scale<irr::s32>(24, 56, 332, 174));
+			mainGame->pnlHostPrepRules->setRelativePosition(mainGame->Scale<irr::s32>(15, 48, 913, 198));
+		mainGame->stHostPrepRule->setRelativePosition(mainGame->Scale<irr::s32>(24, 54, 314, 194));
 		if(mainGame->stHostPrepRule2)
-			mainGame->stHostPrepRule2->setRelativePosition(mainGame->Scale<irr::s32>(342, 56, 642, 174));
-		mainGame->btnHostPrepDuelist->setRelativePosition(mainGame->Scale<irr::s32>(665, 30, 845, 58));
-		mainGame->btnHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(665, 66, 845, 94));
-		mainGame->stHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(665, 102, 845, 124));
-		mainGame->btnHostPrepWindBot->setRelativePosition(mainGame->Scale<irr::s32>(665, 132, 845, 160));
-		mainGame->stDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(15, 192, 125, 214));
-		mainGame->cbDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(130, 188, 390, 216));
-		mainGame->btnHostPrepReady->setRelativePosition(mainGame->Scale<irr::s32>(405, 188, 535, 216));
-		mainGame->btnHostPrepNotReady->setRelativePosition(mainGame->Scale<irr::s32>(405, 188, 535, 216));
-		mainGame->btnHostPrepStart->setRelativePosition(mainGame->Scale<irr::s32>(550, 188, 690, 216));
-		mainGame->btnHostPrepCancel->setRelativePosition(mainGame->Scale<irr::s32>(705, 188, 845, 216));
+			mainGame->stHostPrepRule2->setRelativePosition(mainGame->Scale<irr::s32>(322, 54, 612, 194));
+		if(mainGame->stHostPrepRule3)
+			mainGame->stHostPrepRule3->setRelativePosition(mainGame->Scale<irr::s32>(620, 54, 904, 194));
+		mainGame->stDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(15, 212, 130, 234));
+		mainGame->cbDeckSelect->setRelativePosition(mainGame->Scale<irr::s32>(135, 208, 430, 236));
+		mainGame->btnHostPrepReady->setRelativePosition(mainGame->Scale<irr::s32>(445, 208, 590, 236));
+		mainGame->btnHostPrepNotReady->setRelativePosition(mainGame->Scale<irr::s32>(445, 208, 590, 236));
+		mainGame->btnHostPrepStart->setRelativePosition(mainGame->Scale<irr::s32>(605, 208, 750, 236));
+		mainGame->btnHostPrepCancel->setRelativePosition(mainGame->Scale<irr::s32>(765, 208, 913, 236));
+		if(mainGame->stHostPrepTeamLeft)
+			mainGame->stHostPrepTeamLeft->setRelativePosition(mainGame->Scale<irr::s32>(15, 248, 455, 270));
+		if(mainGame->stHostPrepTeamRight)
+			mainGame->stHostPrepTeamRight->setRelativePosition(mainGame->Scale<irr::s32>(475, 248, 913, 270));
+		mainGame->stHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(450, 556, 560, 580));
+		mainGame->btnHostPrepDuelist->setRelativePosition(mainGame->Scale<irr::s32>(568, 552, 678, 582));
+		mainGame->btnHostPrepOB->setRelativePosition(mainGame->Scale<irr::s32>(686, 552, 796, 582));
+		mainGame->btnHostPrepWindBot->setRelativePosition(mainGame->Scale<irr::s32>(804, 552, 913, 582));
 		mainGame->gBot.window->setRelativePosition(irr::core::vector2di(mainGame->wHostPrepare->getAbsolutePosition().LowerRightCorner.X, mainGame->wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 		for(int i = 0; i < 6; i++) {
 			mainGame->chkHostPrepReady[i]->setVisible(false);
@@ -923,37 +926,40 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->stHostPrepDuelist[i]->setVisible(false);
 			mainGame->stHostPrepDuelist[i]->setText(L"");
 			if(mainGame->stHostPrepName[i]) { mainGame->stHostPrepName[i]->setVisible(false); mainGame->stHostPrepName[i]->setText(L""); }
+			if(mainGame->stHostPrepVip[i]) { mainGame->stHostPrepVip[i]->setVisible(false); mainGame->stHostPrepVip[i]->setText(L""); }
 			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setVisible(false);
 			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setVisible(false);
 		}
 		for(int i = 0; i < pkt.info.team1 && i < 6; i++) {
-			int y = 254 + i * 102;
+			int y = 276 + i * 116;
 			mainGame->chkHostPrepReady[i]->setVisible(true);
 			mainGame->stHostPrepDuelist[i]->setVisible(true);
-			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(15, y + 34, 37, y + 58));
-			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(42, y, 134, y + 92));
-			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(142, y, 392, y + 92));
-			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(148, y + 6, 174, y + 24));
-			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(180, y + 4, 386, y + 28));
-			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(398, y + 34, 422, y + 58));
+			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(15, y + 40, 37, y + 64));
+			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(42, y, 150, y + 108));
+			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(158, y, 426, y + 108));
+			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(164, y + 6, 190, y + 24));
+			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(196, y + 4, 338, y + 28));
+			if(mainGame->stHostPrepVip[i]) mainGame->stHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(340, y + 5, 420, y + 25));
+			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(432, y + 40, 456, y + 64));
 		}
 		for(int i = pkt.info.team1; i < pkt.info.team1 + pkt.info.team2 && i < 6; i++) {
 			int rIdx = i - pkt.info.team1;
-			int y = 254 + rIdx * 102;
+			int y = 276 + rIdx * 116;
 			mainGame->chkHostPrepReady[i]->setVisible(true);
 			mainGame->stHostPrepDuelist[i]->setVisible(true);
-			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(440, y + 34, 462, y + 58));
-			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(467, y, 559, y + 92));
-			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(567, y, 817, y + 92));
-			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(573, y + 6, 599, y + 24));
-			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(605, y + 4, 811, y + 28));
-			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(823, y + 34, 847, y + 58));
+			mainGame->btnHostPrepKick[i]->setRelativePosition(mainGame->Scale<irr::s32>(475, y + 40, 497, y + 64));
+			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setRelativePosition(mainGame->Scale<irr::s32>(502, y, 610, y + 108));
+			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(618, y, 886, y + 108));
+			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(624, y + 6, 650, y + 24));
+			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(656, y + 4, 798, y + 28));
+			if(mainGame->stHostPrepVip[i]) mainGame->stHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(800, y + 5, 880, y + 25));
+			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(892, y + 40, 916, y + 64));
 		}
-		str += epro::format(L"Tipo: {} | Nivel: {}-{}",
-			mainGame->currentRoomIsRanked ? L"Ranked" : L"Amistoso",
+		str += epro::format(L"Tipo: {}\nNivel Rival: {} - {}",
+			mainGame->currentRoomIsRanked ? L"Ranked (Con EXP/SS)" : L"Amistoso (Sin premios)",
 			mainGame->currentRoomMinLv, mainGame->currentRoomMaxLv);
-		if(!strL.empty()) strCol2 += strL;
 		if(!strR.empty()) strCol2 += strR;
+		std::wstring strCol3 = !strL.empty() ? (L"Filtros de Cartas:\n" + strL) : L"Filtros de Cartas:\nSin restricciones de tipo";
 		mainGame->dInfo.selfnames.resize(pkt.info.team1);
 		mainGame->dInfo.opponames.resize(pkt.info.team2);
 		mainGame->btnHostPrepReady->setVisible(true);
@@ -972,6 +978,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		mainGame->stHostPrepRule->setText(str.data());
 		if(mainGame->stHostPrepRule2)
 			mainGame->stHostPrepRule2->setText(strCol2.data());
+		if(mainGame->stHostPrepRule3)
+			mainGame->stHostPrepRule3->setText(strCol3.data());
 		mainGame->stHostPrepRuleR->setText(strR.data());
 		mainGame->stHostPrepRuleL->setText(strL.data());
 		mainGame->RefreshDeck(mainGame->cbDeckSelect);
@@ -1099,10 +1107,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			else if (mainGame->wLanWindow->isVisible())
 				mainGame->HideElement(mainGame->wLanWindow);
 			mainGame->ShowElement(mainGame->wHostPrepare);
-			if(strR.size())
-				mainGame->ShowElement(mainGame->wHostPrepareR);
-			if(strL.size())
-				mainGame->ShowElement(mainGame->wHostPrepareL);
+			mainGame->HideElement(mainGame->wHostPrepareR);
+			mainGame->HideElement(mainGame->wHostPrepareL);
 			mainGame->wChat->setVisible(true);
 		}
 		mainGame->dInfo.isFirst = (mainGame->dInfo.player_type < mainGame->dInfo.team1) || (mainGame->dInfo.player_type >= 7);

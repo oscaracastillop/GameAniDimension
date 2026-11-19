@@ -1332,10 +1332,10 @@ void Game::PopulateGameHostWindows() {
 		menuHandler.MakeElementSynchronized(chkNoShuffleDeck);
 		chkTcgRulings = env->addCheckBox(duel_param & DUEL_TCG_SEGOC_NONPUBLIC, Scale(0, 0, 1, 1), tDuelSettings, TCG_SEGOC_NONPUBLIC, L"");
 		chkTcgRulings->setVisible(false);
-		chkNoCheckDeckContent = env->addCheckBox(gGameConfig->noCheckDeckContent, Scale(0, 0, 1, 1), tDuelSettings, DONT_CHECK_DECK_CONTENT, L"");
+		chkNoCheckDeckContent = env->addCheckBox(false, Scale(0, 0, 1, 1), tDuelSettings, DONT_CHECK_DECK_CONTENT, L"");
 		chkNoCheckDeckContent->setVisible(false);
 		menuHandler.MakeElementSynchronized(chkNoCheckDeckContent);
-		chkNoCheckDeckSize = env->addCheckBox(gGameConfig->noCheckDeckSize, Scale(0, 0, 1, 1), tDuelSettings, DONT_CHECK_DECK_SIZE, L"");
+		chkNoCheckDeckSize = env->addCheckBox(false, Scale(0, 0, 1, 1), tDuelSettings, DONT_CHECK_DECK_SIZE, L"");
 		chkNoCheckDeckSize->setVisible(false);
 		menuHandler.MakeElementSynchronized(chkNoCheckDeckSize);
 
@@ -1423,9 +1423,9 @@ void Game::PopulateGameHostWindows() {
 
 		chkNoShuffleDeckSecondary = env->addCheckBox(gGameConfig->noShuffleDeck, GetNextRect(), tDeckSettings, DONT_SHUFFLE_DECK, gDataManager->GetSysString(1230).data());
 		menuHandler.MakeElementSynchronized(chkNoShuffleDeckSecondary);
-		chkNoCheckDeckContentSecondary = env->addCheckBox(gGameConfig->noCheckDeckContent, GetNextRect(), tDeckSettings, DONT_CHECK_DECK_CONTENT, gDataManager->GetSysString(1229).data());
+		chkNoCheckDeckContentSecondary = env->addCheckBox(false, GetNextRect(), tDeckSettings, DONT_CHECK_DECK_CONTENT, gDataManager->GetSysString(1229).data());
 		menuHandler.MakeElementSynchronized(chkNoCheckDeckContentSecondary);
-		chkNoCheckDeckSizeSecondary = env->addCheckBox(gGameConfig->noCheckDeckSize, GetNextRect(), tDeckSettings, DONT_CHECK_DECK_SIZE, gDataManager->GetSysString(12113).data());
+		chkNoCheckDeckSizeSecondary = env->addCheckBox(false, GetNextRect(), tDeckSettings, DONT_CHECK_DECK_SIZE, gDataManager->GetSysString(12113).data());
 		menuHandler.MakeElementSynchronized(chkNoCheckDeckSizeSecondary);
 
 #define ADD_DECK_SIZE_CHECKBOXES(deck) do { \
@@ -1469,8 +1469,8 @@ void Game::PopulateGameHostWindows() {
 		UpdateDuelParam();
 	}
 
-	//host(single) - Sala de duelo amplia y organizada
-	wHostPrepare = env->addWindow(Scale(82, 30, 942, 600), false, L"Sala de Duelo");
+	//host(single) - Sala de duelo amplia y organizada (3 columnas + avatares grandes + VIP + Clan)
+	wHostPrepare = env->addWindow(Scale(48, 22, 976, 618), false, L"Sala de Duelo");
 	wHostPrepare->getCloseButton()->setVisible(false);
 	wHostPrepare->setVisible(false);
 	wHostPrepareR = env->addWindow(Scale(0, 0, 1, 1), false, L"");
@@ -1482,73 +1482,82 @@ void Game::PopulateGameHostWindows() {
 	stHostPrepRuleR = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepareR, -1, Scale(0, 0, 1, 1));
 	stHostPrepRuleL = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepareL, -1, Scale(0, 0, 1, 1));
 
-	// Top: Titulo Sala de Duelo + Configuracion en 2 columnas + Botones laterales
-	stHostPrepTitle = env->addStaticText(L"SALA DE DUELO", Scale(15, 24, 650, 48), false, false, wHostPrepare);
+	// Top: Titulo Sala de Duelo + Configuracion a TODO EL ANCHO en 3 columnas
+	stHostPrepTitle = env->addStaticText(L"SALA DE DUELO", Scale(15, 22, 913, 46), false, false, wHostPrepare);
 	stHostPrepTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stHostPrepTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
 	if(loginUiFont)
 		stHostPrepTitle->setOverrideFont(loginUiFont);
 
-	pnlHostPrepRules = env->addStaticText(L"", Scale(15, 50, 650, 178), true, false, wHostPrepare, -1, true);
-	pnlHostPrepRules->setBackgroundColor(irr::video::SColor(210, 12, 16, 28));
+	pnlHostPrepRules = env->addStaticText(L"", Scale(15, 48, 913, 198), true, false, wHostPrepare, -1, true);
+	pnlHostPrepRules->setBackgroundColor(irr::video::SColor(215, 12, 16, 28));
 
-	stHostPrepRule = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(24, 56, 332, 174));
+	stHostPrepRule = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(24, 54, 314, 194));
 	stHostPrepRule->setWordWrap(true);
 	stHostPrepRule->setOverrideColor(irr::video::SColor(255, 190, 225, 255));
 
-	stHostPrepRule2 = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(342, 56, 642, 174));
+	stHostPrepRule2 = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(322, 54, 612, 194));
 	stHostPrepRule2->setWordWrap(true);
 	stHostPrepRule2->setOverrideColor(irr::video::SColor(255, 253, 230, 138));
 
-	btnHostPrepDuelist = env->addButton(Scale(665, 30, 845, 58), wHostPrepare, BUTTON_HP_DUELIST, gDataManager->GetSysString(1251).data());
-	defaultStrings.emplace_back(btnHostPrepDuelist, 1251);
-	btnHostPrepOB = env->addButton(Scale(665, 66, 845, 94), wHostPrepare, BUTTON_HP_OBSERVER, gDataManager->GetSysString(1252).data());
-	defaultStrings.emplace_back(btnHostPrepOB, 1252);
-	stHostPrepOB = env->addStaticText(epro::format(L"{} 0", gDataManager->GetSysString(1253)).data(), Scale(665, 102, 845, 124), false, false, wHostPrepare);
-	defaultStrings.emplace_back(stHostPrepOB, 1253);
-	btnHostPrepWindBot = env->addButton(Scale(665, 132, 845, 160), wHostPrepare, BUTTON_HP_AI_TOGGLE, gDataManager->GetSysString(2050).data());
-	defaultStrings.emplace_back(btnHostPrepWindBot, 2050);
+	stHostPrepRule3 = irr::gui::CGUICustomText::addCustomText(L"", false, env, wHostPrepare, -1, Scale(620, 54, 904, 194));
+	stHostPrepRule3->setWordWrap(true);
+	stHostPrepRule3->setOverrideColor(irr::video::SColor(255, 252, 165, 165));
 
-	stDeckSelect = env->addStaticText(gDataManager->GetSysString(1254).data(), Scale(15, 192, 125, 214), false, false, wHostPrepare);
+	// Fila de Deck y Botones principales
+	stDeckSelect = env->addStaticText(gDataManager->GetSysString(1254).data(), Scale(15, 212, 130, 234), false, false, wHostPrepare);
 	defaultStrings.emplace_back(stDeckSelect, 1254);
-	cbDeckSelect = AddComboBox(env, Scale(130, 188, 390, 216), wHostPrepare);
+	cbDeckSelect = AddComboBox(env, Scale(135, 208, 430, 236), wHostPrepare);
 	cbDeckSelect->setMaxSelectionRows(10);
-	btnHostPrepReady = env->addButton(Scale(405, 188, 535, 216), wHostPrepare, BUTTON_HP_READY, gDataManager->GetSysString(1218).data());
+	btnHostPrepReady = env->addButton(Scale(445, 208, 590, 236), wHostPrepare, BUTTON_HP_READY, gDataManager->GetSysString(1218).data());
 	defaultStrings.emplace_back(btnHostPrepReady, 1218);
-	btnHostPrepNotReady = env->addButton(Scale(405, 188, 535, 216), wHostPrepare, BUTTON_HP_NOTREADY, gDataManager->GetSysString(1219).data());
+	btnHostPrepNotReady = env->addButton(Scale(445, 208, 590, 236), wHostPrepare, BUTTON_HP_NOTREADY, gDataManager->GetSysString(1219).data());
 	defaultStrings.emplace_back(btnHostPrepNotReady, 1219);
 	btnHostPrepNotReady->setVisible(false);
-	btnHostPrepStart = env->addButton(Scale(550, 188, 690, 216), wHostPrepare, BUTTON_HP_START, gDataManager->GetSysString(1215).data());
+	btnHostPrepStart = env->addButton(Scale(605, 208, 750, 236), wHostPrepare, BUTTON_HP_START, gDataManager->GetSysString(1215).data());
 	defaultStrings.emplace_back(btnHostPrepStart, 1215);
-	btnHostPrepCancel = env->addButton(Scale(705, 188, 845, 216), wHostPrepare, BUTTON_HP_CANCEL, gDataManager->GetSysString(1210).data());
+	btnHostPrepCancel = env->addButton(Scale(765, 208, 913, 236), wHostPrepare, BUTTON_HP_CANCEL, gDataManager->GetSysString(1210).data());
 	defaultStrings.emplace_back(btnHostPrepCancel, 1210);
 
 	// Bottom: Izquierda Anfitriones | Derecha Invitados/Rivales
-	stHostPrepTeamLeft = env->addStaticText(L"ANFITRIONES (EQUIPO 1)", Scale(15, 226, 420, 248), false, false, wHostPrepare);
+	stHostPrepTeamLeft = env->addStaticText(L"ANFITRIONES (EQUIPO 1)", Scale(15, 248, 455, 270), false, false, wHostPrepare);
 	stHostPrepTeamLeft->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-	stHostPrepTeamRight = env->addStaticText(L"INVITADOS / RIVALES (EQUIPO 2)", Scale(440, 226, 845, 248), false, false, wHostPrepare);
+	stHostPrepTeamRight = env->addStaticText(L"INVITADOS / RIVALES (EQUIPO 2)", Scale(475, 248, 913, 270), false, false, wHostPrepare);
 	stHostPrepTeamRight->setOverrideColor(irr::video::SColor(255, 252, 165, 165));
 
 	for(int i = 0; i < 6; ++i) {
-		btnHostPrepKick[i] = env->addButton(Scale(15, 254 + i * 102, 37, 278 + i * 102), wHostPrepare, BUTTON_HP_KICK, L"X");
-		imgHostPrepAvatar[i] = env->addImage(Scale(42, 254 + i * 102, 134, 346 + i * 102), wHostPrepare, true);
+		btnHostPrepKick[i] = env->addButton(Scale(15, 276 + i * 116, 37, 300 + i * 116), wHostPrepare, BUTTON_HP_KICK, L"X");
+		imgHostPrepAvatar[i] = env->addImage(Scale(42, 276 + i * 116, 150, 384 + i * 116), wHostPrepare, true);
 		imgHostPrepAvatar[i]->setScaleImage(true);
 		imgHostPrepAvatar[i]->setUseAlphaChannel(true);
 		imgHostPrepAvatar[i]->setVisible(false);
-		stHostPrepDuelist[i] = env->addStaticText(L"", Scale(142, 254 + i * 102, 392, 346 + i * 102), true, true, wHostPrepare, -1, true);
-		stHostPrepDuelist[i]->setBackgroundColor(irr::video::SColor(200, 14, 18, 28));
+		stHostPrepDuelist[i] = env->addStaticText(L"", Scale(158, 276 + i * 116, 426, 384 + i * 116), true, true, wHostPrepare, -1, true);
+		stHostPrepDuelist[i]->setBackgroundColor(irr::video::SColor(210, 14, 18, 28));
 		stHostPrepDuelist[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-		imgHostPrepFlag[i] = env->addImage(Scale(148, 260 + i * 102, 174, 278 + i * 102), wHostPrepare, true);
+		imgHostPrepFlag[i] = env->addImage(Scale(164, 282 + i * 116, 190, 300 + i * 116), wHostPrepare, true);
 		imgHostPrepFlag[i]->setScaleImage(true);
 		imgHostPrepFlag[i]->setVisible(false);
-		stHostPrepName[i] = env->addStaticText(L"", Scale(180, 258 + i * 102, 386, 282 + i * 102), false, false, wHostPrepare);
+		stHostPrepName[i] = env->addStaticText(L"", Scale(196, 280 + i * 116, 338, 304 + i * 116), false, false, wHostPrepare);
 		stHostPrepName[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		if(loginUiFont)
 			stHostPrepName[i]->setOverrideFont(loginUiFont);
 		stHostPrepName[i]->setVisible(false);
-		chkHostPrepReady[i] = env->addCheckBox(false, Scale(398, 288 + i * 102, 422, 312 + i * 102), wHostPrepare, CHECKBOX_HP_READY, L"");
+		stHostPrepVip[i] = env->addStaticText(L"", Scale(340, 281 + i * 116, 420, 301 + i * 116), true, false, wHostPrepare, -1, true);
+		stHostPrepVip[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stHostPrepVip[i]->setVisible(false);
+		chkHostPrepReady[i] = env->addCheckBox(false, Scale(432, 318 + i * 116, 456, 342 + i * 116), wHostPrepare, CHECKBOX_HP_READY, L"");
 		chkHostPrepReady[i]->setEnabled(false);
 	}
+
+	// Esquina inferior derecha en una misma linea: Espectadores + Jugador + Espectador + Bot
+	stHostPrepOB = env->addStaticText(epro::format(L"{} 0", gDataManager->GetSysString(1253)).data(), Scale(450, 556, 560, 580), false, false, wHostPrepare);
+	defaultStrings.emplace_back(stHostPrepOB, 1253);
+	btnHostPrepDuelist = env->addButton(Scale(568, 552, 678, 582), wHostPrepare, BUTTON_HP_DUELIST, gDataManager->GetSysString(1251).data());
+	defaultStrings.emplace_back(btnHostPrepDuelist, 1251);
+	btnHostPrepOB = env->addButton(Scale(686, 552, 796, 582), wHostPrepare, BUTTON_HP_OBSERVER, gDataManager->GetSysString(1252).data());
+	defaultStrings.emplace_back(btnHostPrepOB, 1252);
+	btnHostPrepWindBot = env->addButton(Scale(804, 552, 913, 582), wHostPrepare, BUTTON_HP_AI_TOGGLE, gDataManager->GetSysString(2050).data());
+	defaultStrings.emplace_back(btnHostPrepWindBot, 2050);
 }
 
 void Game::PopulateAIBotWindow() {
@@ -3290,6 +3299,7 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 	if(playerName.empty()) {
 		if(stHostPrepDuelist[pos]) stHostPrepDuelist[pos]->setText(L"");
 		if(stHostPrepName[pos]) { stHostPrepName[pos]->setText(L""); stHostPrepName[pos]->setVisible(false); }
+		if(stHostPrepVip[pos]) { stHostPrepVip[pos]->setText(L""); stHostPrepVip[pos]->setVisible(false); }
 		if(imgHostPrepAvatar[pos]) imgHostPrepAvatar[pos]->setVisible(false);
 		if(imgHostPrepFlag[pos]) imgHostPrepFlag[pos]->setVisible(false);
 		return;
@@ -3312,6 +3322,8 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 			entry.level = SafeJsonInt(resp, "nivel", 1);
 			entry.avatarFile = SafeJsonStr(resp, "avatarArchivo", "AVA-001.png");
 			entry.clanNombre = SafeJsonStr(resp, "clanNombre", "Sin Clan");
+			entry.clanNivel = SafeJsonInt(resp, "clanNivel", 0);
+			entry.vipNombre = SafeJsonStr(resp, "vipNombre", "");
 			entry.flagUrl = SafeJsonStr(resp, "flagUrl", "");
 			if(resp.contains("winratePvp") && resp["winratePvp"].is_number())
 				entry.winratePvp = resp["winratePvp"].get<double>();
@@ -3322,11 +3334,48 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 		stHostPrepName[pos]->setText(playerName.c_str());
 		stHostPrepName[pos]->setVisible(true);
 	}
+	if(stHostPrepVip[pos]) {
+		const std::string& vn = it->second.vipNombre;
+		if(!vn.empty()) {
+			std::string lowerVn = vn;
+			for(char& ch : lowerVn) ch = (char)tolower((unsigned char)ch);
+			if(lowerVn.find("platino") != std::string::npos) {
+				stHostPrepVip[pos]->setText(L"VIP PLATINO");
+				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 8, 52, 84));
+				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			} else if(lowerVn.find("oro") != std::string::npos || lowerVn.find("dorad") != std::string::npos) {
+				stHostPrepVip[pos]->setText(L"VIP ORO");
+				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 66, 46, 6));
+				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			} else if(lowerVn.find("plata") != std::string::npos) {
+				stHostPrepVip[pos]->setText(L"VIP PLATA");
+				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 45, 55, 72));
+				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+			} else if(lowerVn.find("bronce") != std::string::npos) {
+				stHostPrepVip[pos]->setText(L"VIP BRONCE");
+				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 68, 36, 16));
+				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 245, 158, 11));
+			} else {
+				stHostPrepVip[pos]->setText(L"VIP");
+				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 66, 46, 6));
+				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			}
+			stHostPrepVip[pos]->setVisible(true);
+		} else {
+			stHostPrepVip[pos]->setVisible(false);
+		}
+	}
 	if(stHostPrepDuelist[pos]) {
 		std::wstring clanW = BufferIO::DecodeUTF8(it->second.clanNombre.empty() ? "Sin Clan" : it->second.clanNombre);
+		std::wstring clanTxt = (it->second.clanNivel > 0)
+			? epro::format(L"{} (Nv. {})", clanW, it->second.clanNivel)
+			: clanW;
+		std::wstring vipTxt = !it->second.vipNombre.empty()
+			? BufferIO::DecodeUTF8(it->second.vipNombre)
+			: L"Sin pase activo";
 		stHostPrepDuelist[pos]->setText(epro::format(
-			L"\n\nNivel: {}  |  PvP WR: {:.1f}%\nClan: {}",
-			it->second.level, it->second.winratePvp, clanW
+			L"\n\nNivel: {}  |  PvP WR: {:.1f}%\nClan: {}\nVIP: {}",
+			it->second.level, it->second.winratePvp, clanTxt, vipTxt
 		).c_str());
 	}
 	if(imgHostPrepAvatar[pos]) {
