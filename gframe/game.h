@@ -159,7 +159,26 @@ struct main_menu_panel_elements {
 	//main menu
 	int mainMenuLeftX;
 	int mainMenuRightX;
-	irr::gui::IGUIWindow* wMainMenu;
+	irr::gui::IGUIStaticText* wMainMenu{ nullptr };
+	irr::gui::IGUIImage* imgMainMenuBg{ nullptr };
+	irr::gui::IGUIStaticText* wLobbyHeader{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyTitle{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyUser{ nullptr };
+	irr::gui::IGUIStaticText* wStatCards[6]{ nullptr };
+	irr::gui::IGUIStaticText* stStatTitles[6]{ nullptr };
+	irr::gui::IGUIStaticText* stStatValues[6]{ nullptr };
+	void ResizeMainMenuScreen();
+	void FetchLobbyStatsAsync();
+	void ProcessPendingLobbyStats();
+	epro::mutex lobbyStatsMutex;
+	std::atomic<bool> lobbyStatsReady{ false };
+	int lobbyPingMs{ 0 };
+	int lobbyTotalCuentas{ 0 };
+	int lobbyOnlineCuentas{ 0 };
+	int lobbyTotalDuelosNpc{ 0 };
+	int lobbyTotalDuelosPvp{ 0 };
+	int lobbyTotalCartas{ 0 };
+	int lobbyTotalNpcs{ 0 };
 	irr::gui::IGUIWindow* wCommitsLog;
 	irr::gui::IGUIContextMenu* mTopMenu;
 	irr::gui::IGUIContextMenu* mRepositoriesInfo;

@@ -250,47 +250,67 @@ void Game::Initialize() {
 		GetLocalizedCompatVersion().data(),
 		Scale(10, 100, 290, 125), false, true, wVersion);
 	((irr::gui::CGUICustomContextMenu*)mVersion)->addItem(wVersion, -1);
-	//main menu
-	int mainMenuWidth = std::max(280, static_cast<int>(titleWidth / dpi_scale + 15));
-	mainMenuLeftX = 510 - mainMenuWidth / 2;
-	mainMenuRightX = 510 + mainMenuWidth / 2;
-	wMainMenu = env->addWindow(Scale(mainMenuLeftX, 145, mainMenuRightX, 400), false, EDOPRO_VERSION_STRING);
-	wMainMenu->getCloseButton()->setVisible(false);
+	// Dedicated full-screen Main Menu Lobby
+	wMainMenu = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
 	wMainMenu->setVisible(false);
-#define OFFSET(x1, y1, x2, y2) Scale(10, 30 + offset, mainMenuWidth - 10, 60 + offset)
-	int offset = 0;
-	btnOnlineMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ONLINE_MULTIPLAYER, gDataManager->GetSysString(2042).data());
+	imgMainMenuBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wMainMenu);
+	imgMainMenuBg->setScaleImage(true);
+	if(auto lobyTex = driver->getTexture("textures/bg_loby.png"))
+		imgMainMenuBg->setImage(lobyTex);
+
+	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 460, 74), true, false, wMainMenu, -1, true);
+	wLobbyHeader->setBackgroundColor(irr::video::SColor(218, 8, 13, 26));
+	stLobbyTitle = env->addStaticText(L"ANI DIMENSION - ESTADO DEL SERVIDOR", irr::core::recti(0, 0, 440, 26), false, false, wLobbyHeader);
+	stLobbyTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stLobbyUser = env->addStaticText(L"Cargando datos del duelista...", irr::core::recti(0, 0, 440, 26), false, false, wLobbyHeader);
+	stLobbyUser->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+
+	const wchar_t* statLabels[6] = {
+		L"CONEXI\u00D3N / PING",
+		L"CUENTAS ONLINE",
+		L"CUENTAS CREADAS",
+		L"DUELOS TOTALES",
+		L"CARTAS EN SERVIDOR",
+		L"NPCS EN AVENTURA"
+	};
+	const irr::video::SColor statColors[6] = {
+		irr::video::SColor(255, 52, 211, 153),
+		irr::video::SColor(255, 56, 189, 248),
+		irr::video::SColor(255, 96, 165, 250),
+		irr::video::SColor(255, 251, 191, 36),
+		irr::video::SColor(255, 192, 132, 252),
+		irr::video::SColor(255, 251, 113, 133)
+	};
+	for(int i = 0; i < 6; ++i) {
+		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 220, 76), true, false, wMainMenu, -1, true);
+		wStatCards[i]->setBackgroundColor(irr::video::SColor(212, 10, 16, 32));
+		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 200, 22), false, false, wStatCards[i]);
+		stStatTitles[i]->setOverrideColor(statColors[i]);
+		stStatValues[i] = env->addStaticText(L"...", irr::core::recti(0, 0, 200, 36), false, true, wStatCards[i]);
+		stStatValues[i]->setOverrideColor(irr::video::SColor(255, 241, 245, 249));
+	}
+
+	btnOnlineMode = env->addButton(Scale(700, 120, 980, 170), wMainMenu, BUTTON_ONLINE_MULTIPLAYER, gDataManager->GetSysString(2042).data());
 	defaultStrings.emplace_back(btnOnlineMode, 2042);
-	offset += 35;
-	btnAdventureMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_ADVENTURE_MODE, L"Modo Aventura");
-	offset += 35;
-	btnStoreMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
+	btnAdventureMode = env->addButton(Scale(700, 185, 980, 235), wMainMenu, BUTTON_ADVENTURE_MODE, L"Modo Aventura");
+	btnStoreMode = env->addButton(Scale(0, 0, 10, 10), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
 	btnStoreMode->setVisible(false);
 	btnStoreMode->setEnabled(false);
-	btnProfileMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_PROFILE_OPEN, L"Perfil Jugador");
+	btnProfileMode = env->addButton(Scale(0, 0, 10, 10), wMainMenu, BUTTON_PROFILE_OPEN, L"Perfil Jugador");
 	btnProfileMode->setVisible(false);
 	btnProfileMode->setEnabled(false);
-	btnMailboxMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_MAILBOX_OPEN, L"Buzon");
+	btnMailboxMode = env->addButton(Scale(0, 0, 10, 10), wMainMenu, BUTTON_MAILBOX_OPEN, L"Buzon");
 	btnMailboxMode->setVisible(false);
 	btnMailboxMode->setEnabled(false);
-	// LAN + AI disabled as requested
-	// btnLanMode = env->addButton(OFFSET(10, 30, 270, 60), wMainMenu, BUTTON_LAN_MODE, gDataManager->GetSysString(1200).data());
-	// defaultStrings.emplace_back(btnLanMode, 1200);
-	// offset += 35;
-	// Puzzles button disabled as requested
-	btnSingleMode = env->addButton(OFFSET(10, 65, 270, 95), wMainMenu, BUTTON_SINGLE_MODE, gDataManager->GetSysString(1201).data());
+	btnSingleMode = env->addButton(Scale(0, 0, 10, 10), wMainMenu, BUTTON_SINGLE_MODE, gDataManager->GetSysString(1201).data());
 	btnSingleMode->setVisible(false);
 	btnSingleMode->setEnabled(false);
-	btnReplayMode = env->addButton(OFFSET(10, 100, 270, 130), wMainMenu, BUTTON_REPLAY_MODE, gDataManager->GetSysString(1202).data());
+	btnReplayMode = env->addButton(Scale(700, 250, 980, 300), wMainMenu, BUTTON_REPLAY_MODE, gDataManager->GetSysString(1202).data());
 	defaultStrings.emplace_back(btnReplayMode, 1202);
-	offset += 35;
-	btnDeckEdit = env->addButton(OFFSET(10, 135, 270, 165), wMainMenu, BUTTON_DECK_EDIT, gDataManager->GetSysString(1204).data());
+	btnDeckEdit = env->addButton(Scale(700, 315, 980, 365), wMainMenu, BUTTON_DECK_EDIT, gDataManager->GetSysString(1204).data());
 	defaultStrings.emplace_back(btnDeckEdit, 1204);
-	offset += 35;
-	btnModeExit = env->addButton(OFFSET(10, 170, 270, 200), wMainMenu, BUTTON_MODE_EXIT, gDataManager->GetSysString(1210).data());
+	btnModeExit = env->addButton(Scale(700, 380, 980, 430), wMainMenu, BUTTON_MODE_EXIT, gDataManager->GetSysString(1210).data());
 	defaultStrings.emplace_back(btnModeExit, 1210);
-	offset += 35;
-#undef OFFSET
 	// Dedicated full-screen Login interface
 	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
 	imgLoginBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wLogin);
@@ -1165,6 +1185,7 @@ void Game::Initialize() {
 		ApplyLocale(selectedLocale, true);
 
 	ResizeLoginScreen();
+	ResizeMainMenuScreen();
 	if(wBtnSettings) wBtnSettings->setVisible(false);
 	env->getRootGUIElement()->bringToFront(wLogin);
 	env->setFocus(ebLoginUser ? static_cast<irr::gui::IGUIElement*>(ebLoginUser) : static_cast<irr::gui::IGUIElement*>(wLogin));
@@ -2528,6 +2549,114 @@ void Game::ResizeLoginScreen() {
 		btnLoginExit->setRelativePosition(irr::core::recti(pad + submitW + gapBtn, y, pad + innerW, y + btnH));
 }
 
+void Game::ResizeMainMenuScreen() {
+	if(!wMainMenu)
+		return;
+	const int W = (int)window_size.Width;
+	const int H = (int)window_size.Height;
+	if(W <= 0 || H <= 0)
+		return;
+
+	wMainMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
+	if(imgMainMenuBg)
+		imgMainMenuBg->setRelativePosition(irr::core::recti(0, 0, W, H));
+
+	const int padX = std::max(Scale(20), (int)(W * 0.032f));
+	const int padY = std::max(Scale(18), (int)(H * 0.05f));
+
+	// Right side: big, separated buttons floating cleanly over bg_loby
+	const int btnW = std::max(Scale(250), std::min(Scale(340), (int)(W * 0.28f)));
+	const int btnH = std::max(Scale(46), std::min(Scale(62), (int)(H * 0.088f)));
+	const int btnGap = std::max(Scale(14), (int)(H * 0.028f));
+	irr::gui::IGUIButton* menuBtns[5] = { btnOnlineMode, btnAdventureMode, btnReplayMode, btnDeckEdit, btnModeExit };
+	const int totalBtnH = 5 * btnH + 4 * btnGap;
+	const int btnX = W - padX - btnW;
+	int btnY = std::max(padY, (H - totalBtnH) / 2);
+	for(int i = 0; i < 5; ++i) {
+		if(menuBtns[i]) {
+			menuBtns[i]->setRelativePosition(irr::core::recti(btnX, btnY, btnX + btnW, btnY + btnH));
+			btnY += btnH + btnGap;
+		}
+	}
+
+	// Left side: Server Stats blocks (2 cols x 3 rows) + Header card
+	const int leftAvailW = std::max(Scale(340), btnX - padX - Scale(30));
+	const int leftW = std::min(Scale(540), leftAvailW);
+	const int headerH = std::max(Scale(68), (int)(H * 0.115f));
+	const int gapGrid = std::max(Scale(12), (int)(W * 0.014f));
+	const int cardW = (leftW - gapGrid) / 2;
+	const int cardH = std::max(Scale(74), std::min(Scale(105), (int)(H * 0.15f)));
+	const int totalLeftH = headerH + gapGrid + 3 * cardH + 2 * gapGrid;
+	int startY = std::max(padY, (H - totalLeftH) / 2);
+
+	if(wLobbyHeader) {
+		wLobbyHeader->setRelativePosition(irr::core::recti(padX, startY, padX + leftW, startY + headerH));
+		if(stLobbyTitle)
+			stLobbyTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), leftW - Scale(14), Scale(34)));
+		if(stLobbyUser)
+			stLobbyUser->setRelativePosition(irr::core::recti(Scale(14), Scale(36), leftW - Scale(14), headerH - Scale(8)));
+	}
+	int gridY = startY + headerH + gapGrid;
+	for(int i = 0; i < 6; ++i) {
+		int row = i / 2;
+		int col = i % 2;
+		int cx = padX + col * (cardW + gapGrid);
+		int cy = gridY + row * (cardH + gapGrid);
+		if(wStatCards[i])
+			wStatCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+		if(stStatTitles[i])
+			stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(10), cardW - Scale(12), Scale(32)));
+		if(stStatValues[i])
+			stStatValues[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(36), cardW - Scale(12), cardH - Scale(10)));
+	}
+}
+
+void Game::FetchLobbyStatsAsync() {
+	std::thread([this]() {
+		auto t0 = std::chrono::steady_clock::now();
+		auto resp = FetchAdventureApi("/api/public/stats");
+		auto t1 = std::chrono::steady_clock::now();
+		int pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+		if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+			std::lock_guard<epro::mutex> lk(lobbyStatsMutex);
+			lobbyPingMs = std::max(1, pingMs);
+			lobbyTotalCuentas = SafeJsonInt(resp, "totalCuentas", 0);
+			lobbyOnlineCuentas = SafeJsonInt(resp, "usuariosConectados", 0);
+			lobbyTotalDuelosNpc = SafeJsonInt(resp, "totalDuelosNpc", 0);
+			lobbyTotalDuelosPvp = SafeJsonInt(resp, "totalDuelosPvp", 0);
+			lobbyTotalCartas = SafeJsonInt(resp, "totalCartas", 0);
+			lobbyTotalNpcs = SafeJsonInt(resp, "totalNpcs", 0);
+			lobbyStatsReady = true;
+		}
+	}).detach();
+}
+
+void Game::ProcessPendingLobbyStats() {
+	if(!lobbyStatsReady.exchange(false))
+		return;
+	int pingMs = 0, totC = 0, onC = 0, dNpc = 0, dPvp = 0, totCards = 0, totNpcs = 0;
+	{
+		std::lock_guard<epro::mutex> lk(lobbyStatsMutex);
+		pingMs = lobbyPingMs;
+		totC = lobbyTotalCuentas;
+		onC = lobbyOnlineCuentas;
+		dNpc = lobbyTotalDuelosNpc;
+		dPvp = lobbyTotalDuelosPvp;
+		totCards = lobbyTotalCartas;
+		totNpcs = lobbyTotalNpcs;
+	}
+	if(stLobbyUser) {
+		std::wstring uName = loggedInUser.empty() ? L"Duelista" : loggedInUser;
+		stLobbyUser->setText(epro::format(L"Duelista: {}   |   Nivel {}   |   {} SS", uName, playerLevel, playerStarShips).c_str());
+	}
+	if(stStatValues[0]) stStatValues[0]->setText(epro::format(L"{} ms  (En L\u00EDnea)", pingMs).c_str());
+	if(stStatValues[1]) stStatValues[1]->setText(epro::format(L"{} conectados", onC).c_str());
+	if(stStatValues[2]) stStatValues[2]->setText(epro::format(L"{} registradas", totC).c_str());
+	if(stStatValues[3]) stStatValues[3]->setText(epro::format(L"NPC: {}  |  PvP: {}", dNpc, dPvp).c_str());
+	if(stStatValues[4]) stStatValues[4]->setText(epro::format(L"{} cartas", totCards).c_str());
+	if(stStatValues[5]) stStatValues[5]->setText(epro::format(L"{} oponentes", totNpcs).c_str());
+}
+
 void Game::SubmitLogin() {
 	if(!ebLoginUser || !ebLoginPass || !btnLoginSubmit || !stLoginStatus)
 		return;
@@ -2661,6 +2790,8 @@ void Game::ProcessPendingLoginResult() {
 		if(wBtnSettings)
 			wBtnSettings->setVisible(true);
 		if(wMainMenu) {
+			ResizeMainMenuScreen();
+			FetchLobbyStatsAsync();
 			wMainMenu->setVisible(true);
 			env->getRootGUIElement()->bringToFront(wMainMenu);
 			if(wBtnSettings) env->getRootGUIElement()->bringToFront(wBtnSettings);
@@ -4555,6 +4686,7 @@ bool Game::MainLoop() {
 		cur_time += delta_time;
 		gJWrapper->ProcessEvents();
 		ProcessPendingLoginResult();
+		ProcessPendingLobbyStats();
 		if(!dInfo.isInDuel && pendingDuelReward.valid) {
 			ShowDuelRewardWindow();
 			pendingDuelReward.valid = false;
@@ -6214,7 +6346,7 @@ void Game::OnResize() {
 		ResizeAdventureMode();
 	if(wStoreMenu)
 		ResizeEconomyScreens();
-	wMainMenu->setRelativePosition(ResizeWin(mainMenuLeftX, 145, mainMenuRightX, 505));
+	ResizeMainMenuScreen();
 	ResizeLoginScreen();
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);
