@@ -28,6 +28,7 @@ public:
 	}
 
 	auto getWindow() const { return window; };
+	auto getTabControl() const { return tabControl; };
 
 	const auto& getClientRect() const {
 		return clientRect;
