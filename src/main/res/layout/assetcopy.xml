@@ -40,11 +40,15 @@
 		<!-- Texto de estado -->
 		<TextView
 			android:id="@+id/textView1"
-			android:layout_width="wrap_content"
+			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_marginTop="12dp"
+			android:gravity="center"
+			android:singleLine="true"
+			android:maxLines="1"
+			android:ellipsize="middle"
 			android:textColor="#FFFFFF"
-			android:textSize="14sp"
+			android:textSize="11sp"
 			android:textStyle="bold"
 			android:shadowColor="#000000"
 			android:shadowRadius="4"

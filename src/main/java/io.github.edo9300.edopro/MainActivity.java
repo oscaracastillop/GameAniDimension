@@ -212,12 +212,20 @@ public class MainActivity extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 			case COPY_ASSETS: {
+				File stringsCheck = new File(working_directory, "config/strings.conf");
+				if (!stringsCheck.exists()) {
+					Log.e("EDOPro", "AssetCopy finished without config/strings.conf, retrying...");
+					Toast.makeText(this, "Reintentando extracción de archivos del juego...", Toast.LENGTH_SHORT).show();
+					copyAssets(working_directory, false);
+					break;
+				}
 				try {
 					var file = new File(getFilesDir(), "assets_copied");
 					if (file.exists() || file.createNewFile()) {
 						var wr = new FileWriter(file);
 						wr.write("" + BuildConfig.VERSION_CODE);
 						wr.flush();
+						wr.close();
 					}
 					if (wantsScopedStorage && data_directory != null && !data_directory.isEmpty()) {
 						var decksFolder = new File(working_directory, "deck");
@@ -320,21 +328,8 @@ public class MainActivity extends Activity {
 	}
 
 	public void next() {
-		setContentView(R.layout.assetcopy);
-		final ProgressBar progressBar = findViewById(R.id.progressBar1);
-		final TextView statusText = findViewById(R.id.textView1);
-		if (statusText != null) {
-			statusText.setText("Ani Dimension: Conectando al servidor...");
-		}
-		if (progressBar != null) {
-			progressBar.setIndeterminate(true);
-		}
-		checkRemoteUpdates(progressBar, statusText, new Runnable() {
-			@Override
-			public void run() {
-				launchGame();
-			}
-		});
+		// Actualizaciones remotas deshabilitadas hasta nueva orden: iniciar directo
+		launchGame();
 	}
 
 	private void checkRemoteUpdates(final ProgressBar progressBar, final TextView statusText, final Runnable onComplete) {

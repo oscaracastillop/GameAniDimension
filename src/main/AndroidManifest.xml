@@ -179,6 +179,7 @@
 		</activity>
 		<activity
 			android:name=".AssetCopy"
+			android:configChanges="orientation|keyboard|keyboardHidden|navigation|screenSize|smallestScreenSize"
 			android:enableOnBackInvokedCallback="false"
 			android:screenOrientation="sensorLandscape"
 			android:theme="@style/AppTheme" />

@@ -249,7 +249,7 @@ public class AssetCopy extends Activity {
 					String raw = m_tocopy.get(idx);
 					String shortName = new File(raw).getName();
 					m_ProgressBar.setProgress(idx + 1);
-					m_Filename.setText("Cargando archivos al juego, espera por favor... (" + (idx + 1) + "/" + m_totalFiles + ")\n" + shortName);
+					m_Filename.setText("Cargando archivos al juego, espera por favor... (" + (idx + 1) + "/" + m_totalFiles + ") - " + shortName);
 				}
 			} else {
 				m_Filename.setText("Preparando archivos del juego, espera por favor...");
