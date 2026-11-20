@@ -3092,7 +3092,7 @@ void Game::LogoutToLogin() {
 	}
 }
 
-static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "");
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson);
 
 void Game::FetchLobbyStatsAsync() {
 	const std::wstring curUser = loggedInUser;
@@ -3105,8 +3105,8 @@ void Game::FetchLobbyStatsAsync() {
 
 		nlohmann::json fullResp, profResp, cardResp;
 		if(!tok.empty()) {
-			fullResp = CallSessionApi("/api/profile/full", tok);
-			profResp = CallSessionApi("/api/profile", tok);
+			fullResp = CallSessionApi("/api/profile/full", tok, "");
+			profResp = CallSessionApi("/api/profile", tok, "");
 		}
 		if(!curUser.empty() && (!fullResp.contains("success") || !fullResp["success"].get<bool>())) {
 			std::string utf8Name = BufferIO::EncodeUTF8(curUser);
