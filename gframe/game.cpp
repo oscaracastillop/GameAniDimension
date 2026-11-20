@@ -284,40 +284,35 @@ void Game::Initialize() {
 	tFlatBtnCyan = makeSolidTex("ani_flat_cyan", 0xFF0284C7);
 	tFlatBtnDark = makeSolidTex("ani_flat_dark", 0xD00F172A);
 
-	// Right Side (Option 4 Mix — Borderless, airy, real icons & DB data)
+	// Right Side (3 Neon-bordered Cards + Top-Right Status + 3 Custom Action Buttons)
 	stServerStatusLine = env->addStaticText(L"\u25CF EN L\u00CDNEA   \u2022   ... ms   \u2022   ... conectados", irr::core::recti(0, 0, 380, 22), false, false, wMainMenu);
 	stServerStatusLine->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	stServerStatusLine->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
 
-	stLobbyBonusHeader = env->addStaticText(L"TUS BONOS ACTIVOS", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
+	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 86), false, false, wMainMenu, -1, true);
+	wLobbyBonusCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+	stLobbyBonusHeader = env->addStaticText(L"TUS BONOS ACTIVOS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyBonusCard);
 	stLobbyBonusHeader->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	if(loginUiFont) stLobbyBonusHeader->setOverrideFont(loginUiFont);
 	{
-		const char* bFiles[3] = { "textures/exp.png", "textures/starships.png", "textures/luck.png" };
 		const irr::video::SColor bColors[3] = {
 			irr::video::SColor(255, 147, 197, 253),
 			irr::video::SColor(255, 251, 191, 36),
 			irr::video::SColor(255, 52, 211, 153)
 		};
-		const wchar_t* bInit[3] = { L"+0% EXP", L"+0% SS", L"+0% Luck" };
-		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
-		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+		const wchar_t* bInit[3] = { L"EXP: +0.0%", L"StarShips: +0.0%", L"Luck: +0.0%" };
 		for(int bi = 0; bi < 3; ++bi) {
-			imgLobbyBonusIcons[bi] = env->addImage(irr::core::recti(0, 0, 32, 24), wMainMenu, -1, 0, true);
-			imgLobbyBonusIcons[bi]->setScaleImage(true);
-			imgLobbyBonusIcons[bi]->setUseAlphaChannel(true);
-			if(auto bt = driver->getTexture(bFiles[bi]))
-				imgLobbyBonusIcons[bi]->setImage(bt);
-			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 96, 22), false, false, wMainMenu);
+			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 120, 20), false, false, wLobbyBonusCard);
 			stLobbyBonusVals[bi]->setOverrideColor(bColors[bi]);
-			stLobbyBonusVals[bi]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 		}
-		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
-	stLobbyClanMedals = env->addStaticText(L"Clan: Sin Clan   \u2022   Medallas: 0 / 81", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyClanMedals = env->addStaticText(L"Clan: Sin Clan   \u2022   Medallas: 0 / 81", irr::core::recti(0, 0, 360, 20), false, false, wLobbyBonusCard);
 	stLobbyClanMedals->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
 
-	stLobbyTop3Header = env->addStaticText(L"TOP 3 DUELISTAS", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
-	stLobbyTop3Header->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	wLobbyTop3Card = env->addStaticText(L"", irr::core::recti(0, 0, 380, 102), false, false, wMainMenu, -1, true);
+	wLobbyTop3Card->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+	stLobbyTop3Header = env->addStaticText(L"TOP 3 DUELISTAS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyTop3Card);
+	stLobbyTop3Header->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
 	if(loginUiFont) stLobbyTop3Header->setOverrideFont(loginUiFont);
 	{
 		const irr::video::SColor rankColors[3] = {
@@ -326,25 +321,44 @@ void Game::Initialize() {
 			irr::video::SColor(255, 251, 146, 60)
 		};
 		for(int ti = 0; ti < 3; ++ti) {
-			imgTop3Avatar[ti] = env->addImage(irr::core::recti(0, 0, 27, 36), wMainMenu, -1, 0, true);
-			imgTop3Avatar[ti]->setScaleImage(true);
-			imgTop3Avatar[ti]->setUseAlphaChannel(true);
-			imgTop3Avatar[ti]->setVisible(false);
-			stTop3Line[ti] = env->addStaticText(L"", irr::core::recti(0, 0, 340, 36), false, false, wMainMenu);
+			stTop3Line[ti] = env->addStaticText(L"", irr::core::recti(0, 0, 350, 20), false, false, wLobbyTop3Card);
 			stTop3Line[ti]->setOverrideColor(rankColors[ti]);
-			stTop3Line[ti]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 		}
 	}
 
-	stLobbyEventHeader = env->addStaticText(L"EVENTO & BUZ\u00D3N", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
+	wLobbyEventCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 82), false, false, wMainMenu, -1, true);
+	wLobbyEventCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+	stLobbyEventHeader = env->addStaticText(L"EVENTO & BUZ\u00D3N", irr::core::recti(0, 0, 340, 20), false, false, wLobbyEventCard);
 	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	if(loginUiFont) stLobbyEventHeader->setOverrideFont(loginUiFont);
 
-	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
 	stLobbyPuzzleEvent->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 
-	stLobbyMailboxStatus = env->addStaticText(L"Buz\u00F3n: 0 pendientes", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyMailboxStatus = env->addStaticText(L"Buz\u00F3n: 0 pendientes", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
 	stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	// 3 Custom Dark-Glass Neon Action Buttons (Tienda, Eventos, Deck — no purple skin!)
+	btnLobbyStore = env->addButton(irr::core::recti(0, 0, 130, 36), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
+	btnLobbyStore->setImage(tFlatBtnDark);
+	btnLobbyStore->setPressedImage(tFlatBtnDark);
+	btnLobbyStore->setScaleImage(true);
+	btnLobbyStore->setDrawBorder(false);
+	if(loginUiFont) btnLobbyStore->setOverrideFont(loginUiFont);
+
+	btnLobbyEvents = env->addButton(irr::core::recti(0, 0, 130, 36), wMainMenu, BUTTON_NAV_EVENTOS, L"Eventos");
+	btnLobbyEvents->setImage(tFlatBtnDark);
+	btnLobbyEvents->setPressedImage(tFlatBtnDark);
+	btnLobbyEvents->setScaleImage(true);
+	btnLobbyEvents->setDrawBorder(false);
+	if(loginUiFont) btnLobbyEvents->setOverrideFont(loginUiFont);
+
+	btnLobbyDeck = env->addButton(irr::core::recti(0, 0, 130, 36), wMainMenu, BUTTON_DECK_EDIT, L"Deck");
+	btnLobbyDeck->setImage(tFlatBtnDark);
+	btnLobbyDeck->setPressedImage(tFlatBtnDark);
+	btnLobbyDeck->setScaleImage(true);
+	btnLobbyDeck->setDrawBorder(false);
+	if(loginUiFont) btnLobbyDeck->setOverrideFont(loginUiFont);
 
 	// Left Player Showcase (No borders/boxes — floating cleanly over web dark gradient)
 	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 420, 34), false, false, wMainMenu);
@@ -3019,67 +3033,66 @@ void Game::ResizeMainMenuScreen() {
 		}
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
-	// Right: Option 4 Mix (Borderless Server Status + Active Bonuses + Top 3 Duelists + Puzzle Event & Mailbox)
-	int ry = welcomeY;
-	if(stServerStatusLine) {
-		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(24)));
-		ry += Scale(34);
-	}
-	if(stLobbyBonusHeader) {
-		stLobbyBonusHeader->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
-		ry += Scale(26);
-	}
-	{
-		const int colW = rightW / 3;
-		const int iconH = Scale(24);
-		const int iconW = Scale(32);
+	// Right: Top-Right Status + 3 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
+	const int rightX = W - padX - rightW;
+	if(stServerStatusLine)
+		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(24)));
+
+	const int blkPad = Scale(12);
+	const int blkGap = Scale(10);
+	const int btnH = Scale(36);
+	const int btnY = contentBottomY - btnH;
+	int ry = contentY;
+
+	const int bonusH = Scale(80);
+	if(wLobbyBonusCard) {
+		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
+		if(stLobbyBonusHeader)
+			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+		const int colW = (rightW - 2 * blkPad) / 3;
 		for(int bi = 0; bi < 3; ++bi) {
-			int bx = rightX + bi * colW;
-			if(imgLobbyBonusIcons[bi])
-				imgLobbyBonusIcons[bi]->setRelativePosition(irr::core::recti(bx, ry, bx + iconW, ry + iconH));
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(bx + iconW + Scale(6), ry, bx + colW - Scale(4), ry + iconH));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(30), blkPad + (bi + 1) * colW - Scale(4), Scale(50)));
 		}
-		ry += iconH + Scale(8);
+		if(stLobbyClanMedals)
+			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(54), rightW - blkPad, bonusH - Scale(6)));
+		ry += bonusH + blkGap;
 	}
-	if(stLobbyClanMedals) {
-		stLobbyClanMedals->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
-		ry += Scale(32);
-	}
-	if(stLobbyTop3Header) {
-		stLobbyTop3Header->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
-		ry += Scale(26);
-	}
-	{
-		const int rowH = Scale(40);
-		const int rowGap = Scale(6);
+
+	const int top3H = Scale(98);
+	if(wLobbyTop3Card) {
+		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
+		if(stLobbyTop3Header)
+			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
 		for(int ti = 0; ti < 3; ++ti) {
-			int avThumbH = Scale(36);
-			int avThumbW = Scale(27);
-			if(imgTop3Avatar[ti] && imgTop3Avatar[ti]->getImage()) {
-				auto tsz = imgTop3Avatar[ti]->getImage()->getOriginalSize();
-				if(tsz.Width > 0 && tsz.Height > 0)
-					avThumbW = (int)((double)avThumbH * tsz.Width / tsz.Height);
-			}
-			if(imgTop3Avatar[ti])
-				imgTop3Avatar[ti]->setRelativePosition(irr::core::recti(rightX, ry + (rowH - avThumbH) / 2, rightX + avThumbW, ry + (rowH + avThumbH) / 2));
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(rightX + avThumbW + Scale(10), ry, rightX + rightW, ry + rowH));
-			ry += rowH + rowGap;
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(30) + ti * Scale(21), rightW - blkPad, Scale(50) + ti * Scale(21)));
 		}
-		ry += Scale(10);
+		ry += top3H + blkGap;
 	}
-	if(stLobbyEventHeader) {
-		stLobbyEventHeader->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
-		ry += Scale(25);
+
+	const int evH = Scale(78);
+	if(wLobbyEventCard) {
+		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
+		if(stLobbyEventHeader)
+			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+		if(stLobbyPuzzleEvent)
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(30), rightW - blkPad, Scale(50)));
+		if(stLobbyMailboxStatus)
+			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, Scale(52), rightW - blkPad, evH - Scale(6)));
 	}
-	if(stLobbyPuzzleEvent) {
-		stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
-		ry += Scale(22);
-	}
-	if(stLobbyMailboxStatus) {
-		stLobbyMailboxStatus->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
-	}
+
+	// 3 Custom Neon Buttons (Tienda, Eventos, Deck) spanning right-center above bottom cards
+	const int btnStripStart = std::max(padX + avW + Scale(22), rightX - Scale(70));
+	const int btnStripW = (rightX + rightW) - btnStripStart;
+	const int btnGap = Scale(12);
+	const int btnW = (btnStripW - 2 * btnGap) / 3;
+	if(btnLobbyStore)
+		btnLobbyStore->setRelativePosition(irr::core::recti(btnStripStart, btnY, btnStripStart + btnW, btnY + btnH));
+	if(btnLobbyEvents)
+		btnLobbyEvents->setRelativePosition(irr::core::recti(btnStripStart + btnW + btnGap, btnY, btnStripStart + 2 * btnW + btnGap, btnY + btnH));
+	if(btnLobbyDeck)
+		btnLobbyDeck->setRelativePosition(irr::core::recti(btnStripStart + 2 * (btnW + btnGap), btnY, rightX + rightW, btnY + btnH));
 	ResizeTopNavBar();
 }
 
@@ -3351,9 +3364,9 @@ void Game::ProcessPendingLobbyStats() {
 	}
 	if(stServerStatusLine)
 		stServerStatusLine->setText(epro::format(L"\u25CF EN L\u00CDNEA   \u2022   {} ms   \u2022   {} conectados", pingMs, onC).c_str());
-	if(stLobbyBonusVals[0]) stLobbyBonusVals[0]->setText(epro::format(L"+{:.1f}% EXP", bExp).c_str());
-	if(stLobbyBonusVals[1]) stLobbyBonusVals[1]->setText(epro::format(L"+{:.1f}% SS", bSS).c_str());
-	if(stLobbyBonusVals[2]) stLobbyBonusVals[2]->setText(epro::format(L"+{:.1f}% Luck", bLuck).c_str());
+	if(stLobbyBonusVals[0]) stLobbyBonusVals[0]->setText(epro::format(L"EXP: +{:.1f}%", bExp).c_str());
+	if(stLobbyBonusVals[1]) stLobbyBonusVals[1]->setText(epro::format(L"StarShips: +{:.1f}%", bSS).c_str());
+	if(stLobbyBonusVals[2]) stLobbyBonusVals[2]->setText(epro::format(L"Luck: +{:.1f}%", bLuck).c_str());
 	if(stLobbyClanMedals)
 		stLobbyClanMedals->setText(epro::format(L"Clan: {}   \u2022   Medallas: {} / {}", clanTxt, medalsGot, medalsTot).c_str());
 	for(int ti = 0; ti < 3; ++ti) {
@@ -3361,18 +3374,8 @@ void Game::ProcessPendingLobbyStats() {
 			const auto& e = top3Copy[ti];
 			if(stTop3Line[ti])
 				stTop3Line[ti]->setText(epro::format(L"#{}   {}   \u2022   Nv. {}   \u2022   {} EXP", e.pos, e.usuario, e.nivel, e.exp).c_str());
-			if(imgTop3Avatar[ti]) {
-				auto tAv = LoadAvatarTexture(e.avatarArchivo);
-				if(tAv) {
-					imgTop3Avatar[ti]->setImage(tAv);
-					imgTop3Avatar[ti]->setVisible(true);
-				} else {
-					imgTop3Avatar[ti]->setVisible(false);
-				}
-			}
 		} else {
 			if(stTop3Line[ti]) stTop3Line[ti]->setText(L"");
-			if(imgTop3Avatar[ti]) imgTop3Avatar[ti]->setVisible(false);
 		}
 	}
 	if(stLobbyPuzzleEvent)
@@ -5764,6 +5767,18 @@ bool Game::MainLoop() {
 		DrawGUI();
 		DrawSpec();
 		if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
+			if(wLobbyBonusCard)
+				driver->draw2DRectangleOutline(wLobbyBonusCard->getAbsolutePosition(), irr::video::SColor(150, 56, 189, 248));
+			if(wLobbyTop3Card)
+				driver->draw2DRectangleOutline(wLobbyTop3Card->getAbsolutePosition(), irr::video::SColor(150, 192, 132, 252));
+			if(wLobbyEventCard)
+				driver->draw2DRectangleOutline(wLobbyEventCard->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
+			if(btnLobbyStore)
+				driver->draw2DRectangleOutline(btnLobbyStore->getAbsolutePosition(), irr::video::SColor(200, 52, 211, 153));
+			if(btnLobbyEvents)
+				driver->draw2DRectangleOutline(btnLobbyEvents->getAbsolutePosition(), irr::video::SColor(200, 251, 191, 36));
+			if(btnLobbyDeck)
+				driver->draw2DRectangleOutline(btnLobbyDeck->getAbsolutePosition(), irr::video::SColor(200, 56, 189, 248));
 			const irr::video::SColor featBorder[4] = {
 				irr::video::SColor(150, 56, 189, 248),
 				irr::video::SColor(150, 52, 211, 153),
