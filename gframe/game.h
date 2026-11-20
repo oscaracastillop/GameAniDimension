@@ -1138,6 +1138,7 @@ public:
 	};
 	struct StorePackItem {
 		int id{ 0 };
+		uint32_t coverPasscode{ 0 };
 		std::wstring nombre;
 		std::wstring descripcion;
 		std::wstring serieNombre;
@@ -1211,6 +1212,7 @@ public:
 	irr::gui::IGUIStaticText* stStoreHubDescs[6]{ nullptr };
 	irr::gui::IGUIButton* btnStoreHubActions[6]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBack{ nullptr };
+	uint32_t storeHubPendingArt[2]{ 89631139, 74677422 };
 
 	// 1b. Store Donations & Cristales (CD) (5 cards)
 	irr::gui::IGUIStaticText* wStoreDonations{ nullptr };
@@ -1281,7 +1283,7 @@ public:
 	irr::gui::IGUIStaticText* stVipCardPrices[4]{ nullptr };
 	irr::gui::IGUIButton* btnVipCardBuy[4]{ nullptr };
 
-	// 3c. Store Cards (5x2 card grid + search + currency filter + pagination)
+	// 3c. Store Cards (7x2 card grid + search + currency filter + pagination)
 	irr::gui::IGUIStaticText* wStoreCards{ nullptr };
 	irr::gui::IGUIStaticText* stStoreCardsTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreCardsBalance{ nullptr };
@@ -1291,21 +1293,21 @@ public:
 	irr::gui::IGUIButton* btnStoreCardSearch{ nullptr };
 	irr::gui::IGUIButton* btnStoreCardFilt[3]{ nullptr };
 	irr::gui::IGUIButton* btnStoreCardBack{ nullptr };
-	irr::gui::IGUIStaticText* wCardCards[10]{ nullptr };
-	irr::gui::IGUIImage* imgCardCardArts[10]{ nullptr };
-	irr::gui::IGUIStaticText* stCardCardTitles[10]{ nullptr };
-	irr::gui::IGUIStaticText* stCardCardMeta[10]{ nullptr };
-	irr::gui::IGUIButton* btnCardCardBuySS[10]{ nullptr };
-	irr::gui::IGUIButton* btnCardCardBuyCD[10]{ nullptr };
+	irr::gui::IGUIStaticText* wCardCards[14]{ nullptr };
+	irr::gui::IGUIImage* imgCardCardArts[14]{ nullptr };
+	irr::gui::IGUIStaticText* stCardCardTitles[14]{ nullptr };
+	irr::gui::IGUIStaticText* stCardCardMeta[14]{ nullptr };
+	irr::gui::IGUIButton* btnCardCardBuySS[14]{ nullptr };
+	irr::gui::IGUIButton* btnCardCardBuyCD[14]{ nullptr };
 	irr::gui::IGUIButton* btnStoreCardPrev{ nullptr };
 	irr::gui::IGUIButton* btnStoreCardNext{ nullptr };
 	irr::gui::IGUIStaticText* stStoreCardPage{ nullptr };
 	int storeCardFilter{ 0 }; // 0=All, 1=SS, 2=CD
 	int storeCardPage{ 0 };
 	std::vector<int> storeCardFiltered;
-	uint32_t storeCardPendingArt[10]{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	uint32_t storeCardPendingArt[14]{};
 
-	// 3d. Store Packs (4x2 card grid + search + pagination + visual pool overlay)
+	// 3d. Store Packs (6x2 card grid + search + pagination + visual pool overlay)
 	irr::gui::IGUIStaticText* wStorePacks{ nullptr };
 	irr::gui::IGUIStaticText* stStorePacksTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStorePacksBalance{ nullptr };
@@ -1314,17 +1316,18 @@ public:
 	irr::gui::IGUIEditBox* ebStorePackSearch{ nullptr };
 	irr::gui::IGUIButton* btnStorePackSearch{ nullptr };
 	irr::gui::IGUIButton* btnStorePackBack{ nullptr };
-	irr::gui::IGUIStaticText* wPackCards[8]{ nullptr };
-	irr::gui::IGUIImage* imgPackCardArts[8]{ nullptr };
-	irr::gui::IGUIStaticText* stPackCardTitles[8]{ nullptr };
-	irr::gui::IGUIStaticText* stPackCardDescs[8]{ nullptr };
-	irr::gui::IGUIButton* btnPackCardBuy[8]{ nullptr };
-	irr::gui::IGUIButton* btnPackCardView[8]{ nullptr };
+	irr::gui::IGUIStaticText* wPackCards[12]{ nullptr };
+	irr::gui::IGUIImage* imgPackCardArts[12]{ nullptr };
+	irr::gui::IGUIStaticText* stPackCardTitles[12]{ nullptr };
+	irr::gui::IGUIStaticText* stPackCardDescs[12]{ nullptr };
+	irr::gui::IGUIButton* btnPackCardBuy[12]{ nullptr };
+	irr::gui::IGUIButton* btnPackCardView[12]{ nullptr };
 	irr::gui::IGUIButton* btnStorePackPrev{ nullptr };
 	irr::gui::IGUIButton* btnStorePackNext{ nullptr };
 	irr::gui::IGUIStaticText* stStorePackPage{ nullptr };
 	int storePackPage{ 0 };
 	std::vector<int> storePackFiltered;
+	uint32_t storePackPendingArt[12]{};
 	struct PackPoolCard {
 		uint32_t passcode{ 0 };
 		std::wstring nombre;
