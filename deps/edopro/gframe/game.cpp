@@ -4172,7 +4172,7 @@ void Game::PopulateEconomyScreens() {
 	btnStoreVip = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_VIP, L"Pases VIP (Cristales CD)");
 	btnStoreCards = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_CARDS, L"Cartas Individuales");
 	btnStorePacks = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_PACKS, L"Sobres de Expansi\u00F3n");
-	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"\u2190 Volver a Perfil");
+	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnStoreAvatars);
 	styleDarkBtn(btnStoreBoosters);
 	styleDarkBtn(btnStoreVip);
@@ -4199,7 +4199,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreAvatarInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnStoreAvaBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BUY, L"Comprar (SS)");
 	btnStoreAvaBuyCD = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BUY_CD, L"Comprar (CD)");
-	btnStoreAvaBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BACK, L"\u2190 Volver a Tienda");
+	btnStoreAvaBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BACK, L"Volver a Tienda");
 	styleCyanBtn(btnStoreAvaBuy);
 	styleDarkBtn(btnStoreAvaBuyCD);
 	styleDarkBtn(btnStoreAvaBack);
@@ -4220,7 +4220,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreBoosterInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnStoreBstBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BUY, L"Comprar (SS)");
 	btnStoreBstBuyCD = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BUY_CD, L"Comprar (CD)");
-	btnStoreBstBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BACK, L"\u2190 Volver a Tienda");
+	btnStoreBstBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BACK, L"Volver a Tienda");
 	styleCyanBtn(btnStoreBstBuy);
 	styleDarkBtn(btnStoreBstBuyCD);
 	styleDarkBtn(btnStoreBstBack);
@@ -4246,7 +4246,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreVipInfo->setWordWrap(true);
 	stStoreVipInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnStoreVipBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreVip, BUTTON_STORE_VIP_BUY, L"Comprar Pase VIP (CD)");
-	btnStoreVipBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreVip, BUTTON_STORE_VIP_BACK, L"\u2190 Volver a Tienda");
+	btnStoreVipBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreVip, BUTTON_STORE_VIP_BACK, L"Volver a Tienda");
 	styleCyanBtn(btnStoreVipBuy);
 	styleDarkBtn(btnStoreVipBack);
 
@@ -4268,7 +4268,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreCardInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnStoreCardBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BUY, L"Comprar (SS)");
 	btnStoreCardBuyCD = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BUY_CD, L"Comprar (CD)");
-	btnStoreCardBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BACK, L"\u2190 Volver a Tienda");
+	btnStoreCardBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BACK, L"Volver a Tienda");
 	styleCyanBtn(btnStoreCardBuy);
 	styleDarkBtn(btnStoreCardBuyCD);
 	styleDarkBtn(btnStoreCardBack);
@@ -4290,7 +4290,7 @@ void Game::PopulateEconomyScreens() {
 	lstStorePackPool = env->addListBox(irr::core::recti(0, 0, 10, 10), wStorePacks, -1, true);
 	lstStorePackPool->setItemHeight(Scale(22));
 	btnStorePackBuy = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BUY, L"Comprar y Abrir Sobre");
-	btnStorePackBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BACK, L"\u2190 Volver a Tienda");
+	btnStorePackBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BACK, L"Volver a Tienda");
 	styleCyanBtn(btnStorePackBuy);
 	styleDarkBtn(btnStorePackBack);
 
@@ -4301,9 +4301,13 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stProfileTitle->setOverrideFont(loginTitleFont);
 	stProfileSubtitle = env->addStaticText(L"Administra tu cuenta, avatares, tienda, buz\u00F3n, medallas, eventos y clanes.", irr::core::recti(0, 0, 10, 10), false, false, wPlayerProfile);
 	stProfileSubtitle->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	btnProfileBack = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_BACK, L"\u2190 Volver al Lobby");
+	btnProfileBack = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_BACK, L"Volver al Lobby");
 	styleDarkBtn(btnProfileBack);
 	{
+		const char* hubIcons[8] = {
+			"textures/shop.png", "textures/info_player.png", "textures/buzon.png", "textures/medals.png",
+			"textures/avatars.png", "textures/inventario.png", "textures/events.png", "textures/clan.png"
+		};
 		const wchar_t* hubTitles[8] = {
 			L"Tienda", L"Informaci\u00F3n Jugador", L"Buz\u00F3n", L"Medallas",
 			L"Avatares", L"Inventario & Decks", L"Eventos", L"Clanes"
@@ -4319,8 +4323,8 @@ void Game::PopulateEconomyScreens() {
 			L"\u00DAnete a un clan o funda el tuyo (Nv. 50+ y 350k SS)."
 		};
 		const wchar_t* hubBtns[8] = {
-			L"Ir a la Tienda \u2192", L"Ver Informaci\u00F3n \u2192", L"Abrir Buz\u00F3n \u2192", L"Ver Medallas \u2192",
-			L"Mis Avatares \u2192", L"Abrir Deck Builder \u2192", L"Ver Eventos \u2192", L"Explorar Clanes \u2192"
+			L"Ir a la Tienda", L"Ver Informaci\u00F3n", L"Abrir Buz\u00F3n", L"Ver Medallas",
+			L"Mis Avatares", L"Abrir Deck Builder", L"Ver Eventos", L"Explorar Clanes"
 		};
 		const int hubIds[8] = {
 			BUTTON_PROF_HUB_STORE, BUTTON_PROF_HUB_INFO, BUTTON_PROF_HUB_MAILBOX, BUTTON_PROF_HUB_MEDALS,
@@ -4332,8 +4336,15 @@ void Game::PopulateEconomyScreens() {
 			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 192, 132, 252),
 			irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 56, 189, 248)
 		};
+		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 		for(int hi = 0; hi < 8; ++hi) {
 			wProfileHubCards[hi] = makePanel(wPlayerProfile);
+			imgProfileHubIcons[hi] = env->addImage(irr::core::recti(0, 0, 44, 44), wProfileHubCards[hi], -1, 0, true);
+			imgProfileHubIcons[hi]->setScaleImage(true);
+			imgProfileHubIcons[hi]->setUseAlphaChannel(true);
+			if(auto hTex = driver->getTexture(hubIcons[hi]))
+				imgProfileHubIcons[hi]->setImage(hTex);
 			stProfileHubTitles[hi] = env->addStaticText(hubTitles[hi], irr::core::recti(0, 0, 10, 10), false, false, wProfileHubCards[hi]);
 			stProfileHubTitles[hi]->setOverrideColor(hubColors[hi]);
 			if(loginUiFont) stProfileHubTitles[hi]->setOverrideFont(loginUiFont);
@@ -4343,6 +4354,7 @@ void Game::PopulateEconomyScreens() {
 			btnProfileHubActions[hi] = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileHubCards[hi], hubIds[hi], hubBtns[hi]);
 			styleDarkBtn(btnProfileHubActions[hi]);
 		}
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
 
 	// 4a. Profile Info Sheet
@@ -4361,7 +4373,7 @@ void Game::PopulateEconomyScreens() {
 	stProfInfoRightText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileInfo);
 	stProfInfoRightText->setWordWrap(true);
 	stProfInfoRightText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	btnProfInfoBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileInfo, BUTTON_PROF_INFO_BACK, L"\u2190 Volver a Perfil");
+	btnProfInfoBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileInfo, BUTTON_PROF_INFO_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnProfInfoBack);
 
 	// 4b. Profile Medals
@@ -4380,7 +4392,7 @@ void Game::PopulateEconomyScreens() {
 	stProfMedalInfo->setWordWrap(true);
 	stProfMedalInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnProfMedalHighlight = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_PROF_MEDAL_HIGHLIGHT, L"Mostrar en Perfil");
-	btnProfMedalsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_PROF_MEDALS_BACK, L"\u2190 Volver a Perfil");
+	btnProfMedalsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_PROF_MEDALS_BACK, L"Volver a Perfil");
 	styleCyanBtn(btnProfMedalHighlight);
 	styleDarkBtn(btnProfMedalsBack);
 
@@ -4403,7 +4415,7 @@ void Game::PopulateEconomyScreens() {
 	stProfileSelectedInfo->setWordWrap(true);
 	stProfileSelectedInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnProfileActivateAva = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROFILE_ACTIVATE_AVA, L"Activar Avatar");
-	btnProfileAvatarsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROF_AVATARS_BACK, L"\u2190 Volver a Perfil");
+	btnProfileAvatarsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROF_AVATARS_BACK, L"Volver a Perfil");
 	styleCyanBtn(btnProfileActivateAva);
 	styleDarkBtn(btnProfileAvatarsBack);
 
@@ -4424,7 +4436,7 @@ void Game::PopulateEconomyScreens() {
 	lstEventsTop10->setItemHeight(Scale(24));
 	btnEventsClaimTop = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_CLAIM_TOP, L"Reclamar Premio Top 10");
 	btnEventsExchange = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_EXCHANGE, L"Canjear Fichas por SS");
-	btnEventsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_BACK, L"\u2190 Volver a Perfil");
+	btnEventsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_BACK, L"Volver a Perfil");
 	styleCyanBtn(btnEventsClaimTop);
 	styleDarkBtn(btnEventsExchange);
 	styleDarkBtn(btnEventsBack);
@@ -4451,7 +4463,7 @@ void Game::PopulateEconomyScreens() {
 	btnClanLeave = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_LEAVE, L"Salir del Clan");
 	btnClanAcceptReq = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_ACCEPT_REQ, L"Aceptar Solicitud");
 	btnClanRejectReq = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_REJECT_REQ, L"Rechazar");
-	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"\u2190 Volver a Perfil");
+	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnClanSearch);
 	styleCyanBtn(btnClanRequest);
 	styleDarkBtn(btnClanMyClan);
@@ -4490,7 +4502,7 @@ void Game::PopulateEconomyScreens() {
 	stMailboxDetail->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	btnMailboxClaim = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_CLAIM, L"Reclamar");
 	btnMailboxDiscard = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_DISCARD, L"Descartar");
-	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"\u2190 Volver");
+	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"Volver");
 	styleCyanBtn(btnMailboxClaim);
 	styleDarkBtn(btnMailboxDiscard);
 	styleDarkBtn(btnMailboxBack);
@@ -4729,12 +4741,30 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wProfileHubCards[hi]) {
 				wProfileHubCards[hi]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 maxIcW = cardW - Scale(24);
+				irr::s32 maxIcH = std::max<irr::s32>(Scale(56), (cardH * 38) / 100);
+				irr::s32 icH = maxIcH;
+				irr::s32 icW = (icH * 669) / 373;
+				if(imgProfileHubIcons[hi] && imgProfileHubIcons[hi]->getImage()) {
+					auto osz = imgProfileHubIcons[hi]->getImage()->getOriginalSize();
+					if(osz.Width > 0 && osz.Height > 0)
+						icW = (irr::s32)((double)icH * osz.Width / osz.Height);
+				}
+				if(icW > maxIcW) {
+					if(icW > 0) icH = (irr::s32)((double)icH * maxIcW / icW);
+					icW = maxIcW;
+				}
+				irr::s32 icX = (cardW - icW) / 2;
+				irr::s32 icY = Scale(10);
+				if(imgProfileHubIcons[hi])
+					imgProfileHubIcons[hi]->setRelativePosition(irr::core::recti(icX, icY, icX + icW, icY + icH));
+				irr::s32 txtTop = icY + icH + Scale(6);
 				if(stProfileHubTitles[hi])
-					stProfileHubTitles[hi]->setRelativePosition(irr::core::recti(Scale(14), Scale(14), cardW - Scale(14), Scale(38)));
+					stProfileHubTitles[hi]->setRelativePosition(irr::core::recti(Scale(12), txtTop, cardW - Scale(12), txtTop + Scale(22)));
 				if(stProfileHubDescs[hi])
-					stProfileHubDescs[hi]->setRelativePosition(irr::core::recti(Scale(14), Scale(42), cardW - Scale(14), cardH - Scale(48)));
+					stProfileHubDescs[hi]->setRelativePosition(irr::core::recti(Scale(12), txtTop + Scale(24), cardW - Scale(12), cardH - Scale(46)));
 				if(btnProfileHubActions[hi])
-					btnProfileHubActions[hi]->setRelativePosition(irr::core::recti(Scale(14), cardH - Scale(42), cardW - Scale(14), cardH - Scale(12)));
+					btnProfileHubActions[hi]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(40), cardW - Scale(12), cardH - Scale(10)));
 			}
 		}
 	}
@@ -5604,7 +5634,7 @@ void Game::OpenPlayerProfile() {
 		pend = SafeJsonInt(resp, "buzonPendientes", 0);
 	}
 	if(btnProfileHubActions[2])
-		btnProfileHubActions[2]->setText(pend > 0 ? epro::format(L"Abrir Buz\u00F3n ({}) \u2192", pend).c_str() : L"Abrir Buz\u00F3n \u2192");
+		btnProfileHubActions[2]->setText(pend > 0 ? epro::format(L"Abrir Buz\u00F3n ({})", pend).c_str() : L"Abrir Buz\u00F3n");
 	ResizeEconomyScreens();
 	wPlayerProfile->setVisible(true);
 }
@@ -7014,18 +7044,22 @@ bool Game::MainLoop() {
 			const irr::video::SColor cCyan(150, 56, 189, 248);
 			const irr::video::SColor cGold(150, 251, 191, 36);
 			const irr::video::SColor cPurp(150, 192, 132, 252);
-			drawNeon(pnlStoreMenu, cCyan); drawNeon(pnlStoreAvaLeft, cCyan); drawNeon(pnlStoreAvaRight, cPurp);
-			drawNeon(pnlStoreBstLeft, irr::video::SColor(150, 52, 211, 153)); drawNeon(pnlStoreBstRight, cCyan);
-			drawNeon(pnlStoreVipLeft, cGold); drawNeon(pnlStoreVipRight, cCyan);
-			drawNeon(pnlStoreCardsLeft, cPurp); drawNeon(pnlStoreCardsRight, cCyan);
-			drawNeon(pnlStorePacksLeft, cCyan); drawNeon(pnlStorePacksRight, cPurp);
-			drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp);
-			drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan);
-			drawNeon(pnlProfileLeft, cCyan); drawNeon(pnlProfileRight, cPurp);
-			drawNeon(pnlEventsLeft, irr::video::SColor(150, 52, 211, 153)); drawNeon(pnlEventsRight, cGold);
-			drawNeon(pnlClansLeft, cCyan); drawNeon(pnlClansRight, cPurp);
-			drawNeon(pnlClanCreate, cGold);
-			drawNeon(pnlMailboxLeft, cGold); drawNeon(pnlMailboxRight, cCyan);
+			const irr::video::SColor cEmer(150, 52, 211, 153);
+			if(wStoreMenu && wStoreMenu->isVisible()) { drawNeon(pnlStoreMenu, cCyan); }
+			if(wStoreAvatars && wStoreAvatars->isVisible()) { drawNeon(pnlStoreAvaLeft, cCyan); drawNeon(pnlStoreAvaRight, cPurp); }
+			if(wStoreBoosters && wStoreBoosters->isVisible()) { drawNeon(pnlStoreBstLeft, cEmer); drawNeon(pnlStoreBstRight, cCyan); }
+			if(wStoreVip && wStoreVip->isVisible()) { drawNeon(pnlStoreVipLeft, cGold); drawNeon(pnlStoreVipRight, cCyan); }
+			if(wStoreCards && wStoreCards->isVisible()) { drawNeon(pnlStoreCardsLeft, cPurp); drawNeon(pnlStoreCardsRight, cCyan); }
+			if(wStorePacks && wStorePacks->isVisible()) { drawNeon(pnlStorePacksLeft, cCyan); drawNeon(pnlStorePacksRight, cPurp); }
+			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
+			if(wProfileMedals && wProfileMedals->isVisible()) { drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan); }
+			if(wProfileAvatars && wProfileAvatars->isVisible()) { drawNeon(pnlProfileLeft, cCyan); drawNeon(pnlProfileRight, cPurp); }
+			if(wEventsMenu && wEventsMenu->isVisible()) { drawNeon(pnlEventsLeft, cEmer); drawNeon(pnlEventsRight, cGold); }
+			if(wClansMenu && wClansMenu->isVisible()) {
+				drawNeon(pnlClansLeft, cCyan); drawNeon(pnlClansRight, cPurp);
+				drawNeon(pnlClanCreate, cGold);
+			}
+			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxLeft, cGold); drawNeon(pnlMailboxRight, cCyan); }
 			drawNeon(wConfirmPurchase, cCyan);
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = (wMainMenu && wMainMenu->isVisible()) ? 0 : 1;

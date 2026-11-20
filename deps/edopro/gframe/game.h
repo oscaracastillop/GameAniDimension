@@ -1280,6 +1280,7 @@ public:
 	irr::gui::IGUIStaticText* stProfileTitle{ nullptr };
 	irr::gui::IGUIStaticText* stProfileSubtitle{ nullptr };
 	irr::gui::IGUIStaticText* wProfileHubCards[8]{ nullptr };
+	irr::gui::IGUIImage* imgProfileHubIcons[8]{ nullptr };
 	irr::gui::IGUIStaticText* stProfileHubTitles[8]{ nullptr };
 	irr::gui::IGUIStaticText* stProfileHubDescs[8]{ nullptr };
 	irr::gui::IGUIButton* btnProfileHubActions[8]{ nullptr };
