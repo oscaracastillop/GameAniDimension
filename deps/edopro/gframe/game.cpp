@@ -3301,6 +3301,9 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 	if(pos < 0 || pos >= 6) return;
 	if(playerName.empty()) {
+		hostPrepTexturePending[pos].store(false);
+		hostPrepPendingAvatarFile[pos].clear();
+		hostPrepPendingFlagUrl[pos].clear();
 		if(stHostPrepDuelist[pos]) stHostPrepDuelist[pos]->setText(L"");
 		if(stHostPrepName[pos]) { stHostPrepName[pos]->setText(L""); stHostPrepName[pos]->setVisible(false); }
 		if(stHostPrepVip[pos]) { stHostPrepVip[pos]->setText(L""); stHostPrepVip[pos]->setVisible(false); }
@@ -3382,22 +3385,33 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 			it->second.level, it->second.winratePvp, clanTxt, vipTxt
 		).c_str());
 	}
-	if(imgHostPrepAvatar[pos]) {
-		auto tex = LoadAvatarTexture(it->second.avatarFile);
-		if(tex) {
-			imgHostPrepAvatar[pos]->setImage(tex);
-			imgHostPrepAvatar[pos]->setVisible(true);
-		} else {
-			imgHostPrepAvatar[pos]->setVisible(false);
+	// Defer OpenGL/Irrlicht texture loading to main render thread (critical on Android EGL)
+	hostPrepPendingAvatarFile[pos] = it->second.avatarFile;
+	hostPrepPendingFlagUrl[pos] = it->second.flagUrl;
+	hostPrepTexturePending[pos].store(true);
+}
+
+void Game::ProcessPendingHostPrepTextures() {
+	for(int pos = 0; pos < 6; ++pos) {
+		if(!hostPrepTexturePending[pos].exchange(false))
+			continue;
+		if(imgHostPrepAvatar[pos]) {
+			auto tex = LoadAvatarTexture(hostPrepPendingAvatarFile[pos]);
+			if(tex) {
+				imgHostPrepAvatar[pos]->setImage(tex);
+				imgHostPrepAvatar[pos]->setVisible(true);
+			} else {
+				imgHostPrepAvatar[pos]->setVisible(false);
+			}
 		}
-	}
-	if(imgHostPrepFlag[pos]) {
-		auto fTex = LoadFlagTexture(it->second.flagUrl);
-		if(fTex) {
-			imgHostPrepFlag[pos]->setImage(fTex);
-			imgHostPrepFlag[pos]->setVisible(true);
-		} else {
-			imgHostPrepFlag[pos]->setVisible(false);
+		if(imgHostPrepFlag[pos]) {
+			auto fTex = LoadFlagTexture(hostPrepPendingFlagUrl[pos]);
+			if(fTex) {
+				imgHostPrepFlag[pos]->setImage(fTex);
+				imgHostPrepFlag[pos]->setVisible(true);
+			} else {
+				imgHostPrepFlag[pos]->setVisible(false);
+			}
 		}
 	}
 }
@@ -5087,6 +5101,7 @@ bool Game::MainLoop() {
 		atkdy = (float)sin(atkframe);
 		driver->beginScene(true, true, irr::video::SColor(0, 0, 0, 0));
 		gMutex.lock();
+		ProcessPendingHostPrepTextures();
 		if(dInfo.isInDuel) {
 			if(dInfo.isReplay)
 				discord.UpdatePresence(DiscordWrapper::REPLAY);
@@ -5138,7 +5153,10 @@ bool Game::MainLoop() {
 			else
 				discord.UpdatePresence(DiscordWrapper::MENU);
 			gSoundManager->PlayBGM(SoundManager::BGM::MENU, gGameConfig->loopMusic);
-			DrawBackImage(imageManager.tBackGround_menu, resized);
+			if((wHostPrepare && wHostPrepare->isVisible()) || (wLanWindow && wLanWindow->isVisible()) || (wCreateHost && wCreateHost->isVisible()) || (wRoomListPlaceholder && wRoomListPlaceholder->isVisible()))
+				DrawBackImage(imageManager.tBackGround, resized);
+			else
+				DrawBackImage(imageManager.tBackGround_menu, resized);
 		}
 		if(current_topdown != gGameConfig->topdown_view || current_keep_aspect_ratio != gGameConfig->keep_aspect_ratio) {
 			if(std::exchange(gGameConfig->topdown_view, current_topdown) != gGameConfig->topdown_view)
@@ -6827,15 +6845,9 @@ void Game::OnResize() {
 
 	wLanWindow->setRelativePosition(ResizeWin(220, 100, 800, 520));
 	SetCentered(wCreateHost, false);
-	if(dInfo.opponames.size() + dInfo.selfnames.size() >= 5) {
-		wHostPrepare->setRelativePosition(ResizeWin(270, 120, 750, 500));
-		wHostPrepareR->setRelativePosition(ResizeWin(750, 120, 950, 500));
-		wHostPrepareL->setRelativePosition(ResizeWin(70, 120, 270, 500));
-	} else {
-		wHostPrepare->setRelativePosition(ResizeWin(270, 120, 750, 440));
-		wHostPrepareR->setRelativePosition(ResizeWin(750, 120, 950, 440));
-		wHostPrepareL->setRelativePosition(ResizeWin(70, 120, 270, 440));
-	}
+	wHostPrepare->setRelativePosition(ResizeWin(48, 22, 976, 618));
+	if(wHostPrepareR) wHostPrepareR->setVisible(false);
+	if(wHostPrepareL) wHostPrepareL->setVisible(false);
 	wRules->setRelativePosition(ResizeWin(630, 100, 1000, 310));
 	wReplay->setRelativePosition(ResizeWin(220, 100, 800, 520));
 	wSinglePlay->setRelativePosition(ResizeWin(220, 100, 800, 520));

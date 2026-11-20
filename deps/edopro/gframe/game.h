@@ -1021,6 +1021,11 @@ public:
 	void StartDuelSessionOnServer(bool isAdventure, int npcId, const std::string& opponentName);
 	void NotifyDuelResultToServer(bool isAdventure, int npcId, const std::string& opponentName, bool isWin, int turnos, const std::string& tipoFin);
 	void UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName);
+	std::atomic<bool> hostPrepTexturePending[6]{};
+	std::wstring hostPrepPendingAvatar[6];
+	std::string hostPrepPendingAvatarFile[6];
+	std::string hostPrepPendingFlagUrl[6];
+	void ProcessPendingHostPrepTextures();
 
 	// Dedicated Economy Interfaces (Store, Store Avatars, Store Boosters, Player Profile, Mailbox)
 	struct StoreAvatarItem {

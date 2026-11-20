@@ -498,10 +498,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->btnJoinCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wHostPrepare);
 				mainGame->HideElement(mainGame->gBot.window);
-				if (mainGame->wHostPrepareR->isVisible())
-					mainGame->HideElement(mainGame->wHostPrepareR);
-				if (mainGame->wHostPrepareL->isVisible())
-					mainGame->HideElement(mainGame->wHostPrepareL);
+				if (mainGame->wHostPrepareR)
+					mainGame->wHostPrepareR->setVisible(false);
+				if (mainGame->wHostPrepareL)
+					mainGame->wHostPrepareL->setVisible(false);
 				if(mainGame->isHostingOnline)
 					mainGame->ShowElement(mainGame->wRoomListPlaceholder);
 				else

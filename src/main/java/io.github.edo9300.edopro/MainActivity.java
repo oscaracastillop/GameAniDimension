@@ -348,8 +348,8 @@ public class MainActivity extends Activity {
 					HttpURLConnection conn = null;
 					try {
 						conn = (HttpURLConnection) url.openConnection();
-						conn.setConnectTimeout(3500);
-						conn.setReadTimeout(5000);
+						conn.setConnectTimeout(2000);
+						conn.setReadTimeout(3500);
 						conn.setRequestMethod("GET");
 						if (conn.getResponseCode() != 200) {
 							throw new Exception("HTTP " + conn.getResponseCode());
@@ -359,8 +359,8 @@ public class MainActivity extends Activity {
 						apiUrl = "http://66.92.168.136:8080";
 						url = new URL(apiUrl + "/api/updates/manifest?platform=android");
 						conn = (HttpURLConnection) url.openConnection();
-						conn.setConnectTimeout(3500);
-						conn.setReadTimeout(5000);
+						conn.setConnectTimeout(2000);
+						conn.setReadTimeout(3500);
 						conn.setRequestMethod("GET");
 					}
 					if (conn.getResponseCode() == 200) {
@@ -432,7 +432,7 @@ public class MainActivity extends Activity {
 									@Override
 									public void run() {
 										if (statusText != null) {
-											statusText.setText("¡Juego actualizado! Conectando al servidor...");
+											statusText.setText("¡Juego actualizado! Iniciando Ani Dimension...");
 										}
 									}
 								});
@@ -441,7 +441,7 @@ public class MainActivity extends Activity {
 									@Override
 									public void run() {
 										if (statusText != null) {
-											statusText.setText("Juego actualizado. Conectando al servidor...");
+											statusText.setText("Juego actualizado. Iniciando Ani Dimension...");
 										}
 									}
 								});
@@ -454,11 +454,10 @@ public class MainActivity extends Activity {
 						@Override
 						public void run() {
 							if (statusText != null) {
-								statusText.setText("Modo sin conexión. Iniciando...");
+								statusText.setText("Iniciando Ani Dimension...");
 							}
 						}
 					});
-					try { Thread.sleep(500); } catch (Exception ignored) {}
 				}
 				runOnUiThread(onComplete);
 			}

@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashSet;
 import java.util.Vector;
 
 public class AssetCopy extends Activity {
@@ -69,6 +70,13 @@ public class AssetCopy extends Activity {
 	//private static native void assetsMutexUnlock();
 
 	public boolean copyAsset(String source, String destination) {
+		try {
+			File destFile = new File(destination);
+			File parent = destFile.getParentFile();
+			if (parent != null && !parent.exists()) {
+				parent.mkdirs();
+			}
+		} catch (Throwable ignored) {}
 		if (sNativeCopierLoaded) {
 			try {
 				if (copyAssetToDestination(getAssets(), source, destination)) {
@@ -180,14 +188,15 @@ public class AssetCopy extends Activity {
 	private class copyAssetTask extends AsyncTask<String, Integer, String> {
 		boolean m_copy_started = false;
 		String m_Foldername = "media";
-		Vector<String> m_foldernames;
+		HashSet<String> m_foldernames;
 		Vector<String> m_filenames;
 		Vector<String> m_tocopy;
+		int m_totalFiles = 0;
 
 		@Override
 		protected String doInBackground(String... files) {
 			Log.e("AssetCopy", "doInBackground");
-			m_foldernames = new Vector<>();
+			m_foldernames = new HashSet<>();
 			m_filenames = new Vector<>();
 			m_tocopy = new Vector<>();
 
@@ -199,17 +208,33 @@ public class AssetCopy extends Activity {
 			ProcessFileList();
 
 			// doing work
-			m_copy_started = m_tocopy.size() > 0;
-			m_ProgressBar.setMax(m_tocopy.size());
+			m_totalFiles = m_tocopy.size();
+			m_copy_started = m_totalFiles > 0;
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					if (m_ProgressBar != null) {
+						m_ProgressBar.setIndeterminate(false);
+						m_ProgressBar.setMax(Math.max(1, m_totalFiles));
+						m_ProgressBar.setProgress(0);
+					}
+				}
+			});
 
-			for (int i = 0; i < m_tocopy.size(); i++) {
+			long lastUiUpdate = 0;
+			for (int i = 0; i < m_totalFiles; i++) {
+				if (isCancelled()) break;
 				String filename = m_tocopy.get(i);
 				String full_source_filename = isUpdate ? "update/" + filename : "defaults/" + filename;
-				publishProgress(i);
+				long now = System.currentTimeMillis();
+				if (i == 0 || i == m_totalFiles - 1 || (now - lastUiUpdate) >= 45) {
+					lastUiUpdate = now;
+					publishProgress(i);
+				}
 				if (copyAsset(full_source_filename, workingDir + "/" + filename))
-					Log.v("AssetCopy", "Copied file: " + m_tocopy.get(i));
+					Log.v("AssetCopy", "Copied file: " + filename);
 				else
-					Log.e("AssetCopy", "Copying file: " + m_tocopy.get(i));
+					Log.e("AssetCopy", "Failed copying file: " + filename);
 			}
 			return "";
 		}
@@ -219,13 +244,15 @@ public class AssetCopy extends Activity {
 		 */
 		protected void onProgressUpdate(Integer... progress) {
 			if (m_copy_started) {
-				String todisplay = m_tocopy.get(progress[0]);
-				m_ProgressBar.setProgress(progress[0]);
-				m_Filename.setText(todisplay);
+				int idx = progress[0];
+				if (idx >= 0 && idx < m_tocopy.size()) {
+					String raw = m_tocopy.get(idx);
+					String shortName = new File(raw).getName();
+					m_ProgressBar.setProgress(idx + 1);
+					m_Filename.setText("Cargando archivos al juego, espera por favor... (" + (idx + 1) + "/" + m_totalFiles + ")\n" + shortName);
+				}
 			} else {
-				String todisplay = m_Foldername;
-				String full_text = "scanning " + todisplay + " ...";
-				m_Filename.setText(full_text);
+				m_Filename.setText("Preparando archivos del juego, espera por favor...");
 			}
 		}
 
@@ -233,8 +260,9 @@ public class AssetCopy extends Activity {
 		 * check all files and folders in filelist
 		 */
 		void ProcessFileList() {
-
+			long lastScanUi = 0;
 			for (String current_path : m_filenames) {
+				if (isCancelled()) break;
 				String FlashPath = workingDir + "/" + current_path;
 				if (isAssetFolder(current_path)) {
 					if (current_path.isEmpty()) {
@@ -245,9 +273,12 @@ public class AssetCopy extends Activity {
 						m_Foldername = "update/" + current_path;
 					else
 						m_Foldername = "defaults/" + current_path;
-					publishProgress(0);
+					long now = System.currentTimeMillis();
+					if ((now - lastScanUi) >= 120) {
+						lastScanUi = now;
+						publishProgress(0);
+					}
 					/* open file in order to check if it's a folder */
-					safeMakeDirectory(FlashPath);
 					if (!safeMakeDirectory(FlashPath)) {
 						Log.e("AssetCopy", "\t failed create folder: " +
 								FlashPath);
@@ -308,7 +339,7 @@ public class AssetCopy extends Activity {
 
 		protected void onPostExecute(String result) {
 			Intent returnIntent = new Intent();
-			setResult(Activity.RESULT_CANCELED, returnIntent);
+			setResult(Activity.RESULT_OK, returnIntent);
 			finish();
 		}
 
