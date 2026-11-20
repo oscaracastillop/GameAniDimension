@@ -436,8 +436,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 				mainGame->btnJoinCancel->setEnabled(true);
 				mainGame->HideElement(mainGame->wCreateHost);
 				mainGame->HideElement(mainGame->wHostPrepare);
-				mainGame->HideElement(mainGame->wHostPrepareL);
-				mainGame->HideElement(mainGame->wHostPrepareR);
+				if (mainGame->wHostPrepareL) mainGame->wHostPrepareL->setVisible(false);
+				if (mainGame->wHostPrepareR) mainGame->wHostPrepareR->setVisible(false);
 				mainGame->HideElement(mainGame->gBot.window);
 				if(mainGame->isAdventureMode) {
 					mainGame->wAdventureMode->setVisible(true);
@@ -988,8 +988,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		if(mainGame->isAdventureMode) {
 			// In adventure mode, do NOT show host preparation lobby or chat
 			mainGame->HideElement(mainGame->wHostPrepare);
-			mainGame->HideElement(mainGame->wHostPrepareL);
-			mainGame->HideElement(mainGame->wHostPrepareR);
+			if (mainGame->wHostPrepareL) mainGame->wHostPrepareL->setVisible(false);
+			if (mainGame->wHostPrepareR) mainGame->wHostPrepareR->setVisible(false);
 			mainGame->HideElement(mainGame->gBot.window);
 			mainGame->btnHostPrepStart->setVisible(false);
 			mainGame->btnHostPrepReady->setVisible(false);
@@ -1103,13 +1103,23 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			}
 #endif
 		} else {
-			if(mainGame->wCreateHost->isVisible())
+			if(mainGame->wCreateHost && mainGame->wCreateHost->isVisible())
 				mainGame->HideElement(mainGame->wCreateHost);
-			else if (mainGame->wLanWindow->isVisible())
+			if(mainGame->wLanWindow && mainGame->wLanWindow->isVisible())
 				mainGame->HideElement(mainGame->wLanWindow);
+			if(mainGame->wRoomListPlaceholder && mainGame->wRoomListPlaceholder->isVisible())
+				mainGame->HideElement(mainGame->wRoomListPlaceholder);
+			if(mainGame->wRules && mainGame->wRules->isVisible())
+				mainGame->HideElement(mainGame->wRules);
+			if(mainGame->wMainMenu && mainGame->wMainMenu->isVisible())
+				mainGame->HideElement(mainGame->wMainMenu);
+			if(mainGame->wHostPrepareR)
+				mainGame->wHostPrepareR->setVisible(false);
+			if(mainGame->wHostPrepareL)
+				mainGame->wHostPrepareL->setVisible(false);
+			if(mainGame->gBot.window)
+				mainGame->gBot.window->setVisible(false);
 			mainGame->ShowElement(mainGame->wHostPrepare);
-			mainGame->HideElement(mainGame->wHostPrepareR);
-			mainGame->HideElement(mainGame->wHostPrepareL);
 			mainGame->wChat->setVisible(true);
 		}
 		mainGame->dInfo.isFirst = (mainGame->dInfo.player_type < mainGame->dInfo.team1) || (mainGame->dInfo.player_type >= 7);
@@ -1164,8 +1174,8 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		}
 		mainGame->HideElement(mainGame->wHostPrepare);
 		mainGame->HideElement(mainGame->gBot.window);
-		mainGame->HideElement(mainGame->wHostPrepareL);
-		mainGame->HideElement(mainGame->wHostPrepareR);
+		if (mainGame->wHostPrepareL) mainGame->wHostPrepareL->setVisible(false);
+		if (mainGame->wHostPrepareR) mainGame->wHostPrepareR->setVisible(false);
 		mainGame->WaitFrameSignal(11, lock);
 		mainGame->dField.Clear();
 		mainGame->dInfo.isInLobby = false;

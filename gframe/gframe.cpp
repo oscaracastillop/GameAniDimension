@@ -147,8 +147,10 @@ int edopro_main(const args_t& args) {
 		ygo::GUIUtils::ShowErrorWindow("Initialization fail", text);
 		return EXIT_FAILURE;
 	}
+#if !EDOPRO_ANDROID
 	if (!data->configs->noClientUpdates)
 		updater.CheckUpdates();
+#endif
 #if EDOPRO_WINDOWS
 	if(!data->configs->showConsole) {
 		FILE* fDummy;
