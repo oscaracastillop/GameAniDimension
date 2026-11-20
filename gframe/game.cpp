@@ -3092,6 +3092,8 @@ void Game::LogoutToLogin() {
 	}
 }
 
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "");
+
 void Game::FetchLobbyStatsAsync() {
 	const std::wstring curUser = loggedInUser;
 	const std::string tok = sessionToken;
