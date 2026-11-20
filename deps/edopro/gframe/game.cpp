@@ -4127,6 +4127,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wClansMenu) wClansMenu->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
 	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
+	if(wPackPoolOverlay) wPackPoolOverlay->setVisible(false);
 	if(pnlClanCreate) pnlClanCreate->setVisible(false);
 }
 
@@ -4163,8 +4164,10 @@ void Game::PopulateEconomyScreens() {
 	stStoreTitle = env->addStaticText(L"TIENDA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
 	stStoreTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreTitle->setOverrideFont(loginTitleFont);
-	stStoreBalance = env->addStaticText(L"StarShips: 0 SS  |  Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
+	stStoreBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
 	stStoreBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
+	stStoreBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnStoreBack);
 	{
@@ -4265,13 +4268,15 @@ void Game::PopulateEconomyScreens() {
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
 
-	// 2. Store Avatars (5-card grid + search + pagination, Imagen 7)
+	// 2. Store Avatars (5x2 card grid + search + pagination)
 	makeCanvas(wStoreAvatars);
 	stStoreAvaTitle = env->addStaticText(L"AVATARES", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreAvaTitle->setOverrideFont(loginTitleFont);
-	stStoreAvaBalance = env->addStaticText(L"StarShips: 0 SS | Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
+	stStoreAvaBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreAvaBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
+	stStoreAvaBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	stStoreAvaBanner = env->addStaticText(L"Cada avatar llega a tu Buz\u00F3n como personaje \u00FAnico. Sus stats pertenecen solo al Avatar equipado. M\u00E1x: 300% EXP \u2022 300% SS \u2022 100% Luck.", irr::core::recti(0, 0, 10, 10), false, true, wStoreAvatars);
 	stStoreAvaBanner->setWordWrap(true);
 	stStoreAvaBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4280,7 +4285,7 @@ void Game::PopulateEconomyScreens() {
 	btnStoreAvaBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStoreAvaSearch);
 	styleDarkBtn(btnStoreAvaBack);
-	for(int i = 0; i < 5; ++i) {
+	for(int i = 0; i < 10; ++i) {
 		wAvaCards[i] = makePanel(wStoreAvatars);
 		imgAvaCardIcons[i] = env->addImage(irr::core::recti(0, 0, 64, 64), wAvaCards[i], -1, 0, true);
 		imgAvaCardIcons[i]->setScaleImage(true);
@@ -4309,8 +4314,10 @@ void Game::PopulateEconomyScreens() {
 	stStoreBstTitle = env->addStaticText(L"POTENCIADORES DE AVATAR", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
 	stStoreBstTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreBstTitle->setOverrideFont(loginTitleFont);
-	stStoreBstBalance = env->addStaticText(L"StarShips: 0 SS | Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
+	stStoreBstBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
 	stStoreBstBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreBstBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
+	stStoreBstBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	stStoreBstBanner = env->addStaticText(L"Llegan a tu Buz\u00F3n y al reclamarlos se suman exclusivamente a tu Avatar Activo. L\u00EDmites: 300% EXP \u2022 300% SS \u2022 100% Luck.", irr::core::recti(0, 0, 10, 10), false, true, wStoreBoosters);
 	stStoreBstBanner->setWordWrap(true);
 	stStoreBstBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4351,8 +4358,10 @@ void Game::PopulateEconomyScreens() {
 	stStoreVipTitle = env->addStaticText(L"PASES VIP SEMANALES", irr::core::recti(0, 0, 10, 10), false, false, wStoreVip);
 	stStoreVipTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreVipTitle->setOverrideFont(loginTitleFont);
-	stStoreVipBalance = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreVip);
-	stStoreVipBalance->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stStoreVipBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreVip);
+	stStoreVipBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreVipBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreVip);
+	stStoreVipBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	stStoreVipActive = env->addStaticText(L"Sin VIP activo", irr::core::recti(0, 0, 10, 10), false, true, wStoreVip);
 	stStoreVipActive->setWordWrap(true);
 	stStoreVipActive->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
@@ -4375,13 +4384,15 @@ void Game::PopulateEconomyScreens() {
 		styleCyanBtn(btnVipCardBuy[i]);
 	}
 
-	// 3c. Store Cards (5-card grid + search + currency filter + pagination, Imagen 11)
+	// 3c. Store Cards (5x2 card grid + search + currency filter + pagination)
 	makeCanvas(wStoreCards);
 	stStoreCardsTitle = env->addStaticText(L"TIENDA DE CARTAS", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreCardsTitle->setOverrideFont(loginTitleFont);
-	stStoreCardsBalance = env->addStaticText(L"StarShips: 0 SS | Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
+	stStoreCardsBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreCardsBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
+	stStoreCardsBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	stStoreCardsBanner = env->addStaticText(L"Adquiere cartas individuales (l\u00EDmite 1 copia por usuario). Cada compra se env\u00EDa a tu Buz\u00F3n.", irr::core::recti(0, 0, 10, 10), false, true, wStoreCards);
 	stStoreCardsBanner->setWordWrap(true);
 	stStoreCardsBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4397,7 +4408,7 @@ void Game::PopulateEconomyScreens() {
 	}
 	btnStoreCardBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStoreCardBack);
-	for(int i = 0; i < 5; ++i) {
+	for(int i = 0; i < 10; ++i) {
 		wCardCards[i] = makePanel(wStoreCards);
 		imgCardCardArts[i] = env->addImage(irr::core::recti(0, 0, 64, 92), wCardCards[i], -1, 0, true);
 		imgCardCardArts[i]->setScaleImage(true);
@@ -4419,13 +4430,15 @@ void Game::PopulateEconomyScreens() {
 	styleDarkBtn(btnStoreCardPrev);
 	styleDarkBtn(btnStoreCardNext);
 
-	// 3d. Store Packs (4-card grid + search + pagination, Imagen 10)
+	// 3d. Store Packs (4x2 card grid + search + pagination + visual pool overlay)
 	makeCanvas(wStorePacks);
 	stStorePacksTitle = env->addStaticText(L"SOBRES DE EXPANSI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePacksTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStorePacksTitle->setOverrideFont(loginTitleFont);
 	stStorePacksBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePacksBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStorePacksBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
+	stStorePacksBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	stStorePacksBanner = env->addStaticText(L"Cada sobre entrega 3 cartas aleatorias de su serie directamente a tu inventario seg\u00FAn su probabilidad de drop.", irr::core::recti(0, 0, 10, 10), false, true, wStorePacks);
 	stStorePacksBanner->setWordWrap(true);
 	stStorePacksBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4434,7 +4447,7 @@ void Game::PopulateEconomyScreens() {
 	btnStorePackBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStorePackSearch);
 	styleDarkBtn(btnStorePackBack);
-	for(int i = 0; i < 4; ++i) {
+	for(int i = 0; i < 8; ++i) {
 		wPackCards[i] = makePanel(wStorePacks);
 		imgPackCardArts[i] = env->addImage(irr::core::recti(0, 0, 64, 92), wPackCards[i], -1, 0, true);
 		imgPackCardArts[i]->setScaleImage(true);
@@ -4449,6 +4462,29 @@ void Game::PopulateEconomyScreens() {
 		styleCyanBtn(btnPackCardBuy[i]);
 		styleDarkBtn(btnPackCardView[i]);
 	}
+	wPackPoolOverlay = makePanel(wStorePacks);
+	wPackPoolOverlay->setBackgroundColor(irr::video::SColor(245, 9, 15, 32));
+	wPackPoolOverlay->setVisible(false);
+	stPackPoolTitle = env->addStaticText(L"CARTAS DEL SOBRE", irr::core::recti(0, 0, 10, 10), false, false, wPackPoolOverlay);
+	stPackPoolTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stPackPoolTitle->setOverrideFont(loginTitleFont);
+	btnPackPoolClose = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_CLOSE, L"Cerrar");
+	styleDarkBtn(btnPackPoolClose);
+	for(int i = 0; i < 12; ++i) {
+		wPackPoolCards[i] = makePanel(wPackPoolOverlay);
+		imgPackPoolArts[i] = env->addImage(irr::core::recti(0, 0, 64, 92), wPackPoolCards[i], -1, 0, true);
+		imgPackPoolArts[i]->setScaleImage(true);
+		stPackPoolNames[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackPoolCards[i]);
+		stPackPoolNames[i]->setWordWrap(true);
+		stPackPoolNames[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	}
+	btnPackPoolPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_PREV, L"Anterior");
+	stPackPoolPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wPackPoolOverlay);
+	stPackPoolPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stPackPoolPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	btnPackPoolNext = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_NEXT, L"Siguiente");
+	styleDarkBtn(btnPackPoolPrev);
+	styleDarkBtn(btnPackPoolNext);
 	btnStorePackPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_PREV, L"Anterior");
 	stStorePackPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePackPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -4788,7 +4824,8 @@ void Game::ResizeEconomyScreens() {
 	if(wStoreMenu) {
 		wStoreMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
 		stStoreTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(32)));
-		stStoreBalance->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad - Scale(190), topY + Scale(54)));
+		stStoreBalance->setRelativePosition(irr::core::recti(pad, topY + Scale(34), pad + Scale(240), topY + Scale(54)));
+		if(stStoreBalanceCD) stStoreBalanceCD->setRelativePosition(irr::core::recti(pad + Scale(248), topY + Scale(34), W - pad - Scale(190), topY + Scale(54)));
 		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(4), W - pad, topY + Scale(40)));
 		const irr::s32 gridTop = topY + Scale(66);
 		const irr::s32 gap = Scale(14);
@@ -4838,50 +4875,65 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridTop = topY + Scale(70);
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(260), botY - gridTop);
+		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(320), availH);
+		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int di = 0; di < 5; ++di) {
 			irr::s32 cx = pad + di * (cardW + gap);
 			if(wDonCards[di]) {
-				wDonCards[di]->setRelativePosition(irr::core::recti(cx, gridTop, cx + cardW, gridTop + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(80), (cardH * 36) / 100);
-				fitImage(imgDonIcons[di], cardW / 2, Scale(12), cardW - Scale(20), icH);
-				irr::s32 ty = Scale(18) + icH;
+				wDonCards[di]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 icH = std::max<irr::s32>(Scale(72), (cardH * 30) / 100);
+				fitImage(imgDonIcons[di], cardW / 2, Scale(10), cardW - Scale(24), icH);
+				irr::s32 ty = Scale(14) + icH;
 				if(stDonTitles[di]) stDonTitles[di]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(22)));
-				if(stDonAmounts[di]) stDonAmounts[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(24), cardW - Scale(10), ty + Scale(44)));
-				if(stDonDescs[di]) stDonDescs[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(48), cardW - Scale(10), cardH - Scale(78)));
-				if(stDonPrices[di]) stDonPrices[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(72), cardW - Scale(10), cardH - Scale(48)));
-				if(btnDonSolicitar[di]) btnDonSolicitar[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(42), cardW - Scale(10), cardH - Scale(10)));
+				if(stDonAmounts[di]) stDonAmounts[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(22), cardW - Scale(10), ty + Scale(42)));
+				if(stDonDescs[di]) stDonDescs[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(46), cardW - Scale(10), cardH - Scale(74)));
+				if(stDonPrices[di]) stDonPrices[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(70), cardW - Scale(10), cardH - Scale(46)));
+				if(btnDonSolicitar[di]) btnDonSolicitar[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(40), cardW - Scale(10), cardH - Scale(10)));
 			}
 		}
 	}
 
-	// 2. Store Avatars (5-card grid + search + pagination)
+	// 2. Store Avatars (5x2 card grid + search + pagination)
 	if(wStoreAvatars) {
 		wStoreAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreAvaTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(400), topY + Scale(30)));
-		stStoreAvaBalance->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(4), W - pad - Scale(185), topY + Scale(30)));
-		btnStoreAvaBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreAvaBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(60)));
-		ebStoreAvaSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(64), pad + Scale(280), topY + Scale(92)));
-		btnStoreAvaSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(64), pad + Scale(378), topY + Scale(92)));
+		stStoreAvaTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
+		stStoreAvaBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
+		if(stStoreAvaBalanceCD) stStoreAvaBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		btnStoreAvaBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		stStoreAvaBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
+		ebStoreAvaSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(280), topY + Scale(90)));
+		btnStoreAvaSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(62), pad + Scale(378), topY + Scale(90)));
 
-		const irr::s32 gridTop = topY + Scale(102);
+		const irr::s32 gridTop = topY + Scale(98);
 		const irr::s32 pageBarH = Scale(34);
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
-		const irr::s32 gap = Scale(12);
+		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(220), gridBot - gridTop);
-		for(int i = 0; i < 5; ++i) {
-			irr::s32 cx = pad + i * (cardW + gap);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		for(int i = 0; i < 10; ++i) {
+			int row = i / 5;
+			int col = i % 5;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wAvaCards[i]) {
-				wAvaCards[i]->setRelativePosition(irr::core::recti(cx, gridTop, cx + cardW, gridTop + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(90), (cardH * 46) / 100);
-				fitImage(imgAvaCardIcons[i], cardW / 2, Scale(10), cardW - Scale(20), icH);
-				irr::s32 ty = Scale(14) + icH;
-				if(stAvaCardTitles[i]) stAvaCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(22)));
-				if(stAvaCardStats[i]) stAvaCardStats[i]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(24), cardW - Scale(10), cardH - Scale(84)));
-				if(btnAvaCardBuySS[i]) btnAvaCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(78), cardW - Scale(10), cardH - Scale(46)));
-				if(btnAvaCardBuyCD[i]) btnAvaCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(40), cardW - Scale(10), cardH - Scale(8)));
+				wAvaCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 icH = std::max<irr::s32>(Scale(48), (cardH * 38) / 100);
+				fitImage(imgAvaCardIcons[i], cardW / 2, Scale(6), cardW - Scale(24), icH);
+				irr::s32 ty = Scale(8) + icH;
+				if(stAvaCardTitles[i]) stAvaCardTitles[i]->setRelativePosition(irr::core::recti(Scale(8), ty, cardW - Scale(8), ty + Scale(20)));
+				if(stAvaCardStats[i]) stAvaCardStats[i]->setRelativePosition(irr::core::recti(Scale(8), ty + Scale(20), cardW - Scale(8), cardH - Scale(38)));
+				bool hasSS = btnAvaCardBuySS[i] && btnAvaCardBuySS[i]->isVisible();
+				bool hasCD = btnAvaCardBuyCD[i] && btnAvaCardBuyCD[i]->isVisible();
+				if(hasSS && hasCD) {
+					irr::s32 halfB = (cardW - Scale(22)) / 2;
+					btnAvaCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), Scale(8) + halfB, cardH - Scale(8)));
+					btnAvaCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				} else if(hasSS) {
+					btnAvaCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				} else if(hasCD) {
+					btnAvaCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				}
 			}
 		}
 		irr::s32 py = botY - pageBarH;
@@ -4893,9 +4945,10 @@ void Game::ResizeEconomyScreens() {
 	// 3. Store Boosters (4x2 card grid + filter tabs + pagination)
 	if(wStoreBoosters) {
 		wStoreBoosters->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreBstTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(400), topY + Scale(30)));
-		stStoreBstBalance->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(4), W - pad - Scale(185), topY + Scale(30)));
-		btnStoreBstBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
+		stStoreBstTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
+		stStoreBstBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
+		if(stStoreBstBalanceCD) stStoreBstBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		btnStoreBstBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stStoreBstBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		for(int fi = 0; fi < 4; ++fi) {
 			irr::s32 fx = pad + fi * Scale(104);
@@ -4933,36 +4986,40 @@ void Game::ResizeEconomyScreens() {
 	// 3b. Store VIP (4-column card grid)
 	if(wStoreVip) {
 		wStoreVip->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreVipTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(400), topY + Scale(30)));
-		stStoreVipBalance->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(4), W - pad - Scale(185), topY + Scale(30)));
-		btnStoreVipBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreVipActive->setRelativePosition(irr::core::recti(pad, topY + Scale(36), W - pad, topY + Scale(64)));
+		stStoreVipTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
+		stStoreVipBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
+		if(stStoreVipBalanceCD) stStoreVipBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		btnStoreVipBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		stStoreVipActive->setRelativePosition(irr::core::recti(pad, topY + Scale(36), W - pad, topY + Scale(62)));
 
-		const irr::s32 gridTop = topY + Scale(72);
+		const irr::s32 gridTop = topY + Scale(70);
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(260), botY - gridTop);
+		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(330), availH);
+		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int i = 0; i < 4; ++i) {
 			irr::s32 cx = pad + i * (cardW + gap);
 			if(wVipCards[i]) {
-				wVipCards[i]->setRelativePosition(irr::core::recti(cx, gridTop, cx + cardW, gridTop + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(100), (cardH * 42) / 100);
-				fitImage(imgVipCardIcons[i], cardW / 2, Scale(12), cardW - Scale(24), icH);
-				irr::s32 ty = Scale(18) + icH;
-				if(stVipCardTitles[i]) stVipCardTitles[i]->setRelativePosition(irr::core::recti(Scale(12), ty, cardW - Scale(12), ty + Scale(24)));
-				if(stVipCardDescs[i]) stVipCardDescs[i]->setRelativePosition(irr::core::recti(Scale(12), ty + Scale(28), cardW - Scale(12), cardH - Scale(78)));
-				if(stVipCardPrices[i]) stVipCardPrices[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(72), cardW - Scale(12), cardH - Scale(48)));
-				if(btnVipCardBuy[i]) btnVipCardBuy[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(42), cardW - Scale(12), cardH - Scale(10)));
+				wVipCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 icH = std::max<irr::s32>(Scale(76), (cardH * 34) / 100);
+				fitImage(imgVipCardIcons[i], cardW / 2, Scale(10), cardW - Scale(24), icH);
+				irr::s32 ty = Scale(14) + icH;
+				if(stVipCardTitles[i]) stVipCardTitles[i]->setRelativePosition(irr::core::recti(Scale(12), ty, cardW - Scale(12), ty + Scale(22)));
+				if(stVipCardDescs[i]) stVipCardDescs[i]->setRelativePosition(irr::core::recti(Scale(12), ty + Scale(24), cardW - Scale(12), cardH - Scale(74)));
+				if(stVipCardPrices[i]) stVipCardPrices[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(70), cardW - Scale(12), cardH - Scale(46)));
+				if(btnVipCardBuy[i]) btnVipCardBuy[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(40), cardW - Scale(12), cardH - Scale(10)));
 			}
 		}
 	}
 
-	// 3c. Store Cards (5-card grid + search + currency filter + pagination)
+	// 3c. Store Cards (5x2 card grid + search + currency filter + pagination)
 	if(wStoreCards) {
 		wStoreCards->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreCardsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(400), topY + Scale(30)));
-		stStoreCardsBalance->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(4), W - pad - Scale(185), topY + Scale(30)));
-		btnStoreCardBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
+		stStoreCardsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
+		stStoreCardsBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
+		if(stStoreCardsBalanceCD) stStoreCardsBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		btnStoreCardBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stStoreCardsBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		ebStoreCardSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(260), topY + Scale(90)));
 		btnStoreCardSearch->setRelativePosition(irr::core::recti(pad + Scale(268), topY + Scale(62), pad + Scale(350), topY + Scale(90)));
@@ -4971,25 +5028,37 @@ void Game::ResizeEconomyScreens() {
 			if(btnStoreCardFilt[fi]) btnStoreCardFilt[fi]->setRelativePosition(irr::core::recti(fx, topY + Scale(62), fx + Scale(116), topY + Scale(90)));
 		}
 
-		const irr::s32 gridTop = topY + Scale(100);
+		const irr::s32 gridTop = topY + Scale(98);
 		const irr::s32 pageBarH = Scale(34);
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
-		const irr::s32 gap = Scale(12);
+		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(230), gridBot - gridTop);
-		for(int i = 0; i < 5; ++i) {
-			irr::s32 cx = pad + i * (cardW + gap);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		for(int i = 0; i < 10; ++i) {
+			int row = i / 5;
+			int col = i % 5;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wCardCards[i]) {
-				wCardCards[i]->setRelativePosition(irr::core::recti(cx, gridTop, cx + cardW, gridTop + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(100), (cardH * 48) / 100);
+				wCardCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 artH = std::max<irr::s32>(Scale(56), (cardH * 42) / 100);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(20)) { artW = cardW - Scale(20); artH = (artW * 254) / 177; }
-				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(10), (cardW + artW) / 2, Scale(10) + artH));
-				irr::s32 ty = Scale(16) + artH;
-				if(stCardCardTitles[i]) stCardCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(24)));
-				if(stCardCardMeta[i]) stCardCardMeta[i]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(26), cardW - Scale(10), cardH - Scale(82)));
-				if(btnCardCardBuySS[i]) btnCardCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(76), cardW - Scale(10), cardH - Scale(44)));
-				if(btnCardCardBuyCD[i]) btnCardCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(40), cardW - Scale(10), cardH - Scale(8)));
+				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
+				irr::s32 ty = Scale(8) + artH;
+				if(stCardCardTitles[i]) stCardCardTitles[i]->setRelativePosition(irr::core::recti(Scale(8), ty, cardW - Scale(8), ty + Scale(20)));
+				if(stCardCardMeta[i]) stCardCardMeta[i]->setRelativePosition(irr::core::recti(Scale(8), ty + Scale(20), cardW - Scale(8), cardH - Scale(38)));
+				bool hasSS = btnCardCardBuySS[i] && btnCardCardBuySS[i]->isVisible();
+				bool hasCD = btnCardCardBuyCD[i] && btnCardCardBuyCD[i]->isVisible();
+				if(hasSS && hasCD) {
+					irr::s32 halfB = (cardW - Scale(22)) / 2;
+					btnCardCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), Scale(8) + halfB, cardH - Scale(8)));
+					btnCardCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				} else if(hasSS) {
+					btnCardCardBuySS[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				} else if(hasCD) {
+					btnCardCardBuyCD[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				}
 			}
 		}
 		irr::s32 py = botY - pageBarH;
@@ -4998,39 +5067,75 @@ void Game::ResizeEconomyScreens() {
 		btnStoreCardNext->setRelativePosition(irr::core::recti(W / 2 + Scale(60), py, W / 2 + Scale(170), botY));
 	}
 
-	// 3d. Store Packs (4-card grid + search + pagination)
+	// 3d. Store Packs (4x2 card grid + search + pagination + visual pool overlay)
 	if(wStorePacks) {
 		wStorePacks->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStorePacksTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(400), topY + Scale(30)));
-		stStorePacksBalance->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(4), W - pad - Scale(185), topY + Scale(30)));
-		btnStorePackBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
+		stStorePacksTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
+		stStorePacksBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
+		if(stStorePacksBalanceCD) stStorePacksBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		btnStorePackBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stStorePacksBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		ebStorePackSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(280), topY + Scale(90)));
 		btnStorePackSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(62), pad + Scale(378), topY + Scale(90)));
 
-		const irr::s32 gridTop = topY + Scale(100);
+		const irr::s32 gridTop = topY + Scale(98);
 		const irr::s32 pageBarH = Scale(34);
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
-		const irr::s32 gap = Scale(14);
+		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(230), gridBot - gridTop);
-		for(int i = 0; i < 4; ++i) {
-			irr::s32 cx = pad + i * (cardW + gap);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		for(int i = 0; i < 8; ++i) {
+			int row = i / 4;
+			int col = i % 4;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wPackCards[i]) {
-				wPackCards[i]->setRelativePosition(irr::core::recti(cx, gridTop, cx + cardW, gridTop + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(90), (cardH * 38) / 100);
-				fitImage(imgPackCardArts[i], cardW / 2, Scale(10), cardW - Scale(24), artH);
-				irr::s32 ty = Scale(16) + artH;
-				if(stPackCardTitles[i]) stPackCardTitles[i]->setRelativePosition(irr::core::recti(Scale(12), ty, cardW - Scale(12), ty + Scale(42)));
-				if(stPackCardDescs[i]) stPackCardDescs[i]->setRelativePosition(irr::core::recti(Scale(12), ty + Scale(44), cardW - Scale(12), cardH - Scale(84)));
-				if(btnPackCardBuy[i]) btnPackCardBuy[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(78), cardW - Scale(12), cardH - Scale(46)));
-				if(btnPackCardView[i]) btnPackCardView[i]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(40), cardW - Scale(12), cardH - Scale(8)));
+				wPackCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 artH = std::max<irr::s32>(Scale(48), (cardH * 36) / 100);
+				fitImage(imgPackCardArts[i], cardW / 2, Scale(6), cardW - Scale(24), artH);
+				irr::s32 ty = Scale(8) + artH;
+				if(stPackCardTitles[i]) stPackCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(34)));
+				if(stPackCardDescs[i]) stPackCardDescs[i]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(34), cardW - Scale(10), cardH - Scale(38)));
+				irr::s32 halfB = (cardW - Scale(26)) / 2;
+				if(btnPackCardBuy[i]) btnPackCardBuy[i]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(34), Scale(10) + halfB, cardH - Scale(8)));
+				if(btnPackCardView[i]) btnPackCardView[i]->setRelativePosition(irr::core::recti(Scale(16) + halfB, cardH - Scale(34), cardW - Scale(10), cardH - Scale(8)));
 			}
 		}
 		irr::s32 py = botY - pageBarH;
 		btnStorePackPrev->setRelativePosition(irr::core::recti(W / 2 - Scale(170), py, W / 2 - Scale(60), botY));
 		stStorePackPage->setRelativePosition(irr::core::recti(W / 2 - Scale(55), py, W / 2 + Scale(55), botY));
 		btnStorePackNext->setRelativePosition(irr::core::recti(W / 2 + Scale(60), py, W / 2 + Scale(170), botY));
+
+		if(wPackPoolOverlay) {
+			irr::s32 ow = W - 2 * pad;
+			irr::s32 oh = botY - topY;
+			wPackPoolOverlay->setRelativePosition(irr::core::recti(pad, topY, pad + ow, topY + oh));
+			if(stPackPoolTitle) stPackPoolTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(12), ow - Scale(140), Scale(42)));
+			if(btnPackPoolClose) btnPackPoolClose->setRelativePosition(irr::core::recti(ow - Scale(128), Scale(10), ow - Scale(16), Scale(42)));
+			const irr::s32 pTop = Scale(52);
+			const irr::s32 pBot = oh - Scale(48);
+			const irr::s32 pGap = Scale(10);
+			const irr::s32 pColW = (ow - Scale(32) - 5 * pGap) / 6;
+			const irr::s32 pRowH = std::max<irr::s32>(Scale(120), (pBot - pTop - pGap) / 2);
+			for(int i = 0; i < 12; ++i) {
+				int r = i / 6;
+				int c = i % 6;
+				irr::s32 px = Scale(16) + c * (pColW + pGap);
+				irr::s32 ppy = pTop + r * (pRowH + pGap);
+				if(wPackPoolCards[i]) {
+					wPackPoolCards[i]->setRelativePosition(irr::core::recti(px, ppy, px + pColW, ppy + pRowH));
+					irr::s32 aH = std::max<irr::s32>(Scale(56), pRowH - Scale(46));
+					irr::s32 aW = (aH * 177) / 254;
+					if(aW > pColW - Scale(12)) { aW = pColW - Scale(12); aH = (aW * 254) / 177; }
+					if(imgPackPoolArts[i]) imgPackPoolArts[i]->setRelativePosition(irr::core::recti((pColW - aW) / 2, Scale(6), (pColW + aW) / 2, Scale(6) + aH));
+					if(stPackPoolNames[i]) stPackPoolNames[i]->setRelativePosition(irr::core::recti(Scale(6), Scale(8) + aH, pColW - Scale(6), pRowH - Scale(4)));
+				}
+			}
+			irr::s32 barY = oh - Scale(40);
+			if(btnPackPoolPrev) btnPackPoolPrev->setRelativePosition(irr::core::recti(ow / 2 - Scale(170), barY, ow / 2 - Scale(60), oh - Scale(8)));
+			if(stPackPoolPage) stPackPoolPage->setRelativePosition(irr::core::recti(ow / 2 - Scale(55), barY, ow / 2 + Scale(55), oh - Scale(8)));
+			if(btnPackPoolNext) btnPackPoolNext->setRelativePosition(irr::core::recti(ow / 2 + Scale(60), barY, ow / 2 + Scale(170), oh - Scale(8)));
+		}
 	}
 
 	// 4. Player Profile Hub (4x2 neon cards)
@@ -5529,7 +5634,8 @@ void Game::OpenStoreMenu() {
 			}
 		}
 	}
-	stStoreBalance->setText(epro::format(L"StarShips: {} SS   |   Cristales: {} CD", playerStarShips, playerCristales).c_str());
+	if(stStoreBalance) stStoreBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStoreBalanceCD) stStoreBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	ResizeEconomyScreens();
 	wStoreMenu->setVisible(true);
 }
@@ -5557,7 +5663,9 @@ void Game::OpenStoreAvatars() {
 
 void Game::RefreshStoreAvatarsPage() {
 	if(stStoreAvaBalance)
-		stStoreAvaBalance->setText(epro::format(L"StarShips: {} SS  |  Cristales: {} CD", playerStarShips, playerCristales).c_str());
+		stStoreAvaBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStoreAvaBalanceCD)
+		stStoreAvaBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	std::string q = ebStoreAvaSearch ? ToLowerAscii(ebStoreAvaSearch->getText()) : "";
 	storeAvaFiltered.clear();
 	for(int i = 0; i < (int)storeAvatars.size(); ++i) {
@@ -5572,25 +5680,25 @@ void Game::RefreshStoreAvatarsPage() {
 				storeAvaFiltered.push_back(i);
 		}
 	}
-	int totalPages = std::max(1, ((int)storeAvaFiltered.size() + 4) / 5);
+	int totalPages = std::max(1, ((int)storeAvaFiltered.size() + 9) / 10);
 	if(storeAvaPage >= totalPages) storeAvaPage = totalPages - 1;
 	if(storeAvaPage < 0) storeAvaPage = 0;
-	for(int slot = 0; slot < 5; ++slot) {
-		int pos = storeAvaPage * 5 + slot;
+	for(int slot = 0; slot < 10; ++slot) {
+		int pos = storeAvaPage * 10 + slot;
 		if(pos < (int)storeAvaFiltered.size()) {
 			const auto& a = storeAvatars[storeAvaFiltered[pos]];
 			if(wAvaCards[slot]) wAvaCards[slot]->setVisible(true);
 			if(imgAvaCardIcons[slot]) imgAvaCardIcons[slot]->setImage(LoadAvatarTexture(a.archivo));
 			if(stAvaCardTitles[slot]) stAvaCardTitles[slot]->setText(a.nombre.c_str());
 			if(stAvaCardStats[slot])
-				stAvaCardStats[slot]->setText(epro::format(L"EXP +{:.0f}%  |  SS +{:.0f}%  |  Luck +{:.0f}%", a.expPct, a.starShipsPct, a.luckPct).c_str());
+				stAvaCardStats[slot]->setText(epro::format(L"EXP +{:.0f}% | SS +{:.0f}% | Luck +{:.0f}%", a.expPct, a.starShipsPct, a.luckPct).c_str());
 			if(btnAvaCardBuySS[slot]) {
 				btnAvaCardBuySS[slot]->setVisible(a.precio > 0);
-				btnAvaCardBuySS[slot]->setText(epro::format(L"Comprar {} SS", a.precio).c_str());
+				btnAvaCardBuySS[slot]->setText(epro::format(L"{} SS", a.precio).c_str());
 			}
 			if(btnAvaCardBuyCD[slot]) {
 				btnAvaCardBuyCD[slot]->setVisible(a.precioCD > 0);
-				btnAvaCardBuyCD[slot]->setText(epro::format(L"Comprar {} CD", a.precioCD).c_str());
+				btnAvaCardBuyCD[slot]->setText(epro::format(L"{} CD", a.precioCD).c_str());
 			}
 		} else {
 			if(wAvaCards[slot]) wAvaCards[slot]->setVisible(false);
@@ -5613,7 +5721,9 @@ void Game::OpenStoreBoosters() {
 
 void Game::RefreshStoreBoostersPage() {
 	if(stStoreBstBalance)
-		stStoreBstBalance->setText(epro::format(L"StarShips: {} SS  |  Cristales: {} CD", playerStarShips, playerCristales).c_str());
+		stStoreBstBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStoreBstBalanceCD)
+		stStoreBstBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	storeBstFiltered.clear();
 	for(int i = 0; i < (int)storeBoosters.size(); ++i) {
 		std::string ts = storeBoosters[i].tipoStat;
@@ -5669,7 +5779,9 @@ void Game::RefreshStoreBoostersPage() {
 void Game::OpenStoreVip() {
 	HideAllEcosystemScreens();
 	if(stStoreVipBalance)
-		stStoreVipBalance->setText(epro::format(L"StarShips: {} SS  |  Cristales: {} CD", playerStarShips, playerCristales).c_str());
+		stStoreVipBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStoreVipBalanceCD)
+		stStoreVipBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 	for(int i = 0; i < 4; ++i) {
@@ -5727,7 +5839,9 @@ void Game::OpenStoreCards() {
 
 void Game::RefreshStoreCardsPage() {
 	if(stStoreCardsBalance)
-		stStoreCardsBalance->setText(epro::format(L"StarShips: {} SS  |  Cristales: {} CD", playerStarShips, playerCristales).c_str());
+		stStoreCardsBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStoreCardsBalanceCD)
+		stStoreCardsBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	std::string q = ebStoreCardSearch ? ToLowerAscii(ebStoreCardSearch->getText()) : "";
 	storeCardFiltered.clear();
 	for(int i = 0; i < (int)storeCards.size(); ++i) {
@@ -5742,12 +5856,12 @@ void Game::RefreshStoreCardsPage() {
 		}
 		storeCardFiltered.push_back(i);
 	}
-	int totalPages = std::max(1, ((int)storeCardFiltered.size() + 4) / 5);
+	int totalPages = std::max(1, ((int)storeCardFiltered.size() + 9) / 10);
 	if(storeCardPage >= totalPages) storeCardPage = totalPages - 1;
 	if(storeCardPage < 0) storeCardPage = 0;
-	for(int slot = 0; slot < 5; ++slot) {
+	for(int slot = 0; slot < 10; ++slot) {
 		storeCardPendingArt[slot] = 0;
-		int pos = storeCardPage * 5 + slot;
+		int pos = storeCardPage * 10 + slot;
 		if(pos < (int)storeCardFiltered.size()) {
 			const auto& c = storeCards[storeCardFiltered[pos]];
 			if(wCardCards[slot]) wCardCards[slot]->setVisible(true);
@@ -5755,19 +5869,19 @@ void Game::RefreshStoreCardsPage() {
 			if(imgCardCardArts[slot])
 				imgCardCardArts[slot]->setImage(imageManager.GetTextureCard(c.passcode, ART, false, true));
 			if(stCardCardTitles[slot]) stCardCardTitles[slot]->setText(c.nombre.c_str());
-			std::wstring stStr = c.yaComprada ? L"YA COMPRADA" : (c.stockRestante >= 0 ? epro::format(L"Disponibles: {}", c.stockRestante) : L"Disponible");
+			std::wstring stStr = c.yaComprada ? L"YA COMPRADA" : (c.stockRestante >= 0 ? epro::format(L"Stock: {}", c.stockRestante) : L"Disponible");
 			if(stCardCardMeta[slot])
-				stCardCardMeta[slot]->setText(epro::format(L"{}\n{}", c.rareza, stStr).c_str());
+				stCardCardMeta[slot]->setText(epro::format(L"{} \u2022 {}", c.rareza, stStr).c_str());
 			bool canBuy = !c.yaComprada && (c.stockRestante != 0);
 			if(btnCardCardBuySS[slot]) {
 				btnCardCardBuySS[slot]->setVisible(c.precio > 0);
 				btnCardCardBuySS[slot]->setEnabled(canBuy);
-				btnCardCardBuySS[slot]->setText(epro::format(L"Comprar {} SS", c.precio).c_str());
+				btnCardCardBuySS[slot]->setText(epro::format(L"{} SS", c.precio).c_str());
 			}
 			if(btnCardCardBuyCD[slot]) {
 				btnCardCardBuyCD[slot]->setVisible(c.precioCD > 0);
 				btnCardCardBuyCD[slot]->setEnabled(canBuy);
-				btnCardCardBuyCD[slot]->setText(epro::format(L"Comprar {} CD", c.precioCD).c_str());
+				btnCardCardBuyCD[slot]->setText(epro::format(L"{} CD", c.precioCD).c_str());
 			}
 		} else {
 			if(wCardCards[slot]) wCardCards[slot]->setVisible(false);
@@ -5776,6 +5890,7 @@ void Game::RefreshStoreCardsPage() {
 	if(stStoreCardPage) stStoreCardPage->setText(epro::format(L"P\u00E1gina {} / {}", storeCardPage + 1, totalPages).c_str());
 	if(btnStoreCardPrev) btnStoreCardPrev->setEnabled(storeCardPage > 0);
 	if(btnStoreCardNext) btnStoreCardNext->setEnabled(storeCardPage + 1 < totalPages);
+	ResizeEconomyScreens();
 }
 
 void Game::OpenStorePacks() {
@@ -5784,12 +5899,14 @@ void Game::OpenStorePacks() {
 	storePacks.clear();
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		playerStarShips = SafeJsonInt64(resp, "starShips", playerStarShips);
+		bool isAdm = isPlayerAdmin || resp.value("isAdmin", false);
 		if(resp.contains("packs") && resp["packs"].is_array()) {
 			for(const auto& p : resp["packs"]) {
-				if(!p.value("activo", false)) continue;
+				bool act = p.value("activo", false);
+				if(!isAdm && !act) continue;
 				StorePackItem it;
 				it.id = SafeJsonInt(p, "id", 0);
-				it.nombre = BufferIO::DecodeUTF8(SafeJsonStr(p, "nombre", ""));
+				it.nombre = (act ? L"" : L"[Admin] ") + BufferIO::DecodeUTF8(SafeJsonStr(p, "nombre", ""));
 				it.descripcion = BufferIO::DecodeUTF8(SafeJsonStr(p, "descripcion", ""));
 				it.serieNombre = BufferIO::DecodeUTF8(SafeJsonStr(p, "serieNombre", ""));
 				it.precio = SafeJsonInt64(p, "precioStarShips", 0);
@@ -5808,7 +5925,9 @@ void Game::OpenStorePacks() {
 
 void Game::RefreshStorePacksPage() {
 	if(stStorePacksBalance)
-		stStorePacksBalance->setText(epro::format(L"StarShips: {} SS  |  Cristales: {} CD", playerStarShips, playerCristales).c_str());
+		stStorePacksBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+	if(stStorePacksBalanceCD)
+		stStorePacksBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	std::string q = ebStorePackSearch ? ToLowerAscii(ebStorePackSearch->getText()) : "";
 	storePackFiltered.clear();
 	for(int i = 0; i < (int)storePacks.size(); ++i) {
@@ -5821,22 +5940,22 @@ void Game::RefreshStorePacksPage() {
 				storePackFiltered.push_back(i);
 		}
 	}
-	int totalPages = std::max(1, ((int)storePackFiltered.size() + 3) / 4);
+	int totalPages = std::max(1, ((int)storePackFiltered.size() + 7) / 8);
 	if(storePackPage >= totalPages) storePackPage = totalPages - 1;
 	if(storePackPage < 0) storePackPage = 0;
 	auto* packTex = driver->getTexture("textures/blue_eyes_dragon.png");
 	if(!packTex) packTex = driver->getTexture("textures/cover.png");
-	for(int slot = 0; slot < 4; ++slot) {
-		int pos = storePackPage * 4 + slot;
+	for(int slot = 0; slot < 8; ++slot) {
+		int pos = storePackPage * 8 + slot;
 		if(pos < (int)storePackFiltered.size()) {
 			const auto& p = storePacks[storePackFiltered[pos]];
 			if(wPackCards[slot]) wPackCards[slot]->setVisible(true);
 			if(imgPackCardArts[slot] && packTex) imgPackCardArts[slot]->setImage(packTex);
 			if(stPackCardTitles[slot]) stPackCardTitles[slot]->setText(p.nombre.c_str());
 			if(stPackCardDescs[slot])
-				stPackCardDescs[slot]->setText(epro::format(L"{} \u2022 {} cartas\nPrecio: {} SS", p.serieNombre, p.totalCartasPool, p.precio).c_str());
+				stPackCardDescs[slot]->setText(epro::format(L"{} \u2022 {} cartas \u2022 {} SS", p.serieNombre, p.totalCartasPool, p.precio).c_str());
 			if(btnPackCardBuy[slot])
-				btnPackCardBuy[slot]->setText(epro::format(L"Comprar y Abrir ({} SS)", p.precio).c_str());
+				btnPackCardBuy[slot]->setText(epro::format(L"Comprar ({} SS)", p.precio).c_str());
 		} else {
 			if(wPackCards[slot]) wPackCards[slot]->setVisible(false);
 		}
@@ -5934,21 +6053,54 @@ void Game::ViewPackCardsIdx(int storeIdx) {
 	if(storeIdx < 0 || storeIdx >= (int)storePacks.size()) return;
 	const auto& p = storePacks[storeIdx];
 	auto cResp = CallSessionApi(epro::format("/api/store/packs/{}/cards", p.id), sessionToken);
-	std::wstring listTxt;
-	int cnt = 0;
+	packPoolCards.clear();
 	if(cResp.contains("cards") && cResp["cards"].is_array()) {
 		for(const auto& c : cResp["cards"]) {
-			if(cnt >= 18) {
-				listTxt += epro::format(L"... y {} cartas m\u00E1s.", (int)cResp["cards"].size() - cnt);
-				break;
-			}
-			listTxt += epro::format(L"[{}] {}\n",
-				BufferIO::DecodeUTF8(SafeJsonStr(c, "Rareza", "Comun")),
-				BufferIO::DecodeUTF8(SafeJsonStr(c, "Nombre", "")));
-			cnt++;
+			PackPoolCard pc;
+			pc.passcode = (uint32_t)SafeJsonInt(c, "Passcode", 0);
+			if(pc.passcode == 0) pc.passcode = (uint32_t)SafeJsonInt(c, "passcode", 0);
+			pc.nombre = BufferIO::DecodeUTF8(SafeJsonStr(c, "Nombre", ""));
+			if(pc.nombre.empty()) pc.nombre = BufferIO::DecodeUTF8(SafeJsonStr(c, "nombre", ""));
+			pc.rareza = BufferIO::DecodeUTF8(SafeJsonStr(c, "Rareza", "Comun"));
+			packPoolCards.push_back(pc);
 		}
 	}
-	PopupMessage(p.nombre, listTxt.empty() ? L"Sin cartas registradas." : listTxt);
+	if(packPoolCards.empty()) {
+		PopupMessage(p.nombre, L"Sin cartas registradas en este sobre.");
+		return;
+	}
+	packPoolPage = 0;
+	if(stPackPoolTitle) stPackPoolTitle->setText(epro::format(L"{} ({} cartas)", p.nombre, (int)packPoolCards.size()).c_str());
+	RefreshPackPoolPage();
+	ResizeEconomyScreens();
+	if(wPackPoolOverlay) {
+		wPackPoolOverlay->setVisible(true);
+		if(wStorePacks) wStorePacks->bringToFront(wPackPoolOverlay);
+	}
+}
+
+void Game::RefreshPackPoolPage() {
+	int totalPages = std::max(1, ((int)packPoolCards.size() + 11) / 12);
+	if(packPoolPage >= totalPages) packPoolPage = totalPages - 1;
+	if(packPoolPage < 0) packPoolPage = 0;
+	for(int slot = 0; slot < 12; ++slot) {
+		packPoolPendingArt[slot] = 0;
+		int pos = packPoolPage * 12 + slot;
+		if(pos < (int)packPoolCards.size()) {
+			const auto& c = packPoolCards[pos];
+			if(wPackPoolCards[slot]) wPackPoolCards[slot]->setVisible(true);
+			packPoolPendingArt[slot] = c.passcode;
+			if(imgPackPoolArts[slot])
+				imgPackPoolArts[slot]->setImage(c.passcode > 0 ? imageManager.GetTextureCard(c.passcode, ART, false, true) : imageManager.tCover[0]);
+			if(stPackPoolNames[slot])
+				stPackPoolNames[slot]->setText(epro::format(L"{}\n[{}]", c.nombre, c.rareza).c_str());
+		} else {
+			if(wPackPoolCards[slot]) wPackPoolCards[slot]->setVisible(false);
+		}
+	}
+	if(stPackPoolPage) stPackPoolPage->setText(epro::format(L"P\u00E1gina {} / {}", packPoolPage + 1, totalPages).c_str());
+	if(btnPackPoolPrev) btnPackPoolPrev->setEnabled(packPoolPage > 0);
+	if(btnPackPoolNext) btnPackPoolNext->setEnabled(packPoolPage + 1 < totalPages);
 }
 
 void Game::ExecuteConfirmedPurchase() {
@@ -6000,12 +6152,18 @@ void Game::ExecuteConfirmedPurchase() {
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		playerStarShips = SafeJsonInt64(resp, "starShipsTotales", playerStarShips);
 		playerCristales = SafeJsonInt64(resp, "cristalesTotales", playerCristales);
-		if(stStoreBalance) stStoreBalance->setText(epro::format(L"StarShips: {} SS   |   Cristales: {} CD", playerStarShips, playerCristales).c_str());
-		if(stStoreAvaBalance) stStoreAvaBalance->setText(epro::format(L"StarShips: {} SS   |   Cristales: {} CD", playerStarShips, playerCristales).c_str());
-		if(stStoreBstBalance) stStoreBstBalance->setText(epro::format(L"StarShips: {} SS   |   Cristales: {} CD", playerStarShips, playerCristales).c_str());
-		if(stStoreVipBalance) stStoreVipBalance->setText(epro::format(L"Cristales disponibles: {} CD", playerCristales).c_str());
-		if(stStoreCardsBalance) stStoreCardsBalance->setText(epro::format(L"StarShips: {} SS   |   Cristales: {} CD", playerStarShips, playerCristales).c_str());
-		if(stStorePacksBalance) stStorePacksBalance->setText(epro::format(L"StarShips disponibles: {} SS", playerStarShips).c_str());
+		if(stStoreBalance) stStoreBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStoreBalanceCD) stStoreBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
+		if(stStoreAvaBalance) stStoreAvaBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStoreAvaBalanceCD) stStoreAvaBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
+		if(stStoreBstBalance) stStoreBstBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStoreBstBalanceCD) stStoreBstBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
+		if(stStoreVipBalance) stStoreVipBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStoreVipBalanceCD) stStoreVipBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
+		if(stStoreCardsBalance) stStoreCardsBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStoreCardsBalanceCD) stStoreCardsBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
+		if(stStorePacksBalance) stStorePacksBalance->setText(epro::format(L"StarShips: {} SS", playerStarShips).c_str());
+		if(stStorePacksBalanceCD) stStorePacksBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 		if(cType == 6 || cType == 7) OpenStoreCards();
 		if(cType == 8) {
 			FetchUserInventoryAndDecks();
@@ -7229,12 +7387,23 @@ bool Game::MainLoop() {
 			pendingDuelReward.valid = false;
 		}
 		if(wStoreCards && wStoreCards->isVisible()) {
-			for(int i = 0; i < 5; ++i) {
+			for(int i = 0; i < 10; ++i) {
 				if(storeCardPendingArt[i] > 0 && imgCardCardArts[i]) {
 					auto cTex = imageManager.GetTextureCard(storeCardPendingArt[i], ART, false, true);
 					if(cTex && cTex != imageManager.tCover[0] && cTex != imageManager.tUnknown) {
 						imgCardCardArts[i]->setImage(cTex);
 						storeCardPendingArt[i] = 0;
+					}
+				}
+			}
+		}
+		if(wStorePacks && wStorePacks->isVisible() && wPackPoolOverlay && wPackPoolOverlay->isVisible()) {
+			for(int i = 0; i < 12; ++i) {
+				if(packPoolPendingArt[i] > 0 && imgPackPoolArts[i]) {
+					auto cTex = imageManager.GetTextureCard(packPoolPendingArt[i], ART, false, true);
+					if(cTex && cTex != imageManager.tCover[0] && cTex != imageManager.tUnknown) {
+						imgPackPoolArts[i]->setImage(cTex);
+						packPoolPendingArt[i] = 0;
 					}
 				}
 			}
@@ -7471,7 +7640,7 @@ bool Game::MainLoop() {
 				drawNeon(btnStoreDonBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wStoreAvatars && wStoreAvatars->isVisible()) {
-				for(int i = 0; i < 5; ++i) drawNeon(wAvaCards[i], cPurp);
+				for(int i = 0; i < 10; ++i) drawNeon(wAvaCards[i], cPurp);
 				drawNeon(btnStoreAvaSearch, cCyan); drawNeon(btnStoreAvaPrev, cCyan); drawNeon(btnStoreAvaNext, cCyan);
 				drawNeon(btnStoreAvaBack, irr::video::SColor(160, 148, 163, 184));
 			}
@@ -7486,15 +7655,20 @@ bool Game::MainLoop() {
 				drawNeon(btnStoreVipBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wStoreCards && wStoreCards->isVisible()) {
-				for(int i = 0; i < 5; ++i) drawNeon(wCardCards[i], cPurp);
+				for(int i = 0; i < 10; ++i) drawNeon(wCardCards[i], cPurp);
 				for(int fi = 0; fi < 3; ++fi) drawNeon(btnStoreCardFilt[fi], storeCardFilter == fi ? cGold : cCyan);
 				drawNeon(btnStoreCardSearch, cCyan); drawNeon(btnStoreCardPrev, cCyan); drawNeon(btnStoreCardNext, cCyan);
 				drawNeon(btnStoreCardBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wStorePacks && wStorePacks->isVisible()) {
-				for(int i = 0; i < 4; ++i) drawNeon(wPackCards[i], cPurp);
+				for(int i = 0; i < 8; ++i) drawNeon(wPackCards[i], cPurp);
 				drawNeon(btnStorePackSearch, cCyan); drawNeon(btnStorePackPrev, cCyan); drawNeon(btnStorePackNext, cCyan);
 				drawNeon(btnStorePackBack, irr::video::SColor(160, 148, 163, 184));
+				if(wPackPoolOverlay && wPackPoolOverlay->isVisible()) {
+					drawNeon(wPackPoolOverlay, cCyan);
+					for(int i = 0; i < 12; ++i) drawNeon(wPackPoolCards[i], cPurp);
+					drawNeon(btnPackPoolPrev, cCyan); drawNeon(btnPackPoolNext, cCyan); drawNeon(btnPackPoolClose, cGold);
+				}
 			}
 			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
 			if(wProfileMedals && wProfileMedals->isVisible()) { drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan); }
