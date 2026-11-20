@@ -1200,16 +1200,15 @@ public:
 	irr::gui::IGUIButton* btnProfileMode{ nullptr };
 	irr::gui::IGUIButton* btnMailboxMode{ nullptr };
 
-	// 1. Store Main Menu (Full-screen canvas)
+	// 1. Store Hub (Full-screen canvas, 3x2 neon cards)
 	irr::gui::IGUIStaticText* wStoreMenu{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreMenu{ nullptr };
 	irr::gui::IGUIStaticText* stStoreTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBalance{ nullptr };
-	irr::gui::IGUIButton* btnStoreAvatars{ nullptr };
-	irr::gui::IGUIButton* btnStoreBoosters{ nullptr };
-	irr::gui::IGUIButton* btnStoreVip{ nullptr };
-	irr::gui::IGUIButton* btnStoreCards{ nullptr };
-	irr::gui::IGUIButton* btnStorePacks{ nullptr };
+	irr::gui::IGUIStaticText* wStoreHubCards[6]{ nullptr };
+	irr::gui::IGUIImage* imgStoreHubIcons[6]{ nullptr };
+	irr::gui::IGUIStaticText* stStoreHubTitles[6]{ nullptr };
+	irr::gui::IGUIStaticText* stStoreHubDescs[6]{ nullptr };
+	irr::gui::IGUIButton* btnStoreHubActions[6]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBack{ nullptr };
 
 	// 2. Store Avatars (Full-screen canvas)

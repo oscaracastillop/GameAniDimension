@@ -4157,28 +4157,65 @@ void Game::PopulateEconomyScreens() {
 		if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 
-	// 1. Store Menu (dedicated full-screen)
+	// 1. Store Menu (dedicated full-screen 3x2 neon cards matching Perfil Hub)
 	makeCanvas(wStoreMenu);
-	pnlStoreMenu = makePanel(wStoreMenu);
 	stStoreTitle = env->addStaticText(L"TIENDA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
-	stStoreTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	stStoreTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stStoreTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stStoreTitle->setOverrideFont(loginTitleFont);
 	stStoreBalance = env->addStaticText(L"StarShips: 0 SS  |  Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
 	stStoreBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	stStoreBalance->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	btnStoreAvatars = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_AVATARS, L"Avatares Coleccionables");
-	btnStoreBoosters = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BOOSTERS, L"Potenciadores de Avatar");
-	btnStoreVip = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_VIP, L"Pases VIP (Cristales CD)");
-	btnStoreCards = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_CARDS, L"Cartas Individuales");
-	btnStorePacks = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_PACKS, L"Sobres de Expansi\u00F3n");
 	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"Volver a Perfil");
-	styleDarkBtn(btnStoreAvatars);
-	styleDarkBtn(btnStoreBoosters);
-	styleDarkBtn(btnStoreVip);
-	styleDarkBtn(btnStoreCards);
-	styleDarkBtn(btnStorePacks);
 	styleDarkBtn(btnStoreBack);
+	{
+		const char* stIcons[6] = {
+			"textures/shop3.png", "textures/avatars/AVA-001.png", "textures/starships.png",
+			"textures/vip/vip_platino.png", "textures/blue_eyes_dragon.png", "textures/red_eyes_dragon.png"
+		};
+		const wchar_t* stTitles[6] = {
+			L"Donaciones & Cristales (CD)", L"Avatares", L"Potenciadores",
+			L"Pases VIP", L"Sobres de Cartas", L"Cartas"
+		};
+		const wchar_t* stDescs[6] = {
+			L"Adquiere paquetes oficiales de Cristales Dimensionales (CD) en d\u00F3lares para sustentar el servidor y equipar tu personaje.",
+			L"Colecciona avatares exclusivos con bonificaciones base de EXP, StarShips y Luck. Cada compra es una instancia \u00FAnica en tu perfil.",
+			L"Mejora las estad\u00EDsticas de EXP, StarShips y Luck de tu avatar activo hasta los l\u00EDmites m\u00E1ximos (300% / 300% / 100%).",
+			L"Membres\u00EDas semanales (7 d\u00EDas) Bronce, Plata, Oro y Platino con bonos extra de EXP, StarShips y Luck adquiribles con CD.",
+			L"Paquetes tem\u00E1ticos y sobres especiales para expandir tu colecci\u00F3n de cartas en tu inventario.",
+			L"Adquiere cartas individuales directamente con StarShips para completar las estrategias de tus decks."
+		};
+		const wchar_t* stBtns[6] = {
+			L"Adquirir Cristales (CD)", L"Explorar Avatares", L"Explorar Potenciadores",
+			L"Ver Pases VIP", L"Ver Sobres de Cartas", L"Ver Cartas"
+		};
+		const int stIds[6] = {
+			BUTTON_STORE_DONATIONS, BUTTON_STORE_AVATARS, BUTTON_STORE_BOOSTERS,
+			BUTTON_STORE_VIP, BUTTON_STORE_PACKS, BUTTON_STORE_CARDS
+		};
+		const irr::video::SColor stColors[6] = {
+			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 192, 132, 252),
+			irr::video::SColor(255, 251, 191, 36), irr::video::SColor(255, 251, 191, 36),
+			irr::video::SColor(255, 192, 132, 252), irr::video::SColor(255, 52, 211, 153)
+		};
+		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+		for(int si = 0; si < 6; ++si) {
+			wStoreHubCards[si] = makePanel(wStoreMenu);
+			imgStoreHubIcons[si] = env->addImage(irr::core::recti(0, 0, 64, 64), wStoreHubCards[si], -1, 0, true);
+			imgStoreHubIcons[si]->setScaleImage(true);
+			imgStoreHubIcons[si]->setUseAlphaChannel(true);
+			if(auto sTex = driver->getTexture(stIcons[si]))
+				imgStoreHubIcons[si]->setImage(sTex);
+			stStoreHubTitles[si] = env->addStaticText(stTitles[si], irr::core::recti(0, 0, 10, 10), false, false, wStoreHubCards[si]);
+			stStoreHubTitles[si]->setOverrideColor(stColors[si]);
+			if(loginUiFont) stStoreHubTitles[si]->setOverrideFont(loginUiFont);
+			stStoreHubDescs[si] = env->addStaticText(stDescs[si], irr::core::recti(0, 0, 10, 10), false, true, wStoreHubCards[si]);
+			stStoreHubDescs[si]->setWordWrap(true);
+			stStoreHubDescs[si]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			btnStoreHubActions[si] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreHubCards[si], stIds[si], stBtns[si]);
+			styleDarkBtn(btnStoreHubActions[si]);
+		}
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
+	}
 
 	// 2. Store Avatars
 	makeCanvas(wStoreAvatars);
@@ -4621,22 +4658,49 @@ void Game::ResizeEconomyScreens() {
 		img->setRelativePosition(irr::core::recti(cx - iw / 2, iy, cx + iw / 2, iy + ih));
 	};
 
-	// 1. Store Menu
+	// 1. Store Menu (3x2 neon cards matching Perfil Hub)
 	if(wStoreMenu) {
 		wStoreMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		irr::s32 bw = std::min<irr::s32>(Scale(440), W - pad * 4);
-		irr::s32 bh = Scale(390);
-		irr::s32 cx = (W - bw) / 2;
-		irr::s32 cy = topY + std::max<irr::s32>(0, (botY - topY - bh) / 2);
-		pnlStoreMenu->setRelativePosition(irr::core::recti(cx - Scale(24), cy - Scale(18), cx + bw + Scale(24), cy + bh + Scale(18)));
-		stStoreTitle->setRelativePosition(irr::core::recti(cx, cy, cx + bw, cy + Scale(32)));
-		stStoreBalance->setRelativePosition(irr::core::recti(cx, cy + Scale(34), cx + bw, cy + Scale(58)));
-		btnStoreAvatars->setRelativePosition(irr::core::recti(cx, cy + Scale(72), cx + bw, cy + Scale(114)));
-		btnStoreBoosters->setRelativePosition(irr::core::recti(cx, cy + Scale(124), cx + bw, cy + Scale(166)));
-		btnStoreVip->setRelativePosition(irr::core::recti(cx, cy + Scale(176), cx + bw, cy + Scale(218)));
-		btnStoreCards->setRelativePosition(irr::core::recti(cx, cy + Scale(228), cx + bw, cy + Scale(270)));
-		btnStorePacks->setRelativePosition(irr::core::recti(cx, cy + Scale(280), cx + bw, cy + Scale(322)));
-		btnStoreBack->setRelativePosition(irr::core::recti(cx, cy + Scale(340), cx + bw, cy + Scale(380)));
+		stStoreTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(32)));
+		stStoreBalance->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad - Scale(190), topY + Scale(54)));
+		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(4), W - pad, topY + Scale(40)));
+		const irr::s32 gridTop = topY + Scale(66);
+		const irr::s32 gap = Scale(14);
+		const irr::s32 cardW = (W - 2 * pad - 2 * gap) / 3;
+		const irr::s32 cardH = std::max<irr::s32>(Scale(130), (botY - gridTop - gap) / 2);
+		for(int si = 0; si < 6; ++si) {
+			int row = si / 3;
+			int col = si % 3;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
+			if(wStoreHubCards[si]) {
+				wStoreHubCards[si]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 maxIcW = cardW - Scale(24);
+				irr::s32 maxIcH = std::max<irr::s32>(Scale(58), (cardH * 38) / 100);
+				irr::s32 icH = maxIcH;
+				irr::s32 icW = icH;
+				if(imgStoreHubIcons[si] && imgStoreHubIcons[si]->getImage()) {
+					auto osz = imgStoreHubIcons[si]->getImage()->getOriginalSize();
+					if(osz.Width > 0 && osz.Height > 0)
+						icW = (irr::s32)((double)icH * osz.Width / osz.Height);
+				}
+				if(icW > maxIcW) {
+					if(icW > 0) icH = (irr::s32)((double)icH * maxIcW / icW);
+					icW = maxIcW;
+				}
+				irr::s32 icX = (cardW - icW) / 2;
+				irr::s32 icY = Scale(10);
+				if(imgStoreHubIcons[si])
+					imgStoreHubIcons[si]->setRelativePosition(irr::core::recti(icX, icY, icX + icW, icY + icH));
+				irr::s32 txtTop = icY + icH + Scale(6);
+				if(stStoreHubTitles[si])
+					stStoreHubTitles[si]->setRelativePosition(irr::core::recti(Scale(12), txtTop, cardW - Scale(12), txtTop + Scale(22)));
+				if(stStoreHubDescs[si])
+					stStoreHubDescs[si]->setRelativePosition(irr::core::recti(Scale(12), txtTop + Scale(24), cardW - Scale(12), cardH - Scale(46)));
+				if(btnStoreHubActions[si])
+					btnStoreHubActions[si]->setRelativePosition(irr::core::recti(Scale(12), cardH - Scale(40), cardW - Scale(12), cardH - Scale(10)));
+			}
+		}
 	}
 
 	// 2. Store Avatars
@@ -7045,7 +7109,16 @@ bool Game::MainLoop() {
 			const irr::video::SColor cGold(150, 251, 191, 36);
 			const irr::video::SColor cPurp(150, 192, 132, 252);
 			const irr::video::SColor cEmer(150, 52, 211, 153);
-			if(wStoreMenu && wStoreMenu->isVisible()) { drawNeon(pnlStoreMenu, cCyan); }
+			if(wStoreMenu && wStoreMenu->isVisible()) {
+				const irr::video::SColor stBorder[6] = {
+					cCyan, cPurp, cGold, cGold, cPurp, cEmer
+				};
+				for(int si = 0; si < 6; ++si) {
+					drawNeon(wStoreHubCards[si], stBorder[si]);
+					drawNeon(btnStoreHubActions[si], irr::video::SColor(140, 56, 189, 248));
+				}
+				drawNeon(btnStoreBack, irr::video::SColor(160, 148, 163, 184));
+			}
 			if(wStoreAvatars && wStoreAvatars->isVisible()) { drawNeon(pnlStoreAvaLeft, cCyan); drawNeon(pnlStoreAvaRight, cPurp); }
 			if(wStoreBoosters && wStoreBoosters->isVisible()) { drawNeon(pnlStoreBstLeft, cEmer); drawNeon(pnlStoreBstRight, cCyan); }
 			if(wStoreVip && wStoreVip->isVisible()) { drawNeon(pnlStoreVipLeft, cGold); drawNeon(pnlStoreVipRight, cCyan); }
