@@ -356,6 +356,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->OpenStorePacks();
 				break;
 			}
+			case BUTTON_STORE_DONATIONS: {
+				mainGame->PopupMessage(L"Donaciones & Cristales (CD)", L"Adquiere paquetes oficiales de Cristales Dimensionales (CD) en:\nhttps://anidimension.online/tienda/donaciones\n\nTus Cristales (CD) se sincronizan al instante con tu cuenta.");
+				break;
+			}
 			case BUTTON_STORE_BACK: {
 				mainGame->OpenPlayerProfile();
 				break;
