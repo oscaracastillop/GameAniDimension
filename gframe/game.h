@@ -272,7 +272,7 @@ struct host_panel_elements {
 	irr::gui::IGUIButton* btnHostPrepOB;
 	irr::gui::IGUIStaticText* stHostPrepDuelist[6];
 	irr::gui::IGUIStaticText* stHostPrepName[6]{ nullptr };
-	irr::gui::IGUIStaticText* stHostPrepVip[6]{ nullptr };
+	irr::gui::IGUIImage* imgHostPrepVip[6]{ nullptr };
 	irr::gui::IGUIImage* imgHostPrepAvatar[6]{ nullptr };
 	irr::gui::IGUIImage* imgHostPrepFlag[6]{ nullptr };
 	irr::gui::IGUIStaticText* stHostPrepTeamLeft{ nullptr };
@@ -1025,7 +1025,10 @@ public:
 	std::wstring hostPrepPendingAvatar[6];
 	std::string hostPrepPendingAvatarFile[6];
 	std::string hostPrepPendingFlagUrl[6];
+	std::string hostPrepPendingVipName[6];
 	void ProcessPendingHostPrepTextures();
+	irr::video::ITexture* LoadVipTexture(const std::string& vipNombre);
+	void LayoutHostPrepareChildren();
 
 	// Dedicated Economy Interfaces (Store, Store Avatars, Store Boosters, Player Profile, Mailbox)
 	struct StoreAvatarItem {

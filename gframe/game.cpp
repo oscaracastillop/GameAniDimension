@@ -1542,9 +1542,10 @@ void Game::PopulateGameHostWindows() {
 		if(loginUiFont)
 			stHostPrepName[i]->setOverrideFont(loginUiFont);
 		stHostPrepName[i]->setVisible(false);
-		stHostPrepVip[i] = env->addStaticText(L"", Scale(340, 281 + i * 116, 420, 301 + i * 116), true, false, wHostPrepare, -1, true);
-		stHostPrepVip[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		stHostPrepVip[i]->setVisible(false);
+		imgHostPrepVip[i] = env->addImage(Scale(342, 279 + i * 116, 422, 305 + i * 116), wHostPrepare, true);
+		imgHostPrepVip[i]->setScaleImage(true);
+		imgHostPrepVip[i]->setUseAlphaChannel(true);
+		imgHostPrepVip[i]->setVisible(false);
 		chkHostPrepReady[i] = env->addCheckBox(false, Scale(432, 318 + i * 116, 456, 342 + i * 116), wHostPrepare, CHECKBOX_HP_READY, L"");
 		chkHostPrepReady[i]->setEnabled(false);
 	}
@@ -1662,7 +1663,7 @@ void Game::PopulateAdventureModeWindow() {
 	// Dedicated background
 	imgAdventureBg = env->addImage(irr::core::recti(0, 0, window_size.Width, window_size.Height), wAdventureMode);
 	imgAdventureBg->setScaleImage(true);
-	auto bgTex = driver->getTexture("textures/bg_duel_aventure.jpg");
+	auto bgTex = driver->getTexture("textures/bg_duel.jpg");
 	if(!bgTex) bgTex = driver->getTexture("textures/bg.png");
 	if(!bgTex) bgTex = driver->getTexture("textures/bg_menu.png");
 	if(bgTex) {
@@ -3304,9 +3305,10 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 		hostPrepTexturePending[pos].store(false);
 		hostPrepPendingAvatarFile[pos].clear();
 		hostPrepPendingFlagUrl[pos].clear();
+		hostPrepPendingVipName[pos].clear();
 		if(stHostPrepDuelist[pos]) stHostPrepDuelist[pos]->setText(L"");
 		if(stHostPrepName[pos]) { stHostPrepName[pos]->setText(L""); stHostPrepName[pos]->setVisible(false); }
-		if(stHostPrepVip[pos]) { stHostPrepVip[pos]->setText(L""); stHostPrepVip[pos]->setVisible(false); }
+		if(imgHostPrepVip[pos]) imgHostPrepVip[pos]->setVisible(false);
 		if(imgHostPrepAvatar[pos]) imgHostPrepAvatar[pos]->setVisible(false);
 		if(imgHostPrepFlag[pos]) imgHostPrepFlag[pos]->setVisible(false);
 		return;
@@ -3341,37 +3343,6 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 		stHostPrepName[pos]->setText(playerName.c_str());
 		stHostPrepName[pos]->setVisible(true);
 	}
-	if(stHostPrepVip[pos]) {
-		const std::string& vn = it->second.vipNombre;
-		if(!vn.empty()) {
-			std::string lowerVn = vn;
-			for(char& ch : lowerVn) ch = (char)tolower((unsigned char)ch);
-			if(lowerVn.find("platino") != std::string::npos) {
-				stHostPrepVip[pos]->setText(L"VIP PLATINO");
-				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 8, 52, 84));
-				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-			} else if(lowerVn.find("oro") != std::string::npos || lowerVn.find("dorad") != std::string::npos) {
-				stHostPrepVip[pos]->setText(L"VIP ORO");
-				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 66, 46, 6));
-				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-			} else if(lowerVn.find("plata") != std::string::npos) {
-				stHostPrepVip[pos]->setText(L"VIP PLATA");
-				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 45, 55, 72));
-				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-			} else if(lowerVn.find("bronce") != std::string::npos) {
-				stHostPrepVip[pos]->setText(L"VIP BRONCE");
-				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 68, 36, 16));
-				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 245, 158, 11));
-			} else {
-				stHostPrepVip[pos]->setText(L"VIP");
-				stHostPrepVip[pos]->setBackgroundColor(irr::video::SColor(235, 66, 46, 6));
-				stHostPrepVip[pos]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-			}
-			stHostPrepVip[pos]->setVisible(true);
-		} else {
-			stHostPrepVip[pos]->setVisible(false);
-		}
-	}
 	if(stHostPrepDuelist[pos]) {
 		std::wstring clanW = BufferIO::DecodeUTF8(it->second.clanNombre.empty() ? "Sin Clan" : it->second.clanNombre);
 		std::wstring clanTxt = (it->second.clanNivel > 0)
@@ -3388,7 +3359,27 @@ void Game::UpdateHostPrepPlayerSlot(int pos, const std::wstring& playerName) {
 	// Defer OpenGL/Irrlicht texture loading to main render thread (critical on Android EGL)
 	hostPrepPendingAvatarFile[pos] = it->second.avatarFile;
 	hostPrepPendingFlagUrl[pos] = it->second.flagUrl;
+	hostPrepPendingVipName[pos] = it->second.vipNombre;
 	hostPrepTexturePending[pos].store(true);
+}
+
+irr::video::ITexture* Game::LoadVipTexture(const std::string& vipNombre) {
+	if(vipNombre.empty() || !driver) return nullptr;
+	std::string lowerVn = vipNombre;
+	for(char& ch : lowerVn) ch = (char)tolower((unsigned char)ch);
+	std::string fname;
+	if(lowerVn.find("platino") != std::string::npos)
+		fname = "vip_platino.png";
+	else if(lowerVn.find("oro") != std::string::npos || lowerVn.find("dorad") != std::string::npos)
+		fname = "vip_oro.png";
+	else if(lowerVn.find("plata") != std::string::npos)
+		fname = "vip_plata.png";
+	else if(lowerVn.find("bronce") != std::string::npos)
+		fname = "vip_bronce.png";
+	else
+		return nullptr;
+	std::string localRel = "textures/vip/" + fname;
+	return driver->getTexture(localRel.c_str());
 }
 
 void Game::ProcessPendingHostPrepTextures() {
@@ -3411,6 +3402,15 @@ void Game::ProcessPendingHostPrepTextures() {
 				imgHostPrepFlag[pos]->setVisible(true);
 			} else {
 				imgHostPrepFlag[pos]->setVisible(false);
+			}
+		}
+		if(imgHostPrepVip[pos]) {
+			auto vTex = LoadVipTexture(hostPrepPendingVipName[pos]);
+			if(vTex) {
+				imgHostPrepVip[pos]->setImage(vTex);
+				imgHostPrepVip[pos]->setVisible(true);
+			} else {
+				imgHostPrepVip[pos]->setVisible(false);
 			}
 		}
 	}
@@ -5153,10 +5153,14 @@ bool Game::MainLoop() {
 			else
 				discord.UpdatePresence(DiscordWrapper::MENU);
 			gSoundManager->PlayBGM(SoundManager::BGM::MENU, gGameConfig->loopMusic);
-			if((wHostPrepare && wHostPrepare->isVisible()) || (wLanWindow && wLanWindow->isVisible()) || (wCreateHost && wCreateHost->isVisible()) || (wRoomListPlaceholder && wRoomListPlaceholder->isVisible()))
-				DrawBackImage(imageManager.tBackGround, resized);
-			else
+			if((wHostPrepare && wHostPrepare->isVisible()) || (wLanWindow && wLanWindow->isVisible()) || (wCreateHost && wCreateHost->isVisible()) || (wRoomListPlaceholder && wRoomListPlaceholder->isVisible())) {
+				static irr::video::ITexture* tRoomBg = nullptr;
+				if(!tRoomBg && driver)
+					tRoomBg = driver->getTexture("textures/bg_duel.jpg");
+				DrawBackImage(tRoomBg ? tRoomBg : imageManager.tBackGround, resized);
+			} else {
 				DrawBackImage(imageManager.tBackGround_menu, resized);
+			}
 		}
 		if(current_topdown != gGameConfig->topdown_view || current_keep_aspect_ratio != gGameConfig->keep_aspect_ratio) {
 			if(std::exchange(gGameConfig->topdown_view, current_topdown) != gGameConfig->topdown_view)
@@ -6804,6 +6808,53 @@ void Game::ResizeRoomListScreen() {
 	if(roomListTable)
 		roomListTable->setRelativePosition(irr::core::recti(padX, tableTop, W - padX, tableBottom));
 }
+void Game::LayoutHostPrepareChildren() {
+	if(!wHostPrepare) return;
+	const auto rect = wHostPrepare->getRelativePosition();
+	const int w = rect.getWidth();
+	const int h = rect.getHeight();
+	if(w <= 0 || h <= 0) return;
+	auto sx = [&](int x) -> irr::s32 { return (irr::s32)(x * (w / 928.0f)); };
+	auto sy = [&](int y) -> irr::s32 { return (irr::s32)(y * (h / 596.0f)); };
+	if(stHostPrepTitle) stHostPrepTitle->setRelativePosition({ sx(15), sy(22), sx(913), sy(46) });
+	if(pnlHostPrepRules) pnlHostPrepRules->setRelativePosition({ sx(15), sy(48), sx(913), sy(198) });
+	if(stHostPrepRule) stHostPrepRule->setRelativePosition({ sx(24), sy(54), sx(314), sy(194) });
+	if(stHostPrepRule2) stHostPrepRule2->setRelativePosition({ sx(322), sy(54), sx(612), sy(194) });
+	if(stHostPrepRule3) stHostPrepRule3->setRelativePosition({ sx(620), sy(54), sx(904), sy(194) });
+	if(stDeckSelect) stDeckSelect->setRelativePosition({ sx(15), sy(212), sx(130), sy(234) });
+	if(cbDeckSelect) cbDeckSelect->setRelativePosition({ sx(135), sy(208), sx(430), sy(236) });
+	if(btnHostPrepReady) btnHostPrepReady->setRelativePosition({ sx(445), sy(208), sx(590), sy(236) });
+	if(btnHostPrepNotReady) btnHostPrepNotReady->setRelativePosition({ sx(445), sy(208), sx(590), sy(236) });
+	if(btnHostPrepStart) btnHostPrepStart->setRelativePosition({ sx(605), sy(208), sx(750), sy(236) });
+	if(btnHostPrepCancel) btnHostPrepCancel->setRelativePosition({ sx(765), sy(208), sx(913), sy(236) });
+	if(stHostPrepTeamLeft) stHostPrepTeamLeft->setRelativePosition({ sx(15), sy(248), sx(455), sy(270) });
+	if(stHostPrepTeamRight) stHostPrepTeamRight->setRelativePosition({ sx(475), sy(248), sx(913), sy(270) });
+	if(stHostPrepOB) stHostPrepOB->setRelativePosition({ sx(450), sy(556), sx(560), sy(580) });
+	if(btnHostPrepDuelist) btnHostPrepDuelist->setRelativePosition({ sx(568), sy(552), sx(678), sy(582) });
+	if(btnHostPrepOB) btnHostPrepOB->setRelativePosition({ sx(686), sy(552), sx(796), sy(582) });
+	if(btnHostPrepWindBot) btnHostPrepWindBot->setRelativePosition({ sx(804), sy(552), sx(913), sy(582) });
+	for(int i = 0; i < dInfo.team1 && i < 6; ++i) {
+		int y = 276 + i * 116;
+		if(btnHostPrepKick[i]) btnHostPrepKick[i]->setRelativePosition({ sx(15), sy(y + 40), sx(37), sy(y + 64) });
+		if(imgHostPrepAvatar[i]) imgHostPrepAvatar[i]->setRelativePosition({ sx(42), sy(y), sx(150), sy(y + 108) });
+		if(stHostPrepDuelist[i]) stHostPrepDuelist[i]->setRelativePosition({ sx(158), sy(y), sx(426), sy(y + 108) });
+		if(imgHostPrepFlag[i]) imgHostPrepFlag[i]->setRelativePosition({ sx(164), sy(y + 6), sx(190), sy(y + 24) });
+		if(stHostPrepName[i]) stHostPrepName[i]->setRelativePosition({ sx(196), sy(y + 4), sx(338), sy(y + 28) });
+		if(imgHostPrepVip[i]) imgHostPrepVip[i]->setRelativePosition({ sx(342), sy(y + 3), sx(422), sy(y + 29) });
+		if(chkHostPrepReady[i]) chkHostPrepReady[i]->setRelativePosition({ sx(432), sy(y + 40), sx(456), sy(y + 64) });
+	}
+	for(int i = dInfo.team1; i < dInfo.team1 + dInfo.team2 && i < 6; ++i) {
+		int rIdx = i - dInfo.team1;
+		int y = 276 + rIdx * 116;
+		if(btnHostPrepKick[i]) btnHostPrepKick[i]->setRelativePosition({ sx(475), sy(y + 40), sx(497), sy(y + 64) });
+		if(imgHostPrepAvatar[i]) imgHostPrepAvatar[i]->setRelativePosition({ sx(502), sy(y), sx(610), sy(y + 108) });
+		if(stHostPrepDuelist[i]) stHostPrepDuelist[i]->setRelativePosition({ sx(618), sy(y), sx(886), sy(y + 108) });
+		if(imgHostPrepFlag[i]) imgHostPrepFlag[i]->setRelativePosition({ sx(624), sy(y + 6), sx(650), sy(y + 24) });
+		if(stHostPrepName[i]) stHostPrepName[i]->setRelativePosition({ sx(656), sy(y + 4), sx(798), sy(y + 28) });
+		if(imgHostPrepVip[i]) imgHostPrepVip[i]->setRelativePosition({ sx(802), sy(y + 3), sx(882), sy(y + 29) });
+		if(chkHostPrepReady[i]) chkHostPrepReady[i]->setRelativePosition({ sx(892), sy(y + 40), sx(916), sy(y + 64) });
+	}
+}
 void Game::OnResize() {
 	env->getRootGUIElement()->setRelativePosition(irr::core::recti(0, 0, window_size.Width, window_size.Height));
 	{
@@ -6846,6 +6897,7 @@ void Game::OnResize() {
 	wLanWindow->setRelativePosition(ResizeWin(220, 100, 800, 520));
 	SetCentered(wCreateHost, false);
 	wHostPrepare->setRelativePosition(ResizeWin(48, 22, 976, 618));
+	LayoutHostPrepareChildren();
 	if(wHostPrepareR) wHostPrepareR->setVisible(false);
 	if(wHostPrepareL) wHostPrepareL->setVisible(false);
 	wRules->setRelativePosition(ResizeWin(630, 100, 1000, 310));

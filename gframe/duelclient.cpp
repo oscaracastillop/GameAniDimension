@@ -927,7 +927,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->stHostPrepDuelist[i]->setVisible(false);
 			mainGame->stHostPrepDuelist[i]->setText(L"");
 			if(mainGame->stHostPrepName[i]) { mainGame->stHostPrepName[i]->setVisible(false); mainGame->stHostPrepName[i]->setText(L""); }
-			if(mainGame->stHostPrepVip[i]) { mainGame->stHostPrepVip[i]->setVisible(false); mainGame->stHostPrepVip[i]->setText(L""); }
+			if(mainGame->imgHostPrepVip[i]) mainGame->imgHostPrepVip[i]->setVisible(false);
 			if(mainGame->imgHostPrepAvatar[i]) mainGame->imgHostPrepAvatar[i]->setVisible(false);
 			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setVisible(false);
 		}
@@ -940,7 +940,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(158, y, 426, y + 108));
 			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(164, y + 6, 190, y + 24));
 			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(196, y + 4, 338, y + 28));
-			if(mainGame->stHostPrepVip[i]) mainGame->stHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(340, y + 5, 420, y + 25));
+			if(mainGame->imgHostPrepVip[i]) mainGame->imgHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(342, y + 3, 422, y + 29));
 			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(432, y + 40, 456, y + 64));
 		}
 		for(int i = pkt.info.team1; i < pkt.info.team1 + pkt.info.team2 && i < 6; i++) {
@@ -953,7 +953,7 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 			mainGame->stHostPrepDuelist[i]->setRelativePosition(mainGame->Scale<irr::s32>(618, y, 886, y + 108));
 			if(mainGame->imgHostPrepFlag[i]) mainGame->imgHostPrepFlag[i]->setRelativePosition(mainGame->Scale<irr::s32>(624, y + 6, 650, y + 24));
 			if(mainGame->stHostPrepName[i]) mainGame->stHostPrepName[i]->setRelativePosition(mainGame->Scale<irr::s32>(656, y + 4, 798, y + 28));
-			if(mainGame->stHostPrepVip[i]) mainGame->stHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(800, y + 5, 880, y + 25));
+			if(mainGame->imgHostPrepVip[i]) mainGame->imgHostPrepVip[i]->setRelativePosition(mainGame->Scale<irr::s32>(802, y + 3, 882, y + 29));
 			mainGame->chkHostPrepReady[i]->setRelativePosition(mainGame->Scale<irr::s32>(892, y + 40, 916, y + 64));
 		}
 		str += epro::format(L"Tipo: {}\nNivel Rival: {} - {}",
@@ -1222,10 +1222,16 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		mainGame->dInfo.opponames.clear();
 		int i;
 		for(i = 0; i < mainGame->dInfo.team1; i++) {
-			mainGame->dInfo.selfnames.push_back(mainGame->stHostPrepDuelist[i]->getText());
+			const wchar_t* pname = (mainGame->stHostPrepName[i] && wcslen(mainGame->stHostPrepName[i]->getText()) > 0)
+				? mainGame->stHostPrepName[i]->getText()
+				: mainGame->stHostPrepDuelist[i]->getText();
+			mainGame->dInfo.selfnames.push_back(pname);
 		}
 		for(; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
-			mainGame->dInfo.opponames.push_back(mainGame->stHostPrepDuelist[i]->getText());
+			const wchar_t* pname = (mainGame->stHostPrepName[i] && wcslen(mainGame->stHostPrepName[i]->getText()) > 0)
+				? mainGame->stHostPrepName[i]->getText()
+				: mainGame->stHostPrepDuelist[i]->getText();
+			mainGame->dInfo.opponames.push_back(pname);
 		}
 		if(selftype >= mainGame->dInfo.team1 + mainGame->dInfo.team2) {
 			mainGame->dInfo.player_type = 7;
