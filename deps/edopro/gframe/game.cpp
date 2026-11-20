@@ -270,39 +270,121 @@ void Game::Initialize() {
 	if(auto lobyTex = driver->getTexture("textures/bg_loby.png"))
 		imgMainMenuBg->setImage(lobyTex);
 
-	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 300, 320), true, false, wMainMenu, -1, true);
-	wLobbyHeader->setBackgroundColor(irr::video::SColor(145, 8, 13, 26));
-	stLobbyTitle = env->addStaticText(L"SERVIDOR ANI DIMENSION", irr::core::recti(0, 0, 280, 24), false, false, wLobbyHeader);
-	stLobbyTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	auto makeSolidTex = [&](const char* texName, irr::u32 argb) -> irr::video::ITexture* {
+		auto* tex = driver->addTexture(irr::core::dimension2du(2, 2), texName, irr::video::ECF_A8R8G8B8);
+		if(tex) {
+			if(auto* px = static_cast<irr::u32*>(tex->lock())) {
+				px[0] = px[1] = px[2] = px[3] = argb;
+				tex->unlock();
+			}
+		}
+		return tex;
+	};
+	tFlatBtnTrans = makeSolidTex("ani_flat_trans", 0x00000000);
+	tFlatBtnCyan = makeSolidTex("ani_flat_cyan", 0xFF0284C7);
+	tFlatBtnDark = makeSolidTex("ani_flat_dark", 0xD00F172A);
+
+	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 360, 300), false, false, wMainMenu, -1, true);
+	wLobbyHeader->setBackgroundColor(irr::video::SColor(195, 11, 17, 34));
+	imgServerLogo = env->addImage(irr::core::recti(0, 0, 32, 32), wLobbyHeader, -1, 0, true);
+	imgServerLogo->setScaleImage(true);
+	if(auto aniTex = driver->getTexture("textures/logo_ani.png"))
+		imgServerLogo->setImage(aniTex);
+	stLobbyTitle = env->addStaticText(L"Servidor Central", irr::core::recti(0, 0, 200, 22), false, false, wLobbyHeader);
+	stLobbyTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginUiFont) stLobbyTitle->setOverrideFont(loginUiFont);
-	stLobbyUser = env->addStaticText(L"Cargando datos del duelista...", irr::core::recti(0, 0, 280, 22), false, false, wLobbyHeader);
-	stLobbyUser->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stLobbyUser = env->addStaticText(L"anidimension.online", irr::core::recti(0, 0, 200, 18), false, false, wLobbyHeader);
+	stLobbyUser->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	stServerOnlineBadge = env->addStaticText(L"\u25CF EN L\u00CDNEA", irr::core::recti(0, 0, 92, 24), false, false, wLobbyHeader, -1, true);
+	stServerOnlineBadge->setBackgroundColor(irr::video::SColor(210, 6, 46, 36));
+	stServerOnlineBadge->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	stServerOnlineBadge->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 
 	const wchar_t* statLabels[6] = {
-		L"Conexi\u00F3n / Ping:",
-		L"Cuentas Online:",
-		L"Cuentas Creadas:",
-		L"Duelos Totales:",
-		L"Cartas en Servidor:",
-		L"NPCs en Aventura:"
+		L"LATENCIA VPS",
+		L"MODALIDADES",
+		L"CONECTADOS",
+		L"CUENTAS CREADAS",
+		L"DUELOS VS NPCS",
+		L"DUELOS PVP"
 	};
 	const irr::video::SColor statColors[6] = {
+		irr::video::SColor(255, 248, 250, 252),
+		irr::video::SColor(255, 248, 250, 252),
 		irr::video::SColor(255, 52, 211, 153),
-		irr::video::SColor(255, 56, 189, 248),
-		irr::video::SColor(255, 96, 165, 250),
-		irr::video::SColor(255, 251, 191, 36),
 		irr::video::SColor(255, 192, 132, 252),
-		irr::video::SColor(255, 251, 113, 133)
+		irr::video::SColor(255, 56, 189, 248),
+		irr::video::SColor(255, 251, 191, 36)
 	};
 	for(int i = 0; i < 6; ++i) {
-		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 280, 28), false, false, wLobbyHeader, -1, true);
-		wStatCards[i]->setBackgroundColor(irr::video::SColor(85, 15, 23, 42));
-		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 140, 24), false, false, wStatCards[i]);
-		stStatTitles[i]->setOverrideColor(statColors[i]);
-		stStatTitles[i]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
-		stStatValues[i] = env->addStaticText(L"...", irr::core::recti(0, 0, 140, 24), false, false, wStatCards[i]);
-		stStatValues[i]->setOverrideColor(irr::video::SColor(255, 241, 245, 249));
-		stStatValues[i]->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
+		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 160, 56), false, false, wLobbyHeader, -1, true);
+		wStatCards[i]->setBackgroundColor(irr::video::SColor(195, 15, 23, 42));
+		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 140, 18), false, false, wStatCards[i]);
+		stStatTitles[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		stStatValues[i] = env->addStaticText(i == 1 ? L"Aventura + PvP" : L"...", irr::core::recti(0, 0, 140, 26), false, false, wStatCards[i]);
+		stStatValues[i]->setOverrideColor(statColors[i]);
+		if(loginUiFont) stStatValues[i]->setOverrideFont(loginUiFont);
+	}
+
+	// Hero Section (left side, floating cleanly over web dark gradient)
+	stLobbyHeroPill = env->addStaticText(L"  \u25CF SERVIDOR ACTIVO  |  Nivel 1  |  0 SS  ", irr::core::recti(0, 0, 320, 26), false, false, wMainMenu, -1, true);
+	stLobbyHeroPill->setBackgroundColor(irr::video::SColor(190, 12, 20, 38));
+	stLobbyHeroPill->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stLobbyHeroPill->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+
+	stLobbyHeroTitle1 = env->addStaticText(L"El Multiverso del Duelo", irr::core::recti(0, 0, 460, 36), false, false, wMainMenu);
+	stLobbyHeroTitle1->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stLobbyHeroTitle1->setOverrideFont(loginTitleFont);
+
+	stLobbyHeroTitle2 = env->addStaticText(L"Ani Dimension", irr::core::recti(0, 0, 460, 36), false, false, wMainMenu);
+	stLobbyHeroTitle2->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginTitleFont) stLobbyHeroTitle2->setOverrideFont(loginTitleFont);
+
+	stLobbyHeroDesc = env->addStaticText(
+		L"Vive la experiencia definitiva de duelos: Modo Aventura contra NPCs con niveles Normal y Leyenda con IA, Salas PvP Ranked y juego cruzado en tiempo real para PC y Android.",
+		irr::core::recti(0, 0, 440, 68), false, true, wMainMenu);
+	stLobbyHeroDesc->setWordWrap(true);
+	stLobbyHeroDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	btnHeroAdventure = env->addButton(irr::core::recti(0, 0, 175, 40), wMainMenu, BUTTON_NAV_AVENTURA, L"Modo Aventura \u2192");
+	btnHeroAdventure->setImage(tFlatBtnCyan);
+	btnHeroAdventure->setPressedImage(tFlatBtnCyan);
+	btnHeroAdventure->setScaleImage(true);
+	btnHeroAdventure->setDrawBorder(false);
+
+	btnHeroRanked = env->addButton(irr::core::recti(0, 0, 175, 40), wMainMenu, BUTTON_NAV_DUELOS, L"Salas Ranked \u2192");
+	btnHeroRanked->setImage(tFlatBtnDark);
+	btnHeroRanked->setPressedImage(tFlatBtnDark);
+	btnHeroRanked->setScaleImage(true);
+	btnHeroRanked->setDrawBorder(true);
+
+	// Bottom 4 Feature Cards (matching web home bottom section)
+	const wchar_t* featTitles[4] = {
+		L"Avatares Coleccionables",
+		L"Tienda & Potenciadores",
+		L"Cartas & Buz\u00F3n",
+		L"Eventos & Medallas"
+	};
+	const wchar_t* featDescs[4] = {
+		L"Equipa personajes con bonos de EXP, StarShips y Luck tras cada victoria.",
+		L"Lleva tu avatar activo hasta 300% EXP, 300% SS y 100% Luck.",
+		L"Consigue cartas y sobres en la web; todo llega al Buz\u00F3n de tu cuenta.",
+		L"Rompecabezas mensuales del 5 al 26 y medallas de 81 NPCs en Leyenda."
+	};
+	const irr::video::SColor featAccent[4] = {
+		irr::video::SColor(255, 56, 189, 248),
+		irr::video::SColor(255, 52, 211, 153),
+		irr::video::SColor(255, 192, 132, 252),
+		irr::video::SColor(255, 251, 191, 36)
+	};
+	for(int fi = 0; fi < 4; ++fi) {
+		wFeatureCards[fi] = env->addStaticText(L"", irr::core::recti(0, 0, 220, 96), false, false, wMainMenu, -1, true);
+		wFeatureCards[fi]->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+		stFeatureTitles[fi] = env->addStaticText(featTitles[fi], irr::core::recti(0, 0, 200, 22), false, false, wFeatureCards[fi]);
+		stFeatureTitles[fi]->setOverrideColor(featAccent[fi]);
+		stFeatureDescs[fi] = env->addStaticText(featDescs[fi], irr::core::recti(0, 0, 200, 62), false, true, wFeatureCards[fi]);
+		stFeatureDescs[fi]->setWordWrap(true);
+		stFeatureDescs[fi]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
 	}
 
 	btnOnlineMode = env->addButton(Scale(700, 120, 980, 170), wMainMenu, BUTTON_ONLINE_MULTIPLAYER, gDataManager->GetSysString(2042).data());
@@ -369,17 +451,17 @@ void Game::Initialize() {
 		}
 	}
 
-	// Dedicated Top Navigation Bar (7 items estilo web, solo en Lobby / Perfil / Tienda)
-	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 46), false, false, 0, -1, true);
-	wTopNavBar->setBackgroundColor(irr::video::SColor(205, 8, 12, 24));
+	// Dedicated Top Navigation Bar (flat web-style links + logo_ani.png)
+	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 48), false, false, 0, -1, true);
+	wTopNavBar->setBackgroundColor(irr::video::SColor(235, 8, 12, 24));
 	wTopNavBar->setVisible(false);
-	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 44, 1024, 46), false, false, wTopNavBar, -1, true);
-	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(190, 56, 189, 248));
-	imgTopNavLogo = env->addImage(irr::core::recti(10, 7, 40, 37), wTopNavBar, -1, 0, true);
+	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 46, 1024, 48), false, false, wTopNavBar, -1, true);
+	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(180, 30, 58, 108));
+	imgTopNavLogo = env->addImage(irr::core::recti(12, 8, 42, 38), wTopNavBar, -1, 0, true);
 	imgTopNavLogo->setScaleImage(true);
-	if(auto navLogoTex = driver->getTexture("textures/AppIcon.png"))
+	if(auto navLogoTex = driver->getTexture("textures/logo_ani.png"))
 		imgTopNavLogo->setImage(navLogoTex);
-	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(46, 0, 185, 44), false, false, wTopNavBar);
+	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(48, 0, 195, 46), false, false, wTopNavBar);
 	stTopNavBrand->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	stTopNavBrand->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
@@ -393,11 +475,19 @@ void Game::Initialize() {
 		};
 		for(int ni = 0; ni < 7; ++ni) {
 			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 88, 30), wTopNavBar, navIds[ni], navLabels[ni]);
+			btnNavItems[ni]->setImage(tFlatBtnTrans);
+			btnNavItems[ni]->setPressedImage(tFlatBtnTrans);
+			btnNavItems[ni]->setScaleImage(true);
+			btnNavItems[ni]->setUseAlphaChannel(true);
+			btnNavItems[ni]->setDrawBorder(false);
 		}
 	}
-	stTopNavUser = env->addStaticText(L"", irr::core::recti(0, 0, 120, 32), false, false, wTopNavBar);
-	stTopNavUser->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
-	stTopNavUser->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	imgTopNavFlag = env->addImage(irr::core::recti(0, 0, 22, 15), wTopNavBar, -1, 0, true);
+	imgTopNavFlag->setScaleImage(true);
+	imgTopNavFlag->setVisible(false);
+	stTopNavUser = env->addStaticText(L"", irr::core::recti(0, 0, 96, 32), false, false, wTopNavBar);
+	stTopNavUser->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	stTopNavUser->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	// Dedicated full-screen Login interface
 	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
 	imgLoginBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wLogin);
@@ -2823,52 +2913,88 @@ void Game::ResizeMainMenuScreen() {
 		return;
 
 	wMainMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-	if(imgMainMenuBg)
+	if(imgMainMenuBg) {
 		imgMainMenuBg->setRelativePosition(irr::core::recti(0, 0, W, H));
-
-	const int navH = Scale(46);
-	const int padX = std::max(Scale(16), (int)(W * 0.022f));
-	const int bottomPad = std::max(Scale(20), (int)(H * 0.035f));
-
-	// Left compact translucent server-status card (leaves center bg_loby artwork completely open!)
-	const int leftW = std::max(Scale(270), std::min(Scale(335), (int)(W * 0.29f)));
-	const int rowH = Scale(30);
-	const int rowGap = Scale(5);
-	const int headerTopH = Scale(64);
-	const int leftCardH = headerTopH + 6 * rowH + 5 * rowGap + Scale(16);
-	const int leftY = H - bottomPad - leftCardH;
-
-	if(wLobbyHeader) {
-		wLobbyHeader->setRelativePosition(irr::core::recti(padX, leftY, padX + leftW, leftY + leftCardH));
-		if(stLobbyTitle)
-			stLobbyTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(10), leftW - Scale(12), Scale(34)));
-		if(stLobbyUser)
-			stLobbyUser->setRelativePosition(irr::core::recti(Scale(12), Scale(34), leftW - Scale(12), Scale(58)));
+		imgMainMenuBg->setVisible(false);
 	}
-	int curRowY = headerTopH;
-	for(int i = 0; i < 6; ++i) {
-		if(wStatCards[i]) {
-			wStatCards[i]->setRelativePosition(irr::core::recti(Scale(10), curRowY, leftW - Scale(10), curRowY + rowH));
-			const int rowW = leftW - Scale(20);
-			if(stStatTitles[i])
-				stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(8), 0, rowW / 2 + Scale(14), rowH));
-			if(stStatValues[i])
-				stStatValues[i]->setRelativePosition(irr::core::recti(rowW / 2 - Scale(4), 0, rowW - Scale(8), rowH));
+
+	const int navH = Scale(48);
+	const int padX = std::max(Scale(24), (int)(W * 0.038f));
+	const int bottomPad = std::max(Scale(18), (int)(H * 0.032f));
+	const int topY = navH + std::max(Scale(24), (int)(H * 0.045f));
+
+	// Bottom 4 feature cards strip (like web home Imagen 3)
+	const int featGap = Scale(12);
+	const int featH = std::max(Scale(84), std::min(Scale(108), (int)(H * 0.165f)));
+	const int featY = H - bottomPad - featH;
+	const int featW = (W - 2 * padX - 3 * featGap) / 4;
+	for(int fi = 0; fi < 4; ++fi) {
+		int fx = padX + fi * (featW + featGap);
+		if(wFeatureCards[fi]) {
+			wFeatureCards[fi]->setRelativePosition(irr::core::recti(fx, featY, fx + featW, featY + featH));
+			if(stFeatureTitles[fi])
+				stFeatureTitles[fi]->setRelativePosition(irr::core::recti(Scale(12), Scale(10), featW - Scale(12), Scale(32)));
+			if(stFeatureDescs[fi])
+				stFeatureDescs[fi]->setRelativePosition(irr::core::recti(Scale(12), Scale(34), featW - Scale(12), featH - Scale(8)));
 		}
-		curRowY += rowH + rowGap;
 	}
 
-	// Right compact translucent Game Guide card (scrollable, leaves center completely open)
-	const int rightW = std::max(Scale(280), std::min(Scale(350), (int)(W * 0.30f)));
+	// Middle Hero + Servidor Central area
+	const int midAvailH = std::max(Scale(220), featY - topY - Scale(18));
+	const int colGap = std::max(Scale(24), (int)(W * 0.04f));
+	const int rightW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.38f)));
+	const int leftW = std::max(Scale(300), W - 2 * padX - rightW - colGap);
+
+	// Left: Hero Title, Description & 2 clean action buttons
+	const int heroY = topY + std::max(0, (midAvailH - Scale(255)) / 2);
+	if(stLobbyHeroPill)
+		stLobbyHeroPill->setRelativePosition(irr::core::recti(padX, heroY, padX + std::min(leftW, Scale(340)), heroY + Scale(26)));
+	if(stLobbyHeroTitle1)
+		stLobbyHeroTitle1->setRelativePosition(irr::core::recti(padX, heroY + Scale(38), padX + leftW, heroY + Scale(76)));
+	if(stLobbyHeroTitle2)
+		stLobbyHeroTitle2->setRelativePosition(irr::core::recti(padX, heroY + Scale(74), padX + leftW, heroY + Scale(112)));
+	if(stLobbyHeroDesc)
+		stLobbyHeroDesc->setRelativePosition(irr::core::recti(padX, heroY + Scale(120), padX + leftW, heroY + Scale(192)));
+	const int heroBtnW = std::min(Scale(175), (leftW - Scale(12)) / 2);
+	const int heroBtnH = Scale(38);
+	const int heroBtnY = heroY + Scale(204);
+	if(btnHeroAdventure)
+		btnHeroAdventure->setRelativePosition(irr::core::recti(padX, heroBtnY, padX + heroBtnW, heroBtnY + heroBtnH));
+	if(btnHeroRanked)
+		btnHeroRanked->setRelativePosition(irr::core::recti(padX + heroBtnW + Scale(12), heroBtnY, padX + 2 * heroBtnW + Scale(12), heroBtnY + heroBtnH));
+
+	// Right: Servidor Central card (2x3 grid + online badge, matching web Imagen 2)
 	const int rightX = W - padX - rightW;
-	const int rightH = leftCardH;
-	const int rightY = H - bottomPad - rightH;
-	if(pnlHomeInfo) {
-		pnlHomeInfo->setRelativePosition(irr::core::recti(rightX, rightY, rightX + rightW, rightY + rightH));
-		if(stHomeInfoTitle)
-			stHomeInfoTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(10), rightW - Scale(12), Scale(34)));
-		if(lstHomeInfo)
-			lstHomeInfo->setRelativePosition(irr::core::recti(Scale(10), Scale(38), rightW - Scale(10), rightH - Scale(10)));
+	const int srvPad = Scale(16);
+	const int srvHeaderH = Scale(58);
+	const int tileGap = Scale(10);
+	const int tileW = (rightW - 2 * srvPad - tileGap) / 2;
+	const int tileH = std::max(Scale(48), std::min(Scale(62), (midAvailH - srvHeaderH - 3 * tileGap - srvPad) / 3));
+	const int srvH = srvHeaderH + 3 * tileH + 2 * tileGap + srvPad + Scale(10);
+	const int srvY = topY + std::max(0, (midAvailH - srvH) / 2);
+	if(wLobbyHeader) {
+		wLobbyHeader->setRelativePosition(irr::core::recti(rightX, srvY, rightX + rightW, srvY + srvH));
+		if(imgServerLogo)
+			imgServerLogo->setRelativePosition(irr::core::recti(srvPad, Scale(12), srvPad + Scale(34), Scale(46)));
+		if(stLobbyTitle)
+			stLobbyTitle->setRelativePosition(irr::core::recti(srvPad + Scale(42), Scale(10), rightW - Scale(112), Scale(32)));
+		if(stLobbyUser)
+			stLobbyUser->setRelativePosition(irr::core::recti(srvPad + Scale(42), Scale(32), rightW - Scale(112), Scale(50)));
+		if(stServerOnlineBadge)
+			stServerOnlineBadge->setRelativePosition(irr::core::recti(rightW - srvPad - Scale(94), Scale(16), rightW - srvPad, Scale(40)));
+	}
+	for(int i = 0; i < 6; ++i) {
+		int row = i / 2;
+		int col = i % 2;
+		int tx = srvPad + col * (tileW + tileGap);
+		int ty = srvHeaderH + row * (tileH + tileGap);
+		if(wStatCards[i]) {
+			wStatCards[i]->setRelativePosition(irr::core::recti(tx, ty, tx + tileW, ty + tileH));
+			if(stStatTitles[i])
+				stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(10), Scale(6), tileW - Scale(10), Scale(24)));
+			if(stStatValues[i])
+				stStatValues[i]->setRelativePosition(irr::core::recti(Scale(10), Scale(24), tileW - Scale(10), tileH - Scale(6)));
+		}
 	}
 	ResizeTopNavBar();
 }
@@ -2876,25 +3002,29 @@ void Game::ResizeMainMenuScreen() {
 void Game::ResizeTopNavBar() {
 	if(!wTopNavBar) return;
 	const int W = (int)window_size.Width;
-	const int navH = Scale(46);
+	const int navH = Scale(48);
 	wTopNavBar->setRelativePosition(irr::core::recti(0, 0, W, navH));
 	if(pnlTopNavBorder)
 		pnlTopNavBorder->setRelativePosition(irr::core::recti(0, navH - 2, W, navH));
 	const int logoSz = Scale(30);
 	if(imgTopNavLogo)
-		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(10), (navH - logoSz) / 2, Scale(10) + logoSz, (navH + logoSz) / 2));
-	const int brandW = Scale(142);
+		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(14), (navH - logoSz) / 2, Scale(14) + logoSz, (navH + logoSz) / 2));
+	const int brandW = Scale(144);
 	if(stTopNavBrand)
-		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(46), 0, Scale(46) + brandW, navH));
-	const int userW = Scale(100);
+		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(50), 0, Scale(50) + brandW, navH));
+	const int flagW = Scale(22);
+	const int flagH = Scale(15);
+	const int userW = Scale(78);
+	if(imgTopNavFlag)
+		imgTopNavFlag->setRelativePosition(irr::core::recti(W - userW - flagW - Scale(18), (navH - flagH) / 2, W - userW - Scale(18), (navH + flagH) / 2));
 	if(stTopNavUser)
 		stTopNavUser->setRelativePosition(irr::core::recti(W - userW - Scale(12), 0, W - Scale(12), navH));
 
-	const int navStartX = Scale(46) + brandW + Scale(14);
-	const int navEndX = W - userW - Scale(18);
+	const int navStartX = Scale(50) + brandW + Scale(16);
+	const int navEndX = W - userW - flagW - Scale(26);
 	const int availW = std::max(Scale(380), navEndX - navStartX);
-	const int gap = Scale(8);
-	const int btnW = std::max(Scale(54), std::min(Scale(108), (availW - 6 * gap) / 7));
+	const int gap = Scale(6);
+	const int btnW = std::max(Scale(52), std::min(Scale(96), (availW - 6 * gap) / 7));
 	const int btnH = Scale(30);
 	const int btnY = (navH - btnH) / 2;
 	int curX = navStartX;
@@ -2912,6 +3042,15 @@ void Game::ShowTopNavBar(bool show) {
 		ResizeTopNavBar();
 		if(stTopNavUser)
 			stTopNavUser->setText(loggedInUser.empty() ? L"" : loggedInUser.c_str());
+		if(imgTopNavFlag && !loggedInUser.empty()) {
+			auto it = playerCardCache.find(loggedInUser);
+			if(it != playerCardCache.end() && !it->second.flagUrl.empty()) {
+				if(auto fTex = LoadFlagTexture(it->second.flagUrl)) {
+					imgTopNavFlag->setImage(fTex);
+					imgTopNavFlag->setVisible(true);
+				}
+			}
+		}
 		wTopNavBar->setVisible(true);
 		env->getRootGUIElement()->bringToFront(wTopNavBar);
 	} else {
@@ -2978,16 +3117,17 @@ void Game::ProcessPendingLobbyStats() {
 		totCards = lobbyTotalCartas;
 		totNpcs = lobbyTotalNpcs;
 	}
-	if(stLobbyUser) {
-		std::wstring uName = loggedInUser.empty() ? L"Duelista" : loggedInUser;
-		stLobbyUser->setText(epro::format(L"Duelista: {}   |   Nivel {}   |   {} SS", uName, playerLevel, playerStarShips).c_str());
+	if(stLobbyHeroPill) {
+		stLobbyHeroPill->setText(epro::format(L"  \u25CF SERVIDOR ACTIVO  |  Nivel {}  |  {} SS  ", playerLevel, playerStarShips).c_str());
 	}
-	if(stStatValues[0]) stStatValues[0]->setText(epro::format(L"{} ms  (En L\u00EDnea)", pingMs).c_str());
-	if(stStatValues[1]) stStatValues[1]->setText(epro::format(L"{} conectados", onC).c_str());
-	if(stStatValues[2]) stStatValues[2]->setText(epro::format(L"{} registradas", totC).c_str());
-	if(stStatValues[3]) stStatValues[3]->setText(epro::format(L"NPC: {}  |  PvP: {}", dNpc, dPvp).c_str());
-	if(stStatValues[4]) stStatValues[4]->setText(epro::format(L"{} cartas", totCards).c_str());
-	if(stStatValues[5]) stStatValues[5]->setText(epro::format(L"{} oponentes", totNpcs).c_str());
+	if(stStatValues[0]) stStatValues[0]->setText(epro::format(L"{} ms", pingMs).c_str());
+	if(stStatValues[1]) stStatValues[1]->setText(L"Aventura + PvP");
+	if(stStatValues[2]) stStatValues[2]->setText(epro::format(L"{}", onC).c_str());
+	if(stStatValues[3]) stStatValues[3]->setText(epro::format(L"{}", totC).c_str());
+	if(stStatValues[4]) stStatValues[4]->setText(epro::format(L"{}", dNpc).c_str());
+	if(stStatValues[5]) stStatValues[5]->setText(epro::format(L"{}", dPvp).c_str());
+	(void)totCards;
+	(void)totNpcs;
 }
 
 void Game::SubmitLogin() {
@@ -5288,7 +5428,33 @@ bool Game::MainLoop() {
 			smgr->drawAll();
 			driver->setMaterial(irr::video::IdentityMaterial);
 			ClearZBuffer(driver);//Without this, "animations" are drawn behind everything
-			EnableMaterial2D(false);
+			if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
+			if(wLobbyHeader)
+				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
+			for(int i = 0; i < 6; ++i) {
+				if(wStatCards[i])
+					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
+			}
+			const irr::video::SColor featBorder[4] = {
+				irr::video::SColor(150, 56, 189, 248),
+				irr::video::SColor(150, 52, 211, 153),
+				irr::video::SColor(150, 192, 132, 252),
+				irr::video::SColor(150, 251, 191, 36)
+			};
+			for(int fi = 0; fi < 4; ++fi) {
+				if(wFeatureCards[fi])
+					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
+			}
+			if(stLobbyHeroPill)
+				driver->draw2DRectangleOutline(stLobbyHeroPill->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
+			if(btnHeroRanked)
+				driver->draw2DRectangleOutline(btnHeroRanked->getAbsolutePosition(), irr::video::SColor(160, 56, 189, 248));
+			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
+				auto r = btnNavItems[0]->getAbsolutePosition();
+				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
+			}
+		}
+		EnableMaterial2D(false);
 		} else if(is_building) {
 			if(is_siding)
 				discord.UpdatePresence(DiscordWrapper::DECK_SIDING);
@@ -5298,7 +5464,33 @@ bool Game::MainLoop() {
 			DrawBackImage(imageManager.tBackGround_deck, resized);
 			EnableMaterial2D(true);
 			DrawDeckBd();
-			EnableMaterial2D(false);
+			if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
+			if(wLobbyHeader)
+				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
+			for(int i = 0; i < 6; ++i) {
+				if(wStatCards[i])
+					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
+			}
+			const irr::video::SColor featBorder[4] = {
+				irr::video::SColor(150, 56, 189, 248),
+				irr::video::SColor(150, 52, 211, 153),
+				irr::video::SColor(150, 192, 132, 252),
+				irr::video::SColor(150, 251, 191, 36)
+			};
+			for(int fi = 0; fi < 4; ++fi) {
+				if(wFeatureCards[fi])
+					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
+			}
+			if(stLobbyHeroPill)
+				driver->draw2DRectangleOutline(stLobbyHeroPill->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
+			if(btnHeroRanked)
+				driver->draw2DRectangleOutline(btnHeroRanked->getAbsolutePosition(), irr::video::SColor(160, 56, 189, 248));
+			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
+				auto r = btnNavItems[0]->getAbsolutePosition();
+				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
+			}
+		}
+		EnableMaterial2D(false);
 		} else {
 			if(dInfo.isInLobby)
 				discord.UpdatePresence(DiscordWrapper::IN_LOBBY);
@@ -5310,6 +5502,16 @@ bool Game::MainLoop() {
 				if(!tRoomBg && driver)
 					tRoomBg = driver->getTexture("textures/bg_duel.jpg");
 				DrawBackImage(tRoomBg ? tRoomBg : imageManager.tBackGround, resized);
+			} else if(wMainMenu && wMainMenu->isVisible()) {
+				// Fondo degradado oscuro estilo web (sin imagen bg_loby)
+				const irr::core::recti fullRect(0, 0, (irr::s32)window_size.Width, (irr::s32)window_size.Height);
+				driver->draw2DRectangle(
+					fullRect,
+					irr::video::SColor(255, 6, 9, 19),
+					irr::video::SColor(255, 11, 22, 46),
+					irr::video::SColor(255, 4, 7, 15),
+					irr::video::SColor(255, 8, 14, 30)
+				);
 			} else {
 				DrawBackImage(imageManager.tBackGround_menu, resized);
 			}
@@ -5347,6 +5549,32 @@ bool Game::MainLoop() {
 		EnableMaterial2D(true);
 		DrawGUI();
 		DrawSpec();
+		if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
+			if(wLobbyHeader)
+				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
+			for(int i = 0; i < 6; ++i) {
+				if(wStatCards[i])
+					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
+			}
+			const irr::video::SColor featBorder[4] = {
+				irr::video::SColor(150, 56, 189, 248),
+				irr::video::SColor(150, 52, 211, 153),
+				irr::video::SColor(150, 192, 132, 252),
+				irr::video::SColor(150, 251, 191, 36)
+			};
+			for(int fi = 0; fi < 4; ++fi) {
+				if(wFeatureCards[fi])
+					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
+			}
+			if(stLobbyHeroPill)
+				driver->draw2DRectangleOutline(stLobbyHeroPill->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
+			if(btnHeroRanked)
+				driver->draw2DRectangleOutline(btnHeroRanked->getAbsolutePosition(), irr::video::SColor(160, 56, 189, 248));
+			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
+				auto r = btnNavItems[0]->getAbsolutePosition();
+				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
+			}
+		}
 		EnableMaterial2D(false);
 		if(cardimagetextureloading) {
 			ShowCardInfo(showingcard);
