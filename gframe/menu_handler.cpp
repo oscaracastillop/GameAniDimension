@@ -280,6 +280,44 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
 				break;
 			}
+			case BUTTON_NAV_AVENTURA: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->ShowTopNavBar(false);
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
+				mainGame->isAdventureMode = true;
+				mainGame->mTopMenu->setVisible(false);
+				mainGame->wBtnSettings->setVisible(false);
+				mainGame->wMainMenu->setVisible(false);
+				mainGame->wAdventureMode->setVisible(true);
+				mainGame->ResizeAdventureMode();
+				mainGame->RefreshAdventureMode();
+				break;
+			}
+			case BUTTON_NAV_REPLAYS: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->ShowTopNavBar(false);
+				mainGame->HideElement(mainGame->wMainMenu);
+				mainGame->stReplayInfo->setText(L"");
+				mainGame->btnLoadReplay->setEnabled(false);
+				mainGame->btnDeleteReplay->setEnabled(false);
+				mainGame->btnRenameReplay->setEnabled(false);
+				mainGame->btnExportDeck->setEnabled(false);
+				mainGame->btnShareReplay->setEnabled(false);
+				mainGame->ebRepStartTurn->setText(L"1");
+				mainGame->chkYrp->setChecked(false);
+				mainGame->chkYrp->setEnabled(false);
+				mainGame->ShowElement(mainGame->wReplay);
+				mainGame->RefreshReplay();
+				break;
+			}
 			case BUTTON_NAV_EVENTOS: {
 				mainGame->PopupMessage(L"Eventos Ani Dimension", L"Eventos y Rompecabezas Mensuales activos en:\nhttps://anidimension.online/eventos\n\nPr\u00F3ximamente integrados aqu\u00ED.");
 				break;

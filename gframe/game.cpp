@@ -270,20 +270,21 @@ void Game::Initialize() {
 	if(auto lobyTex = driver->getTexture("textures/bg_loby.png"))
 		imgMainMenuBg->setImage(lobyTex);
 
-	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 460, 74), true, false, wMainMenu, -1, true);
-	wLobbyHeader->setBackgroundColor(irr::video::SColor(218, 8, 13, 26));
-	stLobbyTitle = env->addStaticText(L"ANI DIMENSION - ESTADO DEL SERVIDOR", irr::core::recti(0, 0, 440, 26), false, false, wLobbyHeader);
+	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 300, 320), true, false, wMainMenu, -1, true);
+	wLobbyHeader->setBackgroundColor(irr::video::SColor(145, 8, 13, 26));
+	stLobbyTitle = env->addStaticText(L"SERVIDOR ANI DIMENSION", irr::core::recti(0, 0, 280, 24), false, false, wLobbyHeader);
 	stLobbyTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	stLobbyUser = env->addStaticText(L"Cargando datos del duelista...", irr::core::recti(0, 0, 440, 26), false, false, wLobbyHeader);
+	if(loginUiFont) stLobbyTitle->setOverrideFont(loginUiFont);
+	stLobbyUser = env->addStaticText(L"Cargando datos del duelista...", irr::core::recti(0, 0, 280, 22), false, false, wLobbyHeader);
 	stLobbyUser->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 
 	const wchar_t* statLabels[6] = {
-		L"CONEXI\u00D3N / PING",
-		L"CUENTAS ONLINE",
-		L"CUENTAS CREADAS",
-		L"DUELOS TOTALES",
-		L"CARTAS EN SERVIDOR",
-		L"NPCS EN AVENTURA"
+		L"Conexi\u00F3n / Ping:",
+		L"Cuentas Online:",
+		L"Cuentas Creadas:",
+		L"Duelos Totales:",
+		L"Cartas en Servidor:",
+		L"NPCs en Aventura:"
 	};
 	const irr::video::SColor statColors[6] = {
 		irr::video::SColor(255, 52, 211, 153),
@@ -294,12 +295,14 @@ void Game::Initialize() {
 		irr::video::SColor(255, 251, 113, 133)
 	};
 	for(int i = 0; i < 6; ++i) {
-		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 220, 76), true, false, wMainMenu, -1, true);
-		wStatCards[i]->setBackgroundColor(irr::video::SColor(212, 10, 16, 32));
-		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 200, 22), false, false, wStatCards[i]);
+		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 280, 28), false, false, wLobbyHeader, -1, true);
+		wStatCards[i]->setBackgroundColor(irr::video::SColor(85, 15, 23, 42));
+		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 140, 24), false, false, wStatCards[i]);
 		stStatTitles[i]->setOverrideColor(statColors[i]);
-		stStatValues[i] = env->addStaticText(L"...", irr::core::recti(0, 0, 200, 36), false, true, wStatCards[i]);
+		stStatTitles[i]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+		stStatValues[i] = env->addStaticText(L"...", irr::core::recti(0, 0, 140, 24), false, false, wStatCards[i]);
 		stStatValues[i]->setOverrideColor(irr::video::SColor(255, 241, 245, 249));
+		stStatValues[i]->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
 	}
 
 	btnOnlineMode = env->addButton(Scale(700, 120, 980, 170), wMainMenu, BUTTON_ONLINE_MULTIPLAYER, gDataManager->GetSysString(2042).data());
@@ -325,76 +328,71 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnModeExit, 1210);
 	btnModeExit->setVisible(false);
 	btnOnlineMode->setVisible(false);
+	btnAdventureMode->setVisible(false);
+	btnReplayMode->setVisible(false);
 	btnDeckEdit->setVisible(false);
 
-	// Right-side scrollable Game & Server Guide panel on Inicio (wMainMenu)
-	pnlHomeInfo = env->addStaticText(L"", irr::core::recti(0, 0, 400, 320), true, false, wMainMenu, -1, true);
-	pnlHomeInfo->setBackgroundColor(irr::video::SColor(218, 10, 15, 30));
-	stHomeInfoTitle = env->addStaticText(L"GU\u00CDA DEL SERVIDOR Y MODOS DE JUEGO", irr::core::recti(0, 0, 380, 26), false, false, pnlHomeInfo);
+	// Right-side compact translucent Game & Server Guide card on Lobby (wMainMenu)
+	pnlHomeInfo = env->addStaticText(L"", irr::core::recti(0, 0, 320, 320), true, false, wMainMenu, -1, true);
+	pnlHomeInfo->setBackgroundColor(irr::video::SColor(145, 8, 13, 26));
+	stHomeInfoTitle = env->addStaticText(L"GU\u00CDA DEL JUEGO", irr::core::recti(0, 0, 300, 24), false, false, pnlHomeInfo);
 	stHomeInfoTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	if(loginUiFont) stHomeInfoTitle->setOverrideFont(loginUiFont);
-	lstHomeInfo = env->addListBox(irr::core::recti(0, 0, 380, 270), pnlHomeInfo, -1, true);
-	lstHomeInfo->setItemHeight(Scale(24));
+	lstHomeInfo = env->addListBox(irr::core::recti(0, 0, 300, 270), pnlHomeInfo, -1, false);
+	lstHomeInfo->setItemHeight(Scale(22));
 	{
 		const wchar_t* homeGuideLines[] = {
-			L"  [ANI DIMENSION - SERVIDOR OFICIAL]",
-			L"  Yu-Gi-Oh! Master Rule 2020 (PC & Android)",
-			L"  Progreso sincronizado 100% con anidimension.online",
+			L"ANI DIMENSION - MASTER RULE 2020",
+			L"Progreso cruzado PC y Android",
 			L"",
-			L"  > MODO AVENTURA RPG:",
-			L"    Desaf\u00EDa NPCs por Series y Arcos (DM, GX, 5D's...)",
-			L"    Gana EXP, StarShips (SS), Medallas y Cartas.",
+			L"> MODO AVENTURA RPG:",
+			L"  Reta NPCs por Series y Arcos.",
+			L"  Gana EXP, StarShips y Medallas.",
 			L"",
-			L"  > DUELOS ONLINE (PvP):",
-			L"    Salas Ranked (EXP/SS) y Amistosas con filtro",
-			L"    de nivel rival y ranking global competitivo.",
+			L"> RANKED (DUELOS ONLINE):",
+			L"  Salas PvP Ranked y Amistosas",
+			L"  con filtro de nivel y ranking.",
 			L"",
-			L"  > ECONOM\u00CDA, TIENDA Y BUZ\u00D3N:",
-			L"    - StarShips (SS): Moneda gratis por duelos.",
-			L"    - Cristales (CD): Moneda especial / Pases VIP.",
-			L"    Compra Avatares, Potenciadores y Cartas; todo",
-			L"    llega directamente al Buz\u00F3n de tu cuenta.",
+			L"> ECONOM\u00CDA Y PROGRESO:",
+			L"  StarShips (SS) y Cristales (CD)",
+			L"  para Avatares, VIPs y Cartas.",
 			L"",
-			L"  > CLANES, EVENTOS Y TUTORIALES:",
-			L"    Forma tu Clan grupal, participa en Eventos de",
-			L"    Rompecabezas y revisa gu\u00EDas en la web oficial.",
-			L"    Web: https://anidimension.online"
+			L"> WEB OFICIAL:",
+			L"  https://anidimension.online"
 		};
 		for(size_t gi = 0; gi < sizeof(homeGuideLines) / sizeof(homeGuideLines[0]); ++gi) {
 			int idx = lstHomeInfo->addItem(homeGuideLines[gi]);
-			if(gi == 0 || gi == 4 || gi == 8 || gi == 12 || gi == 18)
+			if(gi == 0 || gi == 3 || gi == 7 || gi == 11 || gi == 15)
 				lstHomeInfo->setItemOverrideColor(idx, irr::video::SColor(255, 251, 191, 36));
 			else
 				lstHomeInfo->setItemOverrideColor(idx, irr::video::SColor(255, 226, 232, 240));
 		}
 	}
 
-	// Dedicated Top Navigation Bar (solo visible en Inicio / Tienda / Perfil / Buzon)
-	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 48), false, false, 0, -1, true);
-	wTopNavBar->setBackgroundColor(irr::video::SColor(240, 9, 13, 27));
+	// Dedicated Top Navigation Bar (7 items estilo web, solo en Lobby / Perfil / Tienda)
+	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 46), false, false, 0, -1, true);
+	wTopNavBar->setBackgroundColor(irr::video::SColor(205, 8, 12, 24));
 	wTopNavBar->setVisible(false);
-	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 46, 1024, 48), false, false, wTopNavBar, -1, true);
-	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(220, 56, 189, 248));
-	imgTopNavLogo = env->addImage(irr::core::recti(10, 7, 42, 39), wTopNavBar, -1, 0, true);
+	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 44, 1024, 46), false, false, wTopNavBar, -1, true);
+	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(190, 56, 189, 248));
+	imgTopNavLogo = env->addImage(irr::core::recti(10, 7, 40, 37), wTopNavBar, -1, 0, true);
 	imgTopNavLogo->setScaleImage(true);
 	if(auto navLogoTex = driver->getTexture("textures/AppIcon.png"))
 		imgTopNavLogo->setImage(navLogoTex);
-	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(48, 10, 185, 38), false, false, wTopNavBar);
+	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(46, 0, 185, 44), false, false, wTopNavBar);
 	stTopNavBrand->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	stTopNavBrand->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
 	{
-		const wchar_t* navLabels[9] = {
-			L"Inicio", L"Tienda", L"Perfil", L"Deck", L"Duelos",
-			L"Eventos", L"Clan", L"Tutoriales", L"Salir"
+		const wchar_t* navLabels[7] = {
+			L"Lobby", L"Perfil", L"Ranked", L"Aventura", L"Tutoriales", L"Replays", L"Salir"
 		};
-		const int navIds[9] = {
-			BUTTON_NAV_INICIO, BUTTON_NAV_TIENDA, BUTTON_NAV_PERFIL, BUTTON_NAV_DECK,
-			BUTTON_NAV_DUELOS, BUTTON_NAV_EVENTOS, BUTTON_NAV_CLAN, BUTTON_NAV_TUTORIALES,
-			BUTTON_NAV_SALIR
+		const int navIds[7] = {
+			BUTTON_NAV_INICIO, BUTTON_NAV_PERFIL, BUTTON_NAV_DUELOS,
+			BUTTON_NAV_AVENTURA, BUTTON_NAV_TUTORIALES, BUTTON_NAV_REPLAYS, BUTTON_NAV_SALIR
 		};
-		for(int ni = 0; ni < 9; ++ni) {
-			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 80, 32), wTopNavBar, navIds[ni], navLabels[ni]);
+		for(int ni = 0; ni < 7; ++ni) {
+			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 88, 30), wTopNavBar, navIds[ni], navLabels[ni]);
 		}
 	}
 	stTopNavUser = env->addStaticText(L"", irr::core::recti(0, 0, 120, 32), false, false, wTopNavBar);
@@ -2828,64 +2826,49 @@ void Game::ResizeMainMenuScreen() {
 	if(imgMainMenuBg)
 		imgMainMenuBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	const int navH = Scale(48);
-	const int padX = std::max(Scale(18), (int)(W * 0.025f));
-	const int padY = navH + std::max(Scale(14), (int)(H * 0.025f));
-	const int bottomPad = std::max(Scale(16), (int)(H * 0.03f));
-	const int colGap = std::max(Scale(16), (int)(W * 0.02f));
-	const int contentH = std::max(Scale(320), H - padY - bottomPad);
+	const int navH = Scale(46);
+	const int padX = std::max(Scale(16), (int)(W * 0.022f));
+	const int bottomPad = std::max(Scale(20), (int)(H * 0.035f));
 
-	// Left side: Server Stats blocks (2 cols x 3 rows) + Header card
-	const int leftW = std::max(Scale(320), (int)((W - 2 * padX - colGap) * 0.45f));
-	const int headerH = std::max(Scale(64), (int)(contentH * 0.16f));
-	const int gapGrid = std::max(Scale(10), (int)(W * 0.012f));
-	const int cardW = (leftW - gapGrid) / 2;
-	const int cardH = std::max(Scale(64), (contentH - headerH - 3 * gapGrid) / 3);
-	const int startY = padY;
+	// Left compact translucent server-status card (leaves center bg_loby artwork completely open!)
+	const int leftW = std::max(Scale(270), std::min(Scale(335), (int)(W * 0.29f)));
+	const int rowH = Scale(30);
+	const int rowGap = Scale(5);
+	const int headerTopH = Scale(64);
+	const int leftCardH = headerTopH + 6 * rowH + 5 * rowGap + Scale(16);
+	const int leftY = H - bottomPad - leftCardH;
 
 	if(wLobbyHeader) {
-		wLobbyHeader->setRelativePosition(irr::core::recti(padX, startY, padX + leftW, startY + headerH));
+		wLobbyHeader->setRelativePosition(irr::core::recti(padX, leftY, padX + leftW, leftY + leftCardH));
 		if(stLobbyTitle)
-			stLobbyTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), leftW - Scale(14), Scale(34)));
+			stLobbyTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(10), leftW - Scale(12), Scale(34)));
 		if(stLobbyUser)
-			stLobbyUser->setRelativePosition(irr::core::recti(Scale(14), Scale(36), leftW - Scale(14), headerH - Scale(8)));
+			stLobbyUser->setRelativePosition(irr::core::recti(Scale(12), Scale(34), leftW - Scale(12), Scale(58)));
 	}
-	int gridY = startY + headerH + gapGrid;
+	int curRowY = headerTopH;
 	for(int i = 0; i < 6; ++i) {
-		int row = i / 2;
-		int col = i % 2;
-		int cx = padX + col * (cardW + gapGrid);
-		int cy = gridY + row * (cardH + gapGrid);
-		if(wStatCards[i])
-			wStatCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-		if(stStatTitles[i])
-			stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(10), cardW - Scale(12), Scale(32)));
-		if(stStatValues[i])
-			stStatValues[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(36), cardW - Scale(12), cardH - Scale(10)));
+		if(wStatCards[i]) {
+			wStatCards[i]->setRelativePosition(irr::core::recti(Scale(10), curRowY, leftW - Scale(10), curRowY + rowH));
+			const int rowW = leftW - Scale(20);
+			if(stStatTitles[i])
+				stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(8), 0, rowW / 2 + Scale(14), rowH));
+			if(stStatValues[i])
+				stStatValues[i]->setRelativePosition(irr::core::recti(rowW / 2 - Scale(4), 0, rowW - Scale(8), rowH));
+		}
+		curRowY += rowH + rowGap;
 	}
 
-	// Right side: Quick Play buttons strip (Modo Aventura + Replays) + Scrollable Guide Panel
-	const int rightX = padX + leftW + colGap;
-	const int rightW = std::max(Scale(320), W - padX - rightX);
-	const int quickH = Scale(46);
-	const int quickGap = Scale(10);
-	const int halfBtnW = (rightW - quickGap) / 2;
-	if(btnAdventureMode) {
-		btnAdventureMode->setVisible(true);
-		btnAdventureMode->setRelativePosition(irr::core::recti(rightX, startY, rightX + halfBtnW, startY + quickH));
-	}
-	if(btnReplayMode) {
-		btnReplayMode->setVisible(true);
-		btnReplayMode->setRelativePosition(irr::core::recti(rightX + halfBtnW + quickGap, startY, rightX + rightW, startY + quickH));
-	}
-	const int infoY = startY + quickH + gapGrid;
-	const int infoH = std::max(Scale(200), (startY + contentH) - infoY);
+	// Right compact translucent Game Guide card (scrollable, leaves center completely open)
+	const int rightW = std::max(Scale(280), std::min(Scale(350), (int)(W * 0.30f)));
+	const int rightX = W - padX - rightW;
+	const int rightH = leftCardH;
+	const int rightY = H - bottomPad - rightH;
 	if(pnlHomeInfo) {
-		pnlHomeInfo->setRelativePosition(irr::core::recti(rightX, infoY, rightX + rightW, infoY + infoH));
+		pnlHomeInfo->setRelativePosition(irr::core::recti(rightX, rightY, rightX + rightW, rightY + rightH));
 		if(stHomeInfoTitle)
-			stHomeInfoTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), rightW - Scale(14), Scale(36)));
+			stHomeInfoTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(10), rightW - Scale(12), Scale(34)));
 		if(lstHomeInfo)
-			lstHomeInfo->setRelativePosition(irr::core::recti(Scale(12), Scale(42), rightW - Scale(12), infoH - Scale(12)));
+			lstHomeInfo->setRelativePosition(irr::core::recti(Scale(10), Scale(38), rightW - Scale(10), rightH - Scale(10)));
 	}
 	ResizeTopNavBar();
 }
@@ -2893,29 +2876,29 @@ void Game::ResizeMainMenuScreen() {
 void Game::ResizeTopNavBar() {
 	if(!wTopNavBar) return;
 	const int W = (int)window_size.Width;
-	const int navH = Scale(48);
+	const int navH = Scale(46);
 	wTopNavBar->setRelativePosition(irr::core::recti(0, 0, W, navH));
 	if(pnlTopNavBorder)
 		pnlTopNavBorder->setRelativePosition(irr::core::recti(0, navH - 2, W, navH));
 	const int logoSz = Scale(30);
 	if(imgTopNavLogo)
 		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(10), (navH - logoSz) / 2, Scale(10) + logoSz, (navH + logoSz) / 2));
-	const int brandW = Scale(138);
+	const int brandW = Scale(142);
 	if(stTopNavBrand)
 		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(46), 0, Scale(46) + brandW, navH));
-	const int userW = Scale(96);
+	const int userW = Scale(100);
 	if(stTopNavUser)
-		stTopNavUser->setRelativePosition(irr::core::recti(W - userW - Scale(10), 0, W - Scale(10), navH));
+		stTopNavUser->setRelativePosition(irr::core::recti(W - userW - Scale(12), 0, W - Scale(12), navH));
 
-	const int navStartX = Scale(46) + brandW + Scale(8);
-	const int navEndX = W - userW - Scale(16);
-	const int availW = std::max(Scale(360), navEndX - navStartX);
-	const int gap = Scale(5);
-	const int btnW = std::max(Scale(38), (availW - 8 * gap) / 9);
-	const int btnH = Scale(32);
+	const int navStartX = Scale(46) + brandW + Scale(14);
+	const int navEndX = W - userW - Scale(18);
+	const int availW = std::max(Scale(380), navEndX - navStartX);
+	const int gap = Scale(8);
+	const int btnW = std::max(Scale(54), std::min(Scale(108), (availW - 6 * gap) / 7));
+	const int btnH = Scale(30);
 	const int btnY = (navH - btnH) / 2;
 	int curX = navStartX;
-	for(int i = 0; i < 9; ++i) {
+	for(int i = 0; i < 7; ++i) {
 		if(btnNavItems[i]) {
 			btnNavItems[i]->setRelativePosition(irr::core::recti(curX, btnY, curX + btnW, btnY + btnH));
 		}
