@@ -326,30 +326,46 @@ void Game::Initialize() {
 		if(loginUiFont) stStatValues[i]->setOverrideFont(loginUiFont);
 	}
 
-	// Left Player Showcase Card (Neon Glass Card: Big Active Avatar + Nick + Nivel + VIP)
-	wLobbyAvatarCard = env->addStaticText(L"", irr::core::recti(0, 0, 420, 300), false, false, wMainMenu, -1, true);
-	wLobbyAvatarCard->setBackgroundColor(irr::video::SColor(195, 11, 17, 34));
+	// Left Player Showcase (No borders/boxes — floating cleanly over web dark gradient)
+	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 420, 34), false, false, wMainMenu);
+	stLobbyWelcomeTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginTitleFont) stLobbyWelcomeTitle->setOverrideFont(loginTitleFont);
 
-	wLobbyAvatarFrame = env->addStaticText(L"", irr::core::recti(0, 0, 220, 220), false, false, wLobbyAvatarCard, -1, true);
-	wLobbyAvatarFrame->setBackgroundColor(irr::video::SColor(220, 6, 10, 22));
-
-	imgLobbyAvatar = env->addImage(irr::core::recti(0, 0, 210, 210), wLobbyAvatarFrame, -1, 0, true);
+	imgLobbyAvatar = env->addImage(irr::core::recti(0, 0, 220, 300), wMainMenu, -1, 0, true);
 	imgLobbyAvatar->setScaleImage(true);
 	imgLobbyAvatar->setUseAlphaChannel(true);
-	if(auto defAv = driver->getTexture("textures/avatars/AVA-001.png"))
+	if(auto defAv = LoadAvatarTexture("AVA-001.png"))
 		imgLobbyAvatar->setImage(defAv);
 
-	stLobbyPlayerName = env->addStaticText(L"Duelista", irr::core::recti(0, 0, 200, 36), false, false, wLobbyAvatarCard);
+	stLobbyPlayerName = env->addStaticText(L"Duelista", irr::core::recti(0, 0, 240, 34), false, false, wMainMenu);
 	stLobbyPlayerName->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	if(loginTitleFont) stLobbyPlayerName->setOverrideFont(loginTitleFont);
 
-	stLobbyPlayerLevel = env->addStaticText(L"NIVEL 1", irr::core::recti(0, 0, 130, 28), false, false, wLobbyAvatarCard, -1, true);
-	stLobbyPlayerLevel->setBackgroundColor(irr::video::SColor(210, 12, 24, 48));
-	stLobbyPlayerLevel->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	stLobbyPlayerLevel->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stLobbyPlayerLevel = env->addStaticText(L"Nivel 1", irr::core::recti(0, 0, 220, 24), false, false, wMainMenu);
+	stLobbyPlayerLevel->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginUiFont) stLobbyPlayerLevel->setOverrideFont(loginUiFont);
 
-	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 140, 46), wLobbyAvatarCard, -1, 0, true);
+	stLobbyExpTrack = env->addStaticText(L"", irr::core::recti(0, 0, 220, 10), false, false, wMainMenu, -1, true);
+	stLobbyExpTrack->setBackgroundColor(irr::video::SColor(200, 15, 23, 42));
+
+	stLobbyExpText = env->addStaticText(L"EXP: 0 / 100 (0%)", irr::core::recti(0, 0, 240, 18), false, false, wMainMenu);
+	stLobbyExpText->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	stLobbyPvpStats = env->addStaticText(L"PvP: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyPvpStats->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+
+	stLobbyNpcStats = env->addStaticText(L"NPC: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyNpcStats->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+
+	stLobbyStarShips = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyStarShips->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginUiFont) stLobbyStarShips->setOverrideFont(loginUiFont);
+
+	stLobbyCristales = env->addStaticText(L"Cristales (CD): 0 CD", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyCristales->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) stLobbyCristales->setOverrideFont(loginUiFont);
+
+	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 90, 120), wMainMenu, -1, 0, true);
 	imgLobbyVip->setScaleImage(true);
 	imgLobbyVip->setUseAlphaChannel(true);
 	imgLobbyVip->setVisible(false);
@@ -2892,7 +2908,7 @@ void Game::ResizeMainMenuScreen() {
 		}
 	}
 
-	// Middle Left (Player Avatar Showcase) + Right (Servidor Central)
+	// Middle Left (Free-floating Welcome + Big Crisp Avatar + User Stats + Big VIP) + Right (Servidor Central)
 	const int midAvailH = std::max(Scale(220), featY - topY - Scale(18));
 	const int colGap = std::max(Scale(24), (int)(W * 0.035f));
 	const int rightW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.38f)));
@@ -2908,30 +2924,80 @@ void Game::ResizeMainMenuScreen() {
 	const int srvH = srvHeaderH + 3 * tileH + 2 * tileGap + srvPad + Scale(10);
 	const int srvY = topY + std::max(0, (midAvailH - srvH) / 2);
 
-	// Left: Player Avatar Showcase Card (matching height & neon style of Servidor Central)
-	if(wLobbyAvatarCard) {
-		wLobbyAvatarCard->setRelativePosition(irr::core::recti(padX, srvY, padX + leftW, srvY + srvH));
-		const int cardPad = Scale(16);
-		const int avSz = std::max(Scale(120), std::min(srvH - 2 * cardPad, (int)(leftW * 0.56f)));
-		const int avX = cardPad;
-		const int avY = (srvH - avSz) / 2;
-		if(wLobbyAvatarFrame)
-			wLobbyAvatarFrame->setRelativePosition(irr::core::recti(avX, avY, avX + avSz, avY + avSz));
-		if(imgLobbyAvatar)
-			imgLobbyAvatar->setRelativePosition(irr::core::recti(Scale(4), Scale(4), avSz - Scale(4), avSz - Scale(4)));
-		const int infoX = avX + avSz + Scale(18);
-		const int infoW = std::max(Scale(110), leftW - infoX - cardPad);
-		const int stackH = Scale(136);
-		const int infoY = std::max(cardPad, (srvH - stackH) / 2);
-		if(stLobbyPlayerName)
-			stLobbyPlayerName->setRelativePosition(irr::core::recti(infoX, infoY, infoX + infoW, infoY + Scale(38)));
-		if(stLobbyPlayerLevel)
-			stLobbyPlayerLevel->setRelativePosition(irr::core::recti(infoX, infoY + Scale(46), infoX + std::min(infoW, Scale(140)), infoY + Scale(76)));
-		if(imgLobbyVip) {
-			int vipW = std::min(infoW, Scale(150));
-			int vipH = (vipW * 26) / 80;
-			imgLobbyVip->setRelativePosition(irr::core::recti(infoX, infoY + Scale(90), infoX + vipW, infoY + Scale(90) + vipH));
+	// Left: Welcome Title + Large Unbordered Avatar + Stats + Big Proportional VIP
+	const int welcomeY = std::max(navH + Scale(12), topY - Scale(8));
+	if(stLobbyWelcomeTitle)
+		stLobbyWelcomeTitle->setRelativePosition(irr::core::recti(padX, welcomeY, padX + leftW, welcomeY + Scale(34)));
+
+	const int contentY = welcomeY + Scale(40);
+	const int contentBottomY = featY - Scale(12);
+	const int contentH = std::max(Scale(180), contentBottomY - contentY);
+
+	int avW = (int)(contentH * 0.747f);
+	int avH = contentH;
+	if(imgLobbyAvatar && imgLobbyAvatar->getImage()) {
+		auto osz = imgLobbyAvatar->getImage()->getOriginalSize();
+		if(osz.Width > 0 && osz.Height > 0)
+			avW = (int)((double)avH * osz.Width / osz.Height);
+	}
+	const int maxAvW = (int)(leftW * 0.50f);
+	if(avW > maxAvW) {
+		if(avW > 0) avH = (int)((double)avH * maxAvW / avW);
+		avW = maxAvW;
+	}
+	const int avY = contentY + std::max(0, (contentH - avH) / 2);
+	if(imgLobbyAvatar)
+		imgLobbyAvatar->setRelativePosition(irr::core::recti(padX, avY, padX + avW, avY + avH));
+
+	const int infoX = padX + avW + Scale(22);
+	const int infoW = std::max(Scale(150), leftW - (infoX - padX));
+	int iy = contentY;
+	if(stLobbyPlayerName) {
+		stLobbyPlayerName->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(32)));
+		iy += Scale(34);
+	}
+	if(stLobbyPlayerLevel) {
+		stLobbyPlayerLevel->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(26);
+	}
+	if(stLobbyExpTrack) {
+		stLobbyExpTrack->setRelativePosition(irr::core::recti(infoX, iy, infoX + std::min(infoW, Scale(230)), iy + Scale(8)));
+		iy += Scale(11);
+	}
+	if(stLobbyExpText) {
+		stLobbyExpText->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(18)));
+		iy += Scale(22);
+	}
+	if(stLobbyPvpStats) {
+		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(21);
+	}
+	if(stLobbyNpcStats) {
+		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(23);
+	}
+	if(stLobbyStarShips) {
+		stLobbyStarShips->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(23);
+	}
+	if(stLobbyCristales) {
+		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(28);
+	}
+	if(imgLobbyVip) {
+		int vipAvailH = std::max(Scale(64), contentBottomY - iy);
+		int vipH = vipAvailH;
+		int vipW = (int)(vipH * 0.747f);
+		if(imgLobbyVip->getImage()) {
+			auto vsz = imgLobbyVip->getImage()->getOriginalSize();
+			if(vsz.Width > 0 && vsz.Height > 0)
+				vipW = (int)((double)vipH * vsz.Width / vsz.Height);
 		}
+		if(vipW > infoW) {
+			if(vipW > 0) vipH = (int)((double)vipH * infoW / vipW);
+			vipW = infoW;
+		}
+		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
 	if(wLobbyHeader) {
 		wLobbyHeader->setRelativePosition(irr::core::recti(rightX, srvY, rightX + rightW, srvY + srvH));
@@ -3028,14 +3094,19 @@ void Game::LogoutToLogin() {
 
 void Game::FetchLobbyStatsAsync() {
 	const std::wstring curUser = loggedInUser;
-	std::thread([this, curUser]() {
+	const std::string tok = sessionToken;
+	std::thread([this, curUser, tok]() {
 		auto t0 = std::chrono::steady_clock::now();
 		auto resp = FetchAdventureApi("/api/public/stats");
 		auto t1 = std::chrono::steady_clock::now();
 		int pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
-		nlohmann::json cardResp;
-		if(!curUser.empty()) {
+		nlohmann::json fullResp, profResp, cardResp;
+		if(!tok.empty()) {
+			fullResp = CallSessionApi("/api/profile/full", tok);
+			profResp = CallSessionApi("/api/profile", tok);
+		}
+		if(!curUser.empty() && (!fullResp.contains("success") || !fullResp["success"].get<bool>())) {
 			std::string utf8Name = BufferIO::EncodeUTF8(curUser);
 			std::string escName;
 			for(unsigned char c : utf8Name) {
@@ -3059,16 +3130,37 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyTotalCartas = SafeJsonInt(resp, "totalCartas", 0);
 			lobbyTotalNpcs = SafeJsonInt(resp, "totalNpcs", 0);
 		}
-		if(cardResp.contains("success") && cardResp["success"].is_boolean() && cardResp["success"].get<bool>()) {
+		if(fullResp.contains("success") && fullResp["success"].is_boolean() && fullResp["success"].get<bool>() && fullResp.contains("user") && fullResp["user"].is_object()) {
+			const auto& u = fullResp["user"];
+			std::string uStr = SafeJsonStr(u, "Usuario", "");
+			lobbyPlayerDisplayName = uStr.empty() ? curUser : BufferIO::DecodeUTF8(uStr);
+			lobbyPlayerLevel = SafeJsonInt(u, "Nivel", playerLevel);
+			lobbyPlayerExpPct = u.contains("PorcentajeNivel") && u["PorcentajeNivel"].is_number() ? u["PorcentajeNivel"].get<double>() : 0.0;
+			lobbyPlayerExpInLevel = u.contains("ExpEnNivel") && u["ExpEnNivel"].is_number() ? u["ExpEnNivel"].get<long long>() : 0;
+			lobbyPlayerExpNext = u.contains("ExpParaSubir") && u["ExpParaSubir"].is_number() ? u["ExpParaSubir"].get<long long>() : 100;
+			lobbyPlayerStarShips = u.contains("StarShips") && u["StarShips"].is_number() ? u["StarShips"].get<long long>() : playerStarShips;
+			lobbyPlayerPvpDuels = SafeJsonInt(u, "DuelosPvp", 0);
+			lobbyPlayerPvpWr = u.contains("WinratePvp") && u["WinratePvp"].is_number() ? u["WinratePvp"].get<double>() : 0.0;
+			lobbyPlayerNpcDuels = SafeJsonInt(u, "DuelosNpc", 0);
+			lobbyPlayerNpcWr = u.contains("WinrateNpc") && u["WinrateNpc"].is_number() ? u["WinrateNpc"].get<double>() : 0.0;
+			lobbyPlayerAvatarFile = SafeJsonStr(u, "AvaArchivo", "AVA-001.png");
+			bool vipAct = u.contains("VipActivo") && u["VipActivo"].is_boolean() && u["VipActivo"].get<bool>();
+			lobbyPlayerVipName = vipAct ? SafeJsonStr(u, "VipNombre", "") : "";
+		} else if(cardResp.contains("success") && cardResp["success"].is_boolean() && cardResp["success"].get<bool>()) {
 			lobbyPlayerLevel = SafeJsonInt(cardResp, "nivel", playerLevel);
 			lobbyPlayerAvatarFile = SafeJsonStr(cardResp, "avatarArchivo", "AVA-001.png");
 			lobbyPlayerVipName = SafeJsonStr(cardResp, "vipNombre", "");
-			std::string disp = SafeJsonStr(cardResp, "nombre", "");
-			if(disp.empty()) disp = SafeJsonStr(cardResp, "usuario", "");
-			lobbyPlayerDisplayName = disp.empty() ? curUser : BufferIO::DecodeUTF8(disp);
+			lobbyPlayerDisplayName = curUser;
 		} else {
 			lobbyPlayerLevel = playerLevel;
+			lobbyPlayerStarShips = playerStarShips;
 			lobbyPlayerDisplayName = curUser;
+		}
+		if(profResp.contains("success") && profResp["success"].is_boolean() && profResp["success"].get<bool>()) {
+			if(profResp.contains("cristales") && profResp["cristales"].is_number())
+				lobbyPlayerCristales = profResp["cristales"].get<long long>();
+			if(profResp.contains("starShips") && profResp["starShips"].is_number())
+				lobbyPlayerStarShips = profResp["starShips"].get<long long>();
 		}
 		lobbyStatsReady = true;
 	}).detach();
@@ -3078,7 +3170,9 @@ void Game::ProcessPendingLobbyStats() {
 	if(!lobbyStatsReady.exchange(false))
 		return;
 	int pingMs = 0, totC = 0, onC = 0, dNpc = 0, dPvp = 0, totCards = 0, totNpcs = 0;
-	int pLvl = 1;
+	int pLvl = 1, pvpDuels = 0, npcDuels = 0;
+	double expPct = 0.0, pvpWr = 0.0, npcWr = 0.0;
+	long long expIn = 0, expNext = 100, ss = 0, cd = 0;
 	std::string avFile, vipName;
 	std::wstring pName;
 	{
@@ -3091,15 +3185,39 @@ void Game::ProcessPendingLobbyStats() {
 		totCards = lobbyTotalCartas;
 		totNpcs = lobbyTotalNpcs;
 		pLvl = lobbyPlayerLevel;
+		expPct = lobbyPlayerExpPct;
+		expIn = lobbyPlayerExpInLevel;
+		expNext = lobbyPlayerExpNext;
+		ss = lobbyPlayerStarShips;
+		cd = lobbyPlayerCristales;
+		pvpDuels = lobbyPlayerPvpDuels;
+		pvpWr = lobbyPlayerPvpWr;
+		npcDuels = lobbyPlayerNpcDuels;
+		npcWr = lobbyPlayerNpcWr;
 		avFile = lobbyPlayerAvatarFile;
 		vipName = lobbyPlayerVipName;
 		pName = lobbyPlayerDisplayName;
 	}
 	playerLevel = pLvl;
+	playerStarShips = ss;
 	if(stLobbyPlayerName)
 		stLobbyPlayerName->setText(pName.empty() ? L"Duelista" : pName.c_str());
 	if(stLobbyPlayerLevel)
-		stLobbyPlayerLevel->setText(epro::format(L"NIVEL {}", pLvl).c_str());
+		stLobbyPlayerLevel->setText(epro::format(L"Nivel {}", pLvl).c_str());
+	if(stLobbyExpText) {
+		if(pLvl >= 300)
+			stLobbyExpText->setText(L"EXP: M\u00C1XIMO (100%)");
+		else
+			stLobbyExpText->setText(epro::format(L"EXP: {} / {} ({:.1f}%)", expIn, expNext, expPct).c_str());
+	}
+	if(stLobbyPvpStats)
+		stLobbyPvpStats->setText(epro::format(L"PvP: {:.1f}% WR  ({} duelos)", pvpWr, pvpDuels).c_str());
+	if(stLobbyNpcStats)
+		stLobbyNpcStats->setText(epro::format(L"NPC: {:.1f}% WR  ({} duelos)", npcWr, npcDuels).c_str());
+	if(stLobbyStarShips)
+		stLobbyStarShips->setText(epro::format(L"StarShips: {} SS", ss).c_str());
+	if(stLobbyCristales)
+		stLobbyCristales->setText(epro::format(L"Cristales (CD): {} CD", cd).c_str());
 	if(imgLobbyAvatar && !avFile.empty()) {
 		if(auto avTex = LoadAvatarTexture(avFile)) {
 			imgLobbyAvatar->setImage(avTex);
@@ -3115,6 +3233,7 @@ void Game::ProcessPendingLobbyStats() {
 			imgLobbyVip->setVisible(false);
 		}
 	}
+	ResizeMainMenuScreen();
 	if(stStatValues[0]) stStatValues[0]->setText(pingMs > 0 ? epro::format(L"{} ms", pingMs).c_str() : L"...");
 	if(stStatValues[1]) stStatValues[1]->setText(L"Aventura + PvP");
 	if(stStatValues[2]) stStatValues[2]->setText(epro::format(L"{}", onC).c_str());
@@ -3660,7 +3779,11 @@ irr::video::ITexture* Game::LoadVipTexture(const std::string& vipNombre) {
 	else
 		return nullptr;
 	std::string localRel = "textures/vip/" + fname;
-	return driver->getTexture(localRel.c_str());
+	bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+	auto* tex = driver->getTexture(localRel.c_str());
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
+	return tex;
 }
 
 void Game::ProcessPendingHostPrepTextures() {
@@ -3747,7 +3870,10 @@ irr::video::ITexture* Game::LoadFlagTexture(const std::string& flagUrl) {
 irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	if(filename.empty() || !driver) return nullptr;
 	std::string localRel = "textures/avatars/" + filename;
+	bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
 	auto tex = driver->getTexture(localRel.c_str());
+	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	if(tex) return tex;
 
 	// Download dynamically from API so newly added avatars on server work without rebuild
@@ -5511,12 +5637,15 @@ bool Game::MainLoop() {
 				if(wFeatureCards[fi])
 					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
 			}
-			if(wLobbyAvatarCard)
-				driver->draw2DRectangleOutline(wLobbyAvatarCard->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
-			if(wLobbyAvatarFrame)
-				driver->draw2DRectangleOutline(wLobbyAvatarFrame->getAbsolutePosition(), irr::video::SColor(150, 192, 132, 252));
-			if(stLobbyPlayerLevel)
-				driver->draw2DRectangleOutline(stLobbyPlayerLevel->getAbsolutePosition(), irr::video::SColor(160, 251, 191, 36));
+			if(stLobbyExpTrack) {
+				auto tr = stLobbyExpTrack->getAbsolutePosition();
+				double pct = std::max(0.0, std::min(100.0, lobbyPlayerExpPct));
+				int fillW = (int)((double)tr.getWidth() * pct / 100.0);
+				if(fillW > 0) {
+					irr::core::recti fillR(tr.UpperLeftCorner.X, tr.UpperLeftCorner.Y, tr.UpperLeftCorner.X + fillW, tr.LowerRightCorner.Y);
+					driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), fillR);
+				}
+			}
 			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
 				auto r = btnNavItems[0]->getAbsolutePosition();
 				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
