@@ -30,8 +30,8 @@ android {
 	compileSdk = 34
 
 	defaultConfig {
-		versionCode 36
-		versionName "41.0.17"
+		versionCode 1
+		versionName "1.0.0"
 		minSdkVersion 16
 		targetSdkVersion 34
 		applicationId "io.github.edo9300.edopro"
