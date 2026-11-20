@@ -1103,6 +1103,7 @@ public:
 		double starShipsPct{ 0.0 };
 		double luckPct{ 0.0 };
 		long long precio{ 0 };
+		long long precioCD{ 0 };
 	};
 	struct StoreBoosterItem {
 		int id{ 0 };
@@ -1110,6 +1111,68 @@ public:
 		std::wstring nombre;
 		double porcentaje{ 0.0 };
 		long long precio{ 0 };
+		long long precioCD{ 0 };
+	};
+	struct StoreVipItem {
+		int id{ 0 };
+		std::string codigo;
+		std::wstring nombre;
+		std::wstring descripcion;
+		std::string imagen;
+		int dias{ 7 };
+		double expPct{ 0.0 };
+		double starShipsPct{ 0.0 };
+		double luckPct{ 0.0 };
+		long long precioCD{ 0 };
+	};
+	struct StoreCardItem {
+		int tiendaCartaId{ 0 };
+		uint32_t passcode{ 0 };
+		std::wstring nombre;
+		std::wstring rareza;
+		std::wstring descripcionES;
+		long long precio{ 0 };
+		long long precioCD{ 0 };
+		int stockRestante{ -1 };
+		bool yaComprada{ false };
+	};
+	struct StorePackItem {
+		int id{ 0 };
+		std::wstring nombre;
+		std::wstring descripcion;
+		std::wstring serieNombre;
+		long long precio{ 0 };
+		int cartasPorSobre{ 3 };
+		int totalCartasPool{ 0 };
+	};
+	struct UserMedalItem {
+		int id{ 0 };
+		std::wstring titulo;
+		std::wstring npcNombre;
+		std::string archivo;
+		double expPct{ 0.0 };
+		double ssPct{ 0.0 };
+		double luckPct{ 0.0 };
+		bool obtenida{ false };
+		bool esDestacada{ false };
+	};
+	struct ClanListItem {
+		int id{ 0 };
+		std::wstring nombre;
+		std::wstring lider;
+		int nivel{ 1 };
+		int miembros{ 0 };
+		int maxMiembros{ 30 };
+		int nivelMin{ 1 };
+		double expPct{ 0.0 };
+		double ssPct{ 0.0 };
+		double luckPct{ 0.0 };
+		bool solicitudPendiente{ false };
+	};
+	struct ClanRequestItem {
+		int id{ 0 };
+		std::wstring usuario;
+		int nivel{ 1 };
 	};
 	struct UserAvatarItem {
 		int usuarioAvatarId{ 0 };
@@ -1144,6 +1207,9 @@ public:
 	irr::gui::IGUIStaticText* stStoreBalance{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvatars{ nullptr };
 	irr::gui::IGUIButton* btnStoreBoosters{ nullptr };
+	irr::gui::IGUIButton* btnStoreVip{ nullptr };
+	irr::gui::IGUIButton* btnStoreCards{ nullptr };
+	irr::gui::IGUIButton* btnStorePacks{ nullptr };
 	irr::gui::IGUIButton* btnStoreBack{ nullptr };
 
 	// 2. Store Avatars (Full-screen canvas)
@@ -1156,6 +1222,7 @@ public:
 	irr::gui::IGUIImage* imgStoreAvatarPreview{ nullptr };
 	irr::gui::IGUIStaticText* stStoreAvatarInfo{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvaBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaBuyCD{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvaBack{ nullptr };
 
 	// 3. Store Boosters (Full-screen canvas)
@@ -1167,21 +1234,126 @@ public:
 	irr::gui::IGUIListBox* lstStoreBoosters{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBoosterInfo{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstBuyCD{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstBack{ nullptr };
 
-	// 4. Player Profile (Full-screen canvas)
+	// 3b. Store VIP (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStoreVip{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreVipLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreVipRight{ nullptr };
+	irr::gui::IGUIStaticText* stStoreVipTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreVipBalance{ nullptr };
+	irr::gui::IGUIStaticText* stStoreVipActive{ nullptr };
+	irr::gui::IGUIListBox* lstStoreVip{ nullptr };
+	irr::gui::IGUIImage* imgStoreVipPreview{ nullptr };
+	irr::gui::IGUIStaticText* stStoreVipInfo{ nullptr };
+	irr::gui::IGUIButton* btnStoreVipBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreVipBack{ nullptr };
+
+	// 3c. Store Cards (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStoreCards{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreCardsLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlStoreCardsRight{ nullptr };
+	irr::gui::IGUIStaticText* stStoreCardsTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreCardsBalance{ nullptr };
+	irr::gui::IGUIListBox* lstStoreCards{ nullptr };
+	irr::gui::IGUIImage* imgStoreCardPreview{ nullptr };
+	irr::gui::IGUIStaticText* stStoreCardInfo{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardBuy{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardBuyCD{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardBack{ nullptr };
+
+	// 3d. Store Packs (Full-screen canvas)
+	irr::gui::IGUIStaticText* wStorePacks{ nullptr };
+	irr::gui::IGUIStaticText* pnlStorePacksLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlStorePacksRight{ nullptr };
+	irr::gui::IGUIStaticText* stStorePacksTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStorePacksBalance{ nullptr };
+	irr::gui::IGUIListBox* lstStorePacks{ nullptr };
+	irr::gui::IGUIStaticText* stStorePackInfo{ nullptr };
+	irr::gui::IGUIListBox* lstStorePackPool{ nullptr };
+	irr::gui::IGUIButton* btnStorePackBuy{ nullptr };
+	irr::gui::IGUIButton* btnStorePackBack{ nullptr };
+
+	// 4. Player Profile Hub (8 neon cards)
 	irr::gui::IGUIStaticText* wPlayerProfile{ nullptr };
+	irr::gui::IGUIStaticText* stProfileTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfileSubtitle{ nullptr };
+	irr::gui::IGUIStaticText* wProfileHubCards[8]{ nullptr };
+	irr::gui::IGUIStaticText* stProfileHubTitles[8]{ nullptr };
+	irr::gui::IGUIStaticText* stProfileHubDescs[8]{ nullptr };
+	irr::gui::IGUIButton* btnProfileHubActions[8]{ nullptr };
+	irr::gui::IGUIButton* btnProfileBack{ nullptr };
+
+	// 4a. Profile Info Sheet (Full-screen canvas)
+	irr::gui::IGUIStaticText* wProfileInfo{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfInfoLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfInfoRight{ nullptr };
+	irr::gui::IGUIStaticText* stProfInfoTitle{ nullptr };
+	irr::gui::IGUIImage* imgProfInfoAvatar{ nullptr };
+	irr::gui::IGUIStaticText* stProfInfoLeftText{ nullptr };
+	irr::gui::IGUIStaticText* stProfInfoRightText{ nullptr };
+	irr::gui::IGUIButton* btnProfInfoBack{ nullptr };
+
+	// 4b. Profile Medals (Full-screen canvas)
+	irr::gui::IGUIStaticText* wProfileMedals{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfMedalsLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfMedalsRight{ nullptr };
+	irr::gui::IGUIStaticText* stProfMedalsTitle{ nullptr };
+	irr::gui::IGUIListBox* lstProfMedals{ nullptr };
+	irr::gui::IGUIImage* imgProfMedalPreview{ nullptr };
+	irr::gui::IGUIStaticText* stProfMedalInfo{ nullptr };
+	irr::gui::IGUIButton* btnProfMedalHighlight{ nullptr };
+	irr::gui::IGUIButton* btnProfMedalsBack{ nullptr };
+
+	// 4c. Profile Avatars (Full-screen canvas)
+	irr::gui::IGUIStaticText* wProfileAvatars{ nullptr };
 	irr::gui::IGUIStaticText* pnlProfileLeft{ nullptr };
 	irr::gui::IGUIStaticText* pnlProfileRight{ nullptr };
-	irr::gui::IGUIStaticText* stProfileTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfileAvaTitle{ nullptr };
 	irr::gui::IGUIImage* imgProfileAvatar{ nullptr };
-	irr::gui::IGUIStaticText* stProfileHeader{ nullptr };
 	irr::gui::IGUIStaticText* stProfileActiveStats{ nullptr };
 	irr::gui::IGUIListBox* lstProfileAvatars{ nullptr };
 	irr::gui::IGUIStaticText* stProfileSelectedInfo{ nullptr };
 	irr::gui::IGUIButton* btnProfileActivateAva{ nullptr };
-	irr::gui::IGUIButton* btnProfileMailbox{ nullptr };
-	irr::gui::IGUIButton* btnProfileBack{ nullptr };
+	irr::gui::IGUIButton* btnProfileAvatarsBack{ nullptr };
+
+	// 4d. Events / Puzzles (Full-screen canvas)
+	irr::gui::IGUIStaticText* wEventsMenu{ nullptr };
+	irr::gui::IGUIStaticText* pnlEventsLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlEventsRight{ nullptr };
+	irr::gui::IGUIStaticText* stEventsTitle{ nullptr };
+	irr::gui::IGUIComboBox* cbEventsSelect{ nullptr };
+	irr::gui::IGUIStaticText* stEventsMeta{ nullptr };
+	irr::gui::IGUIListBox* lstEventsPieces{ nullptr };
+	irr::gui::IGUIListBox* lstEventsTop10{ nullptr };
+	irr::gui::IGUIButton* btnEventsClaimTop{ nullptr };
+	irr::gui::IGUIButton* btnEventsExchange{ nullptr };
+	irr::gui::IGUIButton* btnEventsBack{ nullptr };
+
+	// 4e. Clans (Full-screen canvas)
+	irr::gui::IGUIStaticText* wClansMenu{ nullptr };
+	irr::gui::IGUIStaticText* pnlClansLeft{ nullptr };
+	irr::gui::IGUIStaticText* pnlClansRight{ nullptr };
+	irr::gui::IGUIStaticText* stClansTitle{ nullptr };
+	irr::gui::IGUIEditBox* ebClanSearch{ nullptr };
+	irr::gui::IGUIButton* btnClanSearch{ nullptr };
+	irr::gui::IGUIListBox* lstClans{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetail{ nullptr };
+	irr::gui::IGUIListBox* lstClanRequests{ nullptr };
+	irr::gui::IGUIButton* btnClanRequest{ nullptr };
+	irr::gui::IGUIButton* btnClanMyClan{ nullptr };
+	irr::gui::IGUIButton* btnClanCreateOpen{ nullptr };
+	irr::gui::IGUIButton* btnClanLeave{ nullptr };
+	irr::gui::IGUIButton* btnClanAcceptReq{ nullptr };
+	irr::gui::IGUIButton* btnClanRejectReq{ nullptr };
+	irr::gui::IGUIStaticText* pnlClanCreate{ nullptr };
+	irr::gui::IGUIEditBox* ebClanCreateName{ nullptr };
+	irr::gui::IGUIEditBox* ebClanCreateDesc{ nullptr };
+	irr::gui::IGUIEditBox* ebClanCreateMinLvl{ nullptr };
+	irr::gui::IGUIButton* btnClanCreateSubmit{ nullptr };
+	irr::gui::IGUIButton* btnClanCreateCancel{ nullptr };
+	irr::gui::IGUIButton* btnClansBack{ nullptr };
 
 	// 5. Mailbox (Full-screen canvas)
 	irr::gui::IGUIStaticText* wMailbox{ nullptr };
@@ -1194,42 +1366,84 @@ public:
 	irr::gui::IGUIButton* btnMailboxDiscard{ nullptr };
 	irr::gui::IGUIButton* btnMailboxBack{ nullptr };
 
-	// Purchase confirmation box
-	irr::gui::IGUIWindow* wConfirmPurchase{ nullptr };
+	// Purchase / Action confirmation overlay (non-window dark-glass neon panel)
+	irr::gui::IGUIStaticText* wConfirmPurchase{ nullptr };
+	irr::gui::IGUIStaticText* stConfirmPurchaseTitle{ nullptr };
 	irr::gui::IGUIStaticText* stConfirmPurchaseMsg{ nullptr };
 	irr::gui::IGUIButton* btnConfirmYes{ nullptr };
 	irr::gui::IGUIButton* btnConfirmNo{ nullptr };
-	int pendingConfirmType{ 0 }; // 1 = avatar, 2 = booster
+	int pendingConfirmType{ 0 };
 	int pendingConfirmId{ 0 };
+	std::wstring pendingConfirmName;
+	long long pendingConfirmPrice{ 0 };
 	int mailboxReturnTarget{ 0 }; // 0 = MainMenu, 1 = PlayerProfile
 
 	std::vector<StoreAvatarItem> storeAvatars;
 	std::vector<StoreBoosterItem> storeBoosters;
+	std::vector<StoreVipItem> storeVips;
+	std::vector<StoreCardItem> storeCards;
+	std::vector<StorePackItem> storePacks;
 	std::vector<UserAvatarItem> profileAvatars;
+	std::vector<UserMedalItem> profileMedals;
 	std::vector<MailboxEntry> mailboxItems;
+	std::vector<int> eventIds;
+	std::vector<ClanListItem> clanList;
+	std::vector<ClanRequestItem> clanRequests;
+	int myClanId{ 0 };
+	bool myClanIsLeader{ false };
+	int selectedClanId{ 0 };
+	int selectedEventId{ 0 };
+	long long playerCristales{ 0 };
+	uint32_t activeStoreCardCode{ 0 };
 
 	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
 	irr::video::ITexture* LoadFlagTexture(const std::string& flagUrl);
 	irr::video::ITexture* LoadMedalTexture(int npcLevel);
+	irr::video::ITexture* LoadMedalTexture(const std::string& filename);
 	irr::video::ITexture* LoadRewardBgTexture();
 	irr::video::ITexture* LoadPuzzlePieceTexture(const std::string& carpeta, int pieceNum);
 	void ShowDuelRewardWindow();
 	void ResizeDuelRewardScreen();
+	void HideAllEcosystemScreens();
 	void PopulateEconomyScreens();
 	void ResizeEconomyScreens();
 	void OpenStoreMenu();
 	void OpenStoreAvatars();
 	void OpenStoreBoosters();
+	void OpenStoreVip();
+	void OpenStoreCards();
+	void OpenStorePacks();
 	void OpenPlayerProfile();
+	void OpenProfileInfo();
+	void OpenProfileMedals();
+	void OpenProfileAvatars();
+	void OpenEventsMenu(int eventoId = 0);
+	void OpenClansMenu(const std::wstring& search = L"");
 	void OpenMailbox(int returnTo = 0);
 	void SelectStoreAvatar(int idx);
 	void SelectStoreBooster(int idx);
+	void SelectStoreVip(int idx);
+	void SelectStoreCard(int idx);
+	void SelectStorePack(int idx);
 	void SelectProfileAvatar(int idx);
+	void SelectProfileMedal(int idx);
+	void SelectClanItem(int idx);
 	void SelectMailboxItem(int idx);
-	void RequestBuySelectedAvatar();
-	void RequestBuySelectedBooster();
+	void RequestBuySelectedAvatar(bool useCD);
+	void RequestBuySelectedBooster(bool useCD);
+	void RequestBuySelectedVip();
+	void RequestBuySelectedCard(bool useCD);
+	void RequestBuySelectedPack();
 	void ExecuteConfirmedPurchase();
 	void ActivateSelectedAvatar();
+	void HighlightSelectedMedal();
+	void ClaimEventsTopReward();
+	void RequestExchangeEventPieces();
+	void OpenMyClanView();
+	void RequestJoinSelectedClan();
+	void RespondClanRequest(bool accept);
+	void RequestLeaveMyClan();
+	void SubmitCreateClan();
 	void ResolveSelectedMailboxItem(bool claim);
 	void PopulateTabSettingsWindow();
 	void PopulateSettingsWindow();

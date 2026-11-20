@@ -240,11 +240,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_NAV_INICIO: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				mainGame->FetchLobbyStatsAsync();
@@ -318,12 +314,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->RefreshReplay();
 				break;
 			}
-			case BUTTON_NAV_EVENTOS: {
-				mainGame->PopupMessage(L"Eventos Ani Dimension", L"Eventos y Rompecabezas Mensuales activos en:\nhttps://anidimension.online/eventos\n\nPr\u00F3ximamente integrados aqu\u00ED.");
+			case BUTTON_NAV_EVENTOS:
+			case BUTTON_PROF_HUB_EVENTS: {
+				mainGame->OpenEventsMenu();
 				break;
 			}
-			case BUTTON_NAV_CLAN: {
-				mainGame->PopupMessage(L"Sistema de Clanes", L"Crea o \u00FAnete a un Clan y sube su nivel grupal en:\nhttps://anidimension.online/clan\n\nPr\u00F3ximamente integrado aqu\u00ED.");
+			case BUTTON_NAV_CLAN:
+			case BUTTON_PROF_HUB_CLANS: {
+				mainGame->OpenClansMenu();
 				break;
 			}
 			case BUTTON_NAV_TUTORIALES: {
@@ -346,15 +344,28 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->OpenStoreBoosters();
 				break;
 			}
+			case BUTTON_STORE_VIP: {
+				mainGame->OpenStoreVip();
+				break;
+			}
+			case BUTTON_STORE_CARDS: {
+				mainGame->OpenStoreCards();
+				break;
+			}
+			case BUTTON_STORE_PACKS: {
+				mainGame->OpenStorePacks();
+				break;
+			}
 			case BUTTON_STORE_BACK: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				mainGame->mTopMenu->setVisible(false);
-				mainGame->wBtnSettings->setVisible(true);
-				mainGame->wMainMenu->setVisible(true);
+				mainGame->OpenPlayerProfile();
 				break;
 			}
 			case BUTTON_STORE_AVA_BUY: {
-				mainGame->RequestBuySelectedAvatar();
+				mainGame->RequestBuySelectedAvatar(false);
+				break;
+			}
+			case BUTTON_STORE_AVA_BUY_CD: {
+				mainGame->RequestBuySelectedAvatar(true);
 				break;
 			}
 			case BUTTON_STORE_AVA_BACK: {
@@ -363,12 +374,134 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_STORE_BST_BUY: {
-				mainGame->RequestBuySelectedBooster();
+				mainGame->RequestBuySelectedBooster(false);
+				break;
+			}
+			case BUTTON_STORE_BST_BUY_CD: {
+				mainGame->RequestBuySelectedBooster(true);
 				break;
 			}
 			case BUTTON_STORE_BST_BACK: {
 				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
 				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_STORE_VIP_BUY: {
+				mainGame->RequestBuySelectedVip();
+				break;
+			}
+			case BUTTON_STORE_VIP_BACK: {
+				if(mainGame->wStoreVip) mainGame->wStoreVip->setVisible(false);
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_STORE_CARD_BUY: {
+				mainGame->RequestBuySelectedCard(false);
+				break;
+			}
+			case BUTTON_STORE_CARD_BUY_CD: {
+				mainGame->RequestBuySelectedCard(true);
+				break;
+			}
+			case BUTTON_STORE_CARD_BACK: {
+				if(mainGame->wStoreCards) mainGame->wStoreCards->setVisible(false);
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_STORE_PACK_BUY: {
+				mainGame->RequestBuySelectedPack();
+				break;
+			}
+			case BUTTON_STORE_PACK_BACK: {
+				if(mainGame->wStorePacks) mainGame->wStorePacks->setVisible(false);
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_PROF_HUB_STORE: {
+				mainGame->OpenStoreMenu();
+				break;
+			}
+			case BUTTON_PROF_HUB_INFO: {
+				mainGame->OpenProfileInfo();
+				break;
+			}
+			case BUTTON_PROF_HUB_MAILBOX: {
+				mainGame->OpenMailbox(1);
+				break;
+			}
+			case BUTTON_PROF_HUB_MEDALS: {
+				mainGame->OpenProfileMedals();
+				break;
+			}
+			case BUTTON_PROF_HUB_AVATARS: {
+				mainGame->OpenProfileAvatars();
+				break;
+			}
+			case BUTTON_PROF_HUB_DECKS: {
+				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(false);
+				// Trigger standard Deck Edit entry
+				irr::SEvent ev;
+				ev.EventType = irr::EET_GUI_EVENT;
+				ev.GUIEvent.EventType = irr::gui::EGET_BUTTON_CLICKED;
+				ev.GUIEvent.Caller = mainGame->btnDeckEdit;
+				mainGame->menuHandler.OnEvent(ev);
+				break;
+			}
+			case BUTTON_PROF_INFO_BACK:
+			case BUTTON_PROF_MEDALS_BACK:
+			case BUTTON_PROF_AVATARS_BACK:
+			case BUTTON_EVENTS_BACK:
+			case BUTTON_CLAN_BACK: {
+				mainGame->OpenPlayerProfile();
+				break;
+			}
+			case BUTTON_PROF_MEDAL_HIGHLIGHT: {
+				mainGame->HighlightSelectedMedal();
+				break;
+			}
+			case BUTTON_EVENTS_CLAIM_TOP: {
+				mainGame->ClaimEventsTopReward();
+				break;
+			}
+			case BUTTON_EVENTS_EXCHANGE: {
+				mainGame->RequestExchangeEventPieces();
+				break;
+			}
+			case BUTTON_CLAN_SEARCH: {
+				mainGame->OpenClansMenu(mainGame->ebClanSearch ? mainGame->ebClanSearch->getText() : L"");
+				break;
+			}
+			case BUTTON_CLAN_REQUEST: {
+				mainGame->RequestJoinSelectedClan();
+				break;
+			}
+			case BUTTON_CLAN_MY_CLAN: {
+				mainGame->OpenMyClanView();
+				break;
+			}
+			case BUTTON_CLAN_CREATE_OPEN: {
+				if(mainGame->pnlClanCreate) mainGame->pnlClanCreate->setVisible(true);
+				break;
+			}
+			case BUTTON_CLAN_CREATE_CANCEL: {
+				if(mainGame->pnlClanCreate) mainGame->pnlClanCreate->setVisible(false);
+				break;
+			}
+			case BUTTON_CLAN_CREATE_SUBMIT: {
+				mainGame->SubmitCreateClan();
+				break;
+			}
+			case BUTTON_CLAN_LEAVE: {
+				mainGame->RequestLeaveMyClan();
+				break;
+			}
+			case BUTTON_CLAN_ACCEPT_REQ: {
+				mainGame->RespondClanRequest(true);
+				break;
+			}
+			case BUTTON_CLAN_REJECT_REQ: {
+				mainGame->RespondClanRequest(false);
 				break;
 			}
 			case BUTTON_PROFILE_ACTIVATE_AVA: {
@@ -380,10 +513,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_PROFILE_BACK: {
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				mainGame->mTopMenu->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
 			case BUTTON_MAILBOX_CLAIM: {
@@ -937,8 +1070,28 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->lstStoreBoosters) mainGame->SelectStoreBooster(mainGame->lstStoreBoosters->getSelected());
 				break;
 			}
+			case LISTBOX_STORE_VIP: {
+				if(mainGame->lstStoreVip) mainGame->SelectStoreVip(mainGame->lstStoreVip->getSelected());
+				break;
+			}
+			case LISTBOX_STORE_CARDS: {
+				if(mainGame->lstStoreCards) mainGame->SelectStoreCard(mainGame->lstStoreCards->getSelected());
+				break;
+			}
+			case LISTBOX_STORE_PACKS: {
+				if(mainGame->lstStorePacks) mainGame->SelectStorePack(mainGame->lstStorePacks->getSelected());
+				break;
+			}
 			case LISTBOX_PROFILE_AVATARS: {
 				if(mainGame->lstProfileAvatars) mainGame->SelectProfileAvatar(mainGame->lstProfileAvatars->getSelected());
+				break;
+			}
+			case LISTBOX_PROF_MEDALS: {
+				if(mainGame->lstProfMedals) mainGame->SelectProfileMedal(mainGame->lstProfMedals->getSelected());
+				break;
+			}
+			case LISTBOX_CLANS: {
+				if(mainGame->lstClans) mainGame->SelectClanItem(mainGame->lstClans->getSelected());
 				break;
 			}
 			case LISTBOX_MAILBOX_ITEMS: {
@@ -1338,6 +1491,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case COMBOBOX_ADVENTURE_DIFFICULTY: {
 				mainGame->UpdateAdventureNPCDisplay();
+				break;
+			}
+			case COMBOBOX_EVENTS_SELECT: {
+				if(mainGame->cbEventsSelect) {
+					int s = mainGame->cbEventsSelect->getSelected();
+					if(s >= 0 && s < (int)mainGame->eventIds.size())
+						mainGame->OpenEventsMenu(mainGame->eventIds[s]);
+				}
 				break;
 			}
 			case SERVER_CHOICE: {
