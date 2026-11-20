@@ -5428,33 +5428,7 @@ bool Game::MainLoop() {
 			smgr->drawAll();
 			driver->setMaterial(irr::video::IdentityMaterial);
 			ClearZBuffer(driver);//Without this, "animations" are drawn behind everything
-			if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
-			if(wLobbyHeader)
-				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
-			for(int i = 0; i < 6; ++i) {
-				if(wStatCards[i])
-					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
-			}
-			const irr::video::SColor featBorder[4] = {
-				irr::video::SColor(150, 56, 189, 248),
-				irr::video::SColor(150, 52, 211, 153),
-				irr::video::SColor(150, 192, 132, 252),
-				irr::video::SColor(150, 251, 191, 36)
-			};
-			for(int fi = 0; fi < 4; ++fi) {
-				if(wFeatureCards[fi])
-					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
-			}
-			if(stLobbyHeroPill)
-				driver->draw2DRectangleOutline(stLobbyHeroPill->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
-			if(btnHeroRanked)
-				driver->draw2DRectangleOutline(btnHeroRanked->getAbsolutePosition(), irr::video::SColor(160, 56, 189, 248));
-			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
-				auto r = btnNavItems[0]->getAbsolutePosition();
-				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
-			}
-		}
-		EnableMaterial2D(false);
+			EnableMaterial2D(false);
 		} else if(is_building) {
 			if(is_siding)
 				discord.UpdatePresence(DiscordWrapper::DECK_SIDING);
@@ -5464,33 +5438,7 @@ bool Game::MainLoop() {
 			DrawBackImage(imageManager.tBackGround_deck, resized);
 			EnableMaterial2D(true);
 			DrawDeckBd();
-			if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
-			if(wLobbyHeader)
-				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
-			for(int i = 0; i < 6; ++i) {
-				if(wStatCards[i])
-					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
-			}
-			const irr::video::SColor featBorder[4] = {
-				irr::video::SColor(150, 56, 189, 248),
-				irr::video::SColor(150, 52, 211, 153),
-				irr::video::SColor(150, 192, 132, 252),
-				irr::video::SColor(150, 251, 191, 36)
-			};
-			for(int fi = 0; fi < 4; ++fi) {
-				if(wFeatureCards[fi])
-					driver->draw2DRectangleOutline(wFeatureCards[fi]->getAbsolutePosition(), featBorder[fi]);
-			}
-			if(stLobbyHeroPill)
-				driver->draw2DRectangleOutline(stLobbyHeroPill->getAbsolutePosition(), irr::video::SColor(150, 251, 191, 36));
-			if(btnHeroRanked)
-				driver->draw2DRectangleOutline(btnHeroRanked->getAbsolutePosition(), irr::video::SColor(160, 56, 189, 248));
-			if(wTopNavBar && wTopNavBar->isVisible() && btnNavItems[0]) {
-				auto r = btnNavItems[0]->getAbsolutePosition();
-				driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
-			}
-		}
-		EnableMaterial2D(false);
+			EnableMaterial2D(false);
 		} else {
 			if(dInfo.isInLobby)
 				discord.UpdatePresence(DiscordWrapper::IN_LOBBY);
