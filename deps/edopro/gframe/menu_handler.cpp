@@ -246,22 +246,22 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->RequestBuyVipIdx(id - BUTTON_STORE_VIP_BUY_0);
 				} else if(id >= BUTTON_STORE_PACK_BUY_0 && id <= BUTTON_STORE_PACK_BUY_MAX) {
 					int slot = id - BUTTON_STORE_PACK_BUY_0;
-					int pos = mainGame->storePackPage * 8 + slot;
+					int pos = mainGame->storePackPage * 12 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
 						mainGame->RequestBuyPackIdx(mainGame->storePackFiltered[pos]);
 				} else if(id >= BUTTON_STORE_PACK_VIEW_0 && id <= BUTTON_STORE_PACK_VIEW_MAX) {
 					int slot = id - BUTTON_STORE_PACK_VIEW_0;
-					int pos = mainGame->storePackPage * 8 + slot;
+					int pos = mainGame->storePackPage * 12 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
 						mainGame->ViewPackCardsIdx(mainGame->storePackFiltered[pos]);
 				} else if(id >= BUTTON_STORE_CARD_SS_0 && id <= BUTTON_STORE_CARD_SS_MAX) {
 					int slot = id - BUTTON_STORE_CARD_SS_0;
-					int pos = mainGame->storeCardPage * 10 + slot;
+					int pos = mainGame->storeCardPage * 14 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
 						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], false);
 				} else if(id >= BUTTON_STORE_CARD_CD_0 && id <= BUTTON_STORE_CARD_CD_MAX) {
 					int slot = id - BUTTON_STORE_CARD_CD_0;
-					int pos = mainGame->storeCardPage * 10 + slot;
+					int pos = mainGame->storeCardPage * 14 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
 						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], true);
 				}
