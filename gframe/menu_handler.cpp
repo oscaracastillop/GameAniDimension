@@ -224,12 +224,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->PopupMessage(L"Solicitar Cristales (CD)", epro::format(L"Paquete seleccionado:\n{}\n\nCompleta tu donaci\u00F3n oficial en:\nhttps://anidimension.online/tienda/donaciones", pkgNames[idx]));
 				} else if(id >= BUTTON_STORE_AVA_SS_0 && id <= BUTTON_STORE_AVA_SS_MAX) {
 					int slot = id - BUTTON_STORE_AVA_SS_0;
-					int pos = mainGame->storeAvaPage * 5 + slot;
+					int pos = mainGame->storeAvaPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeAvaFiltered.size())
 						mainGame->RequestBuyAvatarIdx(mainGame->storeAvaFiltered[pos], false);
 				} else if(id >= BUTTON_STORE_AVA_CD_0 && id <= BUTTON_STORE_AVA_CD_MAX) {
 					int slot = id - BUTTON_STORE_AVA_CD_0;
-					int pos = mainGame->storeAvaPage * 5 + slot;
+					int pos = mainGame->storeAvaPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeAvaFiltered.size())
 						mainGame->RequestBuyAvatarIdx(mainGame->storeAvaFiltered[pos], true);
 				} else if(id >= BUTTON_STORE_BST_SS_0 && id <= BUTTON_STORE_BST_SS_MAX) {
@@ -246,22 +246,22 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->RequestBuyVipIdx(id - BUTTON_STORE_VIP_BUY_0);
 				} else if(id >= BUTTON_STORE_PACK_BUY_0 && id <= BUTTON_STORE_PACK_BUY_MAX) {
 					int slot = id - BUTTON_STORE_PACK_BUY_0;
-					int pos = mainGame->storePackPage * 4 + slot;
+					int pos = mainGame->storePackPage * 8 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
 						mainGame->RequestBuyPackIdx(mainGame->storePackFiltered[pos]);
 				} else if(id >= BUTTON_STORE_PACK_VIEW_0 && id <= BUTTON_STORE_PACK_VIEW_MAX) {
 					int slot = id - BUTTON_STORE_PACK_VIEW_0;
-					int pos = mainGame->storePackPage * 4 + slot;
+					int pos = mainGame->storePackPage * 8 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
 						mainGame->ViewPackCardsIdx(mainGame->storePackFiltered[pos]);
 				} else if(id >= BUTTON_STORE_CARD_SS_0 && id <= BUTTON_STORE_CARD_SS_MAX) {
 					int slot = id - BUTTON_STORE_CARD_SS_0;
-					int pos = mainGame->storeCardPage * 5 + slot;
+					int pos = mainGame->storeCardPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
 						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], false);
 				} else if(id >= BUTTON_STORE_CARD_CD_0 && id <= BUTTON_STORE_CARD_CD_MAX) {
 					int slot = id - BUTTON_STORE_CARD_CD_0;
-					int pos = mainGame->storeCardPage * 5 + slot;
+					int pos = mainGame->storeCardPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
 						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], true);
 				}
@@ -512,6 +512,22 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_STORE_PACK_BACK: {
 				mainGame->OpenStoreMenu();
+				break;
+			}
+			case BUTTON_PACK_POOL_CLOSE: {
+				if(mainGame->wPackPoolOverlay) mainGame->wPackPoolOverlay->setVisible(false);
+				break;
+			}
+			case BUTTON_PACK_POOL_PREV: {
+				if(mainGame->packPoolPage > 0) {
+					mainGame->packPoolPage--;
+					mainGame->RefreshPackPoolPage();
+				}
+				break;
+			}
+			case BUTTON_PACK_POOL_NEXT: {
+				mainGame->packPoolPage++;
+				mainGame->RefreshPackPoolPage();
 				break;
 			}
 			case BUTTON_PROF_HUB_STORE: {
