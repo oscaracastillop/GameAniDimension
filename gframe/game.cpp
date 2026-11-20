@@ -3034,7 +3034,6 @@ void Game::ResizeMainMenuScreen() {
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
 	// Right: Top-Right Status + 3 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
-	const int rightX = W - padX - rightW;
 	if(stServerStatusLine)
 		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(24)));
 
