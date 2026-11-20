@@ -172,7 +172,7 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIImage* imgTopNavLogo{ nullptr };
 	irr::gui::IGUIStaticText* stTopNavBrand{ nullptr };
 	irr::gui::IGUIStaticText* stTopNavUser{ nullptr };
-	irr::gui::IGUIButton* btnNavItems[9]{ nullptr };
+	irr::gui::IGUIButton* btnNavItems[7]{ nullptr };
 	irr::gui::IGUIStaticText* pnlHomeInfo{ nullptr };
 	irr::gui::IGUIStaticText* stHomeInfoTitle{ nullptr };
 	irr::gui::IGUIListBox* lstHomeInfo{ nullptr };
