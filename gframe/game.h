@@ -1211,68 +1211,114 @@ public:
 	irr::gui::IGUIButton* btnStoreHubActions[6]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBack{ nullptr };
 
-	// 2. Store Avatars (Full-screen canvas)
+	// 1b. Store Donations & Cristales (CD) (5 cards)
+	irr::gui::IGUIStaticText* wStoreDonations{ nullptr };
+	irr::gui::IGUIStaticText* stStoreDonTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreDonDesc{ nullptr };
+	irr::gui::IGUIButton* btnStoreDonBack{ nullptr };
+	irr::gui::IGUIStaticText* wDonCards[5]{ nullptr };
+	irr::gui::IGUIImage* imgDonIcons[5]{ nullptr };
+	irr::gui::IGUIStaticText* stDonTitles[5]{ nullptr };
+	irr::gui::IGUIStaticText* stDonAmounts[5]{ nullptr };
+	irr::gui::IGUIStaticText* stDonDescs[5]{ nullptr };
+	irr::gui::IGUIStaticText* stDonPrices[5]{ nullptr };
+	irr::gui::IGUIButton* btnDonSolicitar[5]{ nullptr };
+
+	// 2. Store Avatars (5-card grid + search + pagination)
 	irr::gui::IGUIStaticText* wStoreAvatars{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreAvaLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreAvaRight{ nullptr };
 	irr::gui::IGUIStaticText* stStoreAvaTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreAvaBalance{ nullptr };
-	irr::gui::IGUIListBox* lstStoreAvatars{ nullptr };
-	irr::gui::IGUIImage* imgStoreAvatarPreview{ nullptr };
-	irr::gui::IGUIStaticText* stStoreAvatarInfo{ nullptr };
-	irr::gui::IGUIButton* btnStoreAvaBuy{ nullptr };
-	irr::gui::IGUIButton* btnStoreAvaBuyCD{ nullptr };
+	irr::gui::IGUIStaticText* stStoreAvaBanner{ nullptr };
+	irr::gui::IGUIEditBox* ebStoreAvaSearch{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaSearch{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvaBack{ nullptr };
+	irr::gui::IGUIStaticText* wAvaCards[5]{ nullptr };
+	irr::gui::IGUIImage* imgAvaCardIcons[5]{ nullptr };
+	irr::gui::IGUIStaticText* stAvaCardTitles[5]{ nullptr };
+	irr::gui::IGUIStaticText* stAvaCardStats[5]{ nullptr };
+	irr::gui::IGUIButton* btnAvaCardBuySS[5]{ nullptr };
+	irr::gui::IGUIButton* btnAvaCardBuyCD[5]{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaPrev{ nullptr };
+	irr::gui::IGUIButton* btnStoreAvaNext{ nullptr };
+	irr::gui::IGUIStaticText* stStoreAvaPage{ nullptr };
+	int storeAvaPage{ 0 };
+	std::vector<int> storeAvaFiltered;
 
-	// 3. Store Boosters (Full-screen canvas)
+	// 3. Store Boosters (4x2 card grid + filter tabs + pagination)
 	irr::gui::IGUIStaticText* wStoreBoosters{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreBstLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreBstRight{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBstTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBstBalance{ nullptr };
-	irr::gui::IGUIListBox* lstStoreBoosters{ nullptr };
-	irr::gui::IGUIStaticText* stStoreBoosterInfo{ nullptr };
-	irr::gui::IGUIButton* btnStoreBstBuy{ nullptr };
-	irr::gui::IGUIButton* btnStoreBstBuyCD{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBstBanner{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstFilt[4]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstBack{ nullptr };
+	irr::gui::IGUIStaticText* wBstCards[8]{ nullptr };
+	irr::gui::IGUIImage* imgBstCardIcons[8]{ nullptr };
+	irr::gui::IGUIStaticText* stBstCardTitles[8]{ nullptr };
+	irr::gui::IGUIStaticText* stBstCardStats[8]{ nullptr };
+	irr::gui::IGUIButton* btnBstCardBuySS[8]{ nullptr };
+	irr::gui::IGUIButton* btnBstCardBuyCD[8]{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstPrev{ nullptr };
+	irr::gui::IGUIButton* btnStoreBstNext{ nullptr };
+	irr::gui::IGUIStaticText* stStoreBstPage{ nullptr };
+	int storeBstFilter{ 0 }; // 0=All, 1=EXP, 2=SS, 3=Luck
+	int storeBstPage{ 0 };
+	std::vector<int> storeBstFiltered;
 
-	// 3b. Store VIP (Full-screen canvas)
+	// 3b. Store VIP (4-column card grid)
 	irr::gui::IGUIStaticText* wStoreVip{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreVipLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreVipRight{ nullptr };
 	irr::gui::IGUIStaticText* stStoreVipTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreVipBalance{ nullptr };
 	irr::gui::IGUIStaticText* stStoreVipActive{ nullptr };
-	irr::gui::IGUIListBox* lstStoreVip{ nullptr };
-	irr::gui::IGUIImage* imgStoreVipPreview{ nullptr };
-	irr::gui::IGUIStaticText* stStoreVipInfo{ nullptr };
-	irr::gui::IGUIButton* btnStoreVipBuy{ nullptr };
 	irr::gui::IGUIButton* btnStoreVipBack{ nullptr };
+	irr::gui::IGUIStaticText* wVipCards[4]{ nullptr };
+	irr::gui::IGUIImage* imgVipCardIcons[4]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardTitles[4]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardDescs[4]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardPrices[4]{ nullptr };
+	irr::gui::IGUIButton* btnVipCardBuy[4]{ nullptr };
 
-	// 3c. Store Cards (Full-screen canvas)
+	// 3c. Store Cards (5-card grid + search + currency filter + pagination)
 	irr::gui::IGUIStaticText* wStoreCards{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreCardsLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlStoreCardsRight{ nullptr };
 	irr::gui::IGUIStaticText* stStoreCardsTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreCardsBalance{ nullptr };
-	irr::gui::IGUIListBox* lstStoreCards{ nullptr };
-	irr::gui::IGUIImage* imgStoreCardPreview{ nullptr };
-	irr::gui::IGUIStaticText* stStoreCardInfo{ nullptr };
-	irr::gui::IGUIButton* btnStoreCardBuy{ nullptr };
-	irr::gui::IGUIButton* btnStoreCardBuyCD{ nullptr };
+	irr::gui::IGUIStaticText* stStoreCardsBanner{ nullptr };
+	irr::gui::IGUIEditBox* ebStoreCardSearch{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardSearch{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardFilt[3]{ nullptr };
 	irr::gui::IGUIButton* btnStoreCardBack{ nullptr };
+	irr::gui::IGUIStaticText* wCardCards[5]{ nullptr };
+	irr::gui::IGUIImage* imgCardCardArts[5]{ nullptr };
+	irr::gui::IGUIStaticText* stCardCardTitles[5]{ nullptr };
+	irr::gui::IGUIStaticText* stCardCardMeta[5]{ nullptr };
+	irr::gui::IGUIButton* btnCardCardBuySS[5]{ nullptr };
+	irr::gui::IGUIButton* btnCardCardBuyCD[5]{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardPrev{ nullptr };
+	irr::gui::IGUIButton* btnStoreCardNext{ nullptr };
+	irr::gui::IGUIStaticText* stStoreCardPage{ nullptr };
+	int storeCardFilter{ 0 }; // 0=All, 1=SS, 2=CD
+	int storeCardPage{ 0 };
+	std::vector<int> storeCardFiltered;
+	uint32_t storeCardPendingArt[5]{ 0, 0, 0, 0, 0 };
 
-	// 3d. Store Packs (Full-screen canvas)
+	// 3d. Store Packs (4-card grid + search + pagination)
 	irr::gui::IGUIStaticText* wStorePacks{ nullptr };
-	irr::gui::IGUIStaticText* pnlStorePacksLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlStorePacksRight{ nullptr };
 	irr::gui::IGUIStaticText* stStorePacksTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStorePacksBalance{ nullptr };
-	irr::gui::IGUIListBox* lstStorePacks{ nullptr };
-	irr::gui::IGUIStaticText* stStorePackInfo{ nullptr };
-	irr::gui::IGUIListBox* lstStorePackPool{ nullptr };
-	irr::gui::IGUIButton* btnStorePackBuy{ nullptr };
+	irr::gui::IGUIStaticText* stStorePacksBanner{ nullptr };
+	irr::gui::IGUIEditBox* ebStorePackSearch{ nullptr };
+	irr::gui::IGUIButton* btnStorePackSearch{ nullptr };
 	irr::gui::IGUIButton* btnStorePackBack{ nullptr };
+	irr::gui::IGUIStaticText* wPackCards[4]{ nullptr };
+	irr::gui::IGUIImage* imgPackCardArts[4]{ nullptr };
+	irr::gui::IGUIStaticText* stPackCardTitles[4]{ nullptr };
+	irr::gui::IGUIStaticText* stPackCardDescs[4]{ nullptr };
+	irr::gui::IGUIButton* btnPackCardBuy[4]{ nullptr };
+	irr::gui::IGUIButton* btnPackCardView[4]{ nullptr };
+	irr::gui::IGUIButton* btnStorePackPrev{ nullptr };
+	irr::gui::IGUIButton* btnStorePackNext{ nullptr };
+	irr::gui::IGUIStaticText* stStorePackPage{ nullptr };
+	int storePackPage{ 0 };
+	std::vector<int> storePackFiltered;
 
 	// 4. Player Profile Hub (8 neon cards)
 	irr::gui::IGUIStaticText* wPlayerProfile{ nullptr };
@@ -1408,11 +1454,16 @@ public:
 	void PopulateEconomyScreens();
 	void ResizeEconomyScreens();
 	void OpenStoreMenu();
+	void OpenStoreDonations();
 	void OpenStoreAvatars();
+	void RefreshStoreAvatarsPage();
 	void OpenStoreBoosters();
+	void RefreshStoreBoostersPage();
 	void OpenStoreVip();
 	void OpenStoreCards();
+	void RefreshStoreCardsPage();
 	void OpenStorePacks();
+	void RefreshStorePacksPage();
 	void OpenPlayerProfile();
 	void OpenProfileInfo();
 	void OpenProfileMedals();
@@ -1420,20 +1471,16 @@ public:
 	void OpenEventsMenu(int eventoId = 0);
 	void OpenClansMenu(const std::wstring& search = L"");
 	void OpenMailbox(int returnTo = 0);
-	void SelectStoreAvatar(int idx);
-	void SelectStoreBooster(int idx);
-	void SelectStoreVip(int idx);
-	void SelectStoreCard(int idx);
-	void SelectStorePack(int idx);
 	void SelectProfileAvatar(int idx);
 	void SelectProfileMedal(int idx);
 	void SelectClanItem(int idx);
 	void SelectMailboxItem(int idx);
-	void RequestBuySelectedAvatar(bool useCD);
-	void RequestBuySelectedBooster(bool useCD);
-	void RequestBuySelectedVip();
-	void RequestBuySelectedCard(bool useCD);
-	void RequestBuySelectedPack();
+	void RequestBuyAvatarIdx(int storeIdx, bool useCD);
+	void RequestBuyBoosterIdx(int storeIdx, bool useCD);
+	void RequestBuyVipIdx(int storeIdx);
+	void RequestBuyCardIdx(int storeIdx, bool useCD);
+	void RequestBuyPackIdx(int storeIdx);
+	void ViewPackCardsIdx(int storeIdx);
 	void ExecuteConfirmedPurchase();
 	void ActivateSelectedAvatar();
 	void HighlightSelectedMedal();

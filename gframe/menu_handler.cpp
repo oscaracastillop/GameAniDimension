@@ -218,6 +218,52 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			default: {
 				if(id >= BUTTON_ADVENTURE_NPC_0 && id <= BUTTON_ADVENTURE_NPC_MAX) {
 					mainGame->SelectAdventureNpc(id - BUTTON_ADVENTURE_NPC_0);
+				} else if(id >= BUTTON_STORE_DON_0 && id <= BUTTON_STORE_DON_MAX) {
+					int idx = id - BUTTON_STORE_DON_0;
+					const wchar_t* pkgNames[5] = { L"Fragmento Dimensional (100 CD - $4.99 USD)", L"Cofre Dimensional (210 CD - $9.99 USD)", L"Orbe Legendario (550 CD - $24.99 USD)", L"Arqueta Imperial (1,150 CD - $49.99 USD)", L"B\u00F3veda del Fara\u00F3n (2,400 CD - $99.99 USD)" };
+					mainGame->PopupMessage(L"Solicitar Cristales (CD)", epro::format(L"Paquete seleccionado:\n{}\n\nCompleta tu donaci\u00F3n oficial en:\nhttps://anidimension.online/tienda/donaciones", pkgNames[idx]));
+				} else if(id >= BUTTON_STORE_AVA_SS_0 && id <= BUTTON_STORE_AVA_SS_MAX) {
+					int slot = id - BUTTON_STORE_AVA_SS_0;
+					int pos = mainGame->storeAvaPage * 5 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeAvaFiltered.size())
+						mainGame->RequestBuyAvatarIdx(mainGame->storeAvaFiltered[pos], false);
+				} else if(id >= BUTTON_STORE_AVA_CD_0 && id <= BUTTON_STORE_AVA_CD_MAX) {
+					int slot = id - BUTTON_STORE_AVA_CD_0;
+					int pos = mainGame->storeAvaPage * 5 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeAvaFiltered.size())
+						mainGame->RequestBuyAvatarIdx(mainGame->storeAvaFiltered[pos], true);
+				} else if(id >= BUTTON_STORE_BST_SS_0 && id <= BUTTON_STORE_BST_SS_MAX) {
+					int slot = id - BUTTON_STORE_BST_SS_0;
+					int pos = mainGame->storeBstPage * 8 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeBstFiltered.size())
+						mainGame->RequestBuyBoosterIdx(mainGame->storeBstFiltered[pos], false);
+				} else if(id >= BUTTON_STORE_BST_CD_0 && id <= BUTTON_STORE_BST_CD_MAX) {
+					int slot = id - BUTTON_STORE_BST_CD_0;
+					int pos = mainGame->storeBstPage * 8 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeBstFiltered.size())
+						mainGame->RequestBuyBoosterIdx(mainGame->storeBstFiltered[pos], true);
+				} else if(id >= BUTTON_STORE_VIP_BUY_0 && id <= BUTTON_STORE_VIP_BUY_MAX) {
+					mainGame->RequestBuyVipIdx(id - BUTTON_STORE_VIP_BUY_0);
+				} else if(id >= BUTTON_STORE_PACK_BUY_0 && id <= BUTTON_STORE_PACK_BUY_MAX) {
+					int slot = id - BUTTON_STORE_PACK_BUY_0;
+					int pos = mainGame->storePackPage * 4 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
+						mainGame->RequestBuyPackIdx(mainGame->storePackFiltered[pos]);
+				} else if(id >= BUTTON_STORE_PACK_VIEW_0 && id <= BUTTON_STORE_PACK_VIEW_MAX) {
+					int slot = id - BUTTON_STORE_PACK_VIEW_0;
+					int pos = mainGame->storePackPage * 4 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storePackFiltered.size())
+						mainGame->ViewPackCardsIdx(mainGame->storePackFiltered[pos]);
+				} else if(id >= BUTTON_STORE_CARD_SS_0 && id <= BUTTON_STORE_CARD_SS_MAX) {
+					int slot = id - BUTTON_STORE_CARD_SS_0;
+					int pos = mainGame->storeCardPage * 5 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
+						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], false);
+				} else if(id >= BUTTON_STORE_CARD_CD_0 && id <= BUTTON_STORE_CARD_CD_MAX) {
+					int slot = id - BUTTON_STORE_CARD_CD_0;
+					int pos = mainGame->storeCardPage * 5 + slot;
+					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
+						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], true);
 				}
 				break;
 			}
@@ -356,69 +402,116 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->OpenStorePacks();
 				break;
 			}
-			case BUTTON_STORE_DONATIONS: {
-				mainGame->PopupMessage(L"Donaciones & Cristales (CD)", L"Adquiere paquetes oficiales de Cristales Dimensionales (CD) en:\nhttps://anidimension.online/tienda/donaciones\n\nTus Cristales (CD) se sincronizan al instante con tu cuenta.");
-				break;
-			}
 			case BUTTON_STORE_BACK: {
 				mainGame->OpenPlayerProfile();
 				break;
 			}
-			case BUTTON_STORE_AVA_BUY: {
-				mainGame->RequestBuySelectedAvatar(false);
+			case BUTTON_STORE_DONATIONS: {
+				mainGame->OpenStoreDonations();
 				break;
 			}
-			case BUTTON_STORE_AVA_BUY_CD: {
-				mainGame->RequestBuySelectedAvatar(true);
+			case BUTTON_STORE_DON_BACK: {
+				mainGame->OpenStoreMenu();
+				break;
+			}
+			case BUTTON_STORE_AVA_SEARCH: {
+				mainGame->storeAvaPage = 0;
+				mainGame->RefreshStoreAvatarsPage();
+				break;
+			}
+			case BUTTON_STORE_AVA_PREV: {
+				if(mainGame->storeAvaPage > 0) {
+					mainGame->storeAvaPage--;
+					mainGame->RefreshStoreAvatarsPage();
+				}
+				break;
+			}
+			case BUTTON_STORE_AVA_NEXT: {
+				mainGame->storeAvaPage++;
+				mainGame->RefreshStoreAvatarsPage();
 				break;
 			}
 			case BUTTON_STORE_AVA_BACK: {
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				mainGame->OpenStoreMenu();
 				break;
 			}
-			case BUTTON_STORE_BST_BUY: {
-				mainGame->RequestBuySelectedBooster(false);
+			case BUTTON_STORE_BST_FILT_ALL:
+			case BUTTON_STORE_BST_FILT_EXP:
+			case BUTTON_STORE_BST_FILT_SS:
+			case BUTTON_STORE_BST_FILT_LUCK: {
+				mainGame->storeBstFilter = id - BUTTON_STORE_BST_FILT_ALL;
+				mainGame->storeBstPage = 0;
+				mainGame->RefreshStoreBoostersPage();
 				break;
 			}
-			case BUTTON_STORE_BST_BUY_CD: {
-				mainGame->RequestBuySelectedBooster(true);
+			case BUTTON_STORE_BST_PREV: {
+				if(mainGame->storeBstPage > 0) {
+					mainGame->storeBstPage--;
+					mainGame->RefreshStoreBoostersPage();
+				}
+				break;
+			}
+			case BUTTON_STORE_BST_NEXT: {
+				mainGame->storeBstPage++;
+				mainGame->RefreshStoreBoostersPage();
 				break;
 			}
 			case BUTTON_STORE_BST_BACK: {
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
-				break;
-			}
-			case BUTTON_STORE_VIP_BUY: {
-				mainGame->RequestBuySelectedVip();
+				mainGame->OpenStoreMenu();
 				break;
 			}
 			case BUTTON_STORE_VIP_BACK: {
-				if(mainGame->wStoreVip) mainGame->wStoreVip->setVisible(false);
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				mainGame->OpenStoreMenu();
 				break;
 			}
-			case BUTTON_STORE_CARD_BUY: {
-				mainGame->RequestBuySelectedCard(false);
+			case BUTTON_STORE_CARD_SEARCH: {
+				mainGame->storeCardPage = 0;
+				mainGame->RefreshStoreCardsPage();
 				break;
 			}
-			case BUTTON_STORE_CARD_BUY_CD: {
-				mainGame->RequestBuySelectedCard(true);
+			case BUTTON_STORE_CARD_FILT_ALL:
+			case BUTTON_STORE_CARD_FILT_SS:
+			case BUTTON_STORE_CARD_FILT_CD: {
+				mainGame->storeCardFilter = id - BUTTON_STORE_CARD_FILT_ALL;
+				mainGame->storeCardPage = 0;
+				mainGame->RefreshStoreCardsPage();
+				break;
+			}
+			case BUTTON_STORE_CARD_PREV: {
+				if(mainGame->storeCardPage > 0) {
+					mainGame->storeCardPage--;
+					mainGame->RefreshStoreCardsPage();
+				}
+				break;
+			}
+			case BUTTON_STORE_CARD_NEXT: {
+				mainGame->storeCardPage++;
+				mainGame->RefreshStoreCardsPage();
 				break;
 			}
 			case BUTTON_STORE_CARD_BACK: {
-				if(mainGame->wStoreCards) mainGame->wStoreCards->setVisible(false);
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				mainGame->OpenStoreMenu();
 				break;
 			}
-			case BUTTON_STORE_PACK_BUY: {
-				mainGame->RequestBuySelectedPack();
+			case BUTTON_STORE_PACK_SEARCH: {
+				mainGame->storePackPage = 0;
+				mainGame->RefreshStorePacksPage();
+				break;
+			}
+			case BUTTON_STORE_PACK_PREV: {
+				if(mainGame->storePackPage > 0) {
+					mainGame->storePackPage--;
+					mainGame->RefreshStorePacksPage();
+				}
+				break;
+			}
+			case BUTTON_STORE_PACK_NEXT: {
+				mainGame->storePackPage++;
+				mainGame->RefreshStorePacksPage();
 				break;
 			}
 			case BUTTON_STORE_PACK_BACK: {
-				if(mainGame->wStorePacks) mainGame->wStorePacks->setVisible(false);
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(true);
+				mainGame->OpenStoreMenu();
 				break;
 			}
 			case BUTTON_PROF_HUB_STORE: {
@@ -1064,26 +1157,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case LISTBOX_ADVENTURE_NPC: {
 				mainGame->UpdateAdventureNPCDisplay();
-				break;
-			}
-			case LISTBOX_STORE_AVATARS: {
-				if(mainGame->lstStoreAvatars) mainGame->SelectStoreAvatar(mainGame->lstStoreAvatars->getSelected());
-				break;
-			}
-			case LISTBOX_STORE_BOOSTERS: {
-				if(mainGame->lstStoreBoosters) mainGame->SelectStoreBooster(mainGame->lstStoreBoosters->getSelected());
-				break;
-			}
-			case LISTBOX_STORE_VIP: {
-				if(mainGame->lstStoreVip) mainGame->SelectStoreVip(mainGame->lstStoreVip->getSelected());
-				break;
-			}
-			case LISTBOX_STORE_CARDS: {
-				if(mainGame->lstStoreCards) mainGame->SelectStoreCard(mainGame->lstStoreCards->getSelected());
-				break;
-			}
-			case LISTBOX_STORE_PACKS: {
-				if(mainGame->lstStorePacks) mainGame->SelectStorePack(mainGame->lstStorePacks->getSelected());
 				break;
 			}
 			case LISTBOX_PROFILE_AVATARS: {
