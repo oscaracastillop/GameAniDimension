@@ -284,47 +284,67 @@ void Game::Initialize() {
 	tFlatBtnCyan = makeSolidTex("ani_flat_cyan", 0xFF0284C7);
 	tFlatBtnDark = makeSolidTex("ani_flat_dark", 0xD00F172A);
 
-	wLobbyHeader = env->addStaticText(L"", irr::core::recti(0, 0, 360, 300), false, false, wMainMenu, -1, true);
-	wLobbyHeader->setBackgroundColor(irr::video::SColor(195, 11, 17, 34));
-	imgServerLogo = env->addImage(irr::core::recti(0, 0, 32, 32), wLobbyHeader, -1, 0, true);
-	imgServerLogo->setScaleImage(true);
-	if(auto aniTex = driver->getTexture("textures/logo_ani.png"))
-		imgServerLogo->setImage(aniTex);
-	stLobbyTitle = env->addStaticText(L"Servidor Central", irr::core::recti(0, 0, 200, 22), false, false, wLobbyHeader);
-	stLobbyTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginUiFont) stLobbyTitle->setOverrideFont(loginUiFont);
-	stLobbyUser = env->addStaticText(L"anidimension.online", irr::core::recti(0, 0, 200, 18), false, false, wLobbyHeader);
-	stLobbyUser->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	stServerOnlineBadge = env->addStaticText(L"\u25CF EN L\u00CDNEA", irr::core::recti(0, 0, 92, 24), false, false, wLobbyHeader, -1, true);
-	stServerOnlineBadge->setBackgroundColor(irr::video::SColor(210, 6, 46, 36));
-	stServerOnlineBadge->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-	stServerOnlineBadge->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	// Right Side (Option 4 Mix — Borderless, airy, real icons & DB data)
+	stServerStatusLine = env->addStaticText(L"\u25CF EN L\u00CDNEA   \u2022   ... ms   \u2022   ... conectados", irr::core::recti(0, 0, 380, 22), false, false, wMainMenu);
+	stServerStatusLine->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 
-	const wchar_t* statLabels[6] = {
-		L"LATENCIA VPS",
-		L"MODALIDADES",
-		L"CONECTADOS",
-		L"CUENTAS CREADAS",
-		L"DUELOS VS NPCS",
-		L"DUELOS PVP"
-	};
-	const irr::video::SColor statColors[6] = {
-		irr::video::SColor(255, 248, 250, 252),
-		irr::video::SColor(255, 248, 250, 252),
-		irr::video::SColor(255, 52, 211, 153),
-		irr::video::SColor(255, 192, 132, 252),
-		irr::video::SColor(255, 56, 189, 248),
-		irr::video::SColor(255, 251, 191, 36)
-	};
-	for(int i = 0; i < 6; ++i) {
-		wStatCards[i] = env->addStaticText(L"", irr::core::recti(0, 0, 160, 56), false, false, wLobbyHeader, -1, true);
-		wStatCards[i]->setBackgroundColor(irr::video::SColor(195, 15, 23, 42));
-		stStatTitles[i] = env->addStaticText(statLabels[i], irr::core::recti(0, 0, 140, 18), false, false, wStatCards[i]);
-		stStatTitles[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		stStatValues[i] = env->addStaticText(i == 1 ? L"Aventura + PvP" : L"...", irr::core::recti(0, 0, 140, 26), false, false, wStatCards[i]);
-		stStatValues[i]->setOverrideColor(statColors[i]);
-		if(loginUiFont) stStatValues[i]->setOverrideFont(loginUiFont);
+	stLobbyBonusHeader = env->addStaticText(L"TUS BONOS ACTIVOS", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
+	stLobbyBonusHeader->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) stLobbyBonusHeader->setOverrideFont(loginUiFont);
+	{
+		const char* bFiles[3] = { "textures/exp.png", "textures/starships.png", "textures/luck.png" };
+		const irr::video::SColor bColors[3] = {
+			irr::video::SColor(255, 147, 197, 253),
+			irr::video::SColor(255, 251, 191, 36),
+			irr::video::SColor(255, 52, 211, 153)
+		};
+		const wchar_t* bInit[3] = { L"+0% EXP", L"+0% SS", L"+0% Luck" };
+		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+		for(int bi = 0; bi < 3; ++bi) {
+			imgLobbyBonusIcons[bi] = env->addImage(irr::core::recti(0, 0, 32, 24), wMainMenu, -1, 0, true);
+			imgLobbyBonusIcons[bi]->setScaleImage(true);
+			imgLobbyBonusIcons[bi]->setUseAlphaChannel(true);
+			if(auto bt = driver->getTexture(bFiles[bi]))
+				imgLobbyBonusIcons[bi]->setImage(bt);
+			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 96, 22), false, false, wMainMenu);
+			stLobbyBonusVals[bi]->setOverrideColor(bColors[bi]);
+			stLobbyBonusVals[bi]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+		}
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
+	stLobbyClanMedals = env->addStaticText(L"Clan: Sin Clan   \u2022   Medallas: 0 / 81", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyClanMedals->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	stLobbyTop3Header = env->addStaticText(L"TOP 3 DUELISTAS", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
+	stLobbyTop3Header->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) stLobbyTop3Header->setOverrideFont(loginUiFont);
+	{
+		const irr::video::SColor rankColors[3] = {
+			irr::video::SColor(255, 251, 191, 36),
+			irr::video::SColor(255, 226, 232, 240),
+			irr::video::SColor(255, 251, 146, 60)
+		};
+		for(int ti = 0; ti < 3; ++ti) {
+			imgTop3Avatar[ti] = env->addImage(irr::core::recti(0, 0, 27, 36), wMainMenu, -1, 0, true);
+			imgTop3Avatar[ti]->setScaleImage(true);
+			imgTop3Avatar[ti]->setUseAlphaChannel(true);
+			imgTop3Avatar[ti]->setVisible(false);
+			stTop3Line[ti] = env->addStaticText(L"", irr::core::recti(0, 0, 340, 36), false, false, wMainMenu);
+			stTop3Line[ti]->setOverrideColor(rankColors[ti]);
+			stTop3Line[ti]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+		}
+	}
+
+	stLobbyEventHeader = env->addStaticText(L"EVENTO & BUZ\u00D3N", irr::core::recti(0, 0, 300, 22), false, false, wMainMenu);
+	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginUiFont) stLobbyEventHeader->setOverrideFont(loginUiFont);
+
+	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyPuzzleEvent->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+
+	stLobbyMailboxStatus = env->addStaticText(L"Buz\u00F3n: 0 pendientes", irr::core::recti(0, 0, 380, 20), false, false, wMainMenu);
+	stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
 
 	// Left Player Showcase (No borders/boxes — floating cleanly over web dark gradient)
 	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 420, 34), false, false, wMainMenu);
@@ -2999,29 +3019,66 @@ void Game::ResizeMainMenuScreen() {
 		}
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
-	if(wLobbyHeader) {
-		wLobbyHeader->setRelativePosition(irr::core::recti(rightX, srvY, rightX + rightW, srvY + srvH));
-		if(imgServerLogo)
-			imgServerLogo->setRelativePosition(irr::core::recti(srvPad, Scale(12), srvPad + Scale(34), Scale(46)));
-		if(stLobbyTitle)
-			stLobbyTitle->setRelativePosition(irr::core::recti(srvPad + Scale(42), Scale(10), rightW - Scale(112), Scale(32)));
-		if(stLobbyUser)
-			stLobbyUser->setRelativePosition(irr::core::recti(srvPad + Scale(42), Scale(32), rightW - Scale(112), Scale(50)));
-		if(stServerOnlineBadge)
-			stServerOnlineBadge->setRelativePosition(irr::core::recti(rightW - srvPad - Scale(94), Scale(16), rightW - srvPad, Scale(40)));
+	// Right: Option 4 Mix (Borderless Server Status + Active Bonuses + Top 3 Duelists + Puzzle Event & Mailbox)
+	int ry = welcomeY;
+	if(stServerStatusLine) {
+		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(24)));
+		ry += Scale(34);
 	}
-	for(int i = 0; i < 6; ++i) {
-		int row = i / 2;
-		int col = i % 2;
-		int tx = srvPad + col * (tileW + tileGap);
-		int ty = srvHeaderH + row * (tileH + tileGap);
-		if(wStatCards[i]) {
-			wStatCards[i]->setRelativePosition(irr::core::recti(tx, ty, tx + tileW, ty + tileH));
-			if(stStatTitles[i])
-				stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(10), Scale(6), tileW - Scale(10), Scale(24)));
-			if(stStatValues[i])
-				stStatValues[i]->setRelativePosition(irr::core::recti(Scale(10), Scale(24), tileW - Scale(10), tileH - Scale(6)));
+	if(stLobbyBonusHeader) {
+		stLobbyBonusHeader->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
+		ry += Scale(26);
+	}
+	{
+		const int colW = rightW / 3;
+		const int iconH = Scale(24);
+		const int iconW = Scale(32);
+		for(int bi = 0; bi < 3; ++bi) {
+			int bx = rightX + bi * colW;
+			if(imgLobbyBonusIcons[bi])
+				imgLobbyBonusIcons[bi]->setRelativePosition(irr::core::recti(bx, ry, bx + iconW, ry + iconH));
+			if(stLobbyBonusVals[bi])
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(bx + iconW + Scale(6), ry, bx + colW - Scale(4), ry + iconH));
 		}
+		ry += iconH + Scale(8);
+	}
+	if(stLobbyClanMedals) {
+		stLobbyClanMedals->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
+		ry += Scale(32);
+	}
+	if(stLobbyTop3Header) {
+		stLobbyTop3Header->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
+		ry += Scale(26);
+	}
+	{
+		const int rowH = Scale(40);
+		const int rowGap = Scale(6);
+		for(int ti = 0; ti < 3; ++ti) {
+			int avThumbH = Scale(36);
+			int avThumbW = Scale(27);
+			if(imgTop3Avatar[ti] && imgTop3Avatar[ti]->getImage()) {
+				auto tsz = imgTop3Avatar[ti]->getImage()->getOriginalSize();
+				if(tsz.Width > 0 && tsz.Height > 0)
+					avThumbW = (int)((double)avThumbH * tsz.Width / tsz.Height);
+			}
+			if(imgTop3Avatar[ti])
+				imgTop3Avatar[ti]->setRelativePosition(irr::core::recti(rightX, ry + (rowH - avThumbH) / 2, rightX + avThumbW, ry + (rowH + avThumbH) / 2));
+			if(stTop3Line[ti])
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(rightX + avThumbW + Scale(10), ry, rightX + rightW, ry + rowH));
+			ry += rowH + rowGap;
+		}
+		ry += Scale(10);
+	}
+	if(stLobbyEventHeader) {
+		stLobbyEventHeader->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(22)));
+		ry += Scale(25);
+	}
+	if(stLobbyPuzzleEvent) {
+		stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
+		ry += Scale(22);
+	}
+	if(stLobbyMailboxStatus) {
+		stLobbyMailboxStatus->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + Scale(20)));
 	}
 	ResizeTopNavBar();
 }
@@ -3094,6 +3151,17 @@ void Game::LogoutToLogin() {
 
 static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson);
 
+static long long SafeJsonInt64(const nlohmann::json& j, const char* key, long long def = 0) {
+	if(!j.contains(key)) return def;
+	const auto& v = j[key];
+	if(v.is_number_integer()) return v.get<long long>();
+	if(v.is_number_float()) return (long long)v.get<double>();
+	if(v.is_string()) {
+		try { return std::stoll(v.get<std::string>()); } catch(...) {}
+	}
+	return def;
+}
+
 void Game::FetchLobbyStatsAsync() {
 	const std::wstring curUser = loggedInUser;
 	const std::string tok = sessionToken;
@@ -3103,10 +3171,12 @@ void Game::FetchLobbyStatsAsync() {
 		auto t1 = std::chrono::steady_clock::now();
 		int pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
 
-		nlohmann::json fullResp, profResp, cardResp;
+		auto rankResp = FetchAdventureApi("/api/ranking");
+		nlohmann::json fullResp, profResp, puzResp, cardResp;
 		if(!tok.empty()) {
 			fullResp = CallSessionApi("/api/profile/full", tok, "");
 			profResp = CallSessionApi("/api/profile", tok, "");
+			puzResp = CallSessionApi("/api/events/puzzles", tok, "");
 		}
 		if(!curUser.empty() && (!fullResp.contains("success") || !fullResp["success"].get<bool>())) {
 			std::string utf8Name = BufferIO::EncodeUTF8(curUser);
@@ -3138,9 +3208,9 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyPlayerDisplayName = uStr.empty() ? curUser : BufferIO::DecodeUTF8(uStr);
 			lobbyPlayerLevel = SafeJsonInt(u, "Nivel", playerLevel);
 			lobbyPlayerExpPct = u.contains("PorcentajeNivel") && u["PorcentajeNivel"].is_number() ? u["PorcentajeNivel"].get<double>() : 0.0;
-			lobbyPlayerExpInLevel = u.contains("ExpEnNivel") && u["ExpEnNivel"].is_number() ? u["ExpEnNivel"].get<long long>() : 0;
-			lobbyPlayerExpNext = u.contains("ExpParaSubir") && u["ExpParaSubir"].is_number() ? u["ExpParaSubir"].get<long long>() : 100;
-			lobbyPlayerStarShips = u.contains("StarShips") && u["StarShips"].is_number() ? u["StarShips"].get<long long>() : playerStarShips;
+			lobbyPlayerExpInLevel = SafeJsonInt64(u, "ExpEnNivel", 0);
+			lobbyPlayerExpNext = SafeJsonInt64(u, "ExpParaSubir", 100);
+			lobbyPlayerStarShips = SafeJsonInt64(u, "StarShips", playerStarShips);
 			lobbyPlayerPvpDuels = SafeJsonInt(u, "DuelosPvp", 0);
 			lobbyPlayerPvpWr = u.contains("WinratePvp") && u["WinratePvp"].is_number() ? u["WinratePvp"].get<double>() : 0.0;
 			lobbyPlayerNpcDuels = SafeJsonInt(u, "DuelosNpc", 0);
@@ -3148,6 +3218,18 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyPlayerAvatarFile = SafeJsonStr(u, "AvaArchivo", "AVA-001.png");
 			bool vipAct = u.contains("VipActivo") && u["VipActivo"].is_boolean() && u["VipActivo"].get<bool>();
 			lobbyPlayerVipName = vipAct ? SafeJsonStr(u, "VipNombre", "") : "";
+			lobbyBonusExp = u.contains("TotalBonusExp") && u["TotalBonusExp"].is_number() ? u["TotalBonusExp"].get<double>() : 0.0;
+			lobbyBonusSS = u.contains("TotalBonusStarShips") && u["TotalBonusStarShips"].is_number() ? u["TotalBonusStarShips"].get<double>() : 0.0;
+			lobbyBonusLuck = u.contains("TotalBonusLuck") && u["TotalBonusLuck"].is_number() ? u["TotalBonusLuck"].get<double>() : 0.0;
+			int clanId = SafeJsonInt(u, "ClanId", 0);
+			std::string clanNom = SafeJsonStr(u, "ClanNombre", "");
+			int clanNiv = SafeJsonInt(u, "ClanNivel", 0);
+			if(clanId > 0 && !clanNom.empty())
+				lobbyClanText = epro::format(L"{} (Nv. {})", BufferIO::DecodeUTF8(clanNom), clanNiv);
+			else
+				lobbyClanText = L"Sin Clan";
+			lobbyMedalsGot = SafeJsonInt(u, "MedallasObtenidas", 0);
+			lobbyMedalsTotal = SafeJsonInt(u, "MedallasTotales", 81);
 		} else if(cardResp.contains("success") && cardResp["success"].is_boolean() && cardResp["success"].get<bool>()) {
 			lobbyPlayerLevel = SafeJsonInt(cardResp, "nivel", playerLevel);
 			lobbyPlayerAvatarFile = SafeJsonStr(cardResp, "avatarArchivo", "AVA-001.png");
@@ -3159,10 +3241,37 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyPlayerDisplayName = curUser;
 		}
 		if(profResp.contains("success") && profResp["success"].is_boolean() && profResp["success"].get<bool>()) {
-			if(profResp.contains("cristales") && profResp["cristales"].is_number())
-				lobbyPlayerCristales = profResp["cristales"].get<long long>();
-			if(profResp.contains("starShips") && profResp["starShips"].is_number())
-				lobbyPlayerStarShips = profResp["starShips"].get<long long>();
+			lobbyPlayerCristales = SafeJsonInt64(profResp, "cristales", lobbyPlayerCristales);
+			lobbyPlayerStarShips = SafeJsonInt64(profResp, "starShips", lobbyPlayerStarShips);
+			lobbyMailboxPending = SafeJsonInt(profResp, "buzonPendientes", 0);
+		}
+		lobbyTop3.clear();
+		if(rankResp.contains("success") && rankResp["success"].is_boolean() && rankResp["success"].get<bool>() && rankResp.contains("players") && rankResp["players"].is_array()) {
+			for(const auto& p : rankResp["players"]) {
+				if((int)lobbyTop3.size() >= 3) break;
+				LobbyTopEntry te;
+				te.pos = SafeJsonInt(p, "posicion", (int)lobbyTop3.size() + 1);
+				te.nivel = SafeJsonInt(p, "nivel", 1);
+				te.exp = SafeJsonInt64(p, "exp", 0);
+				te.usuario = BufferIO::DecodeUTF8(SafeJsonStr(p, "usuario", ""));
+				te.avatarArchivo = SafeJsonStr(p, "avatarArchivo", "AVA-001.png");
+				lobbyTop3.push_back(std::move(te));
+			}
+		}
+		if(puzResp.contains("success") && puzResp["success"].is_boolean() && puzResp["success"].get<bool>() && puzResp.contains("selected") && puzResp["selected"].is_object()) {
+			const auto& sel = puzResp["selected"];
+			std::wstring tit = BufferIO::DecodeUTF8(SafeJsonStr(sel, "Titulo", "Evento Mensual"));
+			std::wstring est = BufferIO::DecodeUTF8(SafeJsonStr(sel, "EstadoActual", ""));
+			int gotPieces = 0;
+			if(puzResp.contains("pieces") && puzResp["pieces"].is_array()) {
+				for(const auto& pc : puzResp["pieces"]) {
+					if(SafeJsonInt(pc, "Cantidad", 0) > 0)
+						gotPieces++;
+				}
+			}
+			lobbyPuzzleText = epro::format(L"Rompecabezas: {} ({}) \u2014 {}/20 fichas", tit, est, gotPieces);
+		} else {
+			lobbyPuzzleText = L"Rompecabezas: Sin evento activo (del 5 al 26)";
 		}
 		lobbyStatsReady = true;
 	}).detach();
@@ -3171,21 +3280,17 @@ void Game::FetchLobbyStatsAsync() {
 void Game::ProcessPendingLobbyStats() {
 	if(!lobbyStatsReady.exchange(false))
 		return;
-	int pingMs = 0, totC = 0, onC = 0, dNpc = 0, dPvp = 0, totCards = 0, totNpcs = 0;
-	int pLvl = 1, pvpDuels = 0, npcDuels = 0;
-	double expPct = 0.0, pvpWr = 0.0, npcWr = 0.0;
+	int pingMs = 0, onC = 0;
+	int pLvl = 1, pvpDuels = 0, npcDuels = 0, medalsGot = 0, medalsTot = 81, mailPend = 0;
+	double expPct = 0.0, pvpWr = 0.0, npcWr = 0.0, bExp = 0.0, bSS = 0.0, bLuck = 0.0;
 	long long expIn = 0, expNext = 100, ss = 0, cd = 0;
 	std::string avFile, vipName;
-	std::wstring pName;
+	std::wstring pName, clanTxt, puzTxt;
+	std::vector<LobbyTopEntry> top3Copy;
 	{
 		std::lock_guard<epro::mutex> lk(lobbyStatsMutex);
 		pingMs = lobbyPingMs;
-		totC = lobbyTotalCuentas;
 		onC = lobbyOnlineCuentas;
-		dNpc = lobbyTotalDuelosNpc;
-		dPvp = lobbyTotalDuelosPvp;
-		totCards = lobbyTotalCartas;
-		totNpcs = lobbyTotalNpcs;
 		pLvl = lobbyPlayerLevel;
 		expPct = lobbyPlayerExpPct;
 		expIn = lobbyPlayerExpInLevel;
@@ -3199,6 +3304,15 @@ void Game::ProcessPendingLobbyStats() {
 		avFile = lobbyPlayerAvatarFile;
 		vipName = lobbyPlayerVipName;
 		pName = lobbyPlayerDisplayName;
+		bExp = lobbyBonusExp;
+		bSS = lobbyBonusSS;
+		bLuck = lobbyBonusLuck;
+		clanTxt = lobbyClanText;
+		medalsGot = lobbyMedalsGot;
+		medalsTot = lobbyMedalsTotal;
+		mailPend = lobbyMailboxPending;
+		puzTxt = lobbyPuzzleText;
+		top3Copy = lobbyTop3;
 	}
 	playerLevel = pLvl;
 	playerStarShips = ss;
@@ -3235,15 +3349,44 @@ void Game::ProcessPendingLobbyStats() {
 			imgLobbyVip->setVisible(false);
 		}
 	}
+	if(stServerStatusLine)
+		stServerStatusLine->setText(epro::format(L"\u25CF EN L\u00CDNEA   \u2022   {} ms   \u2022   {} conectados", pingMs, onC).c_str());
+	if(stLobbyBonusVals[0]) stLobbyBonusVals[0]->setText(epro::format(L"+{:.1f}% EXP", bExp).c_str());
+	if(stLobbyBonusVals[1]) stLobbyBonusVals[1]->setText(epro::format(L"+{:.1f}% SS", bSS).c_str());
+	if(stLobbyBonusVals[2]) stLobbyBonusVals[2]->setText(epro::format(L"+{:.1f}% Luck", bLuck).c_str());
+	if(stLobbyClanMedals)
+		stLobbyClanMedals->setText(epro::format(L"Clan: {}   \u2022   Medallas: {} / {}", clanTxt, medalsGot, medalsTot).c_str());
+	for(int ti = 0; ti < 3; ++ti) {
+		if(ti < (int)top3Copy.size()) {
+			const auto& e = top3Copy[ti];
+			if(stTop3Line[ti])
+				stTop3Line[ti]->setText(epro::format(L"#{}   {}   \u2022   Nv. {}   \u2022   {} EXP", e.pos, e.usuario, e.nivel, e.exp).c_str());
+			if(imgTop3Avatar[ti]) {
+				auto tAv = LoadAvatarTexture(e.avatarArchivo);
+				if(tAv) {
+					imgTop3Avatar[ti]->setImage(tAv);
+					imgTop3Avatar[ti]->setVisible(true);
+				} else {
+					imgTop3Avatar[ti]->setVisible(false);
+				}
+			}
+		} else {
+			if(stTop3Line[ti]) stTop3Line[ti]->setText(L"");
+			if(imgTop3Avatar[ti]) imgTop3Avatar[ti]->setVisible(false);
+		}
+	}
+	if(stLobbyPuzzleEvent)
+		stLobbyPuzzleEvent->setText(puzTxt.c_str());
+	if(stLobbyMailboxStatus) {
+		if(mailPend > 0) {
+			stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			stLobbyMailboxStatus->setText(epro::format(L"Buz\u00F3n: {} regalo(s) pendiente(s) por reclamar", mailPend).c_str());
+		} else {
+			stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			stLobbyMailboxStatus->setText(L"Buz\u00F3n: Al d\u00EDa (0 pendientes)");
+		}
+	}
 	ResizeMainMenuScreen();
-	if(stStatValues[0]) stStatValues[0]->setText(pingMs > 0 ? epro::format(L"{} ms", pingMs).c_str() : L"...");
-	if(stStatValues[1]) stStatValues[1]->setText(L"Aventura + PvP");
-	if(stStatValues[2]) stStatValues[2]->setText(epro::format(L"{}", onC).c_str());
-	if(stStatValues[3]) stStatValues[3]->setText(epro::format(L"{}", totC).c_str());
-	if(stStatValues[4]) stStatValues[4]->setText(epro::format(L"{}", dNpc).c_str());
-	if(stStatValues[5]) stStatValues[5]->setText(epro::format(L"{}", dPvp).c_str());
-	(void)totCards;
-	(void)totNpcs;
 }
 
 void Game::SubmitLogin() {
@@ -3380,12 +3523,10 @@ void Game::ProcessPendingLoginResult() {
 			wBtnSettings->setVisible(true);
 		if(wMainMenu) {
 			ResizeMainMenuScreen();
-			if(stLobbyUser)
-				stLobbyUser->setText(L"anidimension.online");
 			if(stLobbyPlayerName)
 				stLobbyPlayerName->setText(loggedInUser.empty() ? L"Duelista" : loggedInUser.c_str());
 			if(stLobbyPlayerLevel)
-				stLobbyPlayerLevel->setText(epro::format(L"NIVEL {}", playerLevel).c_str());
+				stLobbyPlayerLevel->setText(epro::format(L"Nivel {}", playerLevel).c_str());
 			FetchLobbyStatsAsync();
 			wMainMenu->setVisible(true);
 			env->getRootGUIElement()->bringToFront(wMainMenu);
@@ -5623,12 +5764,6 @@ bool Game::MainLoop() {
 		DrawGUI();
 		DrawSpec();
 		if(wMainMenu && wMainMenu->isVisible() && !dInfo.isInDuel && !is_building) {
-			if(wLobbyHeader)
-				driver->draw2DRectangleOutline(wLobbyHeader->getAbsolutePosition(), irr::video::SColor(180, 56, 189, 248));
-			for(int i = 0; i < 6; ++i) {
-				if(wStatCards[i])
-					driver->draw2DRectangleOutline(wStatCards[i]->getAbsolutePosition(), irr::video::SColor(90, 56, 189, 248));
-			}
 			const irr::video::SColor featBorder[4] = {
 				irr::video::SColor(150, 56, 189, 248),
 				irr::video::SColor(150, 52, 211, 153),
