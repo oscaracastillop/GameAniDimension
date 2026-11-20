@@ -167,6 +167,15 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* wStatCards[6]{ nullptr };
 	irr::gui::IGUIStaticText* stStatTitles[6]{ nullptr };
 	irr::gui::IGUIStaticText* stStatValues[6]{ nullptr };
+	irr::gui::IGUIStaticText* wTopNavBar{ nullptr };
+	irr::gui::IGUIStaticText* pnlTopNavBorder{ nullptr };
+	irr::gui::IGUIImage* imgTopNavLogo{ nullptr };
+	irr::gui::IGUIStaticText* stTopNavBrand{ nullptr };
+	irr::gui::IGUIStaticText* stTopNavUser{ nullptr };
+	irr::gui::IGUIButton* btnNavItems[9]{ nullptr };
+	irr::gui::IGUIStaticText* pnlHomeInfo{ nullptr };
+	irr::gui::IGUIStaticText* stHomeInfoTitle{ nullptr };
+	irr::gui::IGUIListBox* lstHomeInfo{ nullptr };
 	irr::gui::IGUIWindow* wCommitsLog;
 	irr::gui::IGUIContextMenu* mTopMenu;
 	irr::gui::IGUIContextMenu* mRepositoriesInfo;
@@ -976,6 +985,9 @@ public:
 	irr::gui::IGUIButton* btnLoginExit{ nullptr };
 	void ResizeLoginScreen();
 	void ResizeMainMenuScreen();
+	void ResizeTopNavBar();
+	void ShowTopNavBar(bool show);
+	void LogoutToLogin();
 	void FetchLobbyStatsAsync();
 	void ProcessPendingLobbyStats();
 	epro::mutex lobbyStatsMutex;

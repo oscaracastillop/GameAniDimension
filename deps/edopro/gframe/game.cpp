@@ -323,6 +323,83 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnDeckEdit, 1204);
 	btnModeExit = env->addButton(Scale(700, 380, 980, 430), wMainMenu, BUTTON_MODE_EXIT, gDataManager->GetSysString(1210).data());
 	defaultStrings.emplace_back(btnModeExit, 1210);
+	btnModeExit->setVisible(false);
+	btnOnlineMode->setVisible(false);
+	btnDeckEdit->setVisible(false);
+
+	// Right-side scrollable Game & Server Guide panel on Inicio (wMainMenu)
+	pnlHomeInfo = env->addStaticText(L"", irr::core::recti(0, 0, 400, 320), true, false, wMainMenu, -1, true);
+	pnlHomeInfo->setBackgroundColor(irr::video::SColor(218, 10, 15, 30));
+	stHomeInfoTitle = env->addStaticText(L"GU\u00CDA DEL SERVIDOR Y MODOS DE JUEGO", irr::core::recti(0, 0, 380, 26), false, false, pnlHomeInfo);
+	stHomeInfoTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) stHomeInfoTitle->setOverrideFont(loginUiFont);
+	lstHomeInfo = env->addListBox(irr::core::recti(0, 0, 380, 270), pnlHomeInfo, -1, true);
+	lstHomeInfo->setItemHeight(Scale(24));
+	{
+		const wchar_t* homeGuideLines[] = {
+			L"  [ANI DIMENSION - SERVIDOR OFICIAL]",
+			L"  Yu-Gi-Oh! Master Rule 2020 (PC & Android)",
+			L"  Progreso sincronizado 100% con anidimension.online",
+			L"",
+			L"  > MODO AVENTURA RPG:",
+			L"    Desaf\u00EDa NPCs por Series y Arcos (DM, GX, 5D's...)",
+			L"    Gana EXP, StarShips (SS), Medallas y Cartas.",
+			L"",
+			L"  > DUELOS ONLINE (PvP):",
+			L"    Salas Ranked (EXP/SS) y Amistosas con filtro",
+			L"    de nivel rival y ranking global competitivo.",
+			L"",
+			L"  > ECONOM\u00CDA, TIENDA Y BUZ\u00D3N:",
+			L"    - StarShips (SS): Moneda gratis por duelos.",
+			L"    - Cristales (CD): Moneda especial / Pases VIP.",
+			L"    Compra Avatares, Potenciadores y Cartas; todo",
+			L"    llega directamente al Buz\u00F3n de tu cuenta.",
+			L"",
+			L"  > CLANES, EVENTOS Y TUTORIALES:",
+			L"    Forma tu Clan grupal, participa en Eventos de",
+			L"    Rompecabezas y revisa gu\u00EDas en la web oficial.",
+			L"    Web: https://anidimension.online"
+		};
+		for(size_t gi = 0; gi < sizeof(homeGuideLines) / sizeof(homeGuideLines[0]); ++gi) {
+			int idx = lstHomeInfo->addItem(homeGuideLines[gi]);
+			if(gi == 0 || gi == 4 || gi == 8 || gi == 12 || gi == 18)
+				lstHomeInfo->setItemOverrideColor(idx, irr::video::SColor(255, 251, 191, 36));
+			else
+				lstHomeInfo->setItemOverrideColor(idx, irr::video::SColor(255, 226, 232, 240));
+		}
+	}
+
+	// Dedicated Top Navigation Bar (solo visible en Inicio / Tienda / Perfil / Buzon)
+	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 48), false, false, 0, -1, true);
+	wTopNavBar->setBackgroundColor(irr::video::SColor(240, 9, 13, 27));
+	wTopNavBar->setVisible(false);
+	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 46, 1024, 48), false, false, wTopNavBar, -1, true);
+	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(220, 56, 189, 248));
+	imgTopNavLogo = env->addImage(irr::core::recti(10, 7, 42, 39), wTopNavBar, -1, 0, true);
+	imgTopNavLogo->setScaleImage(true);
+	if(auto navLogoTex = driver->getTexture("textures/AppIcon.png"))
+		imgTopNavLogo->setImage(navLogoTex);
+	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(48, 10, 185, 38), false, false, wTopNavBar);
+	stTopNavBrand->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	stTopNavBrand->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
+	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
+	{
+		const wchar_t* navLabels[9] = {
+			L"Inicio", L"Tienda", L"Perfil", L"Deck", L"Duelos",
+			L"Eventos", L"Clan", L"Tutoriales", L"Salir"
+		};
+		const int navIds[9] = {
+			BUTTON_NAV_INICIO, BUTTON_NAV_TIENDA, BUTTON_NAV_PERFIL, BUTTON_NAV_DECK,
+			BUTTON_NAV_DUELOS, BUTTON_NAV_EVENTOS, BUTTON_NAV_CLAN, BUTTON_NAV_TUTORIALES,
+			BUTTON_NAV_SALIR
+		};
+		for(int ni = 0; ni < 9; ++ni) {
+			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 80, 32), wTopNavBar, navIds[ni], navLabels[ni]);
+		}
+	}
+	stTopNavUser = env->addStaticText(L"", irr::core::recti(0, 0, 120, 32), false, false, wTopNavBar);
+	stTopNavUser->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
+	stTopNavUser->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	// Dedicated full-screen Login interface
 	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
 	imgLoginBg = env->addImage(irr::core::recti(0, 0, 1024, 640), wLogin);
@@ -2751,33 +2828,20 @@ void Game::ResizeMainMenuScreen() {
 	if(imgMainMenuBg)
 		imgMainMenuBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	const int padX = std::max(Scale(20), (int)(W * 0.032f));
-	const int padY = std::max(Scale(18), (int)(H * 0.05f));
-
-	// Right side: big, separated buttons floating cleanly over bg_loby
-	const int btnW = std::max(Scale(250), std::min(Scale(340), (int)(W * 0.28f)));
-	const int btnH = std::max(Scale(46), std::min(Scale(62), (int)(H * 0.088f)));
-	const int btnGap = std::max(Scale(14), (int)(H * 0.028f));
-	irr::gui::IGUIButton* menuBtns[5] = { btnOnlineMode, btnAdventureMode, btnReplayMode, btnDeckEdit, btnModeExit };
-	const int totalBtnH = 5 * btnH + 4 * btnGap;
-	const int btnX = W - padX - btnW;
-	int btnY = std::max(padY, (H - totalBtnH) / 2);
-	for(int i = 0; i < 5; ++i) {
-		if(menuBtns[i]) {
-			menuBtns[i]->setRelativePosition(irr::core::recti(btnX, btnY, btnX + btnW, btnY + btnH));
-			btnY += btnH + btnGap;
-		}
-	}
+	const int navH = Scale(48);
+	const int padX = std::max(Scale(18), (int)(W * 0.025f));
+	const int padY = navH + std::max(Scale(14), (int)(H * 0.025f));
+	const int bottomPad = std::max(Scale(16), (int)(H * 0.03f));
+	const int colGap = std::max(Scale(16), (int)(W * 0.02f));
+	const int contentH = std::max(Scale(320), H - padY - bottomPad);
 
 	// Left side: Server Stats blocks (2 cols x 3 rows) + Header card
-	const int leftAvailW = std::max(Scale(340), btnX - padX - Scale(30));
-	const int leftW = std::min(Scale(540), leftAvailW);
-	const int headerH = std::max(Scale(68), (int)(H * 0.115f));
-	const int gapGrid = std::max(Scale(12), (int)(W * 0.014f));
+	const int leftW = std::max(Scale(320), (int)((W - 2 * padX - colGap) * 0.45f));
+	const int headerH = std::max(Scale(64), (int)(contentH * 0.16f));
+	const int gapGrid = std::max(Scale(10), (int)(W * 0.012f));
 	const int cardW = (leftW - gapGrid) / 2;
-	const int cardH = std::max(Scale(74), std::min(Scale(105), (int)(H * 0.15f)));
-	const int totalLeftH = headerH + gapGrid + 3 * cardH + 2 * gapGrid;
-	int startY = std::max(padY, (H - totalLeftH) / 2);
+	const int cardH = std::max(Scale(64), (contentH - headerH - 3 * gapGrid) / 3);
+	const int startY = padY;
 
 	if(wLobbyHeader) {
 		wLobbyHeader->setRelativePosition(irr::core::recti(padX, startY, padX + leftW, startY + headerH));
@@ -2798,6 +2862,102 @@ void Game::ResizeMainMenuScreen() {
 			stStatTitles[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(10), cardW - Scale(12), Scale(32)));
 		if(stStatValues[i])
 			stStatValues[i]->setRelativePosition(irr::core::recti(Scale(12), Scale(36), cardW - Scale(12), cardH - Scale(10)));
+	}
+
+	// Right side: Quick Play buttons strip (Modo Aventura + Replays) + Scrollable Guide Panel
+	const int rightX = padX + leftW + colGap;
+	const int rightW = std::max(Scale(320), W - padX - rightX);
+	const int quickH = Scale(46);
+	const int quickGap = Scale(10);
+	const int halfBtnW = (rightW - quickGap) / 2;
+	if(btnAdventureMode) {
+		btnAdventureMode->setVisible(true);
+		btnAdventureMode->setRelativePosition(irr::core::recti(rightX, startY, rightX + halfBtnW, startY + quickH));
+	}
+	if(btnReplayMode) {
+		btnReplayMode->setVisible(true);
+		btnReplayMode->setRelativePosition(irr::core::recti(rightX + halfBtnW + quickGap, startY, rightX + rightW, startY + quickH));
+	}
+	const int infoY = startY + quickH + gapGrid;
+	const int infoH = std::max(Scale(200), (startY + contentH) - infoY);
+	if(pnlHomeInfo) {
+		pnlHomeInfo->setRelativePosition(irr::core::recti(rightX, infoY, rightX + rightW, infoY + infoH));
+		if(stHomeInfoTitle)
+			stHomeInfoTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), rightW - Scale(14), Scale(36)));
+		if(lstHomeInfo)
+			lstHomeInfo->setRelativePosition(irr::core::recti(Scale(12), Scale(42), rightW - Scale(12), infoH - Scale(12)));
+	}
+	ResizeTopNavBar();
+}
+
+void Game::ResizeTopNavBar() {
+	if(!wTopNavBar) return;
+	const int W = (int)window_size.Width;
+	const int navH = Scale(48);
+	wTopNavBar->setRelativePosition(irr::core::recti(0, 0, W, navH));
+	if(pnlTopNavBorder)
+		pnlTopNavBorder->setRelativePosition(irr::core::recti(0, navH - 2, W, navH));
+	const int logoSz = Scale(30);
+	if(imgTopNavLogo)
+		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(10), (navH - logoSz) / 2, Scale(10) + logoSz, (navH + logoSz) / 2));
+	const int brandW = Scale(138);
+	if(stTopNavBrand)
+		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(46), 0, Scale(46) + brandW, navH));
+	const int userW = Scale(96);
+	if(stTopNavUser)
+		stTopNavUser->setRelativePosition(irr::core::recti(W - userW - Scale(10), 0, W - Scale(10), navH));
+
+	const int navStartX = Scale(46) + brandW + Scale(8);
+	const int navEndX = W - userW - Scale(16);
+	const int availW = std::max(Scale(360), navEndX - navStartX);
+	const int gap = Scale(5);
+	const int btnW = std::max(Scale(38), (availW - 8 * gap) / 9);
+	const int btnH = Scale(32);
+	const int btnY = (navH - btnH) / 2;
+	int curX = navStartX;
+	for(int i = 0; i < 9; ++i) {
+		if(btnNavItems[i]) {
+			btnNavItems[i]->setRelativePosition(irr::core::recti(curX, btnY, curX + btnW, btnY + btnH));
+		}
+		curX += btnW + gap;
+	}
+}
+
+void Game::ShowTopNavBar(bool show) {
+	if(!wTopNavBar) return;
+	if(show) {
+		ResizeTopNavBar();
+		if(stTopNavUser)
+			stTopNavUser->setText(loggedInUser.empty() ? L"" : loggedInUser.c_str());
+		wTopNavBar->setVisible(true);
+		env->getRootGUIElement()->bringToFront(wTopNavBar);
+	} else {
+		wTopNavBar->setVisible(false);
+	}
+}
+
+void Game::LogoutToLogin() {
+	isLoggedIn = false;
+	sessionToken.clear();
+	loggedInUser.clear();
+	playerCardCache.clear();
+	ShowTopNavBar(false);
+	if(wMainMenu) wMainMenu->setVisible(false);
+	if(wStoreMenu) wStoreMenu->setVisible(false);
+	if(wStoreAvatars) wStoreAvatars->setVisible(false);
+	if(wStoreBoosters) wStoreBoosters->setVisible(false);
+	if(wPlayerProfile) wPlayerProfile->setVisible(false);
+	if(wMailbox) wMailbox->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	if(wLogin) {
+		ResizeLoginScreen();
+		if(stLoginStatus) {
+			stLoginStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			stLoginStatus->setText(L"Sesi\u00F3n cerrada. Ingresa con tu cuenta de anidimension.online");
+		}
+		wLogin->setVisible(true);
+		env->getRootGUIElement()->bringToFront(wLogin);
+		env->setFocus(ebLoginUser ? static_cast<irr::gui::IGUIElement*>(ebLoginUser) : static_cast<irr::gui::IGUIElement*>(wLogin));
 	}
 }
 
@@ -2988,6 +3148,7 @@ void Game::ProcessPendingLoginResult() {
 			FetchLobbyStatsAsync();
 			wMainMenu->setVisible(true);
 			env->getRootGUIElement()->bringToFront(wMainMenu);
+			ShowTopNavBar(true);
 			if(wBtnSettings) env->getRootGUIElement()->bringToFront(wBtnSettings);
 			env->setFocus(wMainMenu);
 		}
@@ -5102,6 +5263,14 @@ bool Game::MainLoop() {
 		driver->beginScene(true, true, irr::video::SColor(0, 0, 0, 0));
 		gMutex.lock();
 		ProcessPendingHostPrepTextures();
+		{
+			bool shouldShowNav = !dInfo.isInDuel && !is_building &&
+				((wMainMenu && wMainMenu->isVisible()) || (wStoreMenu && wStoreMenu->isVisible()) ||
+				 (wStoreAvatars && wStoreAvatars->isVisible()) || (wStoreBoosters && wStoreBoosters->isVisible()) ||
+				 (wPlayerProfile && wPlayerProfile->isVisible()) || (wMailbox && wMailbox->isVisible()));
+			if(wTopNavBar && wTopNavBar->isVisible() != shouldShowNav)
+				ShowTopNavBar(shouldShowNav);
+		}
 		if(dInfo.isInDuel) {
 			if(dInfo.isReplay)
 				discord.UpdatePresence(DiscordWrapper::REPLAY);
@@ -6872,6 +7041,7 @@ void Game::OnResize() {
 	if(wStoreMenu)
 		ResizeEconomyScreens();
 	ResizeMainMenuScreen();
+	ResizeTopNavBar();
 	ResizeLoginScreen();
 	wBtnSettings->setRelativePosition(ResizeWin(0, 610, 30, 640));
 	SetCentered(wCommitsLog);

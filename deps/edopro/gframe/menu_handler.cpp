@@ -221,12 +221,79 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
-			case BUTTON_STORE_OPEN: {
+			case BUTTON_STORE_OPEN:
+			case BUTTON_NAV_TIENDA: {
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
 				mainGame->OpenStoreMenu();
 				break;
 			}
-			case BUTTON_PROFILE_OPEN: {
+			case BUTTON_PROFILE_OPEN:
+			case BUTTON_NAV_PERFIL: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
 				mainGame->OpenPlayerProfile();
+				break;
+			}
+			case BUTTON_NAV_INICIO: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
+				mainGame->FetchLobbyStatsAsync();
+				break;
+			}
+			case BUTTON_NAV_DECK: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->ShowTopNavBar(false);
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
+				mainGame->RefreshDeck(mainGame->cbDBDecks);
+				if(mainGame->cbDBDecks->getSelected() != -1) {
+					mainGame->deckBuilder.SetCurrentDeckFromFile(Utils::ToPathString(mainGame->cbDBDecks->getItem(mainGame->cbDBDecks->getSelected())), true);
+					mainGame->ebDeckname->setText(L"");
+				}
+				mainGame->HideElement(mainGame->wMainMenu);
+				mainGame->deckBuilder.Initialize();
+				break;
+			}
+			case BUTTON_NAV_DUELOS: {
+				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
+				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
+				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
+				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->ShowTopNavBar(false);
+				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
+				mainGame->isHostingOnline = true;
+				mainGame->HideElement(mainGame->wMainMenu);
+				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
+				break;
+			}
+			case BUTTON_NAV_EVENTOS: {
+				mainGame->PopupMessage(L"Eventos Ani Dimension", L"Eventos y Rompecabezas Mensuales activos en:\nhttps://anidimension.online/eventos\n\nPr\u00F3ximamente integrados aqu\u00ED.");
+				break;
+			}
+			case BUTTON_NAV_CLAN: {
+				mainGame->PopupMessage(L"Sistema de Clanes", L"Crea o \u00FAnete a un Clan y sube su nivel grupal en:\nhttps://anidimension.online/clan\n\nPr\u00F3ximamente integrado aqu\u00ED.");
+				break;
+			}
+			case BUTTON_NAV_TUTORIALES: {
+				mainGame->PopupMessage(L"Tutoriales y Reglas", L"Consulta las gu\u00EDas Master Rule 2020 y modos de juego en:\nhttps://anidimension.online/tutoriales");
+				break;
+			}
+			case BUTTON_NAV_SALIR: {
+				mainGame->LogoutToLogin();
 				break;
 			}
 			case BUTTON_MAILBOX_OPEN: {
