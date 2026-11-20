@@ -1218,20 +1218,14 @@ void DuelClient::HandleSTOCPacketLanAsync(const std::vector<uint8_t>& data) {
 		mainGame->device->setEventReceiver(&mainGame->dField);
 		mainGame->SetPhaseButtons();
 		mainGame->SetMessageWindow();
-		mainGame->dInfo.selfnames.clear();
-		mainGame->dInfo.opponames.clear();
-		int i;
-		for(i = 0; i < mainGame->dInfo.team1; i++) {
-			const wchar_t* pname = (mainGame->stHostPrepName[i] && wcslen(mainGame->stHostPrepName[i]->getText()) > 0)
-				? mainGame->stHostPrepName[i]->getText()
-				: mainGame->stHostPrepDuelist[i]->getText();
-			mainGame->dInfo.selfnames.push_back(pname);
+		for(int i = 0; i < mainGame->dInfo.team1 && i < (int)mainGame->dInfo.selfnames.size(); i++) {
+			if(mainGame->dInfo.selfnames[i].empty() && mainGame->stHostPrepName[i])
+				mainGame->dInfo.selfnames[i] = mainGame->stHostPrepName[i]->getText();
 		}
-		for(; i < mainGame->dInfo.team1 + mainGame->dInfo.team2; i++) {
-			const wchar_t* pname = (mainGame->stHostPrepName[i] && wcslen(mainGame->stHostPrepName[i]->getText()) > 0)
-				? mainGame->stHostPrepName[i]->getText()
-				: mainGame->stHostPrepDuelist[i]->getText();
-			mainGame->dInfo.opponames.push_back(pname);
+		for(int i = 0; i < mainGame->dInfo.team2 && i < (int)mainGame->dInfo.opponames.size(); i++) {
+			int slotIdx = mainGame->dInfo.team1 + i;
+			if(mainGame->dInfo.opponames[i].empty() && slotIdx < 6 && mainGame->stHostPrepName[slotIdx])
+				mainGame->dInfo.opponames[i] = mainGame->stHostPrepName[slotIdx]->getText();
 		}
 		if(selftype >= mainGame->dInfo.team1 + mainGame->dInfo.team2) {
 			mainGame->dInfo.player_type = 7;
