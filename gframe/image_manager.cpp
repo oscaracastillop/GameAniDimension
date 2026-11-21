@@ -658,6 +658,8 @@ ImageManager::load_return ImageManager::LoadCardTexture(uint32_t code, imgType t
 					ret.path = file;
 					ret.texture = img;
 					return ret;
+				} else if(path != EPRO_TEXT("archives") && path.find(EPRO_TEXT("./pics")) != epro::path_string::npos) {
+					Utils::FileDelete(file);
 				}
 			}
 		}

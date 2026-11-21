@@ -232,6 +232,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					int pos = mainGame->storeAvaPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeAvaFiltered.size())
 						mainGame->RequestBuyAvatarIdx(mainGame->storeAvaFiltered[pos], true);
+				} else if(id >= BUTTON_STORE_AVA_PREVIEW_0 && id <= BUTTON_STORE_AVA_PREVIEW_MAX) {
+					mainGame->OpenAvatarPreview(id - BUTTON_STORE_AVA_PREVIEW_0);
 				} else if(id >= BUTTON_STORE_BST_SS_0 && id <= BUTTON_STORE_BST_SS_MAX) {
 					int slot = id - BUTTON_STORE_BST_SS_0;
 					int pos = mainGame->storeBstPage * 8 + slot;
@@ -516,6 +518,14 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_PACK_POOL_CLOSE: {
 				if(mainGame->wPackPoolOverlay) mainGame->wPackPoolOverlay->setVisible(false);
+				break;
+			}
+			case BUTTON_AVA_PREVIEW_CLOSE: {
+				if(mainGame->wAvatarPreviewOverlay) mainGame->wAvatarPreviewOverlay->setVisible(false);
+				break;
+			}
+			case BUTTON_PACK_REVEAL_CLOSE: {
+				if(mainGame->wPackRevealOverlay) mainGame->wPackRevealOverlay->setVisible(false);
 				break;
 			}
 			case BUTTON_PACK_POOL_PREV: {

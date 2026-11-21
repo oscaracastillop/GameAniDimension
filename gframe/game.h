@@ -192,6 +192,8 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* stLobbyStarShips{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyCristales{ nullptr };
 	irr::gui::IGUIImage* imgLobbyVip{ nullptr };
+	irr::gui::IGUIImage* imgLobbyMedal{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyMedalTitle{ nullptr };
 	irr::gui::IGUIStaticText* wFeatureCards[4]{ nullptr };
 	irr::gui::IGUIStaticText* stFeatureTitles[4]{ nullptr };
 	irr::gui::IGUIStaticText* stFeatureDescs[4]{ nullptr };
@@ -1023,6 +1025,8 @@ public:
 	int lobbyTotalNpcs{ 0 };
 	std::string lobbyPlayerAvatarFile{ "AVA-001.png" };
 	std::string lobbyPlayerVipName{};
+	std::string lobbyPlayerMedalTitle{};
+	std::string lobbyPlayerMedalFile{};
 	int lobbyPlayerLevel{ 1 };
 	double lobbyPlayerExpPct{ 0.0 };
 	long long lobbyPlayerExpInLevel{ 0 };
@@ -1242,11 +1246,26 @@ public:
 	irr::gui::IGUIStaticText* stAvaCardStats[10]{ nullptr };
 	irr::gui::IGUIButton* btnAvaCardBuySS[10]{ nullptr };
 	irr::gui::IGUIButton* btnAvaCardBuyCD[10]{ nullptr };
+	irr::gui::IGUIButton* btnAvaCardPreview[10]{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvaPrev{ nullptr };
 	irr::gui::IGUIButton* btnStoreAvaNext{ nullptr };
 	irr::gui::IGUIStaticText* stStoreAvaPage{ nullptr };
+	irr::gui::IGUIStaticText* wAvatarPreviewOverlay{ nullptr };
+	irr::gui::IGUIImage* imgAvatarPreview{ nullptr };
+	irr::gui::IGUIStaticText* stAvatarPreviewName{ nullptr };
+	irr::gui::IGUIStaticText* stAvatarPreviewStats{ nullptr };
+	irr::gui::IGUIButton* btnAvatarPreviewClose{ nullptr };
+	void OpenAvatarPreview(int slotIdx);
 	int storeAvaPage{ 0 };
 	std::vector<int> storeAvaFiltered;
+
+	// Pack Reveal Overlay (3 pulled cards)
+	irr::gui::IGUIStaticText* wPackRevealOverlay{ nullptr };
+	irr::gui::IGUIStaticText* stPackRevealTitle{ nullptr };
+	irr::gui::IGUIImage* imgPackRevealArts[3]{ nullptr };
+	irr::gui::IGUIStaticText* stPackRevealNames[3]{ nullptr };
+	irr::gui::IGUIButton* btnPackRevealAccept{ nullptr };
+	uint32_t packRevealPendingArt[3]{};
 
 	// 3. Store Boosters (4x2 card grid + filter tabs + pagination)
 	irr::gui::IGUIStaticText* wStoreBoosters{ nullptr };

@@ -166,7 +166,10 @@ void ImageDownloader::DownloadPic() {
 			SetPayloadAndUrl(finalUrl, fp);
 			res = curl_easy_perform(curl);
 			fclose(fp);
-			if(res == CURLE_OK) {
+			long httpCode = 0;
+			if(res == CURLE_OK)
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
+			if(res == CURLE_OK && httpCode >= 200 && httpCode < 300) {
 				const auto ext = GetExtension(payload.header);
 				dest_folder.append(ext.data(), ext.size());
 				if(type == imgType::FIELD)
@@ -179,6 +182,8 @@ void ImageDownloader::DownloadPic() {
 					Utils::FileDelete(name);
 				break;
 			}
+			if(res == CURLE_OK && (httpCode < 200 || httpCode >= 300))
+				res = CURLE_HTTP_RETURNED_ERROR;
 			if(gGameConfig->logDownloadErrors) {
 				ygo::ErrorLog("Failed downloading pic for {}", code);
 				ygo::ErrorLog("Curl error: ({}) {} ({})", static_cast<std::underlying_type_t<CURLcode>>(res), curl_easy_strerror(res), curl_error_buffer);
