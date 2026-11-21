@@ -182,11 +182,7 @@ void Game::Initialize() {
 		ltFont.size = Scale(22);
 		loginTitleFont = irr::gui::CGUITTFont::createTTFont(env, ltFont, fallbackFonts);
 		auto luFont = textfont;
-#if EDOPRO_ANDROID
-		luFont.size = Scale(18);
-#else
 		luFont.size = Scale(16);
-#endif
 		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -292,7 +288,6 @@ void Game::Initialize() {
 	stServerStatusLine = env->addStaticText(L"\u25CF EN L\u00CDNEA   \u2022   ... ms   \u2022   ... conectados", irr::core::recti(0, 0, 380, 22), false, false, wMainMenu);
 	stServerStatusLine->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	stServerStatusLine->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
-	if(loginUiFont) stServerStatusLine->setOverrideFont(loginUiFont);
 
 	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 86), false, false, wMainMenu, -1, true);
 	wLobbyBonusCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
@@ -309,12 +304,10 @@ void Game::Initialize() {
 		for(int bi = 0; bi < 3; ++bi) {
 			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 120, 20), false, false, wLobbyBonusCard);
 			stLobbyBonusVals[bi]->setOverrideColor(bColors[bi]);
-			if(loginUiFont) stLobbyBonusVals[bi]->setOverrideFont(loginUiFont);
 		}
 	}
 	stLobbyClanMedals = env->addStaticText(L"Clan: Sin Clan   \u2022   Medallas: 0 / 81", irr::core::recti(0, 0, 360, 20), false, false, wLobbyBonusCard);
 	stLobbyClanMedals->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stLobbyClanMedals->setOverrideFont(loginUiFont);
 
 	wLobbyTop3Card = env->addStaticText(L"", irr::core::recti(0, 0, 380, 102), false, false, wMainMenu, -1, true);
 	wLobbyTop3Card->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
@@ -330,7 +323,6 @@ void Game::Initialize() {
 		for(int ti = 0; ti < 3; ++ti) {
 			stTop3Line[ti] = env->addStaticText(L"", irr::core::recti(0, 0, 350, 20), false, false, wLobbyTop3Card);
 			stTop3Line[ti]->setOverrideColor(rankColors[ti]);
-			if(loginUiFont) stTop3Line[ti]->setOverrideFont(loginUiFont);
 		}
 	}
 
@@ -340,14 +332,11 @@ void Game::Initialize() {
 	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	if(loginUiFont) stLobbyEventHeader->setOverrideFont(loginUiFont);
 
-	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, true, wLobbyEventCard);
-	stLobbyPuzzleEvent->setWordWrap(true);
+	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
 	stLobbyPuzzleEvent->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginUiFont) stLobbyPuzzleEvent->setOverrideFont(loginUiFont);
 
 	stLobbyMailboxStatus = env->addStaticText(L"Buz\u00F3n: 0 pendientes", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
 	stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stLobbyMailboxStatus->setOverrideFont(loginUiFont);
 
 	// 3 Custom Dark-Glass Neon Action Buttons (Tienda, Eventos, Deck — no purple skin!)
 	btnLobbyStore = env->addButton(irr::core::recti(0, 0, 130, 36), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
@@ -395,15 +384,12 @@ void Game::Initialize() {
 
 	stLobbyExpText = env->addStaticText(L"EXP: 0 / 100 (0%)", irr::core::recti(0, 0, 240, 18), false, false, wMainMenu);
 	stLobbyExpText->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stLobbyExpText->setOverrideFont(loginUiFont);
 
 	stLobbyPvpStats = env->addStaticText(L"PvP: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
 	stLobbyPvpStats->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
-	if(loginUiFont) stLobbyPvpStats->setOverrideFont(loginUiFont);
 
 	stLobbyNpcStats = env->addStaticText(L"NPC: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
 	stLobbyNpcStats->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-	if(loginUiFont) stLobbyNpcStats->setOverrideFont(loginUiFont);
 
 	stLobbyStarShips = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
 	stLobbyStarShips->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
@@ -424,7 +410,6 @@ void Game::Initialize() {
 	imgLobbyMedal->setVisible(false);
 	stLobbyMedalTitle = env->addStaticText(L"", irr::core::recti(0, 0, 180, 22), false, true, wMainMenu);
 	stLobbyMedalTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stLobbyMedalTitle->setOverrideFont(loginUiFont);
 	stLobbyMedalTitle->setVisible(false);
 
 	// Bottom 4 Feature Cards (matching web home bottom section)
@@ -485,19 +470,19 @@ void Game::Initialize() {
 	btnDeckEdit->setVisible(false);
 
 	// Dedicated Top Navigation Bar (flat web-style links + logo_ani.png)
-	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 58), false, false, 0, -1, true);
+	wTopNavBar = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 48), false, false, 0, -1, true);
 	wTopNavBar->setBackgroundColor(irr::video::SColor(245, 8, 12, 24));
 	wTopNavBar->setVisible(false);
-	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 56, 1024, 58), false, false, wTopNavBar, -1, true);
+	pnlTopNavBorder = env->addStaticText(L"", irr::core::recti(0, 46, 1024, 48), false, false, wTopNavBar, -1, true);
 	pnlTopNavBorder->setBackgroundColor(irr::video::SColor(180, 30, 58, 108));
-	imgTopNavLogo = env->addImage(irr::core::recti(12, 10, 48, 46), wTopNavBar, -1, 0, true);
+	imgTopNavLogo = env->addImage(irr::core::recti(14, 9, 44, 39), wTopNavBar, -1, 0, true);
 	imgTopNavLogo->setScaleImage(true);
 	if(auto navLogoTex = driver->getTexture("textures/logo_ani.png"))
 		imgTopNavLogo->setImage(navLogoTex);
-	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(54, 0, 230, 56), false, false, wTopNavBar);
+	stTopNavBrand = env->addStaticText(L"ANI DIMENSION", irr::core::recti(50, 0, 194, 48), false, false, wTopNavBar);
 	stTopNavBrand->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	stTopNavBrand->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
-	if(loginTitleFont) stTopNavBrand->setOverrideFont(loginTitleFont);
+	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
 	{
 		const wchar_t* navLabels[7] = {
 			L"Lobby", L"Perfil", L"Ranked", L"Aventura", L"Tutoriales", L"Replays", L"Salir"
@@ -507,21 +492,13 @@ void Game::Initialize() {
 			BUTTON_NAV_AVENTURA, BUTTON_NAV_TUTORIALES, BUTTON_NAV_REPLAYS, BUTTON_NAV_SALIR
 		};
 		for(int ni = 0; ni < 7; ++ni) {
-			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 104, 38), wTopNavBar, navIds[ni], navLabels[ni]);
+			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 96, 30), wTopNavBar, navIds[ni], navLabels[ni]);
 			btnNavItems[ni]->setImage(tFlatBtnTrans);
 			btnNavItems[ni]->setPressedImage(tFlatBtnTrans);
 			btnNavItems[ni]->setScaleImage(true);
 			btnNavItems[ni]->setUseAlphaChannel(true);
 			btnNavItems[ni]->setDrawBorder(false);
-			if(loginUiFont) btnNavItems[ni]->setOverrideFont(loginUiFont);
 		}
-		btnNavReloadUi = env->addButton(irr::core::recti(0, 0, 52, 34), wTopNavBar, BUTTON_RELOAD_UI_LAYOUT, L"UI");
-		btnNavReloadUi->setImage(tFlatBtnCyan);
-		btnNavReloadUi->setPressedImage(tFlatBtnCyan);
-		btnNavReloadUi->setScaleImage(true);
-		btnNavReloadUi->setDrawBorder(false);
-		btnNavReloadUi->setVisible(false);
-		if(loginUiFont) btnNavReloadUi->setOverrideFont(loginUiFont);
 	}
 	// Dedicated full-screen Login interface
 	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
@@ -672,9 +649,7 @@ void Game::Initialize() {
 	stMessage = irr::gui::CGUICustomText::addCustomText(L"", false, env, wMessage, -1, Scale(10, 20, 350, 100));
 	stMessage->setWordWrap(true);
 	stMessage->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
-	if(loginUiFont) stMessage->setOverrideFont(loginUiFont);
 	btnMsgOK = env->addButton(Scale(130, 105, 220, 130), wMessage, BUTTON_MSG_OK, gDataManager->GetSysString(1211).data());
-	if(loginUiFont) btnMsgOK->setOverrideFont(loginUiFont);
 	defaultStrings.emplace_back(btnMsgOK, 1211);
 	//auto fade message (310)
 	wACMessage = env->addWindow(Scale(490, 240, 840, 300), false, L"");
@@ -2955,10 +2930,10 @@ void Game::ResizeMainMenuScreen() {
 		imgMainMenuBg->setVisible(false);
 	}
 
-	const int navH = Scale(uiLayout.navH);
+	const int navH = Scale(48);
 	const int padX = std::max(Scale(24), (int)(W * 0.038f));
 	const int bottomPad = std::max(Scale(18), (int)(H * 0.032f));
-	const int topY = navH + std::max(Scale(18), (int)(H * 0.03f));
+	const int topY = navH + std::max(Scale(24), (int)(H * 0.045f));
 
 	// Hide bottom 4 feature cards so Lobby uses full vertical space cleanly
 	const int featY = H - bottomPad;
@@ -2968,8 +2943,8 @@ void Game::ResizeMainMenuScreen() {
 
 	// Middle Left (Free-floating Welcome + Big Crisp Avatar + User Stats + Big VIP) + Right (Servidor Central)
 	const int midAvailH = std::max(Scale(220), featY - topY - Scale(18));
-	const int colGap = std::max(Scale(20), (int)(W * 0.030f));
-	const int rightW = std::max(Scale(380), std::min(Scale(540), (W * uiLayout.lobbyRightPct) / 100));
+	const int colGap = std::max(Scale(24), (int)(W * 0.035f));
+	const int rightW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.38f)));
 	const int leftW = std::max(Scale(340), W - 2 * padX - rightW - colGap);
 
 	// Right: Servidor Central card (2x3 grid + online badge)
@@ -3023,32 +2998,27 @@ void Game::ResizeMainMenuScreen() {
 		iy += Scale(11);
 	}
 	if(stLobbyExpText) {
-		stLobbyExpText->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
-		iy += Scale(24);
+		stLobbyExpText->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(18)));
+		iy += Scale(22);
 	}
 	if(stLobbyPvpStats) {
-		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
-		iy += Scale(23);
+		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(21);
 	}
 	if(stLobbyNpcStats) {
-		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
-		iy += Scale(25);
+		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(23);
 	}
 	if(stLobbyStarShips) {
-		stLobbyStarShips->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
-		iy += Scale(24);
+		stLobbyStarShips->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(23);
 	}
 	if(stLobbyCristales) {
-		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
-		iy += Scale(24);
-	}
-	if(stLobbyMedalTitle) {
-		stLobbyMedalTitle->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
+		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
 		iy += Scale(28);
 	}
-	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
 	if(imgLobbyVip) {
-		int vipAvailH = std::max(Scale(72), contentBottomY - iy);
+		int vipAvailH = std::max(Scale(72), contentBottomY - iy - Scale(24));
 		int vipH = vipAvailH;
 		int vipW = (int)(vipH * 0.747f);
 		if(imgLobbyVip->getImage()) {
@@ -3056,59 +3026,66 @@ void Game::ResizeMainMenuScreen() {
 			if(vsz.Width > 0 && vsz.Height > 0)
 				vipW = (int)((double)vipH * vsz.Width / vsz.Height);
 		}
-		if(vipW > infoW) {
-			if(vipW > 0) vipH = (int)((double)vipH * infoW / vipW);
-			vipW = infoW;
+		int maxVipW = (infoW * 52) / 100;
+		if(vipW > maxVipW) {
+			if(vipW > 0) vipH = (int)((double)vipH * maxVipW / vipW);
+			vipW = maxVipW;
 		}
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
+	if(imgLobbyMedal && stLobbyMedalTitle) {
+		int medX = infoX + (infoW * 54) / 100;
+		int medAvailW = std::max(Scale(72), (infoX + infoW) - medX);
+		int medSz = std::min(medAvailW, std::max(Scale(64), contentBottomY - iy - Scale(30)));
+		imgLobbyMedal->setRelativePosition(irr::core::recti(medX, iy, medX + medSz, iy + medSz));
+		stLobbyMedalTitle->setRelativePosition(irr::core::recti(medX, iy + medSz + Scale(4), infoX + infoW, iy + medSz + Scale(28)));
+	}
 	// Right: Top-Right Status + 3 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
 	if(stServerStatusLine)
-		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(26)));
+		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(24)));
 
-	const int blkPad = Scale(14);
-	const int blkGap = Scale(12);
-	const int btnH = Scale(uiLayout.lobbyBtnH);
+	const int blkPad = Scale(12);
+	const int blkGap = Scale(10);
+	const int btnH = Scale(36);
 	const int btnY = contentBottomY - btnH;
 	int ry = contentY;
 
-	const int bonusH = Scale(uiLayout.lobbyBonusH);
+	const int bonusH = Scale(80);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
-			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
+			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
 		const int colW = (rightW - 2 * blkPad) / 3;
 		for(int bi = 0; bi < 3; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(34), blkPad + (bi + 1) * colW - Scale(4), Scale(34) + Scale(uiLayout.lobbyLineH)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(30), blkPad + (bi + 1) * colW - Scale(4), Scale(50)));
 		}
 		if(stLobbyClanMedals)
-			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(62), rightW - blkPad, bonusH - Scale(6)));
+			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(54), rightW - blkPad, bonusH - Scale(6)));
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(uiLayout.lobbyTop3H);
+	const int top3H = Scale(98);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
-			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
-		const int lh = Scale(uiLayout.lobbyLineH);
+			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + ti * lh, rightW - blkPad, Scale(34) + ti * lh + lh));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(30) + ti * Scale(21), rightW - blkPad, Scale(50) + ti * Scale(21)));
 		}
 		ry += top3H + blkGap;
 	}
 
-	const int evH = std::max(Scale(106), btnY - ry - Scale(14));
+	const int evH = Scale(78);
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
 		if(stLobbyEventHeader)
-			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
+			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
 		if(stLobbyPuzzleEvent)
-			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(34), rightW - blkPad, evH - Scale(34)));
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(30), rightW - blkPad, Scale(50)));
 		if(stLobbyMailboxStatus)
-			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, evH - Scale(30), rightW - blkPad, evH - Scale(6)));
+			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, Scale(52), rightW - blkPad, evH - Scale(6)));
 	}
 
 	// 3 Custom Neon Buttons (Tienda, Eventos, Deck) spanning right-center above bottom cards
@@ -3128,24 +3105,23 @@ void Game::ResizeMainMenuScreen() {
 void Game::ResizeTopNavBar() {
 	if(!wTopNavBar) return;
 	const int W = (int)window_size.Width;
-	const int navH = Scale(uiLayout.navH);
+	const int navH = Scale(48);
 	wTopNavBar->setRelativePosition(irr::core::recti(0, 0, W, navH));
 	if(pnlTopNavBorder)
 		pnlTopNavBorder->setRelativePosition(irr::core::recti(0, navH - 2, W, navH));
-	const int logoSz = std::max(Scale(26), navH - Scale(22));
+	const int logoSz = Scale(30);
 	if(imgTopNavLogo)
 		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(14), (navH - logoSz) / 2, Scale(14) + logoSz, (navH + logoSz) / 2));
-	const int brandW = Scale(uiLayout.navBrandW);
+	const int brandW = Scale(144);
 	if(stTopNavBrand)
-		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(56), 0, Scale(56) + brandW, navH));
+		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(50), 0, Scale(50) + brandW, navH));
 
-	const int navStartX = Scale(56) + brandW + Scale(16);
-	const int reloadW = isPlayerAdmin ? Scale(54) : 0;
-	const int navEndX = W - Scale(16) - (isPlayerAdmin ? reloadW + Scale(8) : 0);
+	const int navStartX = Scale(50) + brandW + Scale(16);
+	const int navEndX = W - Scale(16);
 	const int availW = std::max(Scale(380), navEndX - navStartX);
-	const int gap = Scale(8);
-	const int btnW = std::max(Scale(58), std::min(Scale(uiLayout.navBtnMaxW), (availW - 6 * gap) / 7));
-	const int btnH = Scale(uiLayout.navBtnH);
+	const int gap = Scale(6);
+	const int btnW = std::max(Scale(52), std::min(Scale(96), (availW - 6 * gap) / 7));
+	const int btnH = Scale(30);
 	const int btnY = (navH - btnH) / 2;
 	int curX = navStartX;
 	for(int i = 0; i < 7; ++i) {
@@ -3154,103 +3130,6 @@ void Game::ResizeTopNavBar() {
 		}
 		curX += btnW + gap;
 	}
-	if(btnNavReloadUi) {
-		btnNavReloadUi->setVisible(isPlayerAdmin);
-		if(isPlayerAdmin)
-			btnNavReloadUi->setRelativePosition(irr::core::recti(W - Scale(14) - reloadW, btnY, W - Scale(14), btnY + btnH));
-	}
-}
-
-void Game::ApplyUiLayoutFonts(irr::gui::IGUIElement* root, irr::gui::IGUIFont* oldUi, irr::gui::IGUIFont* oldTitle) {
-	if(!root) return;
-	for(auto* ch : root->getChildren()) {
-		if(ch->getType() == irr::gui::EGUIET_STATIC_TEXT) {
-			auto* st = (irr::gui::IGUIStaticText*)ch;
-			if(oldTitle && st->getOverrideFont() == oldTitle && loginTitleFont) st->setOverrideFont(loginTitleFont);
-			else if(oldUi && st->getOverrideFont() == oldUi && loginUiFont) st->setOverrideFont(loginUiFont);
-		} else if(ch->getType() == irr::gui::EGUIET_BUTTON) {
-			auto* bt = (irr::gui::IGUIButton*)ch;
-			if(oldTitle && bt->getOverrideFont() == oldTitle && loginTitleFont) bt->setOverrideFont(loginTitleFont);
-			else if(oldUi && bt->getOverrideFont() == oldUi && loginUiFont) bt->setOverrideFont(loginUiFont);
-		} else if(ch->getType() == irr::gui::EGUIET_EDIT_BOX) {
-			auto* eb = (irr::gui::IGUIEditBox*)ch;
-			if(oldUi && eb->getOverrideFont() == oldUi && loginUiFont) eb->setOverrideFont(loginUiFont);
-		}
-		ApplyUiLayoutFonts(ch, oldUi, oldTitle);
-	}
-}
-
-void Game::ReloadUiLayoutFromServer(bool showToast) {
-	auto resp = FetchAdventureApi("/api/ui-layout");
-	if(!resp.is_object()) {
-		if(showToast) PopupMessage(L"No se pudo descargar /api/ui-layout.");
-		return;
-	}
-#if EDOPRO_ANDROID
-	const char* key = "android";
-#else
-	const char* key = "pc";
-#endif
-	if(!resp.contains(key) || !resp[key].is_object()) {
-		if(showToast) PopupMessage(L"Perfil UI no encontrado en /api/ui-layout.");
-		return;
-	}
-	const auto& c = resp[key];
-	int oldUiSz = uiLayout.uiFontSize;
-	int oldTitleSz = uiLayout.titleFontSize;
-	uiLayout.titleFontSize = SafeJsonInt(c, "titleFontSize", uiLayout.titleFontSize);
-	uiLayout.uiFontSize = SafeJsonInt(c, "uiFontSize", uiLayout.uiFontSize);
-	uiLayout.navH = SafeJsonInt(c, "navH", uiLayout.navH);
-	uiLayout.navBtnH = SafeJsonInt(c, "navBtnH", uiLayout.navBtnH);
-	uiLayout.navBtnMaxW = SafeJsonInt(c, "navBtnMaxW", uiLayout.navBtnMaxW);
-	uiLayout.navBrandW = SafeJsonInt(c, "navBrandW", uiLayout.navBrandW);
-	uiLayout.lobbyRightPct = SafeJsonInt(c, "lobbyRightPct", uiLayout.lobbyRightPct);
-	uiLayout.lobbyBonusH = SafeJsonInt(c, "lobbyBonusH", uiLayout.lobbyBonusH);
-	uiLayout.lobbyTop3H = SafeJsonInt(c, "lobbyTop3H", uiLayout.lobbyTop3H);
-	uiLayout.lobbyLineH = SafeJsonInt(c, "lobbyLineH", uiLayout.lobbyLineH);
-	uiLayout.lobbyBtnH = SafeJsonInt(c, "lobbyBtnH", uiLayout.lobbyBtnH);
-	uiLayout.hubIconPct = SafeJsonInt(c, "hubIconPct", uiLayout.hubIconPct);
-	uiLayout.hubGap = SafeJsonInt(c, "hubGap", uiLayout.hubGap);
-	uiLayout.avaIconPct = SafeJsonInt(c, "avaIconPct", uiLayout.avaIconPct);
-	uiLayout.avaCardMinH = SafeJsonInt(c, "avaCardMinH", uiLayout.avaCardMinH);
-	uiLayout.bstIconPct = SafeJsonInt(c, "bstIconPct", uiLayout.bstIconPct);
-	uiLayout.bstCardMinH = SafeJsonInt(c, "bstCardMinH", uiLayout.bstCardMinH);
-	uiLayout.cardArtPct = SafeJsonInt(c, "cardArtPct", uiLayout.cardArtPct);
-	uiLayout.cardMinH = SafeJsonInt(c, "cardMinH", uiLayout.cardMinH);
-	uiLayout.packArtPct = SafeJsonInt(c, "packArtPct", uiLayout.packArtPct);
-	uiLayout.packMinH = SafeJsonInt(c, "packMinH", uiLayout.packMinH);
-	uiLayout.donMaxH = SafeJsonInt(c, "donMaxH", uiLayout.donMaxH);
-	uiLayout.vipMaxH = SafeJsonInt(c, "vipMaxH", uiLayout.vipMaxH);
-	uiLayout.confirmW = SafeJsonInt(c, "confirmW", uiLayout.confirmW);
-	uiLayout.confirmH = SafeJsonInt(c, "confirmH", uiLayout.confirmH);
-
-	if(env && (uiLayout.uiFontSize != oldUiSz || uiLayout.titleFontSize != oldTitleSz)) {
-		auto* prevUi = loginUiFont;
-		auto* prevTitle = loginTitleFont;
-		auto fallbackFonts = gGameConfig->fallbackFonts;
-		for(auto& font : fallbackFonts) font.size = Scale(font.size);
-		if(uiLayout.titleFontSize != oldTitleSz) {
-			auto tf = gGameConfig->textfont;
-			tf.size = Scale(uiLayout.titleFontSize);
-			if(auto* nf = irr::gui::CGUITTFont::createTTFont(env, tf, fallbackFonts)) {
-				if(prevTitle) retiredUiFonts.push_back(prevTitle);
-				loginTitleFont = nf;
-			}
-		}
-		if(uiLayout.uiFontSize != oldUiSz) {
-			auto uf = gGameConfig->textfont;
-			uf.size = Scale(uiLayout.uiFontSize);
-			if(auto* nf = irr::gui::CGUITTFont::createTTFont(env, uf, fallbackFonts)) {
-				if(prevUi) retiredUiFonts.push_back(prevUi);
-				loginUiFont = nf;
-			}
-		}
-		ApplyUiLayoutFonts(env->getRootGUIElement(), prevUi, prevTitle);
-	}
-	ResizeTopNavBar();
-	ResizeMainMenuScreen();
-	ResizeEconomyScreens();
-	if(showToast) PopupMessage(L"UI recargada desde el servidor.");
 }
 
 void Game::ShowTopNavBar(bool show) {
@@ -3488,11 +3367,20 @@ void Game::ProcessPendingLobbyStats() {
 			imgLobbyVip->setVisible(false);
 		}
 	}
-	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
-	if(stLobbyMedalTitle) {
-		stLobbyMedalTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
-		stLobbyMedalTitle->setText(epro::format(L"Medallas: {} / {}", medalsGot, medalsTot).c_str());
-		stLobbyMedalTitle->setVisible(true);
+	if(imgLobbyMedal && stLobbyMedalTitle) {
+		if(!medFile.empty()) {
+			if(auto medTex = LoadMedalTexture(medFile)) {
+				imgLobbyMedal->setImage(medTex);
+				imgLobbyMedal->setVisible(true);
+			} else {
+				imgLobbyMedal->setVisible(false);
+			}
+			stLobbyMedalTitle->setText(BufferIO::DecodeUTF8(medTitle).c_str());
+			stLobbyMedalTitle->setVisible(true);
+		} else {
+			imgLobbyMedal->setVisible(false);
+			stLobbyMedalTitle->setVisible(false);
+		}
 	}
 	if(stServerStatusLine)
 		stServerStatusLine->setText(epro::format(L"\u25CF EN L\u00CDNEA   \u2022   {} ms   \u2022   {} conectados", pingMs, onC).c_str());
@@ -4312,10 +4200,8 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStoreTitle->setOverrideFont(loginTitleFont);
 	stStoreBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
 	stStoreBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stStoreBalance->setOverrideFont(loginUiFont);
 	stStoreBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
 	stStoreBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stStoreBalanceCD->setOverrideFont(loginUiFont);
 	btnStoreBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnStoreBack);
 	{
@@ -4368,7 +4254,6 @@ void Game::PopulateEconomyScreens() {
 			stStoreHubDescs[si] = env->addStaticText(stDescs[si], irr::core::recti(0, 0, 10, 10), false, true, wStoreHubCards[si]);
 			stStoreHubDescs[si]->setWordWrap(true);
 			stStoreHubDescs[si]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-			if(loginUiFont) stStoreHubDescs[si]->setOverrideFont(loginUiFont);
 			btnStoreHubActions[si] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreHubCards[si], stIds[si], stBtns[si]);
 			styleDarkBtn(btnStoreHubActions[si]);
 		}
@@ -4429,16 +4314,12 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStoreAvaTitle->setOverrideFont(loginTitleFont);
 	stStoreAvaBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stStoreAvaBalance->setOverrideFont(loginUiFont);
 	stStoreAvaBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stStoreAvaBalanceCD->setOverrideFont(loginUiFont);
 	stStoreAvaBanner = env->addStaticText(L"Cada avatar llega a tu Buz\u00F3n como personaje \u00FAnico. Toca la imagen para verlo en grande. M\u00E1x: 300% EXP \u2022 300% SS \u2022 100% Luck.", irr::core::recti(0, 0, 10, 10), false, true, wStoreAvatars);
 	stStoreAvaBanner->setWordWrap(true);
 	stStoreAvaBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stStoreAvaBanner->setOverrideFont(loginUiFont);
 	ebStoreAvaSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wStoreAvatars);
-	if(loginUiFont) ebStoreAvaSearch->setOverrideFont(loginUiFont);
 	btnStoreAvaSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_SEARCH, L"Buscar");
 	btnStoreAvaBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStoreAvaSearch);
@@ -4460,7 +4341,6 @@ void Game::PopulateEconomyScreens() {
 		stAvaCardStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAvaCards[i]);
 		stAvaCardStats[i]->setWordWrap(true);
 		stAvaCardStats[i]->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-		if(loginUiFont) stAvaCardStats[i]->setOverrideFont(loginUiFont);
 		btnAvaCardBuySS[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAvaCards[i], BUTTON_STORE_AVA_SS_0 + i, L"Comprar SS");
 		btnAvaCardBuyCD[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAvaCards[i], BUTTON_STORE_AVA_CD_0 + i, L"Comprar CD");
 		styleDarkBtn(btnAvaCardBuySS[i]);
@@ -4479,14 +4359,12 @@ void Game::PopulateEconomyScreens() {
 	stAvatarPreviewStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAvatarPreviewOverlay);
 	stAvatarPreviewStats->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stAvatarPreviewStats->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-	if(loginUiFont) stAvatarPreviewStats->setOverrideFont(loginUiFont);
 	btnAvatarPreviewClose = env->addButton(irr::core::recti(0, 0, 10, 10), wAvatarPreviewOverlay, BUTTON_AVA_PREVIEW_CLOSE, L"Cerrar");
 	styleCyanBtn(btnAvatarPreviewClose);
 	btnStoreAvaPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_PREV, L"Anterior");
 	stStoreAvaPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stStoreAvaPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginUiFont) stStoreAvaPage->setOverrideFont(loginUiFont);
 	btnStoreAvaNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_NEXT, L"Siguiente");
 	styleDarkBtn(btnStoreAvaPrev);
 	styleDarkBtn(btnStoreAvaNext);
@@ -4498,14 +4376,11 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStoreBstTitle->setOverrideFont(loginTitleFont);
 	stStoreBstBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
 	stStoreBstBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stStoreBstBalance->setOverrideFont(loginUiFont);
 	stStoreBstBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
 	stStoreBstBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stStoreBstBalanceCD->setOverrideFont(loginUiFont);
 	stStoreBstBanner = env->addStaticText(L"Llegan a tu Buz\u00F3n y al reclamarlos se suman exclusivamente a tu Avatar Activo. L\u00EDmites: 300% EXP \u2022 300% SS \u2022 100% Luck.", irr::core::recti(0, 0, 10, 10), false, true, wStoreBoosters);
 	stStoreBstBanner->setWordWrap(true);
 	stStoreBstBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stStoreBstBanner->setOverrideFont(loginUiFont);
 	{
 		const wchar_t* fLbls[4] = { L"Todos", L"EXP", L"StarShips", L"Luck" };
 		for(int fi = 0; fi < 4; ++fi) {
@@ -4576,14 +4451,11 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStoreCardsTitle->setOverrideFont(loginTitleFont);
 	stStoreCardsBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stStoreCardsBalance->setOverrideFont(loginUiFont);
 	stStoreCardsBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stStoreCardsBalanceCD->setOverrideFont(loginUiFont);
 	stStoreCardsBanner = env->addStaticText(L"Adquiere cartas individuales (l\u00EDmite 1 copia por usuario). Cada compra se env\u00EDa a tu Buz\u00F3n.", irr::core::recti(0, 0, 10, 10), false, true, wStoreCards);
 	stStoreCardsBanner->setWordWrap(true);
 	stStoreCardsBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stStoreCardsBanner->setOverrideFont(loginUiFont);
 	ebStoreCardSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wStoreCards);
 	btnStoreCardSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_SEARCH, L"Buscar");
 	styleDarkBtn(btnStoreCardSearch);
@@ -4670,7 +4542,6 @@ void Game::PopulateEconomyScreens() {
 	stPackPoolPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wPackPoolOverlay);
 	stPackPoolPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stPackPoolPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginUiFont) stPackPoolPage->setOverrideFont(loginUiFont);
 	btnPackPoolNext = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_NEXT, L"Siguiente");
 	styleDarkBtn(btnPackPoolPrev);
 	styleDarkBtn(btnPackPoolNext);
@@ -4689,7 +4560,6 @@ void Game::PopulateEconomyScreens() {
 		stPackRevealNames[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT);
 		stPackRevealNames[i]->setWordWrap(true);
 		stPackRevealNames[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginUiFont) stPackRevealNames[i]->setOverrideFont(loginUiFont);
 	}
 	btnPackRevealAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wPackRevealOverlay, BUTTON_PACK_REVEAL_CLOSE, L"Aceptar");
 	styleCyanBtn(btnPackRevealAccept);
@@ -4920,11 +4790,10 @@ void Game::PopulateEconomyScreens() {
 	wConfirmPurchase->setVisible(false);
 	stConfirmPurchaseTitle = env->addStaticText(L"CONFIRMAR ACCI\u00D3N", irr::core::recti(20, 14, 480, 44), false, false, wConfirmPurchase);
 	stConfirmPurchaseTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginTitleFont) stConfirmPurchaseTitle->setOverrideFont(loginTitleFont);
+	if(loginUiFont) stConfirmPurchaseTitle->setOverrideFont(loginUiFont);
 	stConfirmPurchaseMsg = env->addStaticText(L"", irr::core::recti(20, 52, 480, 144), false, true, wConfirmPurchase);
 	stConfirmPurchaseMsg->setWordWrap(true);
 	stConfirmPurchaseMsg->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginUiFont) stConfirmPurchaseMsg->setOverrideFont(loginUiFont);
 	btnConfirmYes = env->addButton(irr::core::recti(20, 154, 240, 194), wConfirmPurchase, BUTTON_CONFIRM_YES, L"S\u00ED, Confirmar");
 	btnConfirmNo = env->addButton(irr::core::recti(260, 154, 480, 194), wConfirmPurchase, BUTTON_CONFIRM_NO, L"Cancelar");
 	styleCyanBtn(btnConfirmYes);
@@ -5000,9 +4869,9 @@ void Game::ResizeEconomyScreens() {
 	const irr::s32 W = window_size.Width;
 	const irr::s32 H = window_size.Height;
 	if(W <= 0 || H <= 0) return;
-	const irr::s32 navH = Scale(uiLayout.navH);
+	const irr::s32 navH = Scale(48);
 	const irr::s32 pad = std::max<irr::s32>(Scale(16), W / 45);
-	const irr::s32 topY = navH + Scale(12);
+	const irr::s32 topY = navH + Scale(14);
 	const irr::s32 botY = H - pad;
 	const irr::s32 splitX = (W * 46) / 100;
 	const irr::s32 leftL = pad, leftR = splitX - pad / 2;
@@ -5037,7 +4906,7 @@ void Game::ResizeEconomyScreens() {
 		if(stStoreBalanceCD) stStoreBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(6), W - pad - Scale(175), topY + Scale(32)));
 		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
 		const irr::s32 gridTop = topY + Scale(50);
-		const irr::s32 gap = Scale(uiLayout.hubGap);
+		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 2 * gap) / 3;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (botY - gridTop - gap) / 2);
 		for(int si = 0; si < 6; ++si) {
@@ -5048,7 +4917,7 @@ void Game::ResizeEconomyScreens() {
 			if(wStoreHubCards[si]) {
 				wStoreHubCards[si]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
 				irr::s32 maxIcW = cardW - Scale(24);
-				irr::s32 maxIcH = std::max<irr::s32>(Scale(56), (cardH * uiLayout.hubIconPct) / 100);
+				irr::s32 maxIcH = std::max<irr::s32>(Scale(68), (cardH * 44) / 100);
 				irr::s32 icH = maxIcH;
 				irr::s32 icW = icH;
 				if(imgStoreHubIcons[si] && imgStoreHubIcons[si]->getImage()) {
@@ -5085,7 +4954,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(uiLayout.donMaxH), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(320), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int di = 0; di < 5; ++di) {
 			irr::s32 cx = pad + di * (cardW + gap);
@@ -5119,7 +4988,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.avaCardMinH), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 10; ++i) {
 			int row = i / 5;
 			int col = i % 5;
@@ -5127,7 +4996,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wAvaCards[i]) {
 				wAvaCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(56), (cardH * uiLayout.avaIconPct) / 100);
+				irr::s32 icH = std::max<irr::s32>(Scale(64), (cardH * 46) / 100);
 				fitImage(imgAvaCardIcons[i], cardW / 2, Scale(6), cardW - Scale(20), icH);
 				if(btnAvaCardPreview[i] && imgAvaCardIcons[i])
 					btnAvaCardPreview[i]->setRelativePosition(imgAvaCardIcons[i]->getRelativePosition());
@@ -5180,7 +5049,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.bstCardMinH), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 8; ++i) {
 			int row = i / 4;
 			int col = i % 4;
@@ -5188,7 +5057,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wBstCards[i]) {
 				wBstCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(54), (cardH * uiLayout.bstIconPct) / 100);
+				irr::s32 icH = std::max<irr::s32>(Scale(60), (cardH * 44) / 100);
 				fitImage(imgBstCardIcons[i], cardW / 2, Scale(8), cardW - Scale(24), icH);
 				irr::s32 ty = Scale(10) + icH;
 				if(stBstCardTitles[i]) stBstCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(24)));
@@ -5217,7 +5086,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(uiLayout.vipMaxH), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(330), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int i = 0; i < 4; ++i) {
 			irr::s32 cx = pad + i * (cardW + gap);
@@ -5254,7 +5123,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(8);
 		const irr::s32 cardW = (W - 2 * pad - 6 * gap) / 7;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.cardMinH), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 14; ++i) {
 			int row = i / 7;
 			int col = i % 7;
@@ -5262,7 +5131,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wCardCards[i]) {
 				wCardCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(64), (cardH * uiLayout.cardArtPct) / 100);
+				irr::s32 artH = std::max<irr::s32>(Scale(70), (cardH * 48) / 100);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
 				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
@@ -5304,7 +5173,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 5 * gap) / 6;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.packMinH), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 12; ++i) {
 			int row = i / 6;
 			int col = i % 6;
@@ -5312,7 +5181,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wPackCards[i]) {
 				wPackCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(62), (cardH * uiLayout.packArtPct) / 100);
+				irr::s32 artH = std::max<irr::s32>(Scale(68), (cardH * 46) / 100);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
 				if(imgPackCardArts[i]) imgPackCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
@@ -5526,7 +5395,7 @@ void Game::ResizeEconomyScreens() {
 	}
 
 	if(wConfirmPurchase) {
-		irr::s32 cw = std::min<irr::s32>(Scale(uiLayout.confirmW), W - 2 * pad), ch = Scale(uiLayout.confirmH);
+		irr::s32 cw = std::min<irr::s32>(Scale(500), W - 2 * pad), ch = Scale(210);
 		wConfirmPurchase->setRelativePosition(irr::core::recti((W - cw) / 2, (H - ch) / 2, (W + cw) / 2, (H + ch) / 2));
 		if(stConfirmPurchaseTitle) stConfirmPurchaseTitle->setRelativePosition(irr::core::recti(Scale(18), Scale(12), cw - Scale(18), Scale(42)));
 		if(stConfirmPurchaseMsg) stConfirmPurchaseMsg->setRelativePosition(irr::core::recti(Scale(18), Scale(48), cw - Scale(18), ch - Scale(58)));

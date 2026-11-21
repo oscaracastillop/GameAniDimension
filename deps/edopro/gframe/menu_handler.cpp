@@ -528,10 +528,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->wPackRevealOverlay) mainGame->wPackRevealOverlay->setVisible(false);
 				break;
 			}
-			case BUTTON_RELOAD_UI_LAYOUT: {
-				mainGame->ReloadUiLayoutFromServer(true);
-				break;
-			}
 			case BUTTON_PACK_POOL_PREV: {
 				if(mainGame->packPoolPage > 0) {
 					mainGame->packPoolPage--;
@@ -1651,12 +1647,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			break;
 		}
 		case irr::KEY_F5: {
-			if(!event.KeyInput.PressedDown) {
-				if(mainGame->wRoomListPlaceholder->isVisible())
-					ServerLobby::RefreshRooms();
-				else if(mainGame->isPlayerAdmin)
-					mainGame->ReloadUiLayoutFromServer(true);
-			}
+			if(!event.KeyInput.PressedDown && mainGame->wRoomListPlaceholder->isVisible())
+				ServerLobby::RefreshRooms();
 			break;
 		}
 		default: break;
