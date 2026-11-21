@@ -311,6 +311,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->deckBuilder.Initialize();
 				break;
 			}
+			case BUTTON_QUICK_DUEL:
 			case BUTTON_NAV_DUELOS: {
 				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
 				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
