@@ -187,7 +187,7 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* pnlTopNavBorder{ nullptr };
 	irr::gui::IGUIImage* imgTopNavLogo{ nullptr };
 	irr::gui::IGUIStaticText* stTopNavBrand{ nullptr };
-	irr::gui::IGUIButton* btnNavItems[7]{ nullptr };
+	irr::gui::IGUIButton* btnNavItems[8]{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyWelcomeTitle{ nullptr };
 	irr::gui::IGUIImage* imgLobbyAvatar{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyPlayerName{ nullptr };
