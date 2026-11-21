@@ -289,19 +289,12 @@ void Game::Initialize() {
 	stServerStatusLine->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	stServerStatusLine->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
 
-	auto texPanelHoriz = driver->getTexture("textures/panel_horizontal.png");
-	auto texPanelVert = driver->getTexture("textures/panel_vertical.png");
-	auto texBtn = driver->getTexture("textures/btn.png");
-	auto texBtnDuelo = driver->getTexture("textures/btn_duelo_lobby.png");
+	auto texBtnMenuTop = driver->getTexture("textures/btn_menu_top.png");
 	auto texBaseAvatar = driver->getTexture("textures/base_avatar.png");
 	auto texRegalo = driver->getTexture("textures/regalo.png");
 
-	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 116), false, false, wMainMenu, -1, false);
-	wLobbyBonusCard->setBackgroundColor(irr::video::SColor(0, 0, 0, 0));
-	imgLobbyBonusBg = env->addImage(irr::core::recti(0, 0, 380, 116), wLobbyBonusCard, -1, 0, true);
-	imgLobbyBonusBg->setScaleImage(true);
-	imgLobbyBonusBg->setUseAlphaChannel(true);
-	if(texPanelHoriz) imgLobbyBonusBg->setImage(texPanelHoriz);
+	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 116), false, false, wMainMenu, -1, true);
+	wLobbyBonusCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	stLobbyBonusHeader = env->addStaticText(L"TUS BONOS ACTIVOS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyBonusCard);
 	stLobbyBonusHeader->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
@@ -320,12 +313,8 @@ void Game::Initialize() {
 	}
 	stLobbyClanMedals = nullptr;
 
-	wLobbyTop3Card = env->addStaticText(L"", irr::core::recti(0, 0, 380, 100), false, false, wMainMenu, -1, false);
-	wLobbyTop3Card->setBackgroundColor(irr::video::SColor(0, 0, 0, 0));
-	imgLobbyTop3Bg = env->addImage(irr::core::recti(0, 0, 380, 100), wLobbyTop3Card, -1, 0, true);
-	imgLobbyTop3Bg->setScaleImage(true);
-	imgLobbyTop3Bg->setUseAlphaChannel(true);
-	if(texPanelHoriz) imgLobbyTop3Bg->setImage(texPanelHoriz);
+	wLobbyTop3Card = env->addStaticText(L"", irr::core::recti(0, 0, 380, 100), false, false, wMainMenu, -1, true);
+	wLobbyTop3Card->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	stLobbyTop3Header = env->addStaticText(L"TOP 3 DUELISTAS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyTop3Card);
 	stLobbyTop3Header->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
@@ -335,12 +324,8 @@ void Game::Initialize() {
 		stTop3Line[ti]->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	}
 
-	wLobbyEventCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 74), false, false, wMainMenu, -1, false);
-	wLobbyEventCard->setBackgroundColor(irr::video::SColor(0, 0, 0, 0));
-	imgLobbyEventBg = env->addImage(irr::core::recti(0, 0, 380, 74), wLobbyEventCard, -1, 0, true);
-	imgLobbyEventBg->setScaleImage(true);
-	imgLobbyEventBg->setUseAlphaChannel(true);
-	if(texPanelHoriz) imgLobbyEventBg->setImage(texPanelHoriz);
+	wLobbyEventCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 74), false, false, wMainMenu, -1, true);
+	wLobbyEventCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	stLobbyEventHeader = env->addStaticText(L"EVENTOS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyEventCard);
 	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
@@ -354,12 +339,8 @@ void Game::Initialize() {
 
 	stLobbyMailboxStatus = nullptr;
 
-	wLobbyActivityCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 70), false, false, wMainMenu, -1, false);
-	wLobbyActivityCard->setBackgroundColor(irr::video::SColor(0, 0, 0, 0));
-	imgLobbyActivityBg = env->addImage(irr::core::recti(0, 0, 380, 70), wLobbyActivityCard, -1, 0, true);
-	imgLobbyActivityBg->setScaleImage(true);
-	imgLobbyActivityBg->setUseAlphaChannel(true);
-	if(texPanelHoriz) imgLobbyActivityBg->setImage(texPanelHoriz);
+	wLobbyActivityCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 70), false, false, wMainMenu, -1, true);
+	wLobbyActivityCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	stLobbyActivityHeader = env->addStaticText(L"LOGS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyActivityCard);
 	stLobbyActivityHeader->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
@@ -369,37 +350,34 @@ void Game::Initialize() {
 	stLobbyActivityText->setWordWrap(true);
 	stLobbyActivityText->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	// Action Buttons (Tienda, Eventos, Deck + Duelo Rapido)
+	// Action Buttons (Tienda, Eventos, Deck + Duelo Rapido) using btn_menu_top.png
+	auto applyBtnStyle = [&](irr::gui::IGUIButton* b, const wchar_t* label) {
+		if(!b) return;
+		if(label) b->setText(label);
+		if(texBtnMenuTop) {
+			b->setImage(texBtnMenuTop);
+			b->setPressedImage(texBtnMenuTop);
+		}
+		b->setScaleImage(true);
+		b->setUseAlphaChannel(true);
+		b->setDrawBorder(false);
+		if(loginUiFont) b->setOverrideFont(loginUiFont);
+	};
+
 	btnLobbyStore = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
-	if(texBtn) { btnLobbyStore->setImage(texBtn); btnLobbyStore->setPressedImage(texBtn); }
-	btnLobbyStore->setScaleImage(true);
-	btnLobbyStore->setUseAlphaChannel(true);
-	btnLobbyStore->setDrawBorder(false);
-	if(loginUiFont) btnLobbyStore->setOverrideFont(loginUiFont);
+	applyBtnStyle(btnLobbyStore, L"Tienda");
 
 	btnLobbyEvents = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_EVENTOS, L"Eventos");
-	if(texBtn) { btnLobbyEvents->setImage(texBtn); btnLobbyEvents->setPressedImage(texBtn); }
-	btnLobbyEvents->setScaleImage(true);
-	btnLobbyEvents->setUseAlphaChannel(true);
-	btnLobbyEvents->setDrawBorder(false);
-	if(loginUiFont) btnLobbyEvents->setOverrideFont(loginUiFont);
+	applyBtnStyle(btnLobbyEvents, L"Eventos");
 
 	btnLobbyDeck = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_DECK_EDIT, L"Deck");
-	if(texBtn) { btnLobbyDeck->setImage(texBtn); btnLobbyDeck->setPressedImage(texBtn); }
-	btnLobbyDeck->setScaleImage(true);
-	btnLobbyDeck->setUseAlphaChannel(true);
-	btnLobbyDeck->setDrawBorder(false);
-	if(loginUiFont) btnLobbyDeck->setOverrideFont(loginUiFont);
+	applyBtnStyle(btnLobbyDeck, L"Deck");
 
-	btnLobbyQuickDuel = env->addButton(irr::core::recti(0, 0, 140, 44), wMainMenu, BUTTON_QUICK_DUEL, L"");
-	if(texBtnDuelo) { btnLobbyQuickDuel->setImage(texBtnDuelo); btnLobbyQuickDuel->setPressedImage(texBtnDuelo); }
-	btnLobbyQuickDuel->setScaleImage(true);
-	btnLobbyQuickDuel->setUseAlphaChannel(true);
-	btnLobbyQuickDuel->setDrawBorder(false);
-	if(loginUiFont) btnLobbyQuickDuel->setOverrideFont(loginUiFont);
+	btnLobbyQuickDuel = env->addButton(irr::core::recti(0, 0, 140, 44), wMainMenu, BUTTON_QUICK_DUEL, L"Duelo R\u00E1pido");
+	applyBtnStyle(btnLobbyQuickDuel, L"Duelo R\u00E1pido");
 
 	// Left: Avatar Base Pedestal (Created BEFORE Avatar so Avatar renders ON TOP of it!)
-	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 420, 34), false, false, wMainMenu);
+	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 450, 34), false, false, wMainMenu);
 	stLobbyWelcomeTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stLobbyWelcomeTitle->setOverrideFont(loginTitleFont);
 
@@ -420,48 +398,46 @@ void Game::Initialize() {
 	imgLobbyPendingGift->setVisible(false);
 	if(texRegalo) imgLobbyPendingGift->setImage(texRegalo);
 
-	// Center-Left Player Stats Panel with panel_vertical.png
-	imgLobbyPlayerPanelBg = env->addImage(irr::core::recti(0, 0, 240, 300), wMainMenu, -1, 0, true);
-	imgLobbyPlayerPanelBg->setScaleImage(true);
-	imgLobbyPlayerPanelBg->setUseAlphaChannel(true);
-	if(texPanelVert) imgLobbyPlayerPanelBg->setImage(texPanelVert);
+	// Center-Left Player Stats Panel
+	wLobbyPlayerCard = env->addStaticText(L"", irr::core::recti(0, 0, 240, 300), false, false, wMainMenu, -1, true);
+	wLobbyPlayerCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
-	stLobbyPlayerName = env->addStaticText(L"Duelista", irr::core::recti(0, 0, 240, 34), false, false, wMainMenu);
+	stLobbyPlayerName = env->addStaticText(L"Duelista", irr::core::recti(0, 0, 240, 34), false, false, wLobbyPlayerCard);
 	stLobbyPlayerName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stLobbyPlayerName->setOverrideFont(loginTitleFont);
 
-	stLobbyPlayerLevel = env->addStaticText(L"Nivel 1", irr::core::recti(0, 0, 220, 24), false, false, wMainMenu);
+	stLobbyPlayerLevel = env->addStaticText(L"Nivel 1", irr::core::recti(0, 0, 220, 24), false, false, wLobbyPlayerCard);
 	stLobbyPlayerLevel->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginUiFont) stLobbyPlayerLevel->setOverrideFont(loginUiFont);
 
-	stLobbyExpTrack = env->addStaticText(L"", irr::core::recti(0, 0, 220, 10), false, false, wMainMenu, -1, true);
+	stLobbyExpTrack = env->addStaticText(L"", irr::core::recti(0, 0, 220, 10), false, false, wLobbyPlayerCard, -1, true);
 	stLobbyExpTrack->setBackgroundColor(irr::video::SColor(200, 15, 23, 42));
 
-	stLobbyExpText = env->addStaticText(L"EXP: 0 / 100 (0%)", irr::core::recti(0, 0, 240, 18), false, false, wMainMenu);
+	stLobbyExpText = env->addStaticText(L"EXP: 0 / 100 (0%)", irr::core::recti(0, 0, 240, 18), false, false, wLobbyPlayerCard);
 	stLobbyExpText->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	stLobbyPvpStats = env->addStaticText(L"PvP: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyPvpStats = env->addStaticText(L"PvP: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wLobbyPlayerCard);
 	stLobbyPvpStats->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	stLobbyNpcStats = env->addStaticText(L"NPC: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyNpcStats = env->addStaticText(L"NPC: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wLobbyPlayerCard);
 	stLobbyNpcStats->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	stLobbyStarShips = env->addStaticText(L"0 SS", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyStarShips = env->addStaticText(L"0 SS", irr::core::recti(0, 0, 240, 22), false, false, wLobbyPlayerCard);
 	stLobbyStarShips->setVisible(false);
 
-	stLobbyCristales = env->addStaticText(L"0 CD", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyCristales = env->addStaticText(L"0 CD", irr::core::recti(0, 0, 240, 22), false, false, wLobbyPlayerCard);
 	stLobbyCristales->setVisible(false);
 
-	stLobbyMedallasCount = env->addStaticText(L"Medallas: 0 / 81", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyMedallasCount = env->addStaticText(L"Medallas: 0 / 81", irr::core::recti(0, 0, 240, 20), false, false, wLobbyPlayerCard);
 	stLobbyMedallasCount->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	stLobbyClanName = env->addStaticText(L"Clan: Sin Clan", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyClanName = env->addStaticText(L"Clan: Sin Clan", irr::core::recti(0, 0, 240, 20), false, false, wLobbyPlayerCard);
 	stLobbyClanName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
 	stLobbyAvatarPendingGift = env->addStaticText(L"", irr::core::recti(0, 0, 260, 20), false, false, wMainMenu);
 	stLobbyAvatarPendingGift->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 
-	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 46, 52), wMainMenu, -1, 0, true);
+	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 46, 52), wLobbyPlayerCard, -1, 0, true);
 	imgLobbyVip->setScaleImage(true);
 	imgLobbyVip->setUseAlphaChannel(true);
 	imgLobbyVip->setVisible(false);
@@ -3055,25 +3031,30 @@ void Game::ResizeMainMenuScreen() {
 	const int navH = Scale(48);
 	const int padX = std::max(Scale(16), (int)(W * 0.030f));
 	const int bottomPad = std::max(Scale(12), (int)(H * 0.024f));
-	const int topY = navH + Scale(6);
 
 	// Hide bottom 4 feature cards so Lobby uses full vertical space cleanly
 	for(int fi = 0; fi < 4; ++fi) {
 		if(wFeatureCards[fi]) wFeatureCards[fi]->setVisible(false);
 	}
 
-	// Layout Geometry:
-	// Welcome Title at top left
-	if(stLobbyWelcomeTitle)
-		stLobbyWelcomeTitle->setRelativePosition(irr::core::recti(padX, topY, padX + Scale(400), topY + Scale(24)));
+	// Welcome Title at top left - fully visible, not cut off!
+	const int welcomeY = navH + Scale(8);
+	if(stLobbyWelcomeTitle) {
+		stLobbyWelcomeTitle->setRelativePosition(irr::core::recti(padX, welcomeY, padX + Scale(450), welcomeY + Scale(28)));
+		stLobbyWelcomeTitle->setText(L"BIENVENIDO AL MULTIVERSO");
+		stLobbyWelcomeTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+		if(loginTitleFont) stLobbyWelcomeTitle->setOverrideFont(loginTitleFont);
+		stLobbyWelcomeTitle->setVisible(true);
+		wMainMenu->bringToFront(stLobbyWelcomeTitle);
+	}
 
 	// Bottom action bar heights
 	const int duelBtnH = Scale(46);
 	const int normBtnH = Scale(38);
 	const int btnRowY = H - bottomPad - duelBtnH;
 
-	// Content area vertical boundaries
-	const int contentY = topY + Scale(22);
+	// Content area vertical boundaries (starts cleanly under welcome title)
+	const int contentY = welcomeY + Scale(32);
 	const int contentBottomY = btnRowY - Scale(8);
 	const int contentH = std::max(Scale(180), contentBottomY - contentY);
 
@@ -3083,12 +3064,12 @@ void Game::ResizeMainMenuScreen() {
 
 	// Server status line above right column
 	if(stServerStatusLine)
-		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, topY, rightX + rightW, topY + Scale(20)));
+		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(20)));
 
 	const int leftTotalW = rightX - padX - Scale(16);
 
 	// 1. Leftmost: Avatar + Base Pedestal
-	int avW = (int)(contentH * 0.70f);
+	int avW = (int)(contentH * 0.68f);
 	int avH = contentH;
 	if(imgLobbyAvatar && imgLobbyAvatar->getImage()) {
 		auto osz = imgLobbyAvatar->getImage()->getOriginalSize();
@@ -3103,14 +3084,14 @@ void Game::ResizeMainMenuScreen() {
 	const int avX = padX;
 	const int avY = contentY + std::max(0, (contentH - avH) / 2);
 
-	// Avatar Base (Pedestal) - centered under avatar's feet, rendered behind avatar
-	int baseY = avY;
+	// Avatar Base (Pedestal) - placed exactly at the feet of the avatar, avatar on top!
 	int baseH = 0;
 	if(imgLobbyAvatarBase) {
-		const int baseW = (int)(avW * 1.30f);
+		const int baseW = (int)(avW * 1.35f);
 		baseH = (int)(baseW * 360.0f / 693.0f);
 		const int baseX = avX + (avW - baseW) / 2;
-		baseY = avY + avH - (int)(baseH * 0.68f);
+		// Avatar feet are at avY + avH. Pedestal upper surface is at ~32% from the top of the image.
+		const int baseY = avY + avH - (int)(baseH * 0.32f);
 		imgLobbyAvatarBase->setRelativePosition(irr::core::recti(baseX, baseY, baseX + baseW, baseY + baseH));
 	}
 	if(imgLobbyAvatar) {
@@ -3120,72 +3101,72 @@ void Game::ResizeMainMenuScreen() {
 
 	// Gift indicator below avatar pedestal
 	const int giftSz = Scale(24);
-	const int giftY = std::min(H - Scale(28), baseY + (baseH > 0 ? (int)(baseH * 0.72f) : avH + Scale(6)));
+	const int giftY = std::min(H - Scale(28), avY + avH + (int)(baseH * 0.60f));
 	if(imgLobbyPendingGift)
 		imgLobbyPendingGift->setRelativePosition(irr::core::recti(avX, giftY, avX + giftSz, giftY + giftSz));
 	if(stLobbyAvatarPendingGift)
 		stLobbyAvatarPendingGift->setRelativePosition(irr::core::recti(avX + giftSz + Scale(6), giftY, avX + avW + Scale(120), giftY + giftSz));
 
-	// 2. Center Column: Player Stats Panel (panel_vertical.png)
+	// 2. Center Column: Player Stats Card (wLobbyPlayerCard)
 	const int infoX = avX + avW + Scale(16);
 	const int infoW = leftTotalW - (infoX - padX);
 	const int panelY = contentY;
 	const int panelH = contentH;
 
-	if(imgLobbyPlayerPanelBg) {
-		imgLobbyPlayerPanelBg->setRelativePosition(irr::core::recti(infoX, panelY, infoX + infoW, panelY + panelH));
-	}
+	if(wLobbyPlayerCard) {
+		wLobbyPlayerCard->setRelativePosition(irr::core::recti(infoX, panelY, infoX + infoW, panelY + panelH));
+		wLobbyPlayerCard->setVisible(true);
 
-	const int ipPadX = Scale(14);
-	int iy = panelY + Scale(12);
+		const int ipPadX = Scale(14);
+		int iy = Scale(12);
 
-	if(stLobbyPlayerName) {
-		stLobbyPlayerName->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(28)));
-		iy += Scale(30);
-	}
-	if(stLobbyPlayerLevel) {
-		stLobbyPlayerLevel->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(20)));
-		iy += Scale(22);
-	}
-	if(stLobbyExpTrack) {
-		stLobbyExpTrack->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(8)));
-		iy += Scale(11);
-	}
-	if(stLobbyExpText) {
-		stLobbyExpText->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(18)));
-		iy += Scale(22);
-	}
-	if(stLobbyPvpStats) {
-		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(18)));
-		iy += Scale(20);
-	}
-	if(stLobbyNpcStats) {
-		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(18)));
-		iy += Scale(22);
-	}
-	if(stLobbyMedallasCount) {
-		stLobbyMedallasCount->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(18)));
-		iy += Scale(20);
-	}
-	if(stLobbyClanName) {
-		stLobbyClanName->setRelativePosition(irr::core::recti(infoX + ipPadX, iy, infoX + infoW - ipPadX, iy + Scale(18)));
-		iy += Scale(22);
-	}
-	if(stLobbyStarShips) stLobbyStarShips->setVisible(false);
-	if(stLobbyCristales) stLobbyCristales->setVisible(false);
+		if(stLobbyPlayerName) {
+			stLobbyPlayerName->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(28)));
+			iy += Scale(30);
+		}
+		if(stLobbyPlayerLevel) {
+			stLobbyPlayerLevel->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(20)));
+			iy += Scale(22);
+		}
+		if(stLobbyExpTrack) {
+			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(8)));
+			iy += Scale(11);
+		}
+		if(stLobbyExpText) {
+			stLobbyExpText->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(22);
+		}
+		if(stLobbyPvpStats) {
+			stLobbyPvpStats->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(20);
+		}
+		if(stLobbyNpcStats) {
+			stLobbyNpcStats->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(22);
+		}
+		if(stLobbyMedallasCount) {
+			stLobbyMedallasCount->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(20);
+		}
+		if(stLobbyClanName) {
+			stLobbyClanName->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(22);
+		}
+		if(stLobbyStarShips) stLobbyStarShips->setVisible(false);
+		if(stLobbyCristales) stLobbyCristales->setVisible(false);
 
-	if(imgLobbyVip) {
-		int vipW = Scale(75);
-		int vipH = Scale(85);
-		int vipX = infoX + (infoW - vipW) / 2;
-		int vipY = panelY + panelH - vipH - Scale(10);
-		imgLobbyVip->setRelativePosition(irr::core::recti(vipX, vipY, vipX + vipW, vipY + vipH));
-		imgLobbyVip->setVisible(true);
+		if(imgLobbyVip) {
+			int vipW = Scale(75);
+			int vipH = Scale(85);
+			int vipX = (infoW - vipW) / 2;
+			int vipY = panelH - vipH - Scale(10);
+			imgLobbyVip->setRelativePosition(irr::core::recti(vipX, vipY, vipX + vipW, vipY + vipH));
+		}
 	}
 	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
 	if(stLobbyMedalTitle) stLobbyMedalTitle->setVisible(false);
 
-	// 3. Right Column: 4 blocks with panel_horizontal.png
+	// 3. Right Column: 4 blocks with clean translucent dark styling
 	const int blkPad = Scale(12);
 	const int blkGap = Scale(6);
 	int ry = contentY;
@@ -3193,8 +3174,6 @@ void Game::ResizeMainMenuScreen() {
 	const int bonusH = Scale(92);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
-		if(imgLobbyBonusBg)
-			imgLobbyBonusBg->setRelativePosition(irr::core::recti(0, 0, rightW, bonusH));
 		if(stLobbyBonusHeader)
 			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
 		for(int bi = 0; bi < 4; ++bi) {
@@ -3207,8 +3186,6 @@ void Game::ResizeMainMenuScreen() {
 	const int top3H = Scale(78);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
-		if(imgLobbyTop3Bg)
-			imgLobbyTop3Bg->setRelativePosition(irr::core::recti(0, 0, rightW, top3H));
 		if(stLobbyTop3Header)
 			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
 		for(int ti = 0; ti < 3; ++ti) {
@@ -3221,8 +3198,6 @@ void Game::ResizeMainMenuScreen() {
 	const int evH = Scale(58);
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
-		if(imgLobbyEventBg)
-			imgLobbyEventBg->setRelativePosition(irr::core::recti(0, 0, rightW, evH));
 		if(stLobbyEventHeader)
 			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
 		if(stLobbyPuzzleEvent)
@@ -3237,8 +3212,6 @@ void Game::ResizeMainMenuScreen() {
 		int actY = ry;
 		int actH = std::max(Scale(42), contentBottomY - actY);
 		wLobbyActivityCard->setRelativePosition(irr::core::recti(rightX, actY, rightX + rightW, actY + actH));
-		if(imgLobbyActivityBg)
-			imgLobbyActivityBg->setRelativePosition(irr::core::recti(0, 0, rightW, actH));
 		if(stLobbyActivityHeader)
 			stLobbyActivityHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
 		if(stLobbyActivityText)

@@ -177,6 +177,7 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* wLobbyActivityCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityHeader{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityText{ nullptr };
+	irr::gui::IGUIStaticText* wLobbyPlayerCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyAvatarPendingGift{ nullptr };
 	irr::gui::IGUIImage* imgLobbyPendingGift{ nullptr };
 	irr::gui::IGUIImage* imgLobbyAvatarBase{ nullptr };
