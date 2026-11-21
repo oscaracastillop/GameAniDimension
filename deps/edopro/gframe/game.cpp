@@ -350,14 +350,12 @@ void Game::Initialize() {
 	stLobbyActivityText->setWordWrap(true);
 	stLobbyActivityText->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 
-	// Action Buttons (Tienda, Eventos, Deck + Duelo Rapido) using btn_menu_top.png
+	// Action Buttons (Tienda, Eventos, Deck + Duelo Rapido) flat dark square with neon outline
 	auto applyBtnStyle = [&](irr::gui::IGUIButton* b, const wchar_t* label) {
 		if(!b) return;
 		if(label) b->setText(label);
-		if(texBtnMenuTop) {
-			b->setImage(texBtnMenuTop);
-			b->setPressedImage(texBtnMenuTop);
-		}
+		b->setImage(tFlatBtnDark);
+		b->setPressedImage(tFlatBtnDark);
 		b->setScaleImage(true);
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
@@ -530,40 +528,26 @@ void Game::Initialize() {
 			BUTTON_NAV_AVENTURA, BUTTON_NAV_TUTORIALES, BUTTON_NAV_REPLAYS,
 			BUTTON_NAV_SALIR
 		};
-		auto topNavBtnTex = driver->getTexture("textures/btn_menu_top.png");
 		for(int ni = 0; ni < 7; ++ni) {
 			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 96, 30), wTopNavBar, navIds[ni], navLabels[ni]);
-			if(topNavBtnTex) {
-				btnNavItems[ni]->setImage(topNavBtnTex);
-				btnNavItems[ni]->setPressedImage(topNavBtnTex);
-			} else {
-				btnNavItems[ni]->setImage(tFlatBtnTrans);
-				btnNavItems[ni]->setPressedImage(tFlatBtnTrans);
-			}
+			btnNavItems[ni]->setImage(tFlatBtnTrans);
+			btnNavItems[ni]->setPressedImage(tFlatBtnTrans);
 			btnNavItems[ni]->setScaleImage(true);
 			btnNavItems[ni]->setUseAlphaChannel(true);
 			btnNavItems[ni]->setDrawBorder(false);
 		}
 		btnNavItems[7] = nullptr;
 
-		imgTopNavSS = env->addImage(irr::core::recti(0, 0, 110, 32), wTopNavBar, -1, 0, true);
-		imgTopNavSS->setScaleImage(true);
-		imgTopNavSS->setUseAlphaChannel(true);
-		if(auto ssTex = driver->getTexture("textures/burbuja_ss.png"))
-			imgTopNavSS->setImage(ssTex);
-		stTopNavSS = env->addStaticText(L"0 SS", irr::core::recti(0, 0, 110, 32), false, false, imgTopNavSS);
+		imgTopNavSS = nullptr;
+		stTopNavSS = env->addStaticText(L"0 SS", irr::core::recti(0, 0, 110, 32), false, false, wTopNavBar);
 		stTopNavSS->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		stTopNavSS->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+		stTopNavSS->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		if(loginUiFont) stTopNavSS->setOverrideFont(loginUiFont);
 
-		imgTopNavCD = env->addImage(irr::core::recti(0, 0, 110, 32), wTopNavBar, -1, 0, true);
-		imgTopNavCD->setScaleImage(true);
-		imgTopNavCD->setUseAlphaChannel(true);
-		if(auto cdTex = driver->getTexture("textures/burbuja_cd.png"))
-			imgTopNavCD->setImage(cdTex);
-		stTopNavCD = env->addStaticText(L"0 CD", irr::core::recti(0, 0, 110, 32), false, false, imgTopNavCD);
+		imgTopNavCD = nullptr;
+		stTopNavCD = env->addStaticText(L"0 CD", irr::core::recti(0, 0, 110, 32), false, false, wTopNavBar);
 		stTopNavCD->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		stTopNavCD->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+		stTopNavCD->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 		if(loginUiFont) stTopNavCD->setOverrideFont(loginUiFont);
 	}
 	// Dedicated full-screen Login interface
@@ -3129,7 +3113,8 @@ void Game::ResizeMainMenuScreen() {
 			iy += Scale(22);
 		}
 		if(stLobbyExpTrack) {
-			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(8)));
+			const int expTrackW = std::min(Scale(160), infoW - 2 * ipPadX);
+			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, ipPadX + expTrackW, iy + Scale(8)));
 			iy += Scale(11);
 		}
 		if(stLobbyExpText) {
@@ -3266,11 +3251,11 @@ void Game::ResizeTopNavBar() {
 	if(imgTopNavSS)
 		imgTopNavSS->setRelativePosition(irr::core::recti(ssX, bubbleY, ssX + bubbleW, bubbleY + bubbleH));
 	if(stTopNavSS)
-		stTopNavSS->setRelativePosition(irr::core::recti(0, 0, bubbleW, bubbleH));
+		stTopNavSS->setRelativePosition(irr::core::recti(ssX, bubbleY, ssX + bubbleW, bubbleY + bubbleH));
 	if(imgTopNavCD)
 		imgTopNavCD->setRelativePosition(irr::core::recti(cdX, bubbleY, cdX + bubbleW, bubbleY + bubbleH));
 	if(stTopNavCD)
-		stTopNavCD->setRelativePosition(irr::core::recti(0, 0, bubbleW, bubbleH));
+		stTopNavCD->setRelativePosition(irr::core::recti(cdX, bubbleY, cdX + bubbleW, bubbleY + bubbleH));
 
 	// Nav buttons distributed between Brand and currency bubbles (7 items)
 	const int navStartX = Scale(48) + brandW + Scale(10);
@@ -8082,6 +8067,17 @@ bool Game::MainLoop() {
 					driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
 			};
 			if(wMainMenu && wMainMenu->isVisible()) {
+				drawNeon(wLobbyPlayerCard, irr::video::SColor(180, 56, 189, 248));
+				drawNeon(wLobbyBonusCard, irr::video::SColor(180, 56, 189, 248));
+				drawNeon(wLobbyTop3Card, irr::video::SColor(180, 192, 132, 252));
+				drawNeon(wLobbyEventCard, irr::video::SColor(180, 251, 191, 36));
+				drawNeon(wLobbyActivityCard, irr::video::SColor(180, 52, 211, 153));
+
+				drawNeon(btnLobbyStore, irr::video::SColor(200, 52, 211, 153));
+				drawNeon(btnLobbyEvents, irr::video::SColor(200, 251, 191, 36));
+				drawNeon(btnLobbyDeck, irr::video::SColor(200, 56, 189, 248));
+				drawNeon(btnLobbyQuickDuel, irr::video::SColor(220, 251, 191, 36));
+
 				if(stLobbyExpTrack) {
 					auto tr = stLobbyExpTrack->getAbsolutePosition();
 					double pct = std::max(0.0, std::min(100.0, lobbyPlayerExpPct));
