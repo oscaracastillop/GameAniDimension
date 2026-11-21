@@ -289,25 +289,30 @@ void Game::Initialize() {
 	stServerStatusLine->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	stServerStatusLine->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
 
-	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 86), false, false, wMainMenu, -1, true);
+	wLobbyBonusCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 110), false, false, wMainMenu, -1, true);
 	wLobbyBonusCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 	stLobbyBonusHeader = env->addStaticText(L"TUS BONOS ACTIVOS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyBonusCard);
 	stLobbyBonusHeader->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	if(loginUiFont) stLobbyBonusHeader->setOverrideFont(loginUiFont);
 	{
-		const irr::video::SColor bColors[3] = {
+		const irr::video::SColor bColors[4] = {
 			irr::video::SColor(255, 147, 197, 253),
+			irr::video::SColor(255, 56, 189, 248),
 			irr::video::SColor(255, 251, 191, 36),
-			irr::video::SColor(255, 52, 211, 153)
+			irr::video::SColor(255, 192, 132, 252)
 		};
-		const wchar_t* bInit[3] = { L"EXP: +0.0%", L"StarShips: +0.0%", L"Luck: +0.0%" };
-		for(int bi = 0; bi < 3; ++bi) {
-			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 120, 20), false, false, wLobbyBonusCard);
+		const wchar_t* bInit[4] = {
+			L"Avatar: EXP +0.0%   SS +0.0%   Luck +0.0%",
+			L"Clan: EXP +0.0%   SS +0.0%   Luck +0.0%",
+			L"Medallas: EXP +0.0%   SS +0.0%   Luck +0.0%",
+			L"Vip: EXP +0.0%   SS +0.0%   Luck +0.0%"
+		};
+		for(int bi = 0; bi < 4; ++bi) {
+			stLobbyBonusVals[bi] = env->addStaticText(bInit[bi], irr::core::recti(0, 0, 360, 20), false, false, wLobbyBonusCard);
 			stLobbyBonusVals[bi]->setOverrideColor(bColors[bi]);
 		}
 	}
-	stLobbyClanMedals = env->addStaticText(L"Clan: Sin Clan   \u2022   Medallas: 0 / 81", irr::core::recti(0, 0, 360, 20), false, false, wLobbyBonusCard);
-	stLobbyClanMedals->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	stLobbyClanMedals = nullptr;
 
 	wLobbyTop3Card = env->addStaticText(L"", irr::core::recti(0, 0, 380, 102), false, false, wMainMenu, -1, true);
 	wLobbyTop3Card->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
@@ -326,17 +331,29 @@ void Game::Initialize() {
 		}
 	}
 
-	wLobbyEventCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 82), false, false, wMainMenu, -1, true);
+	wLobbyEventCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 68), false, false, wMainMenu, -1, true);
 	wLobbyEventCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
-	stLobbyEventHeader = env->addStaticText(L"EVENTO & BUZ\u00D3N", irr::core::recti(0, 0, 340, 20), false, false, wLobbyEventCard);
+	stLobbyEventHeader = env->addStaticText(L"EVENTOS", irr::core::recti(0, 0, 340, 20), false, false, wLobbyEventCard);
 	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	if(loginUiFont) stLobbyEventHeader->setOverrideFont(loginUiFont);
 
 	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
 	stLobbyPuzzleEvent->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 
-	stLobbyMailboxStatus = env->addStaticText(L"Buz\u00F3n: 0 pendientes", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
-	stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	stLobbyOrbesEvent = env->addStaticText(L"Orbes: Pr\u00F3ximamente", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
+	stLobbyOrbesEvent->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	stLobbyMailboxStatus = nullptr;
+
+	wLobbyActivityCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 70), false, false, wMainMenu, -1, true);
+	wLobbyActivityCard->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+	stLobbyActivityHeader = env->addStaticText(L"ACTIVIDAD EN VIVO", irr::core::recti(0, 0, 340, 20), false, false, wLobbyActivityCard);
+	stLobbyActivityHeader->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginUiFont) stLobbyActivityHeader->setOverrideFont(loginUiFont);
+
+	stLobbyActivityText = env->addStaticText(L"Esperando eventos del reino...", irr::core::recti(0, 0, 360, 38), false, true, wLobbyActivityCard);
+	stLobbyActivityText->setWordWrap(true);
+	stLobbyActivityText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 
 	// 3 Custom Dark-Glass Neon Action Buttons (Tienda, Eventos, Deck — no purple skin!)
 	btnLobbyStore = env->addButton(irr::core::recti(0, 0, 130, 36), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
@@ -391,15 +408,24 @@ void Game::Initialize() {
 	stLobbyNpcStats = env->addStaticText(L"NPC: 0.0% WR (0 duelos)", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
 	stLobbyNpcStats->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 
-	stLobbyStarShips = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyStarShips = env->addStaticText(L"0 SS", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
 	stLobbyStarShips->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	if(loginUiFont) stLobbyStarShips->setOverrideFont(loginUiFont);
 
-	stLobbyCristales = env->addStaticText(L"Cristales (CD): 0 CD", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
+	stLobbyCristales = env->addStaticText(L"0 CD", irr::core::recti(0, 0, 240, 22), false, false, wMainMenu);
 	stLobbyCristales->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	if(loginUiFont) stLobbyCristales->setOverrideFont(loginUiFont);
 
-	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 90, 120), wMainMenu, -1, 0, true);
+	stLobbyMedallasCount = env->addStaticText(L"Medallas: 0 / 81", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyMedallasCount->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+
+	stLobbyClanName = env->addStaticText(L"Clan: Sin Clan", irr::core::recti(0, 0, 240, 20), false, false, wMainMenu);
+	stLobbyClanName->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	stLobbyAvatarPendingGift = env->addStaticText(L"", irr::core::recti(0, 0, 260, 20), false, false, wMainMenu);
+	stLobbyAvatarPendingGift->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+
+	imgLobbyVip = env->addImage(irr::core::recti(0, 0, 46, 52), wMainMenu, -1, 0, true);
 	imgLobbyVip->setScaleImage(true);
 	imgLobbyVip->setUseAlphaChannel(true);
 	imgLobbyVip->setVisible(false);
@@ -485,7 +511,7 @@ void Game::Initialize() {
 	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
 	{
 		const wchar_t* navLabels[7] = {
-			L"Lobby", L"Perfil", L"Ranked", L"Aventura", L"Tutoriales", L"Replays", L"Salir"
+			L"Lobby", L"Perfil", L"Duelos", L"Aventura", L"Tutoriales", L"Repeticiones", L"Salir"
 		};
 		const int navIds[7] = {
 			BUTTON_NAV_INICIO, BUTTON_NAV_PERFIL, BUTTON_NAV_DUELOS,
@@ -536,9 +562,8 @@ void Game::Initialize() {
 	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 380, 38), true, wLoginCard, EDIT_LOGIN_PASS);
 	ebLoginPass->setPasswordBox(true, L'*');
 	if(loginUiFont) ebLoginPass->setOverrideFont(loginUiFont);
-	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 380, 34), false, true, wLoginCard);
+	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 380, 22), false, true, wLoginCard);
 	stLoginStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginUiFont) stLoginStatus->setOverrideFont(loginUiFont);
 	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 210, 42), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
 	if(loginUiFont) btnLoginSubmit->setOverrideFont(loginUiFont);
 	btnLoginExit = env->addButton(irr::core::recti(0, 0, 150, 42), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
@@ -1774,6 +1799,35 @@ static size_t NpcHttpCallback(void* contents, size_t size, size_t nmemb, void* u
 	return realsize;
 }
 
+static std::string gCachedActiveApiHost = "";
+
+static std::vector<std::string> GetCandidateApiHosts() {
+	if(!gCachedActiveApiHost.empty()) {
+		return { gCachedActiveApiHost };
+	}
+#if !EDOPRO_ANDROID
+	return { "http://127.0.0.1:8080", "https://anidimension.online" };
+#else
+	return { "https://anidimension.online" };
+#endif
+}
+
+static void OnApiHostSucceeded(const std::string& host) {
+	if(gCachedActiveApiHost != host) {
+		gCachedActiveApiHost = host;
+	}
+}
+
+static std::wstring FormatThousandsDots(long long val) {
+	std::wstring s = std::to_wstring(val);
+	int n = (int)s.length() - 3;
+	while(n > 0) {
+		s.insert(n, L".");
+		n -= 3;
+	}
+	return s;
+}
+
 static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::string& authToken = "") {
 	std::string retrieved_data;
 	auto curl_handle = curl_easy_init();
@@ -1784,13 +1838,15 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::
 		headers = curl_slist_append(headers, ("Authorization: Bearer " + authToken).c_str());
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
 	}
-	std::vector<std::string> hosts = { "http://127.0.0.1:8080", "http://localhost:8080", "http://66.92.168.136:8080" };
+	auto hosts = GetCandidateApiHosts();
 	for(const auto& host : hosts) {
 		std::string apiUrl = host + endpoint;
 		curl_easy_setopt(curl_handle, CURLOPT_URL, apiUrl.c_str());
 		curl_easy_setopt(curl_handle, CURLOPT_FAILONERROR, 1L);
-		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 1L);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 3L);
+		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 2L);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 4L);
+		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &retrieved_data);
 		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
@@ -1800,6 +1856,7 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::
 		if(res == CURLE_OK && !retrieved_data.empty()) {
 			try {
 				auto j = nlohmann::json::parse(retrieved_data);
+				OnApiHostSucceeded(host);
 				if(headers) curl_slist_free_all(headers);
 				curl_easy_cleanup(curl_handle);
 				return j;
@@ -2863,7 +2920,7 @@ void Game::ResizeLoginScreen() {
 	const int titleH = Scale(34);
 	const int lblH = Scale(22);
 	const int inputH = Scale(38);
-	const int statusH = Scale(34);
+	const int statusH = Scale(22);
 	const int btnH = Scale(42);
 	const int cardH = Scale(16) + titleH + Scale(10) + lblH + Scale(4) + inputH + Scale(10) + lblH + Scale(4) + inputH + Scale(8) + statusH + Scale(10) + btnH + Scale(18);
 	const int cardX = (W - cardW) / 2;
@@ -2981,6 +3038,8 @@ void Game::ResizeMainMenuScreen() {
 	const int avY = contentY + std::max(0, (contentH - avH) / 2);
 	if(imgLobbyAvatar)
 		imgLobbyAvatar->setRelativePosition(irr::core::recti(padX, avY, padX + avW, avY + avH));
+	if(stLobbyAvatarPendingGift)
+		stLobbyAvatarPendingGift->setRelativePosition(irr::core::recti(padX, avY + avH + Scale(6), padX + avW + Scale(60), avY + avH + Scale(26)));
 
 	const int infoX = padX + avW + Scale(22);
 	const int infoW = std::max(Scale(150), leftW - (infoX - padX));
@@ -3015,77 +3074,81 @@ void Game::ResizeMainMenuScreen() {
 	}
 	if(stLobbyCristales) {
 		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
-		iy += Scale(28);
+		iy += Scale(23);
+	}
+	if(stLobbyMedallasCount) {
+		stLobbyMedallasCount->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(21);
+	}
+	if(stLobbyClanName) {
+		stLobbyClanName->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
+		iy += Scale(25);
 	}
 	if(imgLobbyVip) {
-		int vipAvailH = std::max(Scale(72), contentBottomY - iy - Scale(24));
-		int vipH = vipAvailH;
-		int vipW = (int)(vipH * 0.747f);
-		if(imgLobbyVip->getImage()) {
-			auto vsz = imgLobbyVip->getImage()->getOriginalSize();
-			if(vsz.Width > 0 && vsz.Height > 0)
-				vipW = (int)((double)vipH * vsz.Width / vsz.Height);
-		}
-		int maxVipW = (infoW * 52) / 100;
-		if(vipW > maxVipW) {
-			if(vipW > 0) vipH = (int)((double)vipH * maxVipW / vipW);
-			vipW = maxVipW;
-		}
+		int vipW = Scale(42);
+		int vipH = Scale(46);
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
-	if(imgLobbyMedal && stLobbyMedalTitle) {
-		int medX = infoX + (infoW * 54) / 100;
-		int medAvailW = std::max(Scale(72), (infoX + infoW) - medX);
-		int medSz = std::min(medAvailW, std::max(Scale(64), contentBottomY - iy - Scale(30)));
-		imgLobbyMedal->setRelativePosition(irr::core::recti(medX, iy, medX + medSz, iy + medSz));
-		stLobbyMedalTitle->setRelativePosition(irr::core::recti(medX, iy + medSz + Scale(4), infoX + infoW, iy + medSz + Scale(28)));
+	if(imgLobbyMedal) {
+		imgLobbyMedal->setVisible(false);
 	}
-	// Right: Top-Right Status + 3 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
+	if(stLobbyMedalTitle) {
+		stLobbyMedalTitle->setVisible(false);
+	}
+	// Right: Top-Right Status + 4 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
 	if(stServerStatusLine)
 		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(24)));
 
 	const int blkPad = Scale(12);
-	const int blkGap = Scale(10);
+	const int blkGap = Scale(8);
 	const int btnH = Scale(36);
 	const int btnY = contentBottomY - btnH;
 	int ry = contentY;
 
-	const int bonusH = Scale(80);
+	const int bonusH = Scale(110);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
-			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
-		const int colW = (rightW - 2 * blkPad) / 3;
-		for(int bi = 0; bi < 3; ++bi) {
+			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(26)));
+		for(int bi = 0; bi < 4; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(30), blkPad + (bi + 1) * colW - Scale(4), Scale(50)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + bi * Scale(20), rightW - blkPad, Scale(46) + bi * Scale(20)));
 		}
-		if(stLobbyClanMedals)
-			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(54), rightW - blkPad, bonusH - Scale(6)));
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(98);
+	const int top3H = Scale(96);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
-			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(26)));
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(30) + ti * Scale(21), rightW - blkPad, Scale(50) + ti * Scale(21)));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(28) + ti * Scale(21), rightW - blkPad, Scale(48) + ti * Scale(21)));
 		}
 		ry += top3H + blkGap;
 	}
 
-	const int evH = Scale(78);
+	const int evH = Scale(68);
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
 		if(stLobbyEventHeader)
-			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(26)));
 		if(stLobbyPuzzleEvent)
-			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(30), rightW - blkPad, Scale(50)));
-		if(stLobbyMailboxStatus)
-			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, Scale(52), rightW - blkPad, evH - Scale(6)));
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(27), rightW - blkPad, Scale(46)));
+		if(stLobbyOrbesEvent)
+			stLobbyOrbesEvent->setRelativePosition(irr::core::recti(blkPad, Scale(47), rightW - blkPad, Scale(66)));
+		ry += evH + blkGap;
+	}
+
+	if(wLobbyActivityCard) {
+		int actY = ry;
+		int actH = std::max(Scale(48), btnY - Scale(8) - actY);
+		wLobbyActivityCard->setRelativePosition(irr::core::recti(rightX, actY, rightX + rightW, actY + actH));
+		if(stLobbyActivityHeader)
+			stLobbyActivityHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(26)));
+		if(stLobbyActivityText)
+			stLobbyActivityText->setRelativePosition(irr::core::recti(blkPad, Scale(26), rightW - blkPad, actH - Scale(4)));
 	}
 
 	// 3 Custom Neon Buttons (Tienda, Eventos, Deck) spanning right-center above bottom cards
@@ -3215,6 +3278,9 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyTotalDuelosPvp = SafeJsonInt(resp, "totalDuelosPvp", 0);
 			lobbyTotalCartas = SafeJsonInt(resp, "totalCartas", 0);
 			lobbyTotalNpcs = SafeJsonInt(resp, "totalNpcs", 0);
+			if(resp.contains("latestActivity") && resp["latestActivity"].is_string()) {
+				lobbyLatestActivity = BufferIO::DecodeUTF8(resp["latestActivity"].get<std::string>());
+			}
 		}
 		if(fullResp.contains("success") && fullResp["success"].is_boolean() && fullResp["success"].get<bool>() && fullResp.contains("user") && fullResp["user"].is_object()) {
 			const auto& u = fullResp["user"];
@@ -3235,6 +3301,18 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyBonusExp = u.contains("TotalBonusExp") && u["TotalBonusExp"].is_number() ? u["TotalBonusExp"].get<double>() : 0.0;
 			lobbyBonusSS = u.contains("TotalBonusStarShips") && u["TotalBonusStarShips"].is_number() ? u["TotalBonusStarShips"].get<double>() : 0.0;
 			lobbyBonusLuck = u.contains("TotalBonusLuck") && u["TotalBonusLuck"].is_number() ? u["TotalBonusLuck"].get<double>() : 0.0;
+			lobbyBonusAvaExp = u.contains("AvaTotalExp") && u["AvaTotalExp"].is_number() ? u["AvaTotalExp"].get<double>() : 0.0;
+			lobbyBonusAvaSS = u.contains("AvaTotalSS") && u["AvaTotalSS"].is_number() ? u["AvaTotalSS"].get<double>() : 0.0;
+			lobbyBonusAvaLuck = u.contains("AvaTotalLuck") && u["AvaTotalLuck"].is_number() ? u["AvaTotalLuck"].get<double>() : 0.0;
+			lobbyBonusClanExp = u.contains("ClanExp") && u["ClanExp"].is_number() ? u["ClanExp"].get<double>() : 0.0;
+			lobbyBonusClanSS = u.contains("ClanSS") && u["ClanSS"].is_number() ? u["ClanSS"].get<double>() : 0.0;
+			lobbyBonusClanLuck = u.contains("ClanLuck") && u["ClanLuck"].is_number() ? u["ClanLuck"].get<double>() : 0.0;
+			lobbyBonusMedExp = u.contains("MedExp") && u["MedExp"].is_number() ? u["MedExp"].get<double>() : 0.0;
+			lobbyBonusMedSS = u.contains("MedSS") && u["MedSS"].is_number() ? u["MedSS"].get<double>() : 0.0;
+			lobbyBonusMedLuck = u.contains("MedLuck") && u["MedLuck"].is_number() ? u["MedLuck"].get<double>() : 0.0;
+			lobbyBonusVipExp = u.contains("VipExp") && u["VipExp"].is_number() ? u["VipExp"].get<double>() : 0.0;
+			lobbyBonusVipSS = u.contains("VipSS") && u["VipSS"].is_number() ? u["VipSS"].get<double>() : 0.0;
+			lobbyBonusVipLuck = u.contains("VipLuck") && u["VipLuck"].is_number() ? u["VipLuck"].get<double>() : 0.0;
 			int clanId = SafeJsonInt(u, "ClanId", 0);
 			std::string clanNom = SafeJsonStr(u, "ClanNombre", "");
 			int clanNiv = SafeJsonInt(u, "ClanNivel", 0);
@@ -3278,6 +3356,11 @@ void Game::FetchLobbyStatsAsync() {
 			const auto& sel = puzResp["selected"];
 			std::wstring tit = BufferIO::DecodeUTF8(SafeJsonStr(sel, "Titulo", "Evento Mensual"));
 			std::wstring est = BufferIO::DecodeUTF8(SafeJsonStr(sel, "EstadoActual", ""));
+			if(tit.rfind(L"Rompecabezas ", 0) == 0) {
+				tit = tit.substr(13);
+			} else if(tit.rfind(L"Rompecabezas: ", 0) == 0) {
+				tit = tit.substr(14);
+			}
 			int gotPieces = 0;
 			if(puzResp.contains("pieces") && puzResp["pieces"].is_array()) {
 				for(const auto& pc : puzResp["pieces"]) {
@@ -3299,9 +3382,13 @@ void Game::ProcessPendingLobbyStats() {
 	int pingMs = 0, onC = 0;
 	int pLvl = 1, pvpDuels = 0, npcDuels = 0, medalsGot = 0, medalsTot = 81, mailPend = 0;
 	double expPct = 0.0, pvpWr = 0.0, npcWr = 0.0, bExp = 0.0, bSS = 0.0, bLuck = 0.0;
+	double bAvaExp = 0.0, bAvaSS = 0.0, bAvaLuck = 0.0;
+	double bClanExp = 0.0, bClanSS = 0.0, bClanLuck = 0.0;
+	double bMedExp = 0.0, bMedSS = 0.0, bMedLuck = 0.0;
+	double bVipExp = 0.0, bVipSS = 0.0, bVipLuck = 0.0;
 	long long expIn = 0, expNext = 100, ss = 0, cd = 0;
 	std::string avFile, vipName, medTitle, medFile;
-	std::wstring pName, clanTxt, puzTxt;
+	std::wstring pName, clanTxt, puzTxt, actTxt;
 	std::vector<LobbyTopEntry> top3Copy;
 	{
 		std::lock_guard<epro::mutex> lk(lobbyStatsMutex);
@@ -3325,11 +3412,24 @@ void Game::ProcessPendingLobbyStats() {
 		bExp = lobbyBonusExp;
 		bSS = lobbyBonusSS;
 		bLuck = lobbyBonusLuck;
+		bAvaExp = lobbyBonusAvaExp;
+		bAvaSS = lobbyBonusAvaSS;
+		bAvaLuck = lobbyBonusAvaLuck;
+		bClanExp = lobbyBonusClanExp;
+		bClanSS = lobbyBonusClanSS;
+		bClanLuck = lobbyBonusClanLuck;
+		bMedExp = lobbyBonusMedExp;
+		bMedSS = lobbyBonusMedSS;
+		bMedLuck = lobbyBonusMedLuck;
+		bVipExp = lobbyBonusVipExp;
+		bVipSS = lobbyBonusVipSS;
+		bVipLuck = lobbyBonusVipLuck;
 		clanTxt = lobbyClanText;
 		medalsGot = lobbyMedalsGot;
 		medalsTot = lobbyMedalsTotal;
 		mailPend = lobbyMailboxPending;
 		puzTxt = lobbyPuzzleText;
+		actTxt = lobbyLatestActivity;
 		top3Copy = lobbyTop3;
 	}
 	playerLevel = pLvl;
@@ -3349,9 +3449,22 @@ void Game::ProcessPendingLobbyStats() {
 	if(stLobbyNpcStats)
 		stLobbyNpcStats->setText(epro::format(L"NPC: {:.1f}% WR  ({} duelos)", npcWr, npcDuels).c_str());
 	if(stLobbyStarShips)
-		stLobbyStarShips->setText(epro::format(L"StarShips: {} SS", ss).c_str());
+		stLobbyStarShips->setText(epro::format(L"{} SS", FormatThousandsDots(ss)).c_str());
 	if(stLobbyCristales)
-		stLobbyCristales->setText(epro::format(L"Cristales (CD): {} CD", cd).c_str());
+		stLobbyCristales->setText(epro::format(L"{} CD", FormatThousandsDots(cd)).c_str());
+	if(stLobbyMedallasCount)
+		stLobbyMedallasCount->setText(epro::format(L"Medallas: {} / {}", medalsGot, medalsTot).c_str());
+	if(stLobbyClanName)
+		stLobbyClanName->setText(epro::format(L"Clan: {}", clanTxt).c_str());
+	if(stLobbyAvatarPendingGift) {
+		if(mailPend > 0) {
+			stLobbyAvatarPendingGift->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			stLobbyAvatarPendingGift->setText(epro::format(L"{} regalo(s) pendiente(s) por reclamar", mailPend).c_str());
+		} else {
+			stLobbyAvatarPendingGift->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			stLobbyAvatarPendingGift->setText(L"Sin regalos pendientes");
+		}
+	}
 	if(imgLobbyAvatar && !avFile.empty()) {
 		if(auto avTex = LoadAvatarTexture(avFile)) {
 			imgLobbyAvatar->setImage(avTex);
@@ -3367,28 +3480,18 @@ void Game::ProcessPendingLobbyStats() {
 			imgLobbyVip->setVisible(false);
 		}
 	}
-	if(imgLobbyMedal && stLobbyMedalTitle) {
-		if(!medFile.empty()) {
-			if(auto medTex = LoadMedalTexture(medFile)) {
-				imgLobbyMedal->setImage(medTex);
-				imgLobbyMedal->setVisible(true);
-			} else {
-				imgLobbyMedal->setVisible(false);
-			}
-			stLobbyMedalTitle->setText(BufferIO::DecodeUTF8(medTitle).c_str());
-			stLobbyMedalTitle->setVisible(true);
-		} else {
-			imgLobbyMedal->setVisible(false);
-			stLobbyMedalTitle->setVisible(false);
-		}
+	if(imgLobbyMedal) {
+		imgLobbyMedal->setVisible(false);
+	}
+	if(stLobbyMedalTitle) {
+		stLobbyMedalTitle->setVisible(false);
 	}
 	if(stServerStatusLine)
 		stServerStatusLine->setText(epro::format(L"\u25CF EN L\u00CDNEA   \u2022   {} ms   \u2022   {} conectados", pingMs, onC).c_str());
-	if(stLobbyBonusVals[0]) stLobbyBonusVals[0]->setText(epro::format(L"EXP: +{:.1f}%", bExp).c_str());
-	if(stLobbyBonusVals[1]) stLobbyBonusVals[1]->setText(epro::format(L"StarShips: +{:.1f}%", bSS).c_str());
-	if(stLobbyBonusVals[2]) stLobbyBonusVals[2]->setText(epro::format(L"Luck: +{:.1f}%", bLuck).c_str());
-	if(stLobbyClanMedals)
-		stLobbyClanMedals->setText(epro::format(L"Clan: {}   \u2022   Medallas: {} / {}", clanTxt, medalsGot, medalsTot).c_str());
+	if(stLobbyBonusVals[0]) stLobbyBonusVals[0]->setText(epro::format(L"Avatar: EXP +{:.1f}%   SS +{:.1f}%   Luck +{:.1f}%", bAvaExp, bAvaSS, bAvaLuck).c_str());
+	if(stLobbyBonusVals[1]) stLobbyBonusVals[1]->setText(epro::format(L"Clan: EXP +{:.1f}%   SS +{:.1f}%   Luck +{:.1f}%", bClanExp, bClanSS, bClanLuck).c_str());
+	if(stLobbyBonusVals[2]) stLobbyBonusVals[2]->setText(epro::format(L"Medallas: EXP +{:.1f}%   SS +{:.1f}%   Luck +{:.1f}%", bMedExp, bMedSS, bMedLuck).c_str());
+	if(stLobbyBonusVals[3]) stLobbyBonusVals[3]->setText(epro::format(L"Vip: EXP +{:.1f}%   SS +{:.1f}%   Luck +{:.1f}%", bVipExp, bVipSS, bVipLuck).c_str());
 	for(int ti = 0; ti < 3; ++ti) {
 		if(ti < (int)top3Copy.size()) {
 			const auto& e = top3Copy[ti];
@@ -3400,15 +3503,8 @@ void Game::ProcessPendingLobbyStats() {
 	}
 	if(stLobbyPuzzleEvent)
 		stLobbyPuzzleEvent->setText(puzTxt.c_str());
-	if(stLobbyMailboxStatus) {
-		if(mailPend > 0) {
-			stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-			stLobbyMailboxStatus->setText(epro::format(L"Buz\u00F3n: {} regalo(s) pendiente(s) por reclamar", mailPend).c_str());
-		} else {
-			stLobbyMailboxStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-			stLobbyMailboxStatus->setText(L"Buz\u00F3n: Al d\u00EDa (0 pendientes)");
-		}
-	}
+	if(stLobbyActivityText)
+		stLobbyActivityText->setText(actTxt.c_str());
 	ResizeMainMenuScreen();
 }
 
@@ -3440,10 +3536,11 @@ void Game::SubmitLogin() {
 			{ "plataforma", plataforma }
 		};
 		std::string payload = bodyJson.dump();
-		std::vector<std::string> endpoints = {
-			"https://anidimension.online/api/auth/login",
-			"http://66.92.168.136:8080/api/auth/login"
-		};
+		std::vector<std::string> endpoints;
+		auto hosts = GetCandidateApiHosts();
+		for(const auto& h : hosts) {
+			endpoints.push_back(h + "/api/auth/login");
+		}
 
 		bool ok = false;
 		std::wstring userW;
@@ -3461,8 +3558,8 @@ void Game::SubmitLogin() {
 			curl_easy_setopt(curl, CURLOPT_POST, 1L);
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, payload.c_str());
 			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, static_cast<long>(payload.size()));
-			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 6L);
-			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 12L);
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 4L);
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
@@ -3471,6 +3568,7 @@ void Game::SubmitLogin() {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
 				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 			}
 			CURLcode res = curl_easy_perform(curl);
 			long httpCode = 0;
@@ -3485,6 +3583,10 @@ void Game::SubmitLogin() {
 						ok = true;
 						userW = BufferIO::DecodeUTF8(j["user"].value("usuario", ""));
 						tokenStr = j.value("token", "");
+						size_t pos = url.find("/api/auth/login");
+						if(pos != std::string::npos) {
+							OnApiHostSucceeded(url.substr(0, pos));
+						}
 						break;
 					} else {
 						std::string e = j.value("error", "Usuario o contrasena incorrectos.");
@@ -3496,12 +3598,86 @@ void Game::SubmitLogin() {
 			}
 		}
 
+		// Preload inventory and decks in this background thread so main GUI thread NEVER blocks
+		std::unordered_map<uint32_t, int> stagingCards;
+		std::unordered_map<uint32_t, long long> stagingPrices;
+		std::vector<UserDeckSlot> stagingDecks;
+		long long stagingSS = 0;
+		int stagingLvl = 1, stagingExp = 1;
+		bool hasInv = false;
+
+		if(ok && !tokenStr.empty()) {
+			auto invJson = CallSessionApi("/api/user/inventory", tokenStr);
+			if(invJson.contains("success") && invJson.value("success", false)) {
+				hasInv = true;
+				if(invJson.contains("profile") && invJson["profile"].is_object()) {
+					const auto& prof = invJson["profile"];
+					stagingLvl = SafeJsonInt(prof, "nivel", 1);
+					stagingExp = SafeJsonInt(prof, "exp", 1);
+					if(prof.contains("starShips") && prof["starShips"].is_number())
+						stagingSS = prof["starShips"].get<long long>();
+				}
+				if(invJson.contains("cards") && invJson["cards"].is_array()) {
+					for(const auto& c : invJson["cards"]) {
+						uint32_t code = static_cast<uint32_t>(SafeJsonInt(c, "passcode", 0));
+						int qty = SafeJsonInt(c, "cantidad", 0);
+						long long sellPrice = 0;
+						if(c.contains("precioRecompra") && c["precioRecompra"].is_number())
+							sellPrice = c["precioRecompra"].get<long long>();
+						if(code > 0 && qty > 0) {
+							stagingCards[code] = qty;
+							stagingPrices[code] = sellPrice;
+						}
+					}
+				}
+			}
+			auto decksJson = CallSessionApi("/api/user/decks", tokenStr);
+			if(decksJson.contains("success") && decksJson.value("success", false)) {
+				std::string srvActiveName = SafeJsonStr(decksJson, "activeDeckName", "");
+				if(decksJson.contains("decks") && decksJson["decks"].is_array()) {
+					for(const auto& d : decksJson["decks"]) {
+						UserDeckSlot slotObj;
+						slotObj.slot = SafeJsonInt(d, "slot", 1);
+						slotObj.name = BufferIO::DecodeUTF8(SafeJsonStr(d, "nombreDeck", "Deck"));
+						if(srvActiveName.empty() && d.contains("esActivo") && d.value("esActivo", false))
+							srvActiveName = SafeJsonStr(d, "nombreDeck", "");
+						if(d.contains("main") && d["main"].is_array()) {
+							for(const auto& mc : d["main"]) {
+								uint32_t code = static_cast<uint32_t>(SafeJsonInt(mc, "passcode", 0));
+								if(code > 0) slotObj.mainCards.push_back(code);
+							}
+						}
+						if(d.contains("extra") && d["extra"].is_array()) {
+							for(const auto& ec : d["extra"]) {
+								uint32_t code = static_cast<uint32_t>(SafeJsonInt(ec, "passcode", 0));
+								if(code > 0) slotObj.extraCards.push_back(code);
+							}
+						}
+						if(d.contains("side") && d["side"].is_array()) {
+							for(const auto& sc : d["side"]) {
+								uint32_t code = static_cast<uint32_t>(SafeJsonInt(sc, "passcode", 0));
+								if(code > 0) slotObj.sideCards.push_back(code);
+							}
+						}
+						stagingDecks.push_back(std::move(slotObj));
+					}
+				}
+			}
+		}
+
 		{
 			std::lock_guard<epro::mutex> lk(loginResultMutex);
 			loginPendingSuccess = ok;
 			loginPendingUser = std::move(userW);
 			loginPendingToken = std::move(tokenStr);
 			loginPendingError = std::move(errW);
+			loginPendingHasInventory = hasInv;
+			loginPendingPlayerStarShips = stagingSS;
+			loginPendingPlayerLevel = stagingLvl;
+			loginPendingPlayerExp = stagingExp;
+			loginPendingCardInventory = std::move(stagingCards);
+			loginPendingCardSellPrices = std::move(stagingPrices);
+			loginPendingUserDeckSlots = std::move(stagingDecks);
 		}
 		loginResultReady = true;
 	}).detach();
@@ -3514,12 +3690,25 @@ void Game::ProcessPendingLoginResult() {
 	std::wstring userW;
 	std::string tokenStr;
 	std::wstring errW;
+	bool hasInv = false;
+	long long ss = 0;
+	int lvl = 1, exp = 1;
+	std::unordered_map<uint32_t, int> cInv;
+	std::unordered_map<uint32_t, long long> cPrices;
+	std::vector<UserDeckSlot> dSlots;
 	{
 		std::lock_guard<epro::mutex> lk(loginResultMutex);
 		ok = loginPendingSuccess;
 		userW = loginPendingUser;
 		tokenStr = loginPendingToken;
 		errW = loginPendingError;
+		hasInv = loginPendingHasInventory;
+		ss = loginPendingPlayerStarShips;
+		lvl = loginPendingPlayerLevel;
+		exp = loginPendingPlayerExp;
+		cInv = std::move(loginPendingCardInventory);
+		cPrices = std::move(loginPendingCardSellPrices);
+		dSlots = std::move(loginPendingUserDeckSlots);
 	}
 	if(btnLoginSubmit)
 		btnLoginSubmit->setEnabled(true);
@@ -3527,7 +3716,17 @@ void Game::ProcessPendingLoginResult() {
 		isLoggedIn = true;
 		loggedInUser = userW;
 		sessionToken = tokenStr;
-		FetchUserInventoryAndDecks();
+		{
+			std::lock_guard<epro::mutex> lk(inventoryMutex);
+			if(hasInv) {
+				cardInventory = std::move(cInv);
+				cardSellPrices = std::move(cPrices);
+				userDeckSlots = std::move(dSlots);
+				playerStarShips = ss;
+				playerLevel = lvl;
+				playerExp = exp;
+			}
+		}
 		if(ebNickName) {
 			ebNickName->setText(loggedInUser.c_str());
 			ebNickName->setEnabled(false);
@@ -3567,7 +3766,7 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 	if(token.empty()) return {};
 	auto curl_handle = curl_easy_init();
 	if(!curl_handle) return {};
-	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto hosts = GetCandidateApiHosts();
 	struct curl_slist* headers = nullptr;
 	std::string authHeader = "Authorization: Bearer " + token;
 	headers = curl_slist_append(headers, authHeader.c_str());
@@ -3578,8 +3777,8 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 		std::string url = host + endpoint;
 		curl_easy_setopt(curl_handle, CURLOPT_URL, url.c_str());
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, headers);
-		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 3L);
-		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 8L);
+		curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 2L);
+		curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 4L);
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYPEER, 0L);
 		curl_easy_setopt(curl_handle, CURLOPT_SSL_VERIFYHOST, 0L);
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
@@ -3598,6 +3797,7 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 		if(res == CURLE_OK && !resp.empty()) {
 			try {
 				auto j = nlohmann::json::parse(resp);
+				OnApiHostSucceeded(host);
 				curl_slist_free_all(headers);
 				curl_easy_cleanup(curl_handle);
 				return j;

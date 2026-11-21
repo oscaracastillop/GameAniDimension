@@ -164,7 +164,7 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* stServerStatusLine{ nullptr };
 	irr::gui::IGUIStaticText* wLobbyBonusCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyBonusHeader{ nullptr };
-	irr::gui::IGUIStaticText* stLobbyBonusVals[3]{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyBonusVals[4]{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyClanMedals{ nullptr };
 	irr::gui::IGUIStaticText* wLobbyTop3Card{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyTop3Header{ nullptr };
@@ -172,7 +172,14 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* wLobbyEventCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyEventHeader{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyPuzzleEvent{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyOrbesEvent{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyMailboxStatus{ nullptr };
+	irr::gui::IGUIStaticText* wLobbyActivityCard{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyActivityHeader{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyActivityText{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyAvatarPendingGift{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyMedallasCount{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyClanName{ nullptr };
 	irr::gui::IGUIButton* btnLobbyStore{ nullptr };
 	irr::gui::IGUIButton* btnLobbyEvents{ nullptr };
 	irr::gui::IGUIButton* btnLobbyDeck{ nullptr };
@@ -1041,11 +1048,24 @@ public:
 	double lobbyBonusExp{ 0.0 };
 	double lobbyBonusSS{ 0.0 };
 	double lobbyBonusLuck{ 0.0 };
+	double lobbyBonusAvaExp{ 0.0 };
+	double lobbyBonusAvaSS{ 0.0 };
+	double lobbyBonusAvaLuck{ 0.0 };
+	double lobbyBonusClanExp{ 0.0 };
+	double lobbyBonusClanSS{ 0.0 };
+	double lobbyBonusClanLuck{ 0.0 };
+	double lobbyBonusMedExp{ 0.0 };
+	double lobbyBonusMedSS{ 0.0 };
+	double lobbyBonusMedLuck{ 0.0 };
+	double lobbyBonusVipExp{ 0.0 };
+	double lobbyBonusVipSS{ 0.0 };
+	double lobbyBonusVipLuck{ 0.0 };
 	std::wstring lobbyClanText{ L"Sin Clan" };
 	int lobbyMedalsGot{ 0 };
 	int lobbyMedalsTotal{ 81 };
 	int lobbyMailboxPending{ 0 };
 	std::wstring lobbyPuzzleText{ L"Rompecabezas: Sin evento activo" };
+	std::wstring lobbyLatestActivity{ L"Esperando eventos del reino..." };
 	struct LobbyTopEntry {
 		int pos{ 0 };
 		int nivel{ 1 };
@@ -1063,6 +1083,13 @@ public:
 	std::wstring loginPendingUser{};
 	std::string loginPendingToken{};
 	std::wstring loginPendingError{};
+	bool loginPendingHasInventory{ false };
+	long long loginPendingPlayerStarShips{ 0 };
+	int loginPendingPlayerLevel{ 1 };
+	int loginPendingPlayerExp{ 1 };
+	std::unordered_map<uint32_t, int> loginPendingCardInventory;
+	std::unordered_map<uint32_t, long long> loginPendingCardSellPrices;
+	std::vector<UserDeckSlot> loginPendingUserDeckSlots;
 	void SubmitLogin();
 	void ProcessPendingLoginResult();
 	struct UserDeckSlot {
