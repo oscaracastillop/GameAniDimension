@@ -179,10 +179,14 @@ void Game::Initialize() {
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, numfont, fallbackFonts);
 	{
 		auto ltFont = textfont;
-		ltFont.size = Scale(24);
+		ltFont.size = Scale(22);
 		loginTitleFont = irr::gui::CGUITTFont::createTTFont(env, ltFont, fallbackFonts);
 		auto luFont = textfont;
+#if EDOPRO_ANDROID
 		luFont.size = Scale(18);
+#else
+		luFont.size = Scale(16);
+#endif
 		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -336,7 +340,8 @@ void Game::Initialize() {
 	stLobbyEventHeader->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	if(loginUiFont) stLobbyEventHeader->setOverrideFont(loginUiFont);
 
-	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, false, wLobbyEventCard);
+	stLobbyPuzzleEvent = env->addStaticText(L"Rompecabezas: Cargando...", irr::core::recti(0, 0, 360, 20), false, true, wLobbyEventCard);
+	stLobbyPuzzleEvent->setWordWrap(true);
 	stLobbyPuzzleEvent->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
 	if(loginUiFont) stLobbyPuzzleEvent->setOverrideFont(loginUiFont);
 
@@ -2956,8 +2961,8 @@ void Game::ResizeMainMenuScreen() {
 
 	// Middle Left (Free-floating Welcome + Big Crisp Avatar + User Stats + Big VIP) + Right (Servidor Central)
 	const int midAvailH = std::max(Scale(220), featY - topY - Scale(18));
-	const int colGap = std::max(Scale(24), (int)(W * 0.035f));
-	const int rightW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.38f)));
+	const int colGap = std::max(Scale(20), (int)(W * 0.030f));
+	const int rightW = std::max(Scale(380), std::min(Scale(495), (int)(W * 0.43f)));
 	const int leftW = std::max(Scale(340), W - 2 * padX - rightW - colGap);
 
 	// Right: Servidor Central card (2x3 grid + online badge)
@@ -3011,27 +3016,32 @@ void Game::ResizeMainMenuScreen() {
 		iy += Scale(11);
 	}
 	if(stLobbyExpText) {
-		stLobbyExpText->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(18)));
-		iy += Scale(22);
+		stLobbyExpText->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(24);
 	}
 	if(stLobbyPvpStats) {
-		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
-		iy += Scale(21);
+		stLobbyPvpStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(23);
 	}
 	if(stLobbyNpcStats) {
-		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(20)));
-		iy += Scale(23);
+		stLobbyNpcStats->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		iy += Scale(25);
 	}
 	if(stLobbyStarShips) {
-		stLobbyStarShips->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
-		iy += Scale(23);
+		stLobbyStarShips->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
+		iy += Scale(24);
 	}
 	if(stLobbyCristales) {
-		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(22)));
+		stLobbyCristales->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
+		iy += Scale(24);
+	}
+	if(stLobbyMedalTitle) {
+		stLobbyMedalTitle->setRelativePosition(irr::core::recti(infoX, iy, infoX + infoW, iy + Scale(24)));
 		iy += Scale(28);
 	}
+	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
 	if(imgLobbyVip) {
-		int vipAvailH = std::max(Scale(72), contentBottomY - iy - Scale(24));
+		int vipAvailH = std::max(Scale(72), contentBottomY - iy);
 		int vipH = vipAvailH;
 		int vipW = (int)(vipH * 0.747f);
 		if(imgLobbyVip->getImage()) {
@@ -3039,66 +3049,58 @@ void Game::ResizeMainMenuScreen() {
 			if(vsz.Width > 0 && vsz.Height > 0)
 				vipW = (int)((double)vipH * vsz.Width / vsz.Height);
 		}
-		int maxVipW = (infoW * 52) / 100;
-		if(vipW > maxVipW) {
-			if(vipW > 0) vipH = (int)((double)vipH * maxVipW / vipW);
-			vipW = maxVipW;
+		if(vipW > infoW) {
+			if(vipW > 0) vipH = (int)((double)vipH * infoW / vipW);
+			vipW = infoW;
 		}
 		imgLobbyVip->setRelativePosition(irr::core::recti(infoX, iy, infoX + vipW, iy + vipH));
 	}
-	if(imgLobbyMedal && stLobbyMedalTitle) {
-		int medX = infoX + (infoW * 54) / 100;
-		int medAvailW = std::max(Scale(72), (infoX + infoW) - medX);
-		int medSz = std::min(medAvailW, std::max(Scale(64), contentBottomY - iy - Scale(30)));
-		imgLobbyMedal->setRelativePosition(irr::core::recti(medX, iy, medX + medSz, iy + medSz));
-		stLobbyMedalTitle->setRelativePosition(irr::core::recti(medX, iy + medSz + Scale(4), infoX + infoW, iy + medSz + Scale(28)));
-	}
 	// Right: Top-Right Status + 3 Neon-Bordered Blocks + 3 Custom Action Buttons (Tienda, Eventos, Deck)
 	if(stServerStatusLine)
-		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(24)));
+		stServerStatusLine->setRelativePosition(irr::core::recti(rightX, welcomeY, rightX + rightW, welcomeY + Scale(26)));
 
-	const int blkPad = Scale(12);
-	const int blkGap = Scale(10);
-	const int btnH = Scale(36);
+	const int blkPad = Scale(14);
+	const int blkGap = Scale(12);
+	const int btnH = Scale(40);
 	const int btnY = contentBottomY - btnH;
 	int ry = contentY;
 
-	const int bonusH = Scale(80);
+	const int bonusH = Scale(94);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
-			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
 		const int colW = (rightW - 2 * blkPad) / 3;
 		for(int bi = 0; bi < 3; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(30), blkPad + (bi + 1) * colW - Scale(4), Scale(50)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(34), blkPad + (bi + 1) * colW - Scale(4), Scale(58)));
 		}
 		if(stLobbyClanMedals)
-			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(54), rightW - blkPad, bonusH - Scale(6)));
+			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(62), rightW - blkPad, bonusH - Scale(6)));
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(98);
+	const int top3H = Scale(116);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
-			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(30) + ti * Scale(21), rightW - blkPad, Scale(50) + ti * Scale(21)));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + ti * Scale(25), rightW - blkPad, Scale(58) + ti * Scale(25)));
 		}
 		ry += top3H + blkGap;
 	}
 
-	const int evH = Scale(78);
+	const int evH = std::max(Scale(106), btnY - ry - Scale(14));
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
 		if(stLobbyEventHeader)
-			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(28)));
+			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
 		if(stLobbyPuzzleEvent)
-			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(30), rightW - blkPad, Scale(50)));
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(34), rightW - blkPad, evH - Scale(34)));
 		if(stLobbyMailboxStatus)
-			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, Scale(52), rightW - blkPad, evH - Scale(6)));
+			stLobbyMailboxStatus->setRelativePosition(irr::core::recti(blkPad, evH - Scale(30), rightW - blkPad, evH - Scale(6)));
 	}
 
 	// 3 Custom Neon Buttons (Tienda, Eventos, Deck) spanning right-center above bottom cards
@@ -3380,20 +3382,11 @@ void Game::ProcessPendingLobbyStats() {
 			imgLobbyVip->setVisible(false);
 		}
 	}
-	if(imgLobbyMedal && stLobbyMedalTitle) {
-		if(!medFile.empty()) {
-			if(auto medTex = LoadMedalTexture(medFile)) {
-				imgLobbyMedal->setImage(medTex);
-				imgLobbyMedal->setVisible(true);
-			} else {
-				imgLobbyMedal->setVisible(false);
-			}
-			stLobbyMedalTitle->setText(BufferIO::DecodeUTF8(medTitle).c_str());
-			stLobbyMedalTitle->setVisible(true);
-		} else {
-			imgLobbyMedal->setVisible(false);
-			stLobbyMedalTitle->setVisible(false);
-		}
+	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
+	if(stLobbyMedalTitle) {
+		stLobbyMedalTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+		stLobbyMedalTitle->setText(epro::format(L"Medallas: {} / {}", medalsGot, medalsTot).c_str());
+		stLobbyMedalTitle->setVisible(true);
 	}
 	if(stServerStatusLine)
 		stServerStatusLine->setText(epro::format(L"\u25CF EN L\u00CDNEA   \u2022   {} ms   \u2022   {} conectados", pingMs, onC).c_str());
