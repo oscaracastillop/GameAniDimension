@@ -528,6 +528,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->wPackRevealOverlay) mainGame->wPackRevealOverlay->setVisible(false);
 				break;
 			}
+			case BUTTON_RELOAD_UI_LAYOUT: {
+				mainGame->ReloadUiLayoutFromServer(true);
+				break;
+			}
 			case BUTTON_PACK_POOL_PREV: {
 				if(mainGame->packPoolPage > 0) {
 					mainGame->packPoolPage--;
@@ -1636,6 +1640,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 	}
 	case irr::EET_KEY_INPUT_EVENT: {
 		switch(event.KeyInput.Key) {
+		case irr::KEY_F5: {
+			if(!event.KeyInput.PressedDown && mainGame->isPlayerAdmin)
+				mainGame->ReloadUiLayoutFromServer(true);
+			break;
+		}
 		case irr::KEY_KEY_R: {
 			if(!event.KeyInput.PressedDown && !mainGame->HasFocus(irr::gui::EGUIET_EDIT_BOX))
 				mainGame->textFont->setTransparency(true);

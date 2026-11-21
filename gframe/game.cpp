@@ -515,6 +515,13 @@ void Game::Initialize() {
 			btnNavItems[ni]->setDrawBorder(false);
 			if(loginUiFont) btnNavItems[ni]->setOverrideFont(loginUiFont);
 		}
+		btnNavReloadUi = env->addButton(irr::core::recti(0, 0, 52, 34), wTopNavBar, BUTTON_RELOAD_UI_LAYOUT, L"UI");
+		btnNavReloadUi->setImage(tFlatBtnCyan);
+		btnNavReloadUi->setPressedImage(tFlatBtnCyan);
+		btnNavReloadUi->setScaleImage(true);
+		btnNavReloadUi->setDrawBorder(false);
+		btnNavReloadUi->setVisible(false);
+		if(loginUiFont) btnNavReloadUi->setOverrideFont(loginUiFont);
 	}
 	// Dedicated full-screen Login interface
 	wLogin = env->addStaticText(L"", irr::core::recti(0, 0, 1024, 640), false, false, 0, -1, false);
@@ -2948,7 +2955,7 @@ void Game::ResizeMainMenuScreen() {
 		imgMainMenuBg->setVisible(false);
 	}
 
-	const int navH = Scale(58);
+	const int navH = Scale(uiLayout.navH);
 	const int padX = std::max(Scale(24), (int)(W * 0.038f));
 	const int bottomPad = std::max(Scale(18), (int)(H * 0.032f));
 	const int topY = navH + std::max(Scale(18), (int)(H * 0.03f));
@@ -2962,7 +2969,7 @@ void Game::ResizeMainMenuScreen() {
 	// Middle Left (Free-floating Welcome + Big Crisp Avatar + User Stats + Big VIP) + Right (Servidor Central)
 	const int midAvailH = std::max(Scale(220), featY - topY - Scale(18));
 	const int colGap = std::max(Scale(20), (int)(W * 0.030f));
-	const int rightW = std::max(Scale(380), std::min(Scale(495), (int)(W * 0.43f)));
+	const int rightW = std::max(Scale(380), std::min(Scale(540), (W * uiLayout.lobbyRightPct) / 100));
 	const int leftW = std::max(Scale(340), W - 2 * padX - rightW - colGap);
 
 	// Right: Servidor Central card (2x3 grid + online badge)
@@ -3061,11 +3068,11 @@ void Game::ResizeMainMenuScreen() {
 
 	const int blkPad = Scale(14);
 	const int blkGap = Scale(12);
-	const int btnH = Scale(40);
+	const int btnH = Scale(uiLayout.lobbyBtnH);
 	const int btnY = contentBottomY - btnH;
 	int ry = contentY;
 
-	const int bonusH = Scale(94);
+	const int bonusH = Scale(uiLayout.lobbyBonusH);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
@@ -3073,21 +3080,22 @@ void Game::ResizeMainMenuScreen() {
 		const int colW = (rightW - 2 * blkPad) / 3;
 		for(int bi = 0; bi < 3; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(34), blkPad + (bi + 1) * colW - Scale(4), Scale(58)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad + bi * colW, Scale(34), blkPad + (bi + 1) * colW - Scale(4), Scale(34) + Scale(uiLayout.lobbyLineH)));
 		}
 		if(stLobbyClanMedals)
 			stLobbyClanMedals->setRelativePosition(irr::core::recti(blkPad, Scale(62), rightW - blkPad, bonusH - Scale(6)));
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(116);
+	const int top3H = Scale(uiLayout.lobbyTop3H);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
 			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(30)));
+		const int lh = Scale(uiLayout.lobbyLineH);
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + ti * Scale(25), rightW - blkPad, Scale(58) + ti * Scale(25)));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + ti * lh, rightW - blkPad, Scale(34) + ti * lh + lh));
 		}
 		ry += top3H + blkGap;
 	}
@@ -3120,23 +3128,24 @@ void Game::ResizeMainMenuScreen() {
 void Game::ResizeTopNavBar() {
 	if(!wTopNavBar) return;
 	const int W = (int)window_size.Width;
-	const int navH = Scale(58);
+	const int navH = Scale(uiLayout.navH);
 	wTopNavBar->setRelativePosition(irr::core::recti(0, 0, W, navH));
 	if(pnlTopNavBorder)
 		pnlTopNavBorder->setRelativePosition(irr::core::recti(0, navH - 2, W, navH));
-	const int logoSz = Scale(36);
+	const int logoSz = std::max(Scale(26), navH - Scale(22));
 	if(imgTopNavLogo)
 		imgTopNavLogo->setRelativePosition(irr::core::recti(Scale(14), (navH - logoSz) / 2, Scale(14) + logoSz, (navH + logoSz) / 2));
-	const int brandW = Scale(175);
+	const int brandW = Scale(uiLayout.navBrandW);
 	if(stTopNavBrand)
 		stTopNavBrand->setRelativePosition(irr::core::recti(Scale(56), 0, Scale(56) + brandW, navH));
 
-	const int navStartX = Scale(56) + brandW + Scale(18);
-	const int navEndX = W - Scale(16);
-	const int availW = std::max(Scale(420), navEndX - navStartX);
+	const int navStartX = Scale(56) + brandW + Scale(16);
+	const int reloadW = isPlayerAdmin ? Scale(54) : 0;
+	const int navEndX = W - Scale(16) - (isPlayerAdmin ? reloadW + Scale(8) : 0);
+	const int availW = std::max(Scale(380), navEndX - navStartX);
 	const int gap = Scale(8);
-	const int btnW = std::max(Scale(64), std::min(Scale(118), (availW - 6 * gap) / 7));
-	const int btnH = Scale(38);
+	const int btnW = std::max(Scale(58), std::min(Scale(uiLayout.navBtnMaxW), (availW - 6 * gap) / 7));
+	const int btnH = Scale(uiLayout.navBtnH);
 	const int btnY = (navH - btnH) / 2;
 	int curX = navStartX;
 	for(int i = 0; i < 7; ++i) {
@@ -3145,6 +3154,103 @@ void Game::ResizeTopNavBar() {
 		}
 		curX += btnW + gap;
 	}
+	if(btnNavReloadUi) {
+		btnNavReloadUi->setVisible(isPlayerAdmin);
+		if(isPlayerAdmin)
+			btnNavReloadUi->setRelativePosition(irr::core::recti(W - Scale(14) - reloadW, btnY, W - Scale(14), btnY + btnH));
+	}
+}
+
+void Game::ApplyUiLayoutFonts(irr::gui::IGUIElement* root, irr::gui::IGUIFont* oldUi, irr::gui::IGUIFont* oldTitle) {
+	if(!root) return;
+	for(auto* ch : root->getChildren()) {
+		if(ch->getType() == irr::gui::EGUIET_STATIC_TEXT) {
+			auto* st = (irr::gui::IGUIStaticText*)ch;
+			if(oldTitle && st->getOverrideFont() == oldTitle && loginTitleFont) st->setOverrideFont(loginTitleFont);
+			else if(oldUi && st->getOverrideFont() == oldUi && loginUiFont) st->setOverrideFont(loginUiFont);
+		} else if(ch->getType() == irr::gui::EGUIET_BUTTON) {
+			auto* bt = (irr::gui::IGUIButton*)ch;
+			if(oldTitle && bt->getOverrideFont() == oldTitle && loginTitleFont) bt->setOverrideFont(loginTitleFont);
+			else if(oldUi && bt->getOverrideFont() == oldUi && loginUiFont) bt->setOverrideFont(loginUiFont);
+		} else if(ch->getType() == irr::gui::EGUIET_EDIT_BOX) {
+			auto* eb = (irr::gui::IGUIEditBox*)ch;
+			if(oldUi && eb->getOverrideFont() == oldUi && loginUiFont) eb->setOverrideFont(loginUiFont);
+		}
+		ApplyUiLayoutFonts(ch, oldUi, oldTitle);
+	}
+}
+
+void Game::ReloadUiLayoutFromServer(bool showToast) {
+	auto resp = FetchAdventureApi("/api/ui-layout");
+	if(!resp.is_object()) {
+		if(showToast) PopupMessage(L"No se pudo descargar /api/ui-layout.");
+		return;
+	}
+#if EDOPRO_ANDROID
+	const char* key = "android";
+#else
+	const char* key = "pc";
+#endif
+	if(!resp.contains(key) || !resp[key].is_object()) {
+		if(showToast) PopupMessage(L"Perfil UI no encontrado en /api/ui-layout.");
+		return;
+	}
+	const auto& c = resp[key];
+	int oldUiSz = uiLayout.uiFontSize;
+	int oldTitleSz = uiLayout.titleFontSize;
+	uiLayout.titleFontSize = SafeJsonInt(c, "titleFontSize", uiLayout.titleFontSize);
+	uiLayout.uiFontSize = SafeJsonInt(c, "uiFontSize", uiLayout.uiFontSize);
+	uiLayout.navH = SafeJsonInt(c, "navH", uiLayout.navH);
+	uiLayout.navBtnH = SafeJsonInt(c, "navBtnH", uiLayout.navBtnH);
+	uiLayout.navBtnMaxW = SafeJsonInt(c, "navBtnMaxW", uiLayout.navBtnMaxW);
+	uiLayout.navBrandW = SafeJsonInt(c, "navBrandW", uiLayout.navBrandW);
+	uiLayout.lobbyRightPct = SafeJsonInt(c, "lobbyRightPct", uiLayout.lobbyRightPct);
+	uiLayout.lobbyBonusH = SafeJsonInt(c, "lobbyBonusH", uiLayout.lobbyBonusH);
+	uiLayout.lobbyTop3H = SafeJsonInt(c, "lobbyTop3H", uiLayout.lobbyTop3H);
+	uiLayout.lobbyLineH = SafeJsonInt(c, "lobbyLineH", uiLayout.lobbyLineH);
+	uiLayout.lobbyBtnH = SafeJsonInt(c, "lobbyBtnH", uiLayout.lobbyBtnH);
+	uiLayout.hubIconPct = SafeJsonInt(c, "hubIconPct", uiLayout.hubIconPct);
+	uiLayout.hubGap = SafeJsonInt(c, "hubGap", uiLayout.hubGap);
+	uiLayout.avaIconPct = SafeJsonInt(c, "avaIconPct", uiLayout.avaIconPct);
+	uiLayout.avaCardMinH = SafeJsonInt(c, "avaCardMinH", uiLayout.avaCardMinH);
+	uiLayout.bstIconPct = SafeJsonInt(c, "bstIconPct", uiLayout.bstIconPct);
+	uiLayout.bstCardMinH = SafeJsonInt(c, "bstCardMinH", uiLayout.bstCardMinH);
+	uiLayout.cardArtPct = SafeJsonInt(c, "cardArtPct", uiLayout.cardArtPct);
+	uiLayout.cardMinH = SafeJsonInt(c, "cardMinH", uiLayout.cardMinH);
+	uiLayout.packArtPct = SafeJsonInt(c, "packArtPct", uiLayout.packArtPct);
+	uiLayout.packMinH = SafeJsonInt(c, "packMinH", uiLayout.packMinH);
+	uiLayout.donMaxH = SafeJsonInt(c, "donMaxH", uiLayout.donMaxH);
+	uiLayout.vipMaxH = SafeJsonInt(c, "vipMaxH", uiLayout.vipMaxH);
+	uiLayout.confirmW = SafeJsonInt(c, "confirmW", uiLayout.confirmW);
+	uiLayout.confirmH = SafeJsonInt(c, "confirmH", uiLayout.confirmH);
+
+	if(env && (uiLayout.uiFontSize != oldUiSz || uiLayout.titleFontSize != oldTitleSz)) {
+		auto* prevUi = loginUiFont;
+		auto* prevTitle = loginTitleFont;
+		auto fallbackFonts = gGameConfig->fallbackFonts;
+		for(auto& font : fallbackFonts) font.size = Scale(font.size);
+		if(uiLayout.titleFontSize != oldTitleSz) {
+			auto tf = gGameConfig->textfont;
+			tf.size = Scale(uiLayout.titleFontSize);
+			if(auto* nf = irr::gui::CGUITTFont::createTTFont(env, tf, fallbackFonts)) {
+				if(prevTitle) retiredUiFonts.push_back(prevTitle);
+				loginTitleFont = nf;
+			}
+		}
+		if(uiLayout.uiFontSize != oldUiSz) {
+			auto uf = gGameConfig->textfont;
+			uf.size = Scale(uiLayout.uiFontSize);
+			if(auto* nf = irr::gui::CGUITTFont::createTTFont(env, uf, fallbackFonts)) {
+				if(prevUi) retiredUiFonts.push_back(prevUi);
+				loginUiFont = nf;
+			}
+		}
+		ApplyUiLayoutFonts(env->getRootGUIElement(), prevUi, prevTitle);
+	}
+	ResizeTopNavBar();
+	ResizeMainMenuScreen();
+	ResizeEconomyScreens();
+	if(showToast) PopupMessage(L"UI recargada desde el servidor.");
 }
 
 void Game::ShowTopNavBar(bool show) {
@@ -4894,7 +5000,7 @@ void Game::ResizeEconomyScreens() {
 	const irr::s32 W = window_size.Width;
 	const irr::s32 H = window_size.Height;
 	if(W <= 0 || H <= 0) return;
-	const irr::s32 navH = Scale(58);
+	const irr::s32 navH = Scale(uiLayout.navH);
 	const irr::s32 pad = std::max<irr::s32>(Scale(16), W / 45);
 	const irr::s32 topY = navH + Scale(12);
 	const irr::s32 botY = H - pad;
@@ -4931,7 +5037,7 @@ void Game::ResizeEconomyScreens() {
 		if(stStoreBalanceCD) stStoreBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(6), W - pad - Scale(175), topY + Scale(32)));
 		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
 		const irr::s32 gridTop = topY + Scale(50);
-		const irr::s32 gap = Scale(14);
+		const irr::s32 gap = Scale(uiLayout.hubGap);
 		const irr::s32 cardW = (W - 2 * pad - 2 * gap) / 3;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (botY - gridTop - gap) / 2);
 		for(int si = 0; si < 6; ++si) {
@@ -4942,7 +5048,7 @@ void Game::ResizeEconomyScreens() {
 			if(wStoreHubCards[si]) {
 				wStoreHubCards[si]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
 				irr::s32 maxIcW = cardW - Scale(24);
-				irr::s32 maxIcH = std::max<irr::s32>(Scale(68), (cardH * 44) / 100);
+				irr::s32 maxIcH = std::max<irr::s32>(Scale(56), (cardH * uiLayout.hubIconPct) / 100);
 				irr::s32 icH = maxIcH;
 				irr::s32 icW = icH;
 				if(imgStoreHubIcons[si] && imgStoreHubIcons[si]->getImage()) {
@@ -4979,7 +5085,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(320), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(uiLayout.donMaxH), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int di = 0; di < 5; ++di) {
 			irr::s32 cx = pad + di * (cardW + gap);
@@ -5013,7 +5119,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.avaCardMinH), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 10; ++i) {
 			int row = i / 5;
 			int col = i % 5;
@@ -5021,7 +5127,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wAvaCards[i]) {
 				wAvaCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(64), (cardH * 46) / 100);
+				irr::s32 icH = std::max<irr::s32>(Scale(56), (cardH * uiLayout.avaIconPct) / 100);
 				fitImage(imgAvaCardIcons[i], cardW / 2, Scale(6), cardW - Scale(20), icH);
 				if(btnAvaCardPreview[i] && imgAvaCardIcons[i])
 					btnAvaCardPreview[i]->setRelativePosition(imgAvaCardIcons[i]->getRelativePosition());
@@ -5074,7 +5180,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.bstCardMinH), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 8; ++i) {
 			int row = i / 4;
 			int col = i % 4;
@@ -5082,7 +5188,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wBstCards[i]) {
 				wBstCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(60), (cardH * 44) / 100);
+				irr::s32 icH = std::max<irr::s32>(Scale(54), (cardH * uiLayout.bstIconPct) / 100);
 				fitImage(imgBstCardIcons[i], cardW / 2, Scale(8), cardW - Scale(24), icH);
 				irr::s32 ty = Scale(10) + icH;
 				if(stBstCardTitles[i]) stBstCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(24)));
@@ -5111,7 +5217,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(330), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(uiLayout.vipMaxH), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int i = 0; i < 4; ++i) {
 			irr::s32 cx = pad + i * (cardW + gap);
@@ -5148,7 +5254,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(8);
 		const irr::s32 cardW = (W - 2 * pad - 6 * gap) / 7;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.cardMinH), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 14; ++i) {
 			int row = i / 7;
 			int col = i % 7;
@@ -5156,7 +5262,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wCardCards[i]) {
 				wCardCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(70), (cardH * 48) / 100);
+				irr::s32 artH = std::max<irr::s32>(Scale(64), (cardH * uiLayout.cardArtPct) / 100);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
 				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
@@ -5198,7 +5304,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 5 * gap) / 6;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(uiLayout.packMinH), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 12; ++i) {
 			int row = i / 6;
 			int col = i % 6;
@@ -5206,7 +5312,7 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wPackCards[i]) {
 				wPackCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(68), (cardH * 46) / 100);
+				irr::s32 artH = std::max<irr::s32>(Scale(62), (cardH * uiLayout.packArtPct) / 100);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
 				if(imgPackCardArts[i]) imgPackCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
@@ -5420,7 +5526,7 @@ void Game::ResizeEconomyScreens() {
 	}
 
 	if(wConfirmPurchase) {
-		irr::s32 cw = std::min<irr::s32>(Scale(500), W - 2 * pad), ch = Scale(210);
+		irr::s32 cw = std::min<irr::s32>(Scale(uiLayout.confirmW), W - 2 * pad), ch = Scale(uiLayout.confirmH);
 		wConfirmPurchase->setRelativePosition(irr::core::recti((W - cw) / 2, (H - ch) / 2, (W + cw) / 2, (H + ch) / 2));
 		if(stConfirmPurchaseTitle) stConfirmPurchaseTitle->setRelativePosition(irr::core::recti(Scale(18), Scale(12), cw - Scale(18), Scale(42)));
 		if(stConfirmPurchaseMsg) stConfirmPurchaseMsg->setRelativePosition(irr::core::recti(Scale(18), Scale(48), cw - Scale(18), ch - Scale(58)));
