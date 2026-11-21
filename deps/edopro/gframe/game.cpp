@@ -3226,7 +3226,7 @@ void Game::LogoutToLogin() {
 	}
 }
 
-static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson);
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "");
 
 static long long SafeJsonInt64(const nlohmann::json& j, const char* key, long long def = 0) {
 	if(!j.contains(key)) return def;
@@ -3641,24 +3641,19 @@ void Game::SubmitLogin() {
 						slotObj.name = BufferIO::DecodeUTF8(SafeJsonStr(d, "nombreDeck", "Deck"));
 						if(srvActiveName.empty() && d.contains("esActivo") && d.value("esActivo", false))
 							srvActiveName = SafeJsonStr(d, "nombreDeck", "");
-						if(d.contains("main") && d["main"].is_array()) {
-							for(const auto& mc : d["main"]) {
-								uint32_t code = static_cast<uint32_t>(SafeJsonInt(mc, "passcode", 0));
-								if(code > 0) slotObj.mainCards.push_back(code);
+						auto loadVec = [](const nlohmann::json& arr, Deck::Vector& out) {
+							if(!arr.is_array()) return;
+							for(const auto& item : arr) {
+								if(item.is_number()) {
+									uint32_t code = item.get<uint32_t>();
+									if(auto* cd = gDataManager->GetCardData(code))
+										out.push_back(cd);
+								}
 							}
-						}
-						if(d.contains("extra") && d["extra"].is_array()) {
-							for(const auto& ec : d["extra"]) {
-								uint32_t code = static_cast<uint32_t>(SafeJsonInt(ec, "passcode", 0));
-								if(code > 0) slotObj.extraCards.push_back(code);
-							}
-						}
-						if(d.contains("side") && d["side"].is_array()) {
-							for(const auto& sc : d["side"]) {
-								uint32_t code = static_cast<uint32_t>(SafeJsonInt(sc, "passcode", 0));
-								if(code > 0) slotObj.sideCards.push_back(code);
-							}
-						}
+						};
+						if(d.contains("main")) loadVec(d["main"], slotObj.deck.main);
+						if(d.contains("extra")) loadVec(d["extra"], slotObj.deck.extra);
+						if(d.contains("side")) loadVec(d["side"], slotObj.deck.side);
 						stagingDecks.push_back(std::move(slotObj));
 					}
 				}
@@ -3762,7 +3757,7 @@ void Game::ProcessPendingLoginResult() {
 	}
 }
 
-static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "") {
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson) {
 	if(token.empty()) return {};
 	auto curl_handle = curl_easy_init();
 	if(!curl_handle) return {};
