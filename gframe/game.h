@@ -1077,6 +1077,11 @@ public:
 	bool isLoggedIn{ false };
 	std::wstring loggedInUser{};
 	std::string sessionToken{};
+	struct UserDeckSlot {
+		int slot{ 1 };
+		std::wstring name;
+		Deck deck;
+	};
 	epro::mutex loginResultMutex;
 	std::atomic<bool> loginResultReady{ false };
 	bool loginPendingSuccess{ false };
@@ -1092,11 +1097,6 @@ public:
 	std::vector<UserDeckSlot> loginPendingUserDeckSlots;
 	void SubmitLogin();
 	void ProcessPendingLoginResult();
-	struct UserDeckSlot {
-		int slot{ 1 };
-		std::wstring name;
-		Deck deck;
-	};
 	int playerLevel{ 1 };
 	int playerExp{ 1 };
 	long long playerStarShips{ 10000 };
