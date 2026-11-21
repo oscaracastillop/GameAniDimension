@@ -1640,11 +1640,6 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 	}
 	case irr::EET_KEY_INPUT_EVENT: {
 		switch(event.KeyInput.Key) {
-		case irr::KEY_F5: {
-			if(!event.KeyInput.PressedDown && mainGame->isPlayerAdmin)
-				mainGame->ReloadUiLayoutFromServer(true);
-			break;
-		}
 		case irr::KEY_KEY_R: {
 			if(!event.KeyInput.PressedDown && !mainGame->HasFocus(irr::gui::EGUIET_EDIT_BOX))
 				mainGame->textFont->setTransparency(true);
@@ -1656,8 +1651,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			break;
 		}
 		case irr::KEY_F5: {
-			if(!event.KeyInput.PressedDown && mainGame->wRoomListPlaceholder->isVisible())
-				ServerLobby::RefreshRooms();
+			if(!event.KeyInput.PressedDown) {
+				if(mainGame->wRoomListPlaceholder->isVisible())
+					ServerLobby::RefreshRooms();
+				else if(mainGame->isPlayerAdmin)
+					mainGame->ReloadUiLayoutFromServer(true);
+			}
 			break;
 		}
 		default: break;

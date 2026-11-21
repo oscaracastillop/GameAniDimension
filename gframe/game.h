@@ -211,8 +211,6 @@ struct main_menu_panel_elements {
 	};
 	UiLayoutConfig uiLayout;
 	std::vector<irr::gui::IGUIFont*> retiredUiFonts;
-	void ReloadUiLayoutFromServer(bool showToast = true);
-	void ApplyUiLayoutFonts(irr::gui::IGUIElement* root, irr::gui::IGUIFont* oldUi, irr::gui::IGUIFont* oldTitle);
 	irr::gui::IGUIStaticText* stLobbyWelcomeTitle{ nullptr };
 	irr::gui::IGUIImage* imgLobbyAvatar{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyPlayerName{ nullptr };
@@ -1397,6 +1395,8 @@ public:
 	irr::gui::IGUIStaticText* stPackPoolPage{ nullptr };
 	irr::gui::IGUIButton* btnPackPoolNext{ nullptr };
 	void RefreshPackPoolPage();
+	void ReloadUiLayoutFromServer(bool showToast = true);
+	void ApplyUiLayoutFonts(irr::gui::IGUIElement* root, irr::gui::IGUIFont* oldUi, irr::gui::IGUIFont* oldTitle);
 
 	// 4. Player Profile Hub (8 neon cards)
 	irr::gui::IGUIStaticText* wPlayerProfile{ nullptr };
