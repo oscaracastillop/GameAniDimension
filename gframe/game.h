@@ -181,36 +181,6 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIImage* imgTopNavLogo{ nullptr };
 	irr::gui::IGUIStaticText* stTopNavBrand{ nullptr };
 	irr::gui::IGUIButton* btnNavItems[7]{ nullptr };
-	irr::gui::IGUIButton* btnNavReloadUi{ nullptr };
-	struct UiLayoutConfig {
-		int titleFontSize{ 22 };
-		int uiFontSize{ 16 };
-		int navH{ 58 };
-		int navBtnH{ 38 };
-		int navBtnMaxW{ 118 };
-		int navBrandW{ 175 };
-		int lobbyRightPct{ 43 };
-		int lobbyBonusH{ 94 };
-		int lobbyTop3H{ 116 };
-		int lobbyLineH{ 25 };
-		int lobbyBtnH{ 40 };
-		int hubIconPct{ 44 };
-		int hubGap{ 14 };
-		int avaIconPct{ 46 };
-		int avaCardMinH{ 140 };
-		int bstIconPct{ 44 };
-		int bstCardMinH{ 140 };
-		int cardArtPct{ 48 };
-		int cardMinH{ 140 };
-		int packArtPct{ 46 };
-		int packMinH{ 140 };
-		int donMaxH{ 320 };
-		int vipMaxH{ 330 };
-		int confirmW{ 500 };
-		int confirmH{ 210 };
-	};
-	UiLayoutConfig uiLayout;
-	std::vector<irr::gui::IGUIFont*> retiredUiFonts;
 	irr::gui::IGUIStaticText* stLobbyWelcomeTitle{ nullptr };
 	irr::gui::IGUIImage* imgLobbyAvatar{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyPlayerName{ nullptr };
@@ -1395,8 +1365,6 @@ public:
 	irr::gui::IGUIStaticText* stPackPoolPage{ nullptr };
 	irr::gui::IGUIButton* btnPackPoolNext{ nullptr };
 	void RefreshPackPoolPage();
-	void ReloadUiLayoutFromServer(bool showToast = true);
-	void ApplyUiLayoutFonts(irr::gui::IGUIElement* root, irr::gui::IGUIFont* oldUi, irr::gui::IGUIFont* oldTitle);
 
 	// 4. Player Profile Hub (8 neon cards)
 	irr::gui::IGUIStaticText* wPlayerProfile{ nullptr };
