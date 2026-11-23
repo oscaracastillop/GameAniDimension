@@ -4889,12 +4889,12 @@ void Game::PopulateEconomyScreens() {
 		imgCardCardArts[i]->setScaleImage(true);
 		stCardCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wCardCards[i]);
 		stCardCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginCardTextFont) stCardCardTitles[i]->setOverrideFont(loginCardTextFont);
+		if(loginDescFont) stCardCardTitles[i]->setOverrideFont(loginDescFont);
 		else if(loginUiFont) stCardCardTitles[i]->setOverrideFont(loginUiFont);
 		stCardCardMeta[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wCardCards[i]);
 		stCardCardMeta[i]->setWordWrap(true);
 		stCardCardMeta[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginCardTextFont) stCardCardMeta[i]->setOverrideFont(loginCardTextFont);
+		if(loginDescFont) stCardCardMeta[i]->setOverrideFont(loginDescFont);
 		btnCardCardBuySS[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_SS_0 + i, L"Comprar SS");
 		btnCardCardBuyCD[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_CD_0 + i, L"Comprar CD");
 		styleDarkBtn(btnCardCardBuySS[i]);
@@ -4936,11 +4936,11 @@ void Game::PopulateEconomyScreens() {
 		stPackCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardTitles[i]->setWordWrap(true);
 		stPackCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginCardTextFont) stPackCardTitles[i]->setOverrideFont(loginCardTextFont);
+		if(loginDescFont) stPackCardTitles[i]->setOverrideFont(loginDescFont);
 		stPackCardDescs[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardDescs[i]->setWordWrap(true);
 		stPackCardDescs[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginCardTextFont) stPackCardDescs[i]->setOverrideFont(loginCardTextFont);
+		if(loginDescFont) stPackCardDescs[i]->setOverrideFont(loginDescFont);
 		btnPackCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_BUY_0 + i, L"Comprar");
 		btnPackCardView[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_VIEW_0 + i, L"Ver Cartas");
 		styleDarkBtn(btnPackCardBuy[i]);
