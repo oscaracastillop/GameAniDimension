@@ -236,12 +236,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->OpenAvatarPreview(id - BUTTON_STORE_AVA_PREVIEW_0);
 				} else if(id >= BUTTON_STORE_BST_SS_0 && id <= BUTTON_STORE_BST_SS_MAX) {
 					int slot = id - BUTTON_STORE_BST_SS_0;
-					int pos = mainGame->storeBstPage * 8 + slot;
+					int pos = mainGame->storeBstPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeBstFiltered.size())
 						mainGame->RequestBuyBoosterIdx(mainGame->storeBstFiltered[pos], false);
 				} else if(id >= BUTTON_STORE_BST_CD_0 && id <= BUTTON_STORE_BST_CD_MAX) {
 					int slot = id - BUTTON_STORE_BST_CD_0;
-					int pos = mainGame->storeBstPage * 8 + slot;
+					int pos = mainGame->storeBstPage * 10 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeBstFiltered.size())
 						mainGame->RequestBuyBoosterIdx(mainGame->storeBstFiltered[pos], true);
 				} else if(id >= BUTTON_STORE_VIP_BUY_0 && id <= BUTTON_STORE_VIP_BUY_MAX) {
@@ -436,6 +436,20 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_STORE_AVA_BACK: {
 				mainGame->OpenStoreMenu();
+				break;
+			}
+			case BUTTON_STORE_HUB_PREV: {
+				if(mainGame->storeHubPage > 0) {
+					mainGame->storeHubPage--;
+					mainGame->RefreshStoreHubCards();
+				}
+				break;
+			}
+			case BUTTON_STORE_HUB_NEXT: {
+				if(mainGame->storeHubPage < 1) {
+					mainGame->storeHubPage++;
+					mainGame->RefreshStoreHubCards();
+				}
 				break;
 			}
 			case BUTTON_STORE_BST_FILT_ALL:

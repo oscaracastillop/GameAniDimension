@@ -990,6 +990,7 @@ public:
 	irr::gui::CGUITTFont* lpcFont;
 	irr::gui::CGUITTFont* loginTitleFont{ nullptr };
 	irr::gui::CGUITTFont* loginUiFont{ nullptr };
+	irr::gui::CGUITTFont* loginBtnFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
@@ -1265,7 +1266,12 @@ public:
 	irr::gui::IGUIStaticText* stStoreHubTitles[6]{ nullptr };
 	irr::gui::IGUIStaticText* stStoreHubDescs[6]{ nullptr };
 	irr::gui::IGUIButton* btnStoreHubActions[6]{ nullptr };
+	irr::gui::IGUIButton* btnStoreHubPrev{ nullptr };
+	irr::gui::IGUIButton* btnStoreHubNext{ nullptr };
+	irr::gui::IGUIStaticText* stStoreHubPage{ nullptr };
 	irr::gui::IGUIButton* btnStoreBack{ nullptr };
+	int storeHubPage{ 0 };
+	void RefreshStoreHubCards();
 	uint32_t storeHubPendingArt[2]{ 89631139, 74677422 };
 
 	// 1b. Store Donations & Cristales (CD) (5 cards)
@@ -1317,7 +1323,7 @@ public:
 	irr::gui::IGUIButton* btnPackRevealAccept{ nullptr };
 	uint32_t packRevealPendingArt[3]{};
 
-	// 3. Store Boosters (4x2 card grid + filter tabs + pagination)
+	// 3. Store Boosters (5x2 card grid + filter tabs + pagination)
 	irr::gui::IGUIStaticText* wStoreBoosters{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBstTitle{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBstBalance{ nullptr };
@@ -1325,12 +1331,12 @@ public:
 	irr::gui::IGUIStaticText* stStoreBstBanner{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstFilt[4]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstBack{ nullptr };
-	irr::gui::IGUIStaticText* wBstCards[8]{ nullptr };
-	irr::gui::IGUIImage* imgBstCardIcons[8]{ nullptr };
-	irr::gui::IGUIStaticText* stBstCardTitles[8]{ nullptr };
-	irr::gui::IGUIStaticText* stBstCardStats[8]{ nullptr };
-	irr::gui::IGUIButton* btnBstCardBuySS[8]{ nullptr };
-	irr::gui::IGUIButton* btnBstCardBuyCD[8]{ nullptr };
+	irr::gui::IGUIStaticText* wBstCards[10]{ nullptr };
+	irr::gui::IGUIImage* imgBstCardIcons[10]{ nullptr };
+	irr::gui::IGUIStaticText* stBstCardTitles[10]{ nullptr };
+	irr::gui::IGUIStaticText* stBstCardStats[10]{ nullptr };
+	irr::gui::IGUIButton* btnBstCardBuySS[10]{ nullptr };
+	irr::gui::IGUIButton* btnBstCardBuyCD[10]{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstPrev{ nullptr };
 	irr::gui::IGUIButton* btnStoreBstNext{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBstPage{ nullptr };
