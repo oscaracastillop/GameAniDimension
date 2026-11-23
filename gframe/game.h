@@ -1112,6 +1112,7 @@ public:
 	std::wstring loginPendingError{};
 	bool loginPendingHasInventory{ false };
 	long long loginPendingPlayerStarShips{ 0 };
+	long long loginPendingPlayerCristales{ 0 };
 	int loginPendingPlayerLevel{ 1 };
 	int loginPendingPlayerExp{ 1 };
 	std::unordered_map<uint32_t, int> loginPendingCardInventory;
