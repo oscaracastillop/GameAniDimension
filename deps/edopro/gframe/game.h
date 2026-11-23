@@ -1260,6 +1260,7 @@ public:
 	// 1. Store Hub (Full-screen canvas, 3x2 neon cards)
 	irr::gui::IGUIStaticText* wStoreMenu{ nullptr };
 	irr::gui::IGUIStaticText* stStoreTitle{ nullptr };
+	irr::gui::IGUIStaticText* stStoreDesc{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBalance{ nullptr };
 	irr::gui::IGUIStaticText* stStoreBalanceCD{ nullptr };
 	irr::gui::IGUIStaticText* wStoreHubCards[6]{ nullptr };
