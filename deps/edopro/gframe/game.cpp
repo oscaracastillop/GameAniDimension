@@ -361,11 +361,13 @@ void Game::Initialize() {
 	for(int li = 0; li < 3; ++li) {
 		stLobbyLogText[li] = env->addStaticText(L"", irr::core::recti(0, 0, 300, 20), false, false, wLobbyActivityCard);
 		stLobbyLogText[li]->setOverrideColor(irr::video::SColor(255, 230, 238, 248));
+		stLobbyLogText[li]->setWordWrap(true);
+		stLobbyLogText[li]->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
 		if(loginLogItalicFont) stLobbyLogText[li]->setOverrideFont(loginLogItalicFont);
 
 		stLobbyLogTime[li] = env->addStaticText(L"", irr::core::recti(0, 0, 80, 20), false, false, wLobbyActivityCard);
 		stLobbyLogTime[li]->setOverrideColor(irr::video::SColor(200, 150, 180, 200));
-		stLobbyLogTime[li]->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
+		stLobbyLogTime[li]->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_UPPERLEFT);
 		if(loginLogTimeFont) stLobbyLogTime[li]->setOverrideFont(loginLogTimeFont);
 	}
 	stLobbyActivityText = nullptr;
@@ -1850,11 +1852,7 @@ static std::vector<std::string> GetCandidateApiHosts() {
 	if(!gCachedActiveApiHost.empty()) {
 		return { gCachedActiveApiHost };
 	}
-#if !EDOPRO_ANDROID
-	return { "http://127.0.0.1:8080", "https://anidimension.online" };
-#else
-	return { "https://anidimension.online" };
-#endif
+	return { "https://anidimension.online", "http://127.0.0.1:8080" };
 }
 
 static void OnApiHostSucceeded(const std::string& host) {
@@ -3114,7 +3112,7 @@ void Game::ResizeMainMenuScreen() {
 
 	// 2. Center Column: Player Stats Card (wLobbyPlayerCard) - fitted snug to text in width and height
 	const int infoX = avX + avW + Scale(16);
-	const int infoW = std::min(Scale(195), leftTotalW - (infoX - padX));
+	const int infoW = std::min(Scale(235), leftTotalW - (infoX - padX));
 	const int panelY = contentY;
 
 	if(wLobbyPlayerCard) {
@@ -3130,7 +3128,7 @@ void Game::ResizeMainMenuScreen() {
 			iy += Scale(20);
 		}
 		if(stLobbyExpTrack) {
-			const int expTrackW = std::min(Scale(160), infoW - 2 * ipPadX);
+			const int expTrackW = std::min(Scale(190), infoW - 2 * ipPadX);
 			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, ipPadX + expTrackW, iy + Scale(8)));
 			iy += Scale(10);
 		}
@@ -3157,10 +3155,10 @@ void Game::ResizeMainMenuScreen() {
 		if(stLobbyStarShips) stLobbyStarShips->setVisible(false);
 		if(stLobbyCristales) stLobbyCristales->setVisible(false);
 
-		int vipW = Scale(96);
-		int vipH = Scale(108);
+		int vipW = Scale(118);
+		int vipH = Scale(132);
 		int vipX = (infoW - vipW) / 2;
-		int vipY = iy + Scale(8);
+		int vipY = iy + Scale(10);
 		if(imgLobbyVip) {
 			imgLobbyVip->setRelativePosition(irr::core::recti(vipX, vipY, vipX + vipW, vipY + vipH));
 		}
@@ -3176,57 +3174,58 @@ void Game::ResizeMainMenuScreen() {
 	const int blkGap = Scale(6);
 	int ry = contentY;
 
-	const int bonusH = Scale(116);
+	const int bonusH = Scale(128);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
-			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
+			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(32)));
 		for(int bi = 0; bi < 4; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + bi * Scale(21), rightW - blkPad, Scale(46) + bi * Scale(21)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + bi * Scale(22), rightW - blkPad, Scale(54) + bi * Scale(22)));
 		}
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(96);
+	const int top3H = Scale(108);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
-			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
+			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(32)));
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + ti * Scale(21), rightW - blkPad, Scale(46) + ti * Scale(21)));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(34) + ti * Scale(22), rightW - blkPad, Scale(54) + ti * Scale(22)));
 		}
 		ry += top3H + blkGap;
 	}
 
-	const int evH = Scale(82);
+	const int evH = Scale(88);
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
 		if(stLobbyEventHeader)
-			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
+			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(32)));
 		if(stLobbyPuzzleEvent)
-			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(26), rightW - blkPad, Scale(46)));
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(34), rightW - blkPad, Scale(56)));
 		if(stLobbyOrbesEvent)
-			stLobbyOrbesEvent->setRelativePosition(irr::core::recti(blkPad, Scale(48), rightW - blkPad, Scale(68)));
+			stLobbyOrbesEvent->setRelativePosition(irr::core::recti(blkPad, Scale(58), rightW - blkPad, Scale(80)));
 		ry += evH + blkGap;
 	}
 
-	// Block 5: Logs (3 rows with italic text and smaller date/time)
+	// Block 5: Logs (3 rows with italic text, word wrap, and smaller date/time)
 	if(wLobbyActivityCard) {
 		int actY = ry;
-		int actH = std::max(Scale(90), contentBottomY - actY);
+		int actH = std::max(Scale(146), contentBottomY - actY);
 		wLobbyActivityCard->setRelativePosition(irr::core::recti(rightX, actY, rightX + rightW, actY + actH));
 		if(stLobbyActivityHeader)
-			stLobbyActivityHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
-		const int logRowH = Scale(20);
-		const int timeW = Scale(85);
+			stLobbyActivityHeader->setRelativePosition(irr::core::recti(blkPad, Scale(8), rightW - blkPad, Scale(32)));
+		const int logRowH = Scale(32);
+		const int timeW = Scale(82);
+		const int timeH = Scale(18);
 		for(int li = 0; li < 3; ++li) {
-			const int rowY = Scale(26) + li * Scale(22);
+			const int rowY = Scale(34) + li * Scale(36);
 			if(stLobbyLogText[li])
 				stLobbyLogText[li]->setRelativePosition(irr::core::recti(blkPad, rowY, rightW - blkPad - timeW - Scale(6), rowY + logRowH));
 			if(stLobbyLogTime[li])
-				stLobbyLogTime[li]->setRelativePosition(irr::core::recti(rightW - blkPad - timeW, rowY, rightW - blkPad, rowY + logRowH));
+				stLobbyLogTime[li]->setRelativePosition(irr::core::recti(rightW - blkPad - timeW, rowY, rightW - blkPad, rowY + timeH));
 		}
 		if(stLobbyActivityText)
 			stLobbyActivityText->setVisible(false);
@@ -3434,7 +3433,8 @@ void Game::FetchLobbyStatsAsync() {
 			lobbyPlayerExpPct = u.contains("PorcentajeNivel") && u["PorcentajeNivel"].is_number() ? u["PorcentajeNivel"].get<double>() : 0.0;
 			lobbyPlayerExpInLevel = SafeJsonInt64(u, "ExpEnNivel", 0);
 			lobbyPlayerExpNext = SafeJsonInt64(u, "ExpParaSubir", 100);
-			lobbyPlayerStarShips = SafeJsonInt64(u, "StarShips", playerStarShips);
+			lobbyPlayerStarShips = SafeJsonInt64(u, "StarShips", SafeJsonInt64(u, "starShips", playerStarShips));
+			lobbyPlayerCristales = SafeJsonInt64(u, "CristalesDimensionales", SafeJsonInt64(u, "cristales", playerCristales));
 			lobbyPlayerPvpDuels = SafeJsonInt(u, "DuelosPvp", 0);
 			lobbyPlayerPvpWr = u.contains("WinratePvp") && u["WinratePvp"].is_number() ? u["WinratePvp"].get<double>() : 0.0;
 			lobbyPlayerNpcDuels = SafeJsonInt(u, "DuelosNpc", 0);
@@ -3474,6 +3474,7 @@ void Game::FetchLobbyStatsAsync() {
 		} else {
 			lobbyPlayerLevel = playerLevel;
 			lobbyPlayerStarShips = playerStarShips;
+			lobbyPlayerCristales = playerCristales;
 			lobbyPlayerDisplayName = curUser;
 		}
 		if(profResp.contains("success") && profResp["success"].is_boolean() && profResp["success"].get<bool>()) {
@@ -3747,6 +3748,10 @@ void Game::SubmitLogin() {
 						ok = true;
 						userW = BufferIO::DecodeUTF8(j["user"].value("usuario", ""));
 						tokenStr = j.value("token", "");
+						stagingSS = SafeJsonInt64(j["user"], "starShips", 0);
+						stagingCD = SafeJsonInt64(j["user"], "cristales", 0);
+						stagingLvl = SafeJsonInt(j["user"], "nivel", 1);
+						stagingExp = SafeJsonInt(j["user"], "exp", 1);
 						size_t pos = url.find("/api/auth/login");
 						if(pos != std::string::npos) {
 							OnApiHostSucceeded(url.substr(0, pos));
@@ -3767,6 +3772,7 @@ void Game::SubmitLogin() {
 		std::unordered_map<uint32_t, long long> stagingPrices;
 		std::vector<UserDeckSlot> stagingDecks;
 		long long stagingSS = 0;
+		long long stagingCD = 0;
 		int stagingLvl = 1, stagingExp = 1;
 		bool hasInv = false;
 
@@ -3832,6 +3838,7 @@ void Game::SubmitLogin() {
 			loginPendingError = std::move(errW);
 			loginPendingHasInventory = hasInv;
 			loginPendingPlayerStarShips = stagingSS;
+			loginPendingPlayerCristales = stagingCD;
 			loginPendingPlayerLevel = stagingLvl;
 			loginPendingPlayerExp = stagingExp;
 			loginPendingCardInventory = std::move(stagingCards);
@@ -3851,6 +3858,7 @@ void Game::ProcessPendingLoginResult() {
 	std::wstring errW;
 	bool hasInv = false;
 	long long ss = 0;
+	long long cdVal = 0;
 	int lvl = 1, exp = 1;
 	std::unordered_map<uint32_t, int> cInv;
 	std::unordered_map<uint32_t, long long> cPrices;
@@ -3863,6 +3871,7 @@ void Game::ProcessPendingLoginResult() {
 		errW = loginPendingError;
 		hasInv = loginPendingHasInventory;
 		ss = loginPendingPlayerStarShips;
+		cdVal = loginPendingPlayerCristales;
 		lvl = loginPendingPlayerLevel;
 		exp = loginPendingPlayerExp;
 		cInv = std::move(loginPendingCardInventory);
@@ -3877,13 +3886,14 @@ void Game::ProcessPendingLoginResult() {
 		sessionToken = tokenStr;
 		{
 			std::lock_guard<epro::mutex> lk(inventoryMutex);
+			playerStarShips = ss;
+			playerCristales = cdVal;
+			playerLevel = lvl;
+			playerExp = exp;
 			if(hasInv) {
 				cardInventory = std::move(cInv);
 				cardSellPrices = std::move(cPrices);
 				userDeckSlots = std::move(dSlots);
-				playerStarShips = ss;
-				playerLevel = lvl;
-				playerExp = exp;
 			}
 		}
 		if(ebNickName) {
@@ -3906,6 +3916,14 @@ void Game::ProcessPendingLoginResult() {
 		}
 		if(wMainMenu) {
 			ResizeMainMenuScreen();
+			lobbyPlayerStarShips = ss;
+			lobbyPlayerCristales = cdVal;
+			lobbyPlayerLevel = lvl;
+			lobbyPlayerDisplayName = loggedInUser;
+			if(stTopNavSS)
+				stTopNavSS->setText(epro::format(L"{} SS", FormatThousandsDots(ss)).c_str());
+			if(stTopNavCD)
+				stTopNavCD->setText(epro::format(L"{} CD", FormatThousandsDots(cdVal)).c_str());
 			if(stLobbyPlayerName)
 				stLobbyPlayerName->setText(loggedInUser.empty() ? L"Duelista" : loggedInUser.c_str());
 			if(stLobbyPlayerLevel)
