@@ -177,6 +177,8 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* wLobbyActivityCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityHeader{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityText{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyLogText[3]{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyLogTime[3]{ nullptr };
 	irr::gui::IGUIStaticText* wLobbyPlayerCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyAvatarPendingGift{ nullptr };
 	irr::gui::IGUIImage* imgLobbyPendingGift{ nullptr };
@@ -988,6 +990,8 @@ public:
 	irr::gui::CGUITTFont* lpcFont;
 	irr::gui::CGUITTFont* loginTitleFont{ nullptr };
 	irr::gui::CGUITTFont* loginUiFont{ nullptr };
+	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
+	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;
@@ -1079,6 +1083,11 @@ public:
 	int lobbyMailboxPending{ 0 };
 	std::wstring lobbyPuzzleText{ L"Rompecabezas: Sin evento activo" };
 	std::wstring lobbyLatestActivity{ L"Esperando eventos del reino..." };
+	struct LobbyLogEntry {
+		std::wstring text;
+		std::wstring time;
+	};
+	std::vector<LobbyLogEntry> lobbyLogs;
 	struct LobbyTopEntry {
 		int pos{ 0 };
 		int nivel{ 1 };
