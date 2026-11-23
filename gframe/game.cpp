@@ -185,7 +185,7 @@ void Game::Initialize() {
 		luFont.size = Scale(16);
 		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
 		auto liFont = textfont;
-		liFont.name = EPRO_TEXT("fonts/italic.ttf");
+		liFont.font = EPRO_TEXT("fonts/italic.ttf");
 		liFont.size = Scale(13);
 		loginLogItalicFont = irr::gui::CGUITTFont::createTTFont(env, liFont, fallbackFonts);
 		if(!loginLogItalicFont) {
