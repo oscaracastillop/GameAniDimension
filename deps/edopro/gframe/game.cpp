@@ -3711,6 +3711,9 @@ void Game::SubmitLogin() {
 		std::wstring userW;
 		std::string tokenStr;
 		std::wstring errW = L"No se pudo conectar con el servidor.";
+		long long stagingSS = 0;
+		long long stagingCD = 0;
+		int stagingLvl = 1, stagingExp = 1;
 
 		for(const auto& url : endpoints) {
 			auto curl = curl_easy_init();
@@ -3771,9 +3774,6 @@ void Game::SubmitLogin() {
 		std::unordered_map<uint32_t, int> stagingCards;
 		std::unordered_map<uint32_t, long long> stagingPrices;
 		std::vector<UserDeckSlot> stagingDecks;
-		long long stagingSS = 0;
-		long long stagingCD = 0;
-		int stagingLvl = 1, stagingExp = 1;
 		bool hasInv = false;
 
 		if(ok && !tokenStr.empty()) {
