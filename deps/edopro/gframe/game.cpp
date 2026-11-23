@@ -184,6 +184,16 @@ void Game::Initialize() {
 		auto luFont = textfont;
 		luFont.size = Scale(16);
 		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
+		GameConfig::TextFont liFont{ "fonts/italic.ttf", (uint8_t)Scale(13) };
+		loginLogItalicFont = irr::gui::CGUITTFont::createTTFont(env, liFont, fallbackFonts);
+		if(!loginLogItalicFont) {
+			auto fallbackLi = textfont;
+			fallbackLi.size = Scale(13);
+			loginLogItalicFont = irr::gui::CGUITTFont::createTTFont(env, fallbackLi, fallbackFonts);
+		}
+		auto lTimeFont = textfont;
+		lTimeFont.size = Scale(10);
+		loginLogTimeFont = irr::gui::CGUITTFont::createTTFont(env, lTimeFont, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
 		throw std::runtime_error("Failed to load numbers font");
@@ -346,9 +356,17 @@ void Game::Initialize() {
 	stLobbyActivityHeader->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	if(loginUiFont) stLobbyActivityHeader->setOverrideFont(loginUiFont);
 
-	stLobbyActivityText = env->addStaticText(L"Esperando eventos del reino...", irr::core::recti(0, 0, 360, 38), false, true, wLobbyActivityCard);
-	stLobbyActivityText->setWordWrap(true);
-	stLobbyActivityText->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	for(int li = 0; li < 3; ++li) {
+		stLobbyLogText[li] = env->addStaticText(L"", irr::core::recti(0, 0, 300, 20), false, false, wLobbyActivityCard);
+		stLobbyLogText[li]->setOverrideColor(irr::video::SColor(255, 230, 238, 248));
+		if(loginLogItalicFont) stLobbyLogText[li]->setOverrideFont(loginLogItalicFont);
+
+		stLobbyLogTime[li] = env->addStaticText(L"", irr::core::recti(0, 0, 80, 20), false, false, wLobbyActivityCard);
+		stLobbyLogTime[li]->setOverrideColor(irr::video::SColor(200, 150, 180, 200));
+		stLobbyLogTime[li]->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
+		if(loginLogTimeFont) stLobbyLogTime[li]->setOverrideFont(loginLogTimeFont);
+	}
+	stLobbyActivityText = nullptr;
 
 	// Action Buttons (Tienda, Eventos, Deck + Duelo Rapido) flat dark square with neon outline
 	auto applyBtnStyle = [&](irr::gui::IGUIButton* b, const wchar_t* label) {
@@ -3043,7 +3061,7 @@ void Game::ResizeMainMenuScreen() {
 	const int contentH = std::max(Scale(180), contentBottomY - contentY);
 
 	// Right column width and position
-	const int rightW = std::max(Scale(330), std::min(Scale(410), (int)(W * 0.38f)));
+	const int rightW = std::max(Scale(390), std::min(Scale(500), (int)(W * 0.44f)));
 	const int rightX = W - padX - rightW;
 
 	// Server status line above right column
@@ -3068,14 +3086,15 @@ void Game::ResizeMainMenuScreen() {
 	const int avX = padX;
 	const int avY = contentY + std::max(0, (contentH - avH) / 2);
 
-	// Avatar Base (Pedestal) - placed exactly at the feet of the avatar, avatar on top!
+	// Avatar Base (Pedestal) - placed firmly under avatar's feet
 	int baseH = 0;
+	int baseY = 0;
 	if(imgLobbyAvatarBase) {
 		const int baseW = (int)(avW * 1.35f);
 		baseH = (int)(baseW * 360.0f / 693.0f);
 		const int baseX = avX + (avW - baseW) / 2;
-		// Avatar feet are at avY + avH. Pedestal upper surface is at ~32% from the top of the image.
-		const int baseY = avY + avH - (int)(baseH * 0.32f);
+		// Avatar feet are at avY + avH. Pedestal upper surface is placed directly under feet
+		baseY = avY + avH - (int)(baseH * 0.48f);
 		imgLobbyAvatarBase->setRelativePosition(irr::core::recti(baseX, baseY, baseX + baseW, baseY + baseH));
 	}
 	if(imgLobbyAvatar) {
@@ -3085,41 +3104,37 @@ void Game::ResizeMainMenuScreen() {
 
 	// Gift indicator below avatar pedestal
 	const int giftSz = Scale(24);
-	const int giftY = std::min(H - Scale(28), avY + avH + (int)(baseH * 0.60f));
+	const int giftY = std::min(H - Scale(28), (baseY > 0 ? baseY + baseH + Scale(2) : avY + avH + Scale(8)));
 	if(imgLobbyPendingGift)
 		imgLobbyPendingGift->setRelativePosition(irr::core::recti(avX, giftY, avX + giftSz, giftY + giftSz));
 	if(stLobbyAvatarPendingGift)
 		stLobbyAvatarPendingGift->setRelativePosition(irr::core::recti(avX + giftSz + Scale(6), giftY, avX + avW + Scale(120), giftY + giftSz));
 
-	// 2. Center Column: Player Stats Card (wLobbyPlayerCard)
+	// 2. Center Column: Player Stats Card (wLobbyPlayerCard) - fitted snug to text in width and height
 	const int infoX = avX + avW + Scale(16);
-	const int infoW = leftTotalW - (infoX - padX);
+	const int infoW = std::min(Scale(195), leftTotalW - (infoX - padX));
 	const int panelY = contentY;
-	const int panelH = contentH;
 
 	if(wLobbyPlayerCard) {
-		wLobbyPlayerCard->setRelativePosition(irr::core::recti(infoX, panelY, infoX + infoW, panelY + panelH));
-		wLobbyPlayerCard->setVisible(true);
-
 		const int ipPadX = Scale(14);
-		int iy = Scale(12);
+		int iy = Scale(10);
 
 		if(stLobbyPlayerName) {
-			stLobbyPlayerName->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(28)));
-			iy += Scale(30);
+			stLobbyPlayerName->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(26)));
+			iy += Scale(28);
 		}
 		if(stLobbyPlayerLevel) {
-			stLobbyPlayerLevel->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(20)));
-			iy += Scale(22);
+			stLobbyPlayerLevel->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
+			iy += Scale(20);
 		}
 		if(stLobbyExpTrack) {
 			const int expTrackW = std::min(Scale(160), infoW - 2 * ipPadX);
 			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, ipPadX + expTrackW, iy + Scale(8)));
-			iy += Scale(11);
+			iy += Scale(10);
 		}
 		if(stLobbyExpText) {
 			stLobbyExpText->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
-			iy += Scale(22);
+			iy += Scale(20);
 		}
 		if(stLobbyPvpStats) {
 			stLobbyPvpStats->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
@@ -3127,7 +3142,7 @@ void Game::ResizeMainMenuScreen() {
 		}
 		if(stLobbyNpcStats) {
 			stLobbyNpcStats->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
-			iy += Scale(22);
+			iy += Scale(20);
 		}
 		if(stLobbyMedallasCount) {
 			stLobbyMedallasCount->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(18)));
@@ -3140,83 +3155,103 @@ void Game::ResizeMainMenuScreen() {
 		if(stLobbyStarShips) stLobbyStarShips->setVisible(false);
 		if(stLobbyCristales) stLobbyCristales->setVisible(false);
 
+		int vipW = Scale(96);
+		int vipH = Scale(108);
+		int vipX = (infoW - vipW) / 2;
+		int vipY = iy + Scale(8);
 		if(imgLobbyVip) {
-			int vipW = Scale(75);
-			int vipH = Scale(85);
-			int vipX = (infoW - vipW) / 2;
-			int vipY = panelH - vipH - Scale(10);
 			imgLobbyVip->setRelativePosition(irr::core::recti(vipX, vipY, vipX + vipW, vipY + vipH));
 		}
+		const int panelH = vipY + vipH + Scale(14);
+		wLobbyPlayerCard->setRelativePosition(irr::core::recti(infoX, panelY, infoX + infoW, panelY + panelH));
+		wLobbyPlayerCard->setVisible(true);
 	}
 	if(imgLobbyMedal) imgLobbyMedal->setVisible(false);
 	if(stLobbyMedalTitle) stLobbyMedalTitle->setVisible(false);
 
-	// 3. Right Column: 4 blocks with clean translucent dark styling
+	// 3. Right Column: 4 blocks with generous padding and height
 	const int blkPad = Scale(12);
 	const int blkGap = Scale(6);
 	int ry = contentY;
 
-	const int bonusH = Scale(92);
+	const int bonusH = Scale(116);
 	if(wLobbyBonusCard) {
 		wLobbyBonusCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + bonusH));
 		if(stLobbyBonusHeader)
 			stLobbyBonusHeader->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
 		for(int bi = 0; bi < 4; ++bi) {
 			if(stLobbyBonusVals[bi])
-				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + bi * Scale(16), rightW - blkPad, Scale(42) + bi * Scale(16)));
+				stLobbyBonusVals[bi]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + bi * Scale(21), rightW - blkPad, Scale(46) + bi * Scale(21)));
 		}
 		ry += bonusH + blkGap;
 	}
 
-	const int top3H = Scale(78);
+	const int top3H = Scale(96);
 	if(wLobbyTop3Card) {
 		wLobbyTop3Card->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + top3H));
 		if(stLobbyTop3Header)
 			stLobbyTop3Header->setRelativePosition(irr::core::recti(blkPad, Scale(6), rightW - blkPad, Scale(24)));
 		for(int ti = 0; ti < 3; ++ti) {
 			if(stTop3Line[ti])
-				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + ti * Scale(17), rightW - blkPad, Scale(44) + ti * Scale(17)));
+				stTop3Line[ti]->setRelativePosition(irr::core::recti(blkPad, Scale(26) + ti * Scale(21), rightW - blkPad, Scale(46) + ti * Scale(21)));
 		}
 		ry += top3H + blkGap;
 	}
 
-	const int evH = Scale(58);
+	const int evH = Scale(82);
 	if(wLobbyEventCard) {
 		wLobbyEventCard->setRelativePosition(irr::core::recti(rightX, ry, rightX + rightW, ry + evH));
 		if(stLobbyEventHeader)
 			stLobbyEventHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
 		if(stLobbyPuzzleEvent)
-			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(23), rightW - blkPad, Scale(39)));
+			stLobbyPuzzleEvent->setRelativePosition(irr::core::recti(blkPad, Scale(26), rightW - blkPad, Scale(46)));
 		if(stLobbyOrbesEvent)
-			stLobbyOrbesEvent->setRelativePosition(irr::core::recti(blkPad, Scale(39), rightW - blkPad, Scale(55)));
+			stLobbyOrbesEvent->setRelativePosition(irr::core::recti(blkPad, Scale(48), rightW - blkPad, Scale(68)));
 		ry += evH + blkGap;
 	}
 
-	// Block 4: Logs (height reduced to give ample space for big Duelo button)
+	// Block 5: Logs (3 rows with italic text and smaller date/time)
 	if(wLobbyActivityCard) {
 		int actY = ry;
-		int actH = std::max(Scale(42), contentBottomY - actY);
+		int actH = std::max(Scale(90), contentBottomY - actY);
 		wLobbyActivityCard->setRelativePosition(irr::core::recti(rightX, actY, rightX + rightW, actY + actH));
 		if(stLobbyActivityHeader)
 			stLobbyActivityHeader->setRelativePosition(irr::core::recti(blkPad, Scale(5), rightW - blkPad, Scale(22)));
+		const int logRowH = Scale(20);
+		const int timeW = Scale(85);
+		for(int li = 0; li < 3; ++li) {
+			const int rowY = Scale(26) + li * Scale(22);
+			if(stLobbyLogText[li])
+				stLobbyLogText[li]->setRelativePosition(irr::core::recti(blkPad, rowY, rightW - blkPad - timeW - Scale(6), rowY + logRowH));
+			if(stLobbyLogTime[li])
+				stLobbyLogTime[li]->setRelativePosition(irr::core::recti(rightW - blkPad - timeW, rowY, rightW - blkPad, rowY + logRowH));
+		}
 		if(stLobbyActivityText)
-			stLobbyActivityText->setRelativePosition(irr::core::recti(blkPad, Scale(24), rightW - blkPad, actH - Scale(4)));
+			stLobbyActivityText->setVisible(false);
 	}
 
 	// 4. Bottom Row Action Buttons:
-	// - Tienda, Eventos, Deck sit under the Center Panel (infoX to infoX + infoW)
-	// - DUELO RAPIDO sits under the 4 right cards (rightX to rightX + rightW)
-	const int normBtnGap = Scale(8);
-	const int normBtnW = (infoW - 2 * normBtnGap) / 3;
+	// - Independent sizes!
+	// - Tienda, Eventos, Deck: standard width ~Scale(105), gap Scale(10)
+	// - Duelo Rápido: half width (~Scale(185)), positioned at the far right
+	const int normBtnW = Scale(105);
+	const int normBtnGap = Scale(10);
+	int btnX = infoX;
 
-	if(btnLobbyStore)
-		btnLobbyStore->setRelativePosition(irr::core::recti(infoX, btnRowY + (duelBtnH - normBtnH) / 2, infoX + normBtnW, btnRowY + (duelBtnH + normBtnH) / 2));
-	if(btnLobbyEvents)
-		btnLobbyEvents->setRelativePosition(irr::core::recti(infoX + normBtnW + normBtnGap, btnRowY + (duelBtnH - normBtnH) / 2, infoX + 2 * normBtnW + normBtnGap, btnRowY + (duelBtnH + normBtnH) / 2));
-	if(btnLobbyDeck)
-		btnLobbyDeck->setRelativePosition(irr::core::recti(infoX + 2 * (normBtnW + normBtnGap), btnRowY + (duelBtnH - normBtnH) / 2, infoX + infoW, btnRowY + (duelBtnH + normBtnH) / 2));
+	if(btnLobbyStore) {
+		btnLobbyStore->setRelativePosition(irr::core::recti(btnX, btnRowY + (duelBtnH - normBtnH) / 2, btnX + normBtnW, btnRowY + (duelBtnH + normBtnH) / 2));
+		btnX += normBtnW + normBtnGap;
+	}
+	if(btnLobbyEvents) {
+		btnLobbyEvents->setRelativePosition(irr::core::recti(btnX, btnRowY + (duelBtnH - normBtnH) / 2, btnX + normBtnW, btnRowY + (duelBtnH + normBtnH) / 2));
+		btnX += normBtnW + normBtnGap;
+	}
+	if(btnLobbyDeck) {
+		btnLobbyDeck->setRelativePosition(irr::core::recti(btnX, btnRowY + (duelBtnH - normBtnH) / 2, btnX + normBtnW, btnRowY + (duelBtnH + normBtnH) / 2));
+	}
+	const int duelBtnW = Scale(185);
 	if(btnLobbyQuickDuel)
-		btnLobbyQuickDuel->setRelativePosition(irr::core::recti(rightX, btnRowY, rightX + rightW, btnRowY + duelBtnH));
+		btnLobbyQuickDuel->setRelativePosition(irr::core::recti(W - padX - duelBtnW, btnRowY, W - padX, btnRowY + duelBtnH));
 
 	// Settings gear button at bottom-left corner
 	if(wBtnSettings) {
@@ -3363,6 +3398,31 @@ void Game::FetchLobbyStatsAsync() {
 			if(resp.contains("latestActivity") && resp["latestActivity"].is_string()) {
 				lobbyLatestActivity = BufferIO::DecodeUTF8(resp["latestActivity"].get<std::string>());
 			}
+			lobbyLogs.clear();
+			if(resp.contains("latestLogs") && resp["latestLogs"].is_array()) {
+				for(const auto& item : resp["latestLogs"]) {
+					if(item.is_object()) {
+						LobbyLogEntry entry;
+						std::string txt = SafeJsonStr(item, "text", "");
+						std::string tim = SafeJsonStr(item, "time", "");
+						entry.text = BufferIO::DecodeUTF8(txt);
+						entry.time = BufferIO::DecodeUTF8(tim);
+						if(!entry.text.empty())
+							lobbyLogs.push_back(entry);
+					}
+				}
+			}
+			if(lobbyLogs.empty() && !lobbyLatestActivity.empty()) {
+				std::wstringstream wss(lobbyLatestActivity);
+				std::wstring line;
+				while(std::getline(wss, line)) {
+					if(!line.empty()) {
+						LobbyLogEntry entry;
+						entry.text = line;
+						lobbyLogs.push_back(entry);
+					}
+				}
+			}
 		}
 		if(fullResp.contains("success") && fullResp["success"].is_boolean() && fullResp["success"].get<bool>() && fullResp.contains("user") && fullResp["user"].is_object()) {
 			const auto& u = fullResp["user"];
@@ -3472,6 +3532,7 @@ void Game::ProcessPendingLobbyStats() {
 	std::string avFile, vipName, medTitle, medFile;
 	std::wstring pName, clanTxt, puzTxt, actTxt;
 	std::vector<LobbyTopEntry> top3Copy;
+	std::vector<LobbyLogEntry> logsCopy;
 	{
 		std::lock_guard<epro::mutex> lk(lobbyStatsMutex);
 		pingMs = lobbyPingMs;
@@ -3513,6 +3574,7 @@ void Game::ProcessPendingLobbyStats() {
 		puzTxt = lobbyPuzzleText;
 		actTxt = lobbyLatestActivity;
 		top3Copy = lobbyTop3;
+		logsCopy = lobbyLogs;
 	}
 	playerLevel = pLvl;
 	playerStarShips = ss;
@@ -3594,6 +3656,15 @@ void Game::ProcessPendingLobbyStats() {
 	}
 	if(stLobbyPuzzleEvent)
 		stLobbyPuzzleEvent->setText(puzTxt.c_str());
+	for(int li = 0; li < 3; ++li) {
+		if(li < (int)logsCopy.size()) {
+			if(stLobbyLogText[li]) stLobbyLogText[li]->setText(logsCopy[li].text.c_str());
+			if(stLobbyLogTime[li]) stLobbyLogTime[li]->setText(logsCopy[li].time.c_str());
+		} else {
+			if(stLobbyLogText[li]) stLobbyLogText[li]->setText(L"");
+			if(stLobbyLogTime[li]) stLobbyLogTime[li]->setText(L"");
+		}
+	}
 	if(stLobbyActivityText)
 		stLobbyActivityText->setText(actTxt.c_str());
 	ResizeMainMenuScreen();
