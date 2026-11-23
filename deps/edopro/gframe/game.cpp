@@ -187,6 +187,9 @@ void Game::Initialize() {
 		auto lbFont = textfont;
 		lbFont.size = Scale(15);
 		loginBtnFont = irr::gui::CGUITTFont::createTTFont(env, lbFont, fallbackFonts);
+		auto ldFont = textfont;
+		ldFont.size = Scale(12);
+		loginDescFont = irr::gui::CGUITTFont::createTTFont(env, ldFont, fallbackFonts);
 		auto liFont = textfont;
 		liFont.font = EPRO_TEXT("fonts/italic.ttf");
 		liFont.size = Scale(13);
@@ -4861,8 +4864,10 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStoreCardsTitle->setOverrideFont(loginTitleFont);
 	stStoreCardsBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStoreCardsBalance->setVisible(false);
 	stStoreCardsBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
 	stStoreCardsBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stStoreCardsBalanceCD->setVisible(false);
 	stStoreCardsBanner = env->addStaticText(L"Adquiere cartas individuales (l\u00EDmite 1 copia por usuario). Cada compra se env\u00EDa a tu Buz\u00F3n.", irr::core::recti(0, 0, 10, 10), false, true, wStoreCards);
 	stStoreCardsBanner->setWordWrap(true);
 	stStoreCardsBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4884,13 +4889,18 @@ void Game::PopulateEconomyScreens() {
 		imgCardCardArts[i]->setScaleImage(true);
 		stCardCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wCardCards[i]);
 		stCardCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginCardTextFont) stCardCardTitles[i]->setOverrideFont(loginCardTextFont);
+		else if(loginUiFont) stCardCardTitles[i]->setOverrideFont(loginUiFont);
 		stCardCardMeta[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wCardCards[i]);
 		stCardCardMeta[i]->setWordWrap(true);
 		stCardCardMeta[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginCardTextFont) stCardCardMeta[i]->setOverrideFont(loginCardTextFont);
 		btnCardCardBuySS[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_SS_0 + i, L"Comprar SS");
 		btnCardCardBuyCD[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_CD_0 + i, L"Comprar CD");
 		styleDarkBtn(btnCardCardBuySS[i]);
-		styleCyanBtn(btnCardCardBuyCD[i]);
+		btnCardCardBuySS[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		styleDarkBtn(btnCardCardBuyCD[i]);
+		btnCardCardBuyCD[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	}
 	btnStoreCardPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_PREV, L"Anterior");
 	stStoreCardPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
@@ -4907,8 +4917,10 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stStorePacksTitle->setOverrideFont(loginTitleFont);
 	stStorePacksBalance = env->addStaticText(L"StarShips: 0 SS", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePacksBalance->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	stStorePacksBalance->setVisible(false);
 	stStorePacksBalanceCD = env->addStaticText(L"Cristales: 0 CD", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePacksBalanceCD->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stStorePacksBalanceCD->setVisible(false);
 	stStorePacksBanner = env->addStaticText(L"Cada sobre entrega 3 cartas aleatorias de su serie directamente a tu inventario seg\u00FAn su probabilidad de drop.", irr::core::recti(0, 0, 10, 10), false, true, wStorePacks);
 	stStorePacksBanner->setWordWrap(true);
 	stStorePacksBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
@@ -4924,12 +4936,15 @@ void Game::PopulateEconomyScreens() {
 		stPackCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardTitles[i]->setWordWrap(true);
 		stPackCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginCardTextFont) stPackCardTitles[i]->setOverrideFont(loginCardTextFont);
 		stPackCardDescs[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardDescs[i]->setWordWrap(true);
-		stPackCardDescs[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-		btnPackCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_BUY_0 + i, L"Comprar y Abrir");
+		stPackCardDescs[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginCardTextFont) stPackCardDescs[i]->setOverrideFont(loginCardTextFont);
+		btnPackCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_BUY_0 + i, L"Comprar");
 		btnPackCardView[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_VIEW_0 + i, L"Ver Cartas");
-		styleCyanBtn(btnPackCardBuy[i]);
+		styleDarkBtn(btnPackCardBuy[i]);
+		btnPackCardBuy[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnPackCardView[i]);
 	}
 	wPackPoolOverlay = makePanel(wStorePacks);
@@ -5509,9 +5524,9 @@ void Game::ResizeEconomyScreens() {
 	// 3c. Store Cards (7x2 card grid + search + currency filter + pagination)
 	if(wStoreCards) {
 		wStoreCards->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreCardsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
-		stStoreCardsBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
-		if(stStoreCardsBalanceCD) stStoreCardsBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		stStoreCardsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		if(stStoreCardsBalance) stStoreCardsBalance->setVisible(false);
+		if(stStoreCardsBalanceCD) stStoreCardsBalanceCD->setVisible(false);
 		btnStoreCardBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stStoreCardsBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		ebStoreCardSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(260), topY + Scale(90)));
@@ -5534,13 +5549,14 @@ void Game::ResizeEconomyScreens() {
 			irr::s32 cy = gridTop + row * (cardH + gap);
 			if(wCardCards[i]) {
 				wCardCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 artH = std::max<irr::s32>(Scale(70), (cardH * 48) / 100);
+				irr::s32 maxArtH = cardH - Scale(78);
+				irr::s32 maxArtW = cardW - Scale(10);
+				irr::s32 artH = maxArtH;
 				irr::s32 artW = (artH * 177) / 254;
-				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
-				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(6), (cardW + artW) / 2, Scale(6) + artH));
-				irr::s32 ty = Scale(8) + artH;
-				if(stCardCardTitles[i]) stCardCardTitles[i]->setRelativePosition(irr::core::recti(Scale(6), ty, cardW - Scale(6), ty + Scale(20)));
-				if(stCardCardMeta[i]) stCardCardMeta[i]->setRelativePosition(irr::core::recti(Scale(6), ty + Scale(20), cardW - Scale(6), cardH - Scale(38)));
+				if(artW > maxArtW) { artW = maxArtW; artH = (artW * 254) / 177; }
+				if(imgCardCardArts[i]) imgCardCardArts[i]->setRelativePosition(irr::core::recti((cardW - artW) / 2, Scale(4), (cardW + artW) / 2, Scale(4) + artH));
+				if(stCardCardTitles[i]) stCardCardTitles[i]->setRelativePosition(irr::core::recti(Scale(4), cardH - Scale(72), cardW - Scale(4), cardH - Scale(52)));
+				if(stCardCardMeta[i]) stCardCardMeta[i]->setRelativePosition(irr::core::recti(Scale(4), cardH - Scale(52), cardW - Scale(4), cardH - Scale(36)));
 				bool hasSS = btnCardCardBuySS[i] && btnCardCardBuySS[i]->isVisible();
 				bool hasCD = btnCardCardBuyCD[i] && btnCardCardBuyCD[i]->isVisible();
 				if(hasSS && hasCD) {
@@ -5563,9 +5579,9 @@ void Game::ResizeEconomyScreens() {
 	// 3d. Store Packs (6x2 card grid + search + pagination + visual pool overlay)
 	if(wStorePacks) {
 		wStorePacks->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStorePacksTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(560), topY + Scale(30)));
-		stStorePacksBalance->setRelativePosition(irr::core::recti(W - pad - Scale(550), topY + Scale(4), W - pad - Scale(350), topY + Scale(28)));
-		if(stStorePacksBalanceCD) stStorePacksBalanceCD->setRelativePosition(irr::core::recti(W - pad - Scale(342), topY + Scale(4), W - pad - Scale(175), topY + Scale(28)));
+		stStorePacksTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		if(stStorePacksBalance) stStorePacksBalance->setVisible(false);
+		if(stStorePacksBalanceCD) stStorePacksBalanceCD->setVisible(false);
 		btnStorePackBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stStorePacksBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		ebStorePackSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(280), topY + Scale(90)));
@@ -6434,11 +6450,13 @@ void Game::RefreshStoreCardsPage() {
 				btnCardCardBuySS[slot]->setVisible(c.precio > 0);
 				btnCardCardBuySS[slot]->setEnabled(canBuy);
 				btnCardCardBuySS[slot]->setText(epro::format(L"{} SS", c.precio).c_str());
+				btnCardCardBuySS[slot]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 			}
 			if(btnCardCardBuyCD[slot]) {
 				btnCardCardBuyCD[slot]->setVisible(c.precioCD > 0);
 				btnCardCardBuyCD[slot]->setEnabled(canBuy);
 				btnCardCardBuyCD[slot]->setText(epro::format(L"{} CD", c.precioCD).c_str());
+				btnCardCardBuyCD[slot]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 			}
 		} else {
 			if(wCardCards[slot]) wCardCards[slot]->setVisible(false);
@@ -6520,8 +6538,10 @@ void Game::RefreshStorePacksPage() {
 			if(stPackCardTitles[slot]) stPackCardTitles[slot]->setText(p.nombre.c_str());
 			if(stPackCardDescs[slot])
 				stPackCardDescs[slot]->setText(epro::format(L"{} \u2022 {} cartas \u2022 {} SS", p.serieNombre, p.totalCartasPool, p.precio).c_str());
-			if(btnPackCardBuy[slot])
+			if(btnPackCardBuy[slot]) {
 				btnPackCardBuy[slot]->setText(epro::format(L"{} SS", p.precio).c_str());
+				btnPackCardBuy[slot]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			}
 		} else {
 			if(wPackCards[slot]) wPackCards[slot]->setVisible(false);
 		}
@@ -10163,4 +10183,217 @@ irr::core::recti Game::ResizeWin(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y
 }
 void Game::SetCentered(irr::gui::IGUIElement* elem, bool use_offset) const {
 	if(use_offset && (is_building || dInfo.isInDuel))
-... [truncated for diff preview]
+		elem->setRelativePosition(ResizeWinFromCenter(0, 0, elem->getRelativePosition().getWidth(), elem->getRelativePosition().getHeight(), Scale(155)));
+	else
+		elem->setRelativePosition(ResizeWinFromCenter(0, 0, elem->getRelativePosition().getWidth(), elem->getRelativePosition().getHeight()));
+}
+irr::core::recti Game::ResizeElem(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2, bool scale) const {
+	irr::s32 sx = x2 - x;
+	irr::s32 sy = y2 - y;
+	x = (x + sx / 2 - 100) * window_scale.X - sx / 2 + 100;
+	y = y * window_scale.Y;
+	x2 = sx + x;
+	y2 = sy + y;
+	return scale ? Scale(x, y, x2, y2) : irr::core::recti{x, y, x2, y2};
+}
+irr::core::recti Game::ResizePhaseHint(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2, irr::s32 width) const {
+	auto res = Resize(x, y, x2, y2);
+	res.UpperLeftCorner.X -= width / 2;
+	return res;
+}
+irr::core::recti Game::ResizeWinFromCenter(irr::s32 x, irr::s32 y, irr::s32 x2, irr::s32 y2, irr::s32 xoff, irr::s32 yoff) const {
+	auto size = driver->getScreenSize();
+	irr::core::recti rect(0, 0, size.Width, size.Height);
+	auto center = rect.getCenter();
+	irr::core::dimension2du sizes((x + x2) / 2, (y + y2) / 2);
+	return irr::core::recti((center.X - sizes.Width) + xoff, center.Y - sizes.Height + yoff, center.X + sizes.Width + xoff, center.Y + sizes.Height + yoff);
+}
+void Game::ValidateName(irr::gui::IGUIElement* obj) {
+	std::wstring text = obj->getText();
+	const auto oldsize = text.size();
+	static constexpr wchar_t chars[] = LR"(<>:"/\|?*)";
+	for(auto& forbid : chars)
+		text.erase(std::remove(text.begin(), text.end(), forbid), text.end());
+	if(text.size() != oldsize)
+		obj->setText(text.data());
+}
+epro::path_string Game::FindScript(epro::path_stringview name, irr::io::IReadFile** retarchive) {
+	for(auto& path : script_dirs) {
+		if(path == EPRO_TEXT("archives")) {
+			if(auto tmp = Utils::FindFileInArchives(EPRO_TEXT("script/"), name)) {
+				if(retarchive)
+					*retarchive = tmp;
+				else
+					tmp->drop();
+				return path;
+			}
+		} else {
+			auto tmp = path + name.data();
+			if(Utils::FileExists(tmp))
+				return tmp;
+		}
+	}
+	if(Utils::FileExists(name))
+		return name.data();
+	return EPRO_TEXT("");
+}
+static inline void seek(irr::io::IReadFile& file) { file.seek(0); }
+static inline void seek(FileStream& file) { file.seekg(0); }
+std::vector<char> Game::FindAndReadScript(epro::stringview name) {
+	irr::io::IReadFile* tmp{ nullptr };
+	auto path = FindScript(Utils::ToPathString(name), &tmp);
+	return ReadScript(path, tmp);
+}
+std::vector<char> Game::ReadScript(epro::path_stringview path, irr::io::IReadFile* archive) {
+	auto SkipBom = [](auto& stream) -> auto& {
+		char bom[3]{};
+		stream.read(bom, 3);
+		if(bom[0] != '\xEF' || bom[1] != '\xBB' || bom[2] != '\xBF')
+			seek(stream);
+		return stream;
+	};
+	if(archive) {
+		SkipBom(*archive);
+		std::vector<char> buffer(archive->getSize() - archive->getPos());
+		if(archive->read(buffer.data(), buffer.size()) != buffer.size())
+			buffer.clear();
+		archive->drop();
+		return buffer;
+	}
+	if(path.empty())
+		return {};
+	FileStream script{ path.data(), FileStream::in | FileStream::binary };
+	if(!script.fail())
+		return { std::istreambuf_iterator<char>(SkipBom(script)), std::istreambuf_iterator<char>() };
+	return {};
+}
+bool Game::LoadScript(OCG_Duel pduel, epro::stringview script_name) {
+	auto buf = FindAndReadScript(script_name);
+	return buf.size() && OCG_LoadScript(pduel, buf.data(), static_cast<uint32_t>(buf.size()), script_name.data());
+}
+OCG_Duel Game::SetupDuel(OCG_DuelOptions opts) {
+	opts.cardReader = DataManager::CardReader;
+	opts.payload1 = gDataManager;
+	opts.scriptReader = ScriptReader;
+	opts.payload2 = this;
+	opts.logHandler = MessageHandler;
+	opts.payload3 = this;
+	opts.enableUnsafeLibraries = 1;
+	OCG_Duel pduel = nullptr;
+	OCG_CreateDuel(&pduel, &opts);
+	LoadScript(pduel, "constant.lua");
+	LoadScript(pduel, "utility.lua");
+	for(const auto& script : init_scripts) {
+		auto buf = ReadScript(script);
+		if(buf.size())
+			OCG_LoadScript(pduel, buf.data(), static_cast<uint32_t>(buf.size()), Utils::ToUTF8IfNeeded(script).data());
+	}
+	return pduel;
+}
+int Game::ScriptReader(void* payload, OCG_Duel duel, const char* name) {
+	return static_cast<Game*>(payload)->LoadScript(duel, name);
+}
+void Game::MessageHandler(void* payload, const char* string, int type) {
+	Game* game = static_cast<Game*>(payload);
+	std::stringstream ss(string);
+	std::string str;
+	while(std::getline(ss, str)) {
+		auto pos = str.find('\r');
+		if(str.size() && pos != std::string::npos)
+			str.erase(pos);
+		game->AddDebugMsg(str);
+		if(type > 1)
+			epro::print("{}\n", str);
+	}
+}
+void Game::UpdateDownloadBar(int percentage, int cur, int tot, const char* filename, bool is_new, void* payload) {
+	Game* game = static_cast<Game*>(payload);
+	std::lock_guard<epro::mutex> lk(game->progressStatusLock);
+	auto& status = game->progressStatus;
+	status.progressBottom = percentage;
+	game->updateProgressBottom->setProgress(percentage);
+	if((status.newFile |= is_new) == true)
+		status.progressText = epro::format(L"{}\n{}",
+										  epro::format(gDataManager->GetSysString(1462), BufferIO::DecodeUTF8(filename)),
+										  epro::format(gDataManager->GetSysString(1464), cur, tot));
+}
+void Game::UpdateUnzipBar(unzip_payload* payload) {
+	UnzipperPayload* unzipper = static_cast<UnzipperPayload*>(payload->payload);
+	Game* game = static_cast<Game*>(unzipper->payload);
+	std::lock_guard<epro::mutex> lk(game->progressStatusLock);
+	auto& status = game->progressStatus;
+	// current archive
+	if((status.newFile |= payload->is_new) == true) {
+		status.progressText = epro::format(L"{}\n{}",
+										  epro::format(gDataManager->GetSysString(1463), Utils::ToUnicodeIfNeeded(unzipper->filename)),
+										  epro::format(gDataManager->GetSysString(1464), unzipper->cur, unzipper->tot));
+		status.subProgressText = epro::format(gDataManager->GetSysString(1465), Utils::ToUnicodeIfNeeded(payload->filename));
+	}
+	status.progressTop = static_cast<irr::s32>(((double)payload->cur / (double)payload->tot) * 100);
+	// current file in archive
+	status.progressBottom = payload->percentage;
+}
+void Game::PopulateResourcesDirectories() {
+	if(Utils::FileExists(EPRO_TEXT("./init.lua")))
+		init_scripts.push_back(EPRO_TEXT("./init.lua"));
+	script_dirs.push_back(EPRO_TEXT("./expansions/script/"));
+	auto expansions_subdirs = Utils::FindSubfolders(EPRO_TEXT("./expansions/script/"));
+	script_dirs.insert(script_dirs.end(), std::make_move_iterator(expansions_subdirs.begin()), std::make_move_iterator(expansions_subdirs.end()));
+	script_dirs.push_back(EPRO_TEXT("archives"));
+	script_dirs.push_back(EPRO_TEXT("./script/"));
+	auto script_subdirs = Utils::FindSubfolders(EPRO_TEXT("./script/"));
+	script_dirs.insert(script_dirs.end(), std::make_move_iterator(script_subdirs.begin()), std::make_move_iterator(script_subdirs.end()));
+	pic_dirs.push_back(EPRO_TEXT("./expansions/pics/"));
+	pic_dirs.push_back(EPRO_TEXT("archives"));
+	pic_dirs.push_back(EPRO_TEXT("./pics/"));
+	cover_dirs.push_back(EPRO_TEXT("./expansions/pics/cover/"));
+	cover_dirs.push_back(EPRO_TEXT("archives"));
+	cover_dirs.push_back(EPRO_TEXT("./pics/cover/"));
+	field_dirs.push_back(EPRO_TEXT("./expansions/pics/field/"));
+	field_dirs.push_back(EPRO_TEXT("archives"));
+	field_dirs.push_back(EPRO_TEXT("./pics/field/"));
+}
+
+void Game::PopulateLocales() {
+	locales.clear();
+	for(auto& locale : Utils::FindSubfolders(EPRO_TEXT("./config/languages/"), 1, false)) {
+		locales.emplace_back(locale, std::vector<epro::path_string>());
+	}
+}
+
+void Game::ApplyLocale(size_t index, bool forced) {
+	static size_t previndex = 0;
+	if(index > locales.size())
+		return;
+	if(previndex == index && !forced)
+		return;
+	previndex = index;
+	gDataManager->ClearLocaleStrings();
+	gDataManager->ClearLocaleTexts();
+	if(index > 0) {
+		try {
+			gGameConfig->locale = locales[index - 1].first;
+			auto locale = epro::format(EPRO_TEXT("./config/languages/{}"), gGameConfig->locale);
+			for(auto& file : Utils::FindFiles(locale, { EPRO_TEXT("cdb") })) {
+				gDataManager->LoadLocaleDB(epro::format(EPRO_TEXT("{}/{}"), locale, file));
+			}
+			gDataManager->LoadLocaleStrings(epro::format(EPRO_TEXT("{}/strings.conf"), locale));
+			auto& extra = locales[index - 1].second;
+			bool refresh_db = false;
+			for(auto& path : extra) {
+				for(auto& file : Utils::FindFiles(path, { EPRO_TEXT("cdb") }, 0))
+					refresh_db = gDataManager->LoadLocaleDB(path + file) || refresh_db;
+				gDataManager->LoadLocaleStrings(path + EPRO_TEXT("strings.conf"));
+			}
+			if(refresh_db && is_building && deckBuilder.results.size())
+				deckBuilder.StartFilter(true);
+		}
+		catch(...) {
+			return;
+		}
+	} else
+		gGameConfig->locale = EPRO_TEXT("en");
+	ReloadElementsStrings();
+}
+
+}

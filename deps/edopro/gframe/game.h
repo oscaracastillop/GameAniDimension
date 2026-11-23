@@ -991,6 +991,7 @@ public:
 	irr::gui::CGUITTFont* loginTitleFont{ nullptr };
 	irr::gui::CGUITTFont* loginUiFont{ nullptr };
 	irr::gui::CGUITTFont* loginBtnFont{ nullptr };
+	irr::gui::CGUITTFont* loginDescFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
