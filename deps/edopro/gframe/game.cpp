@@ -2107,9 +2107,7 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 		bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
 		driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
-		auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
-		if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
-		if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+		auto tex = LoadCharacterTexture(utf8Avatar);
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
 
 		if(tex) {
@@ -2623,9 +2621,7 @@ void Game::UpdateAdventureNPCDisplay() {
 	bool prevMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
 	driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
-	auto tex = driver->getTexture(epro::format("textures/characters/dm/{}", utf8Avatar).c_str());
-	if(!tex) tex = driver->getTexture(epro::format("textures/characters/gx/{}", utf8Avatar).c_str());
-	if(!tex) tex = driver->getTexture(epro::format("textures/characters/{}", utf8Avatar).c_str());
+	auto tex = LoadCharacterTexture(utf8Avatar);
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, prevMip);
 
 	if(tex) {
@@ -4471,6 +4467,69 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 				}
 				if(tex) break;
 			}
+		}
+		curl_easy_cleanup(curl);
+	}
+	return tex;
+}
+
+irr::video::ITexture* Game::LoadCharacterTexture(const std::string& filename) {
+	if(filename.empty() || !driver) return nullptr;
+	std::vector<std::string> localPaths = {
+		"textures/characters/dm/" + filename,
+		"textures/characters/gx/" + filename,
+		"textures/characters/" + filename
+	};
+	for(const auto& path : localPaths) {
+		auto tex = driver->getTexture(path.c_str());
+		if(tex) return tex;
+	}
+
+	Utils::MakeDirectory(EPRO_TEXT("textures"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/characters"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/characters/dm"));
+	Utils::MakeDirectory(EPRO_TEXT("textures/characters/gx"));
+
+	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+	auto curl = curl_easy_init();
+	irr::video::ITexture* tex = nullptr;
+	if(curl) {
+		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
+		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+		curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+		curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+
+		for(const auto& host : hosts) {
+			for(const auto& rel : localPaths) {
+				std::string url = host + "/" + rel;
+				std::string bytes;
+				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+				long code = 0;
+				auto res = curl_easy_perform(curl);
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+				if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+					std::ofstream out(rel, std::ios::binary);
+					if(out) {
+						out.write(bytes.data(), bytes.size());
+						out.close();
+						tex = driver->getTexture(rel.c_str());
+					}
+					if(!tex && device && device->getFileSystem()) {
+						auto* memFile = device->getFileSystem()->createMemoryReadFile(
+							const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), rel.c_str(), false);
+						if(memFile) {
+							tex = driver->getTexture(memFile);
+							memFile->drop();
+						}
+					}
+					if(tex) break;
+				}
+			}
+			if(tex) break;
 		}
 		curl_easy_cleanup(curl);
 	}

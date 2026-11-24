@@ -1547,6 +1547,7 @@ public:
 	uint32_t activeStoreCardCode{ 0 };
 
 	irr::video::ITexture* LoadAvatarTexture(const std::string& filename);
+	irr::video::ITexture* LoadCharacterTexture(const std::string& filename);
 	irr::video::ITexture* LoadFlagTexture(const std::string& flagUrl);
 	irr::video::ITexture* LoadMedalTexture(int npcLevel);
 	irr::video::ITexture* LoadMedalTexture(const std::string& filename);
