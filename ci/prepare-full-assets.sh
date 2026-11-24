@@ -81,6 +81,13 @@ if [ -d "src/main/assets/textures" ]; then
     cp -r src/main/assets/textures/* "$ASSETS/textures/"
 fi
 
+# 4.1 Custom Skin (Ani Dimension dark neon skin)
+if [ -d "src/main/assets/skin" ]; then
+    echo "Copying custom skin overrides..."
+    mkdir -p "$ASSETS/skin"
+    cp -r src/main/assets/skin/* "$ASSETS/skin/"
+fi
+
 # 5. User and NPC Decks
 if [ -d "src/main/assets/deck" ]; then
     echo "Copying deck collections..."

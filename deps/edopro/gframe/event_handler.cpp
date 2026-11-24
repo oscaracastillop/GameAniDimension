@@ -907,7 +907,7 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						mainGame->imageLoading[mainGame->btnCardSelect[i]] = curcard->chain_code;
 					else
 						mainGame->btnCardSelect[i]->setImage(mainGame->imageManager.tCover[0]);
-					mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale(30 + i * 125, 55, 30 + 120 + i * 125, 225));
+					mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale(25 + i * 135, 62, 25 + 125 + i * 135, 262));
 					// text
 					std::wstring text = L"";
 					if(sort_list.size()) {

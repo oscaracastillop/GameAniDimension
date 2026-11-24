@@ -9,6 +9,7 @@ src/main/assets/*
 !src/main/assets/WindBot/
 !src/main/assets/textures/
 !src/main/assets/config/
+!src/main/assets/skin/
 .gradle/
 .id*/
 *vs/
