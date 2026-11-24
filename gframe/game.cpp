@@ -1872,7 +1872,7 @@ static std::vector<std::string> GetCandidateApiHosts() {
 	if(!gCachedActiveApiHost.empty()) {
 		return { gCachedActiveApiHost };
 	}
-	return { "https://anidimension.online", "http://127.0.0.1:8080" };
+	return { "https://anidimension.online", "http://66.92.168.136:8080", "http://127.0.0.1:8080" };
 }
 
 static void OnApiHostSucceeded(const std::string& host) {
@@ -4638,6 +4638,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wEventsHub) wEventsHub->setVisible(false);
 	if(wEventsMenu) wEventsMenu->setVisible(false);
 	if(wClansMenu) wClansMenu->setVisible(false);
+	if(wClanDetail) wClanDetail->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
 	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
 	if(wPackPoolOverlay) wPackPoolOverlay->setVisible(false);
@@ -5401,40 +5402,86 @@ void Game::PopulateEconomyScreens() {
 		}
 	}
 
-	// 4e. Clans
+	// 4e. Clans (Full-screen table canvas with pagination matching web reference)
 	makeCanvas(wClansMenu);
-	pnlClansLeft = makePanel(wClansMenu);
-	pnlClansRight = makePanel(wClansMenu);
-	stClansTitle = env->addStaticText(L"CLANES ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu);
-	stClansTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stClansTitle->setOverrideFont(loginUiFont);
-	ebClanSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wClansMenu);
-	btnClanSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_SEARCH, L"Buscar");
-	lstClans = env->addListBox(irr::core::recti(0, 0, 10, 10), wClansMenu, LISTBOX_CLANS, true);
-	lstClans->setItemHeight(Scale(26));
-	stClanDetail = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wClansMenu);
-	stClanDetail->setWordWrap(true);
-	stClanDetail->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	lstClanRequests = env->addListBox(irr::core::recti(0, 0, 10, 10), wClansMenu, LISTBOX_CLAN_REQUESTS, true);
-	lstClanRequests->setItemHeight(Scale(24));
-	btnClanRequest = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_REQUEST, L"Solicitar Unirse");
+	stClansTitle = env->addStaticText(L"CLANES DE ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu);
+	stClansTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stClansTitle->setOverrideFont(loginTitleFont);
+
+	stClansDesc = env->addStaticText(L"M\u00E1ximo 30 miembros por clan. Gana EXP de clan derrotando a jugadores con clan en PvP Online.", irr::core::recti(0, 0, 10, 10), false, true, wClansMenu);
+	stClansDesc->setWordWrap(true);
+	stClansDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClansDesc->setOverrideFont(loginDescFont);
+
 	btnClanMyClan = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_MY_CLAN, L"Mi Clan");
-	btnClanCreateOpen = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_CREATE_OPEN, L"Crear Clan");
-	btnClanLeave = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_LEAVE, L"Salir del Clan");
-	btnClanAcceptReq = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_ACCEPT_REQ, L"Aceptar Solicitud");
-	btnClanRejectReq = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_REJECT_REQ, L"Rechazar");
-	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"Volver a Perfil");
-	styleDarkBtn(btnClanSearch);
-	styleCyanBtn(btnClanRequest);
-	styleDarkBtn(btnClanMyClan);
-	styleDarkBtn(btnClanCreateOpen);
-	styleDarkBtn(btnClanLeave);
-	styleCyanBtn(btnClanAcceptReq);
-	styleDarkBtn(btnClanRejectReq);
+	btnClanCreateOpen = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_CREATE_OPEN, L"+ Crear Clan");
+	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"\u2190 Volver a Perfil");
+	stylePurpBtn(btnClanMyClan);
+	styleCyanBtn(btnClanCreateOpen);
 	styleDarkBtn(btnClansBack);
 
+	ebClanSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wClansMenu);
+	ebClanSearch->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	btnClanSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_SEARCH, L"Buscar");
+	styleDarkBtn(btnClanSearch);
+
+	pnlClansTable = makePanel(wClansMenu);
+
+	thClanColClan = env->addStaticText(L"CLAN", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	thClanColLevel = env->addStaticText(L"NIVEL", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	thClanColMembers = env->addStaticText(L"MIEMBROS", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	thClanColMinLevel = env->addStaticText(L"NIVEL M\u00CDN.", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	thClanColBonus = env->addStaticText(L"BONOS", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	thClanColActions = env->addStaticText(L"ACCIONES", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+	for(auto* th : { thClanColClan, thClanColLevel, thClanColMembers, thClanColMinLevel, thClanColBonus, thClanColActions }) {
+		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) th->setOverrideFont(loginDescFont);
+	}
+
+	for(int r = 0; r < 6; ++r) {
+		stClanRowName[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlClansTable);
+		stClanRowName[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginUiFont) stClanRowName[r]->setOverrideFont(loginUiFont);
+
+		stClanRowLevel[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+		stClanRowLevel[r]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		if(loginUiFont) stClanRowLevel[r]->setOverrideFont(loginUiFont);
+
+		stClanRowMembers[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+		stClanRowMembers[r]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		if(loginUiFont) stClanRowMembers[r]->setOverrideFont(loginUiFont);
+
+		stClanRowMinLevel[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+		stClanRowMinLevel[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginUiFont) stClanRowMinLevel[r]->setOverrideFont(loginUiFont);
+
+		stClanRowBonus[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClansTable);
+		stClanRowBonus[r]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginUiFont) stClanRowBonus[r]->setOverrideFont(loginUiFont);
+
+		btnClanRowView[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClansTable, BUTTON_CLAN_ROW_VIEW_0 + r, L"Ver Clan");
+		stylePurpBtn(btnClanRowView[r]);
+
+		btnClanRowReq[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClansTable, BUTTON_CLAN_ROW_REQ_0 + r, L"Solicitar");
+		styleCyanBtn(btnClanRowReq[r]);
+	}
+
+	stClansTotal = env->addStaticText(L"Total: 0 clanes", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu);
+	stClansTotal->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClansTotal->setOverrideFont(loginDescFont);
+
+	btnClansPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_PREV_PAGE, L"Anterior");
+	stClansPage = env->addStaticText(L"P\u00E1gina 1 de 1", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu);
+	stClansPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stClansPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginUiFont) stClansPage->setOverrideFont(loginUiFont);
+	btnClansNext = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_NEXT_PAGE, L"Siguiente");
+	styleDarkBtn(btnClansPrev);
+	styleDarkBtn(btnClansNext);
+
+	// Modal Crear Clan
 	pnlClanCreate = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu, -1, true);
-	pnlClanCreate->setBackgroundColor(irr::video::SColor(242, 10, 15, 28));
+	pnlClanCreate->setBackgroundColor(irr::video::SColor(245, 10, 15, 28));
 	pnlClanCreate->setVisible(false);
 	env->addStaticText(L"CREAR CLAN (Requiere Nv. 50+ y 350,000 SS)", irr::core::recti(20, 14, 420, 38), false, false, pnlClanCreate)->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 	env->addStaticText(L"Nombre del Clan:", irr::core::recti(20, 48, 420, 68), false, false, pnlClanCreate)->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
@@ -5447,6 +5494,123 @@ void Game::PopulateEconomyScreens() {
 	btnClanCreateCancel = env->addButton(irr::core::recti(230, 240, 420, 276), pnlClanCreate, BUTTON_CLAN_CREATE_CANCEL, L"Cancelar");
 	styleCyanBtn(btnClanCreateSubmit);
 	styleDarkBtn(btnClanCreateCancel);
+
+	// 4e-bis. Clan Detail (Dedicated screen matching Image 2 web reference)
+	makeCanvas(wClanDetail);
+	stClanDetailTitle = env->addStaticText(L"Clan: AniDimension", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
+	stClanDetailTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stClanDetailTitle->setOverrideFont(loginTitleFont);
+
+	stClanDetailDesc = env->addStaticText(L"Gestiona tu clan, miembros, solicitudes y bonificaciones.", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
+	stClanDetailDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClanDetailDesc->setOverrideFont(loginDescFont);
+
+	btnClanDetailLeave = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_LEAVE, L"Abandonar Clan");
+	btnClanDetailRequest = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_REQUEST, L"Solicitar Unirse");
+	btnClanDetailBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_BACK, L"\u2190 Lista de Clanes");
+	styleDarkBtn(btnClanDetailLeave);
+	styleCyanBtn(btnClanDetailRequest);
+	styleDarkBtn(btnClanDetailBack);
+
+	// Summary Card
+	pnlClanSummary = makePanel(wClanDetail);
+	stClanDetailName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
+	stClanDetailName->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stClanDetailName->setOverrideFont(loginTitleFont);
+
+	stClanDetailBadges = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
+	stClanDetailBadges->setOverrideColor(irr::video::SColor(255, 110, 231, 183));
+	if(loginUiFont) stClanDetailBadges->setOverrideFont(loginUiFont);
+
+	stClanDetailSummary = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlClanSummary);
+	stClanDetailSummary->setWordWrap(true);
+	stClanDetailSummary->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
+	if(loginDescFont) stClanDetailSummary->setOverrideFont(loginDescFont);
+
+	stClanDetailBonuses = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
+	stClanDetailBonuses->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) stClanDetailBonuses->setOverrideFont(loginUiFont);
+
+	stClanDetailExpInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
+	stClanDetailExpInfo->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClanDetailExpInfo->setOverrideFont(loginDescFont);
+
+	// Requests Card
+	pnlClanRequestsTable = makePanel(wClanDetail);
+	stClanRequestsTitle = env->addStaticText(L"Solicitudes de Ingreso Pendientes", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
+	stClanRequestsTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginUiFont) stClanRequestsTitle->setOverrideFont(loginUiFont);
+
+	stClanNoRequests = env->addStaticText(L"No hay solicitudes pendientes.", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
+	stClanNoRequests->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClanNoRequests->setOverrideFont(loginDescFont);
+
+	for(int i = 0; i < 4; ++i) {
+		stClanReqUser[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
+		stClanReqUser[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		if(loginDescFont) stClanReqUser[i]->setOverrideFont(loginDescFont);
+
+		btnClanReqAccept[i] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClanRequestsTable, BUTTON_CLAN_REQ_ACCEPT_0 + i, L"Aceptar");
+		styleEmerBtn(btnClanReqAccept[i]);
+
+		btnClanReqReject[i] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClanRequestsTable, BUTTON_CLAN_REQ_REJECT_0 + i, L"Rechazar");
+		styleDarkBtn(btnClanReqReject[i]);
+	}
+
+	// Members Card
+	pnlClanMembersTable = makePanel(wClanDetail);
+	stClanMembersTitle = env->addStaticText(L"Miembros del Clan", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	stClanMembersTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginUiFont) stClanMembersTitle->setOverrideFont(loginUiFont);
+
+	thClanMemUser = env->addStaticText(L"DUELISTA", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	thClanMemRole = env->addStaticText(L"ROL", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	thClanMemLevel = env->addStaticText(L"NIVEL", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	thClanMemExp = env->addStaticText(L"EXP APORTADA", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	thClanMemDate = env->addStaticText(L"FECHA INGRESO", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	thClanMemAction = env->addStaticText(L"GESTI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+	for(auto* th : { thClanMemUser, thClanMemRole, thClanMemLevel, thClanMemExp, thClanMemDate, thClanMemAction }) {
+		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) th->setOverrideFont(loginDescFont);
+	}
+
+	for(int i = 0; i < 6; ++i) {
+		stClanMemUser[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+		stClanMemUser[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginUiFont) stClanMemUser[i]->setOverrideFont(loginUiFont);
+
+		stClanMemRole[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+		stClanMemRole[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		if(loginUiFont) stClanMemRole[i]->setOverrideFont(loginUiFont);
+
+		stClanMemLevel[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+		stClanMemLevel[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		if(loginUiFont) stClanMemLevel[i]->setOverrideFont(loginUiFont);
+
+		stClanMemExp[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+		stClanMemExp[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginUiFont) stClanMemExp[i]->setOverrideFont(loginUiFont);
+
+		stClanMemDate[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
+		stClanMemDate[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) stClanMemDate[i]->setOverrideFont(loginDescFont);
+
+		btnClanMemKick[i] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClanMembersTable, BUTTON_CLAN_MEM_KICK_0 + i, L"Expulsar");
+		styleDarkBtn(btnClanMemKick[i]);
+	}
+
+	stClanMemTotal = env->addStaticText(L"Total: 0 miembros", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
+	stClanMemTotal->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stClanMemTotal->setOverrideFont(loginDescFont);
+
+	btnClanMemPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_MEMBERS_PREV, L"Anterior");
+	stClanMemPage = env->addStaticText(L"P\u00E1gina 1 de 1", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
+	stClanMemPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stClanMemPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginUiFont) stClanMemPage->setOverrideFont(loginUiFont);
+	btnClanMemNext = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_MEMBERS_NEXT, L"Siguiente");
+	styleDarkBtn(btnClanMemPrev);
+	styleDarkBtn(btnClanMemNext);
 
 	// 5. Mailbox (Modern Table with Pagination matching web reference)
 	makeCanvas(wMailbox);
@@ -6228,32 +6392,198 @@ void Game::ResizeEconomyScreens() {
 		}
 	}
 
-	// 4e. Clans
+	// 4e. Clans (Full-screen table canvas with pagination matching web reference)
 	if(wClansMenu) {
 		wClansMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlClansLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlClansRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stClansTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		ebClanSearch->setRelativePosition(irr::core::recti(lx, topY + Scale(42), lx + lw - Scale(96), topY + Scale(72)));
-		btnClanSearch->setRelativePosition(irr::core::recti(lx + lw - Scale(88), topY + Scale(42), lx + lw, topY + Scale(72)));
-		lstClans->setRelativePosition(irr::core::recti(lx, topY + Scale(80), lx + lw, botY - Scale(104)));
-		irr::s32 halfL = (lw - Scale(8)) / 2;
-		btnClanMyClan->setRelativePosition(irr::core::recti(lx, botY - Scale(94), lx + halfL, botY - Scale(56)));
-		btnClanCreateOpen->setRelativePosition(irr::core::recti(lx + halfL + Scale(8), botY - Scale(94), lx + lw, botY - Scale(56)));
-		btnClansBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
+		stClansTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(460), topY + Scale(30)));
+		if(stClansDesc) stClansDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(460), topY + Scale(54)));
 
-		stClanDetail->setRelativePosition(irr::core::recti(rx, topY + Scale(16), rx + rw, topY + (botY - topY) * 48 / 100));
-		lstClanRequests->setRelativePosition(irr::core::recti(rx, topY + (botY - topY) * 50 / 100, rx + rw, botY - Scale(104)));
-		irr::s32 halfR = (rw - Scale(8)) / 2;
-		btnClanAcceptReq->setRelativePosition(irr::core::recti(rx, botY - Scale(94), rx + halfR, botY - Scale(56)));
-		btnClanRejectReq->setRelativePosition(irr::core::recti(rx + halfR + Scale(8), botY - Scale(94), rx + rw, botY - Scale(56)));
-		btnClanRequest->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + halfR, botY - Scale(10)));
-		btnClanLeave->setRelativePosition(irr::core::recti(rx + halfR + Scale(8), botY - Scale(46), rx + rw, botY - Scale(10)));
+		irr::s32 btnGap = Scale(8);
+		irr::s32 rxRight = W - pad;
+		if(btnClansBack) {
+			btnClansBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+			rxRight -= Scale(140) + btnGap;
+		}
+		if(btnClanCreateOpen) {
+			btnClanCreateOpen->setRelativePosition(irr::core::recti(rxRight - Scale(120), topY + Scale(6), rxRight, topY + Scale(42)));
+			rxRight -= Scale(120) + btnGap;
+		}
+		if(btnClanMyClan) {
+			btnClanMyClan->setRelativePosition(irr::core::recti(rxRight - Scale(100), topY + Scale(6), rxRight, topY + Scale(42)));
+		}
+
+		irr::s32 searchTop = topY + Scale(60);
+		if(ebClanSearch && btnClanSearch) {
+			irr::s32 sw = std::min(Scale(340), W - 2 * pad - Scale(90));
+			ebClanSearch->setRelativePosition(irr::core::recti(pad, searchTop, pad + sw, searchTop + Scale(32)));
+			btnClanSearch->setRelativePosition(irr::core::recti(pad + sw + Scale(8), searchTop, pad + sw + Scale(8) + Scale(80), searchTop + Scale(32)));
+		}
+
+		const irr::s32 gridTop = searchTop + Scale(40);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 tableH = botY - gridTop - pageBarH - Scale(8);
+		if(pnlClansTable) {
+			pnlClansTable->setRelativePosition(irr::core::recti(pad, gridTop, W - pad, gridTop + tableH));
+
+			const irr::s32 tw = W - 2 * pad;
+			const irr::s32 levelW = Scale(90);
+			const irr::s32 memW = Scale(90);
+			const irr::s32 minLvlW = Scale(90);
+			const irr::s32 bonusW = Scale(110);
+			const irr::s32 actionsW = Scale(190);
+			const irr::s32 clanNameW = std::max(Scale(140), tw - levelW - memW - minLvlW - bonusW - actionsW - Scale(24));
+
+			irr::s32 x0 = Scale(10);
+			irr::s32 x1 = x0 + clanNameW;
+			irr::s32 x2 = x1 + levelW;
+			irr::s32 x3 = x2 + memW;
+			irr::s32 x4 = x3 + minLvlW;
+			irr::s32 x5 = x4 + bonusW;
+
+			irr::s32 thY = Scale(8);
+			irr::s32 thH = Scale(22);
+			if(thClanColClan) thClanColClan->setRelativePosition(irr::core::recti(x0, thY, x1 - 4, thY + thH));
+			if(thClanColLevel) thClanColLevel->setRelativePosition(irr::core::recti(x1, thY, x2 - 4, thY + thH));
+			if(thClanColMembers) thClanColMembers->setRelativePosition(irr::core::recti(x2, thY, x3 - 4, thY + thH));
+			if(thClanColMinLevel) thClanColMinLevel->setRelativePosition(irr::core::recti(x3, thY, x4 - 4, thY + thH));
+			if(thClanColBonus) thClanColBonus->setRelativePosition(irr::core::recti(x4, thY, x5 - 4, thY + thH));
+			if(thClanColActions) thClanColActions->setRelativePosition(irr::core::recti(x5, thY, tw - Scale(10), thY + thH));
+
+			irr::s32 rowsStartY = thY + thH + Scale(6);
+			irr::s32 availH = tableH - rowsStartY - Scale(6);
+			irr::s32 rowH = std::max(Scale(38), availH / 6);
+
+			for(int r = 0; r < 6; ++r) {
+				irr::s32 ry = rowsStartY + r * rowH;
+				if(stClanRowName[r]) stClanRowName[r]->setRelativePosition(irr::core::recti(x0, ry + Scale(2), x1 - 4, ry + rowH - 2));
+				if(stClanRowLevel[r]) stClanRowLevel[r]->setRelativePosition(irr::core::recti(x1, ry + Scale(2), x2 - 4, ry + rowH - 2));
+				if(stClanRowMembers[r]) stClanRowMembers[r]->setRelativePosition(irr::core::recti(x2, ry + Scale(2), x3 - 4, ry + rowH - 2));
+				if(stClanRowMinLevel[r]) stClanRowMinLevel[r]->setRelativePosition(irr::core::recti(x3, ry + Scale(2), x4 - 4, ry + rowH - 2));
+				if(stClanRowBonus[r]) stClanRowBonus[r]->setRelativePosition(irr::core::recti(x4, ry + Scale(2), x5 - 4, ry + rowH - 2));
+
+				irr::s32 btnRowW = Scale(85);
+				irr::s32 btnRowH = std::min(Scale(30), rowH - 4);
+				irr::s32 by = ry + (rowH - btnRowH) / 2;
+				if(btnClanRowView[r]) btnClanRowView[r]->setRelativePosition(irr::core::recti(x5, by, x5 + btnRowW, by + btnRowH));
+				if(btnClanRowReq[r]) btnClanRowReq[r]->setRelativePosition(irr::core::recti(x5 + btnRowW + Scale(8), by, x5 + 2 * btnRowW + Scale(8), by + btnRowH));
+			}
+		}
+
+		irr::s32 botBarY = botY - pageBarH;
+		if(stClansTotal) stClansTotal->setRelativePosition(irr::core::recti(pad, botBarY + Scale(4), pad + Scale(200), botBarY + pageBarH));
+		if(btnClansPrev) btnClansPrev->setRelativePosition(irr::core::recti(W - pad - Scale(250), botBarY, W - pad - Scale(160), botBarY + pageBarH));
+		if(stClansPage) stClansPage->setRelativePosition(irr::core::recti(W - pad - Scale(155), botBarY, W - pad - Scale(95), botBarY + pageBarH));
+		if(btnClansNext) btnClansNext->setRelativePosition(irr::core::recti(W - pad - Scale(90), botBarY, W - pad, botBarY + pageBarH));
 
 		if(pnlClanCreate) {
 			irr::s32 cw = Scale(440), ch = Scale(292);
 			pnlClanCreate->setRelativePosition(irr::core::recti((W - cw) / 2, (H - ch) / 2, (W + cw) / 2, (H + ch) / 2));
 		}
+	}
+
+	// 4e-bis. Clan Detail (Dedicated screen matching web reference)
+	if(wClanDetail) {
+		wClanDetail->setRelativePosition(irr::core::recti(0, 0, W, H));
+		stClanDetailTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(320), topY + Scale(30)));
+		if(stClanDetailDesc) stClanDetailDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(320), topY + Scale(54)));
+
+		irr::s32 rxRight = W - pad;
+		if(btnClanDetailBack) {
+			btnClanDetailBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+			rxRight -= Scale(140) + Scale(8);
+		}
+		if(btnClanDetailLeave) {
+			btnClanDetailLeave->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+			rxRight -= Scale(140) + Scale(8);
+		}
+		if(btnClanDetailRequest) {
+			btnClanDetailRequest->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+		}
+
+		irr::s32 curY = topY + Scale(60);
+		irr::s32 sumH = Scale(96);
+		if(pnlClanSummary) {
+			pnlClanSummary->setRelativePosition(irr::core::recti(pad, curY, W - pad, curY + sumH));
+			stClanDetailName->setRelativePosition(irr::core::recti(Scale(14), Scale(10), W - 2 * pad - Scale(250), Scale(36)));
+			stClanDetailBadges->setRelativePosition(irr::core::recti(W - 2 * pad - Scale(240), Scale(10), W - 2 * pad - Scale(14), Scale(36)));
+			stClanDetailSummary->setRelativePosition(irr::core::recti(Scale(14), Scale(38), W - 2 * pad - Scale(14), Scale(58)));
+			stClanDetailBonuses->setRelativePosition(irr::core::recti(Scale(14), Scale(58), (W - 2 * pad) * 55 / 100, Scale(78)));
+			stClanDetailExpInfo->setRelativePosition(irr::core::recti((W - 2 * pad) * 55 / 100, Scale(58), W - 2 * pad - Scale(14), Scale(78)));
+		}
+		curY += sumH + Scale(10);
+
+		// If requests table is visible
+		if(pnlClanRequestsTable && pnlClanRequestsTable->isVisible()) {
+			irr::s32 reqH = Scale(90);
+			pnlClanRequestsTable->setRelativePosition(irr::core::recti(pad, curY, W - pad, curY + reqH));
+			stClanRequestsTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(6), Scale(250), Scale(26)));
+			stClanNoRequests->setRelativePosition(irr::core::recti(Scale(14), Scale(30), Scale(350), Scale(52)));
+
+			irr::s32 rw = (W - 2 * pad - Scale(28)) / 2;
+			for(int i = 0; i < 4; ++i) {
+				irr::s32 rx = Scale(14) + (i % 2) * rw;
+				irr::s32 ry = Scale(28) + (i / 2) * Scale(28);
+				if(stClanReqUser[i]) stClanReqUser[i]->setRelativePosition(irr::core::recti(rx, ry, rx + rw - Scale(150), ry + Scale(24)));
+				if(btnClanReqAccept[i]) btnClanReqAccept[i]->setRelativePosition(irr::core::recti(rx + rw - Scale(145), ry, rx + rw - Scale(75), ry + Scale(24)));
+				if(btnClanReqReject[i]) btnClanReqReject[i]->setRelativePosition(irr::core::recti(rx + rw - Scale(70), ry, rx + rw, ry + Scale(24)));
+			}
+			curY += reqH + Scale(10);
+		}
+
+		// Members table
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 memTableH = botY - curY - pageBarH - Scale(8);
+		if(pnlClanMembersTable) {
+			pnlClanMembersTable->setRelativePosition(irr::core::recti(pad, curY, W - pad, curY + memTableH));
+			stClanMembersTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(6), Scale(250), Scale(26)));
+
+			const irr::s32 tw = W - 2 * pad;
+			const irr::s32 roleW = Scale(100);
+			const irr::s32 lvlW = Scale(75);
+			const irr::s32 expW = Scale(110);
+			const irr::s32 dateW = Scale(100);
+			const irr::s32 actW = Scale(95);
+			const irr::s32 userW = std::max(Scale(120), tw - roleW - lvlW - expW - dateW - actW - Scale(28));
+
+			irr::s32 x0 = Scale(14);
+			irr::s32 x1 = x0 + userW;
+			irr::s32 x2 = x1 + roleW;
+			irr::s32 x3 = x2 + lvlW;
+			irr::s32 x4 = x3 + expW;
+			irr::s32 x5 = x4 + dateW;
+
+			irr::s32 thY = Scale(28);
+			irr::s32 thH = Scale(20);
+			if(thClanMemUser) thClanMemUser->setRelativePosition(irr::core::recti(x0, thY, x1 - 4, thY + thH));
+			if(thClanMemRole) thClanMemRole->setRelativePosition(irr::core::recti(x1, thY, x2 - 4, thY + thH));
+			if(thClanMemLevel) thClanMemLevel->setRelativePosition(irr::core::recti(x2, thY, x3 - 4, thY + thH));
+			if(thClanMemExp) thClanMemExp->setRelativePosition(irr::core::recti(x3, thY, x4 - 4, thY + thH));
+			if(thClanMemDate) thClanMemDate->setRelativePosition(irr::core::recti(x4, thY, x5 - 4, thY + thH));
+			if(thClanMemAction) thClanMemAction->setRelativePosition(irr::core::recti(x5, thY, tw - Scale(14), thY + thH));
+
+			irr::s32 rowsStartY = thY + thH + Scale(4);
+			irr::s32 availH = memTableH - rowsStartY - Scale(4);
+			irr::s32 rowH = std::max(Scale(28), availH / 6);
+
+			for(int r = 0; r < 6; ++r) {
+				irr::s32 ry = rowsStartY + r * rowH;
+				if(stClanMemUser[r]) stClanMemUser[r]->setRelativePosition(irr::core::recti(x0, ry, x1 - 4, ry + rowH - 2));
+				if(stClanMemRole[r]) stClanMemRole[r]->setRelativePosition(irr::core::recti(x1, ry, x2 - 4, ry + rowH - 2));
+				if(stClanMemLevel[r]) stClanMemLevel[r]->setRelativePosition(irr::core::recti(x2, ry, x3 - 4, ry + rowH - 2));
+				if(stClanMemExp[r]) stClanMemExp[r]->setRelativePosition(irr::core::recti(x3, ry, x4 - 4, ry + rowH - 2));
+				if(stClanMemDate[r]) stClanMemDate[r]->setRelativePosition(irr::core::recti(x4, ry, x5 - 4, ry + rowH - 2));
+				if(btnClanMemKick[r]) {
+					irr::s32 btnH = std::min(Scale(24), rowH - 2);
+					btnClanMemKick[r]->setRelativePosition(irr::core::recti(x5, ry + (rowH - btnH) / 2, x5 + Scale(75), ry + (rowH - btnH) / 2 + btnH));
+				}
+			}
+		}
+
+		irr::s32 botBarY = botY - pageBarH;
+		if(stClanMemTotal) stClanMemTotal->setRelativePosition(irr::core::recti(pad, botBarY + Scale(4), pad + Scale(200), botBarY + pageBarH));
+		if(btnClanMemPrev) btnClanMemPrev->setRelativePosition(irr::core::recti(W - pad - Scale(250), botBarY, W - pad - Scale(160), botBarY + pageBarH));
+		if(stClanMemPage) stClanMemPage->setRelativePosition(irr::core::recti(W - pad - Scale(155), botBarY, W - pad - Scale(95), botBarY + pageBarH));
+		if(btnClanMemNext) btnClanMemNext->setRelativePosition(irr::core::recti(W - pad - Scale(90), botBarY, W - pad, botBarY + pageBarH));
 	}
 
 	// 5. Mailbox (Full-screen table canvas with pagination)
@@ -7809,16 +8139,17 @@ void Game::RequestExchangeEventPieces() {
 }
 
 void Game::OpenClansMenu(const std::wstring& search) {
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
 	HideAllEcosystemScreens();
-	std::string q;
+
+	std::string q = "";
 	if(!search.empty()) {
 		std::string utf8 = BufferIO::EncodeUTF8(search);
 		q = "?search=" + utf8;
 	}
 	auto resp = CallSessionApi("/api/clans" + q, sessionToken);
 	clanList.clear();
-	lstClans->clear();
-	lstClanRequests->clear();
 	myClanId = 0;
 	myClanIsLeader = false;
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
@@ -7839,91 +8170,259 @@ void Game::OpenClansMenu(const std::wstring& search) {
 				it.luckPct = c.value("PorcentajeSuerte", 0.0);
 				it.solicitudPendiente = c.value("SolicitudPendiente", false);
 				clanList.push_back(it);
-				lstClans->addItem(epro::format(L"{} (Nv.{} | {}/{})", it.nombre, it.nivel, it.miembros, it.maxMiembros).c_str());
 			}
 		}
 	}
 	if(btnClanMyClan) btnClanMyClan->setEnabled(myClanId > 0);
 	if(btnClanCreateOpen) btnClanCreateOpen->setEnabled(myClanId == 0);
-	if(btnClanLeave) btnClanLeave->setEnabled(myClanId > 0);
-	if(!clanList.empty()) {
-		lstClans->setSelected(0);
-		SelectClanItem(0);
-	} else {
-		stClanDetail->setText(L"No se encontraron clanes.");
-	}
+
+	clanPage = 0;
+	RefreshClansPage();
 	ResizeEconomyScreens();
 	wClansMenu->setVisible(true);
 }
 
-void Game::SelectClanItem(int idx) {
-	if(idx < 0 || idx >= (int)clanList.size()) return;
-	const auto& c = clanList[idx];
-	selectedClanId = c.id;
-	stClanDetail->setText(epro::format(
-		L"{}\nL\u00EDder: {}\nNivel: {} / 50  |  Miembros: {}/{}\nNivel m\u00EDnimo: Nv. {}\nBonos: +{:.1f}% EXP, +{:.1f}% SS, +{:.1f}% Luck\nEstado: {}",
-		c.nombre, c.lider, c.nivel, c.miembros, c.maxMiembros, c.nivelMin, c.expPct, c.ssPct, c.luckPct,
-		c.solicitudPendiente ? L"Solicitud Pendiente" : (myClanId == c.id ? L"Tu Clan Actual" : L"Disponible")
-	).c_str());
-	if(btnClanRequest) btnClanRequest->setEnabled(myClanId == 0 && !c.solicitudPendiente && c.miembros < c.maxMiembros);
+void Game::RefreshClansPage() {
+	int total = (int)clanList.size();
+	int totalPages = std::max(1, (total + 5) / 6);
+	if(clanPage >= totalPages) clanPage = totalPages - 1;
+	if(clanPage < 0) clanPage = 0;
+
+	if(stClansTotal) stClansTotal->setText(epro::format(L"Total: {} clan(es)", total).c_str());
+	if(stClansPage) stClansPage->setText(epro::format(L"P\u00E1gina {} de {}", clanPage + 1, totalPages).c_str());
+	if(btnClansPrev) btnClansPrev->setEnabled(clanPage > 0);
+	if(btnClansNext) btnClansNext->setEnabled(clanPage + 1 < totalPages);
+
+	int startIdx = clanPage * 6;
+	for(int r = 0; r < 6; ++r) {
+		int idx = startIdx + r;
+		if(idx < total) {
+			const auto& it = clanList[idx];
+			if(stClanRowName[r]) {
+				stClanRowName[r]->setText(epro::format(L"{}\nL\u00EDder: {}", it.nombre, it.lider).c_str());
+				stClanRowName[r]->setVisible(true);
+			}
+			if(stClanRowLevel[r]) {
+				stClanRowLevel[r]->setText(epro::format(L"Nv. {} / 50", it.nivel).c_str());
+				stClanRowLevel[r]->setVisible(true);
+			}
+			if(stClanRowMembers[r]) {
+				stClanRowMembers[r]->setText(epro::format(L"{}/{}", it.miembros, it.maxMiembros).c_str());
+				stClanRowMembers[r]->setVisible(true);
+			}
+			if(stClanRowMinLevel[r]) {
+				stClanRowMinLevel[r]->setText(epro::format(L"Nv. {}", it.nivelMin).c_str());
+				stClanRowMinLevel[r]->setVisible(true);
+			}
+			if(stClanRowBonus[r]) {
+				stClanRowBonus[r]->setText(epro::format(L"+{:.1f}% EXP", it.expPct).c_str());
+				stClanRowBonus[r]->setVisible(true);
+			}
+			if(btnClanRowView[r]) {
+				btnClanRowView[r]->setText(L"Ver Clan");
+				btnClanRowView[r]->setVisible(true);
+			}
+			if(btnClanRowReq[r]) {
+				btnClanRowReq[r]->setVisible(true);
+				if(myClanId > 0) {
+					btnClanRowReq[r]->setEnabled(false);
+					btnClanRowReq[r]->setText(myClanId == it.id ? L"Mi Clan" : L"Ya en Clan");
+				} else if(it.solicitudPendiente) {
+					btnClanRowReq[r]->setEnabled(false);
+					btnClanRowReq[r]->setText(L"Pendiente");
+				} else if(it.miembros >= it.maxMiembros) {
+					btnClanRowReq[r]->setEnabled(false);
+					btnClanRowReq[r]->setText(L"Lleno");
+				} else {
+					btnClanRowReq[r]->setEnabled(true);
+					btnClanRowReq[r]->setText(L"Solicitar");
+				}
+			}
+		} else {
+			if(stClanRowName[r]) stClanRowName[r]->setVisible(false);
+			if(stClanRowLevel[r]) stClanRowLevel[r]->setVisible(false);
+			if(stClanRowMembers[r]) stClanRowMembers[r]->setVisible(false);
+			if(stClanRowMinLevel[r]) stClanRowMinLevel[r]->setVisible(false);
+			if(stClanRowBonus[r]) stClanRowBonus[r]->setVisible(false);
+			if(btnClanRowView[r]) btnClanRowView[r]->setVisible(false);
+			if(btnClanRowReq[r]) btnClanRowReq[r]->setVisible(false);
+		}
+	}
 }
 
-void Game::OpenMyClanView() {
-	if(myClanId <= 0) return;
-	auto resp = CallSessionApi(epro::format("/api/clans/{}", myClanId), sessionToken);
+void Game::OpenClanDetail(int clanId) {
+	if(clanId <= 0) return;
+	currentViewingClanId = clanId;
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	HideAllEcosystemScreens();
+
+	auto resp = CallSessionApi(epro::format("/api/clans/{}", clanId), sessionToken);
 	clanRequests.clear();
-	lstClanRequests->clear();
+	clanMembers.clear();
+	myClanIsLeader = false;
+
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		const auto& c = resp["clan"];
 		myClanIsLeader = resp.value("esLider", false);
-		std::wstring txt = epro::format(
-			L"MI CLAN: {}\nNivel: {} / 50\nEXP: {}  |  StarShips: {}  |  Luck: {}\nMiembros:\n",
-			BufferIO::DecodeUTF8(SafeJsonStr(c, "Nombre", "")),
-			SafeJsonInt(c, "Nivel", 1),
-			c.value("PorcentajeExp", 0.0), c.value("PorcentajeStarShips", 0.0), c.value("PorcentajeSuerte", 0.0)
-		);
-		if(resp.contains("miembros") && resp["miembros"].is_array()) {
-			for(const auto& m : resp["miembros"]) {
-				txt += epro::format(L"- {} (Nv. {}) [{}]\n",
-					BufferIO::DecodeUTF8(SafeJsonStr(m, "Usuario", "")),
-					SafeJsonInt(m, "Nivel", 1),
-					BufferIO::DecodeUTF8(SafeJsonStr(m, "RolClan", "Miembro")));
-			}
+		std::wstring clanNom = BufferIO::DecodeUTF8(SafeJsonStr(c, "Nombre", ""));
+		int lvl = SafeJsonInt(c, "Nivel", 1);
+		int miemb = SafeJsonInt(c, "TotalMiembros", 1);
+		int maxM = SafeJsonInt(c, "MaxMiembros", 30);
+		long long expActual = c.value("Experiencia", 0LL);
+		long long expSiguiente = c.value("ExpSiguienteNivel", 2500LL);
+		int minLvl = SafeJsonInt(c, "NivelMinimoIngreso", 1);
+		double expP = c.value("PorcentajeExp", 0.0);
+		double ssP = c.value("PorcentajeStarShips", 0.0);
+		double luckP = c.value("PorcentajeSuerte", 0.0);
+		std::wstring desc = BufferIO::DecodeUTF8(SafeJsonStr(c, "Descripcion", ""));
+
+		if(stClanDetailTitle) stClanDetailTitle->setText(epro::format(L"Clan: {}", clanNom).c_str());
+		if(stClanDetailDesc) stClanDetailDesc->setText(L"Gestiona tu clan, miembros, solicitudes y bonificaciones.");
+
+		if(stClanDetailName) stClanDetailName->setText(clanNom.c_str());
+		if(stClanDetailBadges) stClanDetailBadges->setText(epro::format(L"[Nv. {} / 50]  [{}/{} miembros]", lvl, miemb, maxM).c_str());
+		if(stClanDetailSummary) stClanDetailSummary->setText(desc.c_str());
+		if(stClanDetailBonuses) stClanDetailBonuses->setText(epro::format(L"Bonificaciones: EXP +{:.1f}% \u2022 StarShips +{:.1f}% \u2022 Luck +{:.1f}%", expP, ssP, luckP).c_str());
+		if(stClanDetailExpInfo) stClanDetailExpInfo->setText(epro::format(L"EXP Clan: {} / {} \u2022 Nivel m\u00EDn. ingreso: {}", expActual, expSiguiente, minLvl).c_str());
+
+		if(btnClanDetailLeave) btnClanDetailLeave->setVisible(myClanId == clanId);
+		if(btnClanDetailRequest) {
+			btnClanDetailRequest->setVisible(myClanId != clanId);
+			btnClanDetailRequest->setEnabled(myClanId == 0);
 		}
-		if(stClanDetail) stClanDetail->setText(txt.c_str());
-		if(resp.contains("solicitudes") && resp["solicitudes"].is_array()) {
+
+		if(resp.contains("solicitudes") && resp["solicitudes"].is_array() && myClanIsLeader) {
 			for(const auto& s : resp["solicitudes"]) {
 				ClanRequestItem rq;
 				rq.id = SafeJsonInt(s, "Id", 0);
+				rq.usuarioId = SafeJsonInt(s, "UsuarioId", 0);
 				rq.usuario = BufferIO::DecodeUTF8(SafeJsonStr(s, "Usuario", ""));
 				rq.nivel = SafeJsonInt(s, "Nivel", 1);
+				rq.fechaSolicitud = BufferIO::DecodeUTF8(SafeJsonStr(s, "FechaSolicitud", ""));
 				clanRequests.push_back(rq);
-				lstClanRequests->addItem(epro::format(L"{} (Nv. {})", rq.usuario, rq.nivel).c_str());
+			}
+		}
+
+		if(pnlClanRequestsTable) {
+			pnlClanRequestsTable->setVisible(myClanIsLeader);
+			if(stClanNoRequests) stClanNoRequests->setVisible(clanRequests.empty());
+			for(int i = 0; i < 4; ++i) {
+				if(i < (int)clanRequests.size()) {
+					const auto& rq = clanRequests[i];
+					if(stClanReqUser[i]) {
+						stClanReqUser[i]->setText(epro::format(L"{} (Nv. {})", rq.usuario, rq.nivel).c_str());
+						stClanReqUser[i]->setVisible(true);
+					}
+					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(true);
+					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(true);
+				} else {
+					if(stClanReqUser[i]) stClanReqUser[i]->setVisible(false);
+					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(false);
+					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(false);
+				}
+			}
+		}
+
+		if(resp.contains("miembros") && resp["miembros"].is_array()) {
+			for(const auto& m : resp["miembros"]) {
+				ClanMemberItem mb;
+				mb.usuarioId = SafeJsonInt(m, "UsuarioId", 0);
+				mb.usuario = BufferIO::DecodeUTF8(SafeJsonStr(m, "Usuario", ""));
+				mb.rol = BufferIO::DecodeUTF8(SafeJsonStr(m, "RolClan", "Miembro"));
+				mb.nivel = SafeJsonInt(m, "Nivel", 1);
+				mb.expAportada = m.value("ExperienciaAportada", 0LL);
+				mb.fechaIngreso = BufferIO::DecodeUTF8(SafeJsonStr(m, "FechaIngreso", ""));
+				clanMembers.push_back(mb);
 			}
 		}
 	}
-	if(btnClanAcceptReq) btnClanAcceptReq->setEnabled(myClanIsLeader && !clanRequests.empty());
-	if(btnClanRejectReq) btnClanRejectReq->setEnabled(myClanIsLeader && !clanRequests.empty());
+
+	clanMemberPage = 0;
+	RefreshClanMembersPage();
+	ResizeEconomyScreens();
+	wClanDetail->setVisible(true);
 }
 
-void Game::RequestJoinSelectedClan() {
-	if(selectedClanId <= 0) return;
+void Game::RefreshClanMembersPage() {
+	int total = (int)clanMembers.size();
+	int totalPages = std::max(1, (total + 5) / 6);
+	if(clanMemberPage >= totalPages) clanMemberPage = totalPages - 1;
+	if(clanMemberPage < 0) clanMemberPage = 0;
+
+	if(stClanMemTotal) stClanMemTotal->setText(epro::format(L"Total: {} miembro(s)", total).c_str());
+	if(stClanMemPage) stClanMemPage->setText(epro::format(L"P\u00E1gina {} de {}", clanMemberPage + 1, totalPages).c_str());
+	if(btnClanMemPrev) btnClanMemPrev->setEnabled(clanMemberPage > 0);
+	if(btnClanMemNext) btnClanMemNext->setEnabled(clanMemberPage + 1 < totalPages);
+
+	int startIdx = clanMemberPage * 6;
+	for(int r = 0; r < 6; ++r) {
+		int idx = startIdx + r;
+		if(idx < total) {
+			const auto& mb = clanMembers[idx];
+			if(stClanMemUser[r]) {
+				stClanMemUser[r]->setText(mb.usuario.c_str());
+				stClanMemUser[r]->setVisible(true);
+			}
+			if(stClanMemRole[r]) {
+				stClanMemRole[r]->setText(mb.rol.c_str());
+				stClanMemRole[r]->setVisible(true);
+			}
+			if(stClanMemLevel[r]) {
+				stClanMemLevel[r]->setText(epro::format(L"Nv. {}", mb.nivel).c_str());
+				stClanMemLevel[r]->setVisible(true);
+			}
+			if(stClanMemExp[r]) {
+				stClanMemExp[r]->setText(epro::format(L"{} EXP", mb.expAportada).c_str());
+				stClanMemExp[r]->setVisible(true);
+			}
+			if(stClanMemDate[r]) {
+				stClanMemDate[r]->setText(mb.fechaIngreso.substr(0, 10).c_str());
+				stClanMemDate[r]->setVisible(true);
+			}
+			if(btnClanMemKick[r]) {
+				bool canKick = myClanIsLeader && (myClanId == currentViewingClanId) && (mb.rol != L"LIDER" && mb.rol != L"L\u00CDDER");
+				btnClanMemKick[r]->setVisible(canKick);
+				btnClanMemKick[r]->setEnabled(canKick);
+			}
+		} else {
+			if(stClanMemUser[r]) stClanMemUser[r]->setVisible(false);
+			if(stClanMemRole[r]) stClanMemRole[r]->setVisible(false);
+			if(stClanMemLevel[r]) stClanMemLevel[r]->setVisible(false);
+			if(stClanMemExp[r]) stClanMemExp[r]->setVisible(false);
+			if(stClanMemDate[r]) stClanMemDate[r]->setVisible(false);
+			if(btnClanMemKick[r]) btnClanMemKick[r]->setVisible(false);
+		}
+	}
+}
+
+void Game::RequestJoinClanId(int clanId) {
+	if(clanId <= 0) return;
 	nlohmann::json body;
-	body["clanId"] = selectedClanId;
+	body["clanId"] = clanId;
 	auto resp = CallSessionApi("/api/clans/request", sessionToken, body.dump());
 	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
 	OpenClansMenu(ebClanSearch ? ebClanSearch->getText() : L"");
 }
 
-void Game::RespondClanRequest(bool accept) {
-	int idx = lstClanRequests ? lstClanRequests->getSelected() : -1;
-	if(idx < 0 || idx >= (int)clanRequests.size()) return;
+void Game::RespondClanRequestId(int reqId, bool accept) {
+	if(reqId <= 0) return;
 	nlohmann::json body;
-	body["solicitudId"] = clanRequests[idx].id;
+	body["solicitudId"] = reqId;
 	body["aceptar"] = accept;
 	auto resp = CallSessionApi("/api/clans/respond", sessionToken, body.dump());
 	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
-	OpenMyClanView();
+	if(currentViewingClanId > 0) OpenClanDetail(currentViewingClanId);
+}
+
+void Game::KickClanMember(int targetUserId) {
+	if(targetUserId <= 0 || currentViewingClanId <= 0) return;
+	nlohmann::json body;
+	body["clanId"] = currentViewingClanId;
+	body["miembroId"] = targetUserId;
+	auto resp = CallSessionApi("/api/clans/kick", sessionToken, body.dump());
+	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
+	OpenClanDetail(currentViewingClanId);
 }
 
 void Game::RequestLeaveMyClan() {
@@ -8774,6 +9273,7 @@ bool Game::MainLoop() {
 				(wProfileInfo && wProfileInfo->isVisible()) || (wProfileMedals && wProfileMedals->isVisible()) ||
 				(wProfileAvatars && wProfileAvatars->isVisible()) || (wEventsHub && wEventsHub->isVisible()) ||
 				(wEventsMenu && wEventsMenu->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
+				(wClanDetail && wClanDetail->isVisible()) ||
 				(wMailbox && wMailbox->isVisible());
 		};
 		{
@@ -9018,8 +9518,15 @@ bool Game::MainLoop() {
 			}
 			if(wEventsMenu && wEventsMenu->isVisible()) { drawNeon(pnlEventsLeft, cEmer); drawNeon(pnlEventsRight, cGold); }
 			if(wClansMenu && wClansMenu->isVisible()) {
-				drawNeon(pnlClansLeft, cCyan); drawNeon(pnlClansRight, cPurp);
+				drawNeon(pnlClansTable, cCyan);
 				drawNeon(pnlClanCreate, cGold);
+			}
+			if(wClanDetail && wClanDetail->isVisible()) {
+				drawNeon(pnlClanSummary, cCyan);
+				if(pnlClanRequestsTable && pnlClanRequestsTable->isVisible()) {
+					drawNeon(pnlClanRequestsTable, cGold);
+				}
+				drawNeon(pnlClanMembersTable, cPurp);
 			}
 			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
 			drawNeon(wConfirmPurchase, cCyan);
