@@ -998,6 +998,7 @@ public:
 	irr::gui::CGUITTFont* loginDescFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
+	irr::gui::CGUITTFont* cardInfoFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;

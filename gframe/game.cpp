@@ -89,6 +89,8 @@ Game::~Game() {
 		guiFont->drop();
 	if(textFont)
 		textFont->drop();
+	if(cardInfoFont)
+		cardInfoFont->drop();
 	if(numFont)
 		numFont->drop();
 	if(adFont)
@@ -202,6 +204,11 @@ void Game::Initialize() {
 		auto lTimeFont = textfont;
 		lTimeFont.size = Scale(12);
 		loginLogTimeFont = irr::gui::CGUITTFont::createTTFont(env, lTimeFont, fallbackFonts);
+#if EDOPRO_ANDROID
+		auto cif = textfont;
+		cif.size = Scale(gGameConfig->textfont.size + 2);
+		cardInfoFont = irr::gui::CGUITTFont::createTTFont(env, cif, fallbackFonts);
+#endif
 	}
 	if(!numFont || !adFont || !lpcFont)
 		throw std::runtime_error("Failed to load numbers font");
@@ -3380,8 +3387,9 @@ void Game::ResizeMainMenuScreen() {
 		curBtnR -= (normBtnW + normBtnGap);
 	}
 	if(btnLobbyReplays) {
-		btnLobbyReplays->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
-		curBtnR -= (normBtnW + normBtnGap);
+		const irr::s32 repW = Scale(135);
+		btnLobbyReplays->setRelativePosition(irr::core::recti(curBtnR - repW, btnYNorm, curBtnR, btnYNorm + normBtnH));
+		curBtnR -= (repW + normBtnGap);
 	}
 	if(btnLobbyTutorials) {
 		btnLobbyTutorials->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
@@ -5902,7 +5910,13 @@ void Game::PopulateEconomyScreens() {
 	stDuelRewardCardInfo->setWordWrap(true);
 
 	btnDuelRewardSaveReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_SAVE_REPLAY, L"GUARDAR REPETICION");
+	btnDuelRewardSaveReplay->setImage(tFlatBtnDark);
+	btnDuelRewardSaveReplay->setDrawBorder(false);
+	btnDuelRewardSaveReplay->setUseAlphaChannel(true);
 	btnDuelRewardAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_ACCEPT, L"ACEPTAR");
+	btnDuelRewardAccept->setImage(tFlatBtnBlue);
+	btnDuelRewardAccept->setDrawBorder(false);
+	btnDuelRewardAccept->setUseAlphaChannel(true);
 
 	ResizeEconomyScreens();
 }
@@ -8717,6 +8731,14 @@ void Game::PopulateTabSettingsWindow() {
 			stText = text;
 		}
 		stText->setWordWrap(true);
+		if(cardInfoFont) {
+			stName->setOverrideFont(cardInfoFont);
+			stInfo->setOverrideFont(cardInfoFont);
+			stDataInfo->setOverrideFont(cardInfoFont);
+			stSetName->setOverrideFont(cardInfoFont);
+			stPasscodeScope->setOverrideFont(cardInfoFont);
+			stText->setOverrideFont(cardInfoFont);
+		}
 	}
 	//log
 	{
@@ -9671,7 +9693,7 @@ bool Game::MainLoop() {
 			}
 			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
 			drawNeon(wConfirmPurchase, cCyan);
-			if(wAdventureMode && wAdventureMode->isVisible()) {
+			if(wAdventureMode && wAdventureMode->isVisible() && (!wDuelReward || !wDuelReward->isVisible())) {
 				drawNeon(pnlAdventureLeft, cCyan);
 				drawNeon(pnlAdventureCenter, cPurp);
 				drawNeon(pnlAdventureDetails, cCyan);
@@ -9699,6 +9721,18 @@ bool Game::MainLoop() {
 				drawNeon(btnAdventureDuel, cEmer);
 				drawNeon(btnAdventureBack, irr::video::SColor(160, 148, 163, 184));
 			}
+			if(wDuelReward && wDuelReward->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(190, 0, 0, 0), irr::core::recti(0, 0, window_size.Width, window_size.Height));
+				drawNeon(wDuelReward, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(stDuelRewardHeader, irr::video::SColor(220, 251, 191, 36));
+				drawNeon(stDuelRewardTable, irr::video::SColor(200, 56, 189, 248));
+				drawNeon(stDuelRewardTotal, irr::video::SColor(220, 52, 211, 153));
+				drawNeon(stDuelRewardEventBox, irr::video::SColor(220, 251, 191, 36));
+				drawNeon(stDuelRewardCardInfo, irr::video::SColor(200, 56, 189, 248));
+				drawNeon(stDuelRewardLuck, irr::video::SColor(200, 192, 132, 252));
+				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 192, 132, 252));
+				drawNeon(btnDuelRewardAccept, irr::video::SColor(220, 56, 189, 248));
+			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
 				if(wAdventureMode && wAdventureMode->isVisible()) activeIdx = 3;
@@ -9723,6 +9757,8 @@ bool Game::MainLoop() {
 						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
 				}
 			};
+			if(wInfos && wInfos->isVisible())
+				drawNeon(wInfos, irr::video::SColor(180, 56, 189, 248));
 			if(btnLeaveGame && btnLeaveGame->isVisible())
 				drawNeon(btnLeaveGame, irr::video::SColor(220, 239, 68, 68));
 			if(btnChainIgnore && btnChainIgnore->isVisible())

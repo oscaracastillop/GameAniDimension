@@ -2636,9 +2636,9 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 		mainGame->wCmdMenu->setVisible(false);
 		return;
 	}
-	const int btnCmdW = mainGame->Scale(110);
-	const int btnCmdH = mainGame->Scale(28);
-	const int btnCmdGap = mainGame->Scale(5);
+	const int btnCmdW = mainGame->Scale(115);
+	const int btnCmdH = mainGame->Scale(30);
+	const int btnCmdGap = mainGame->Scale(8);
 	const int padMenu = mainGame->Scale(4);
 	int height = padMenu;
 	auto increase = btnCmdH + btnCmdGap;
@@ -2709,7 +2709,20 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 	y = mouse.Y;
 	int totalMenuH = (height > padMenu) ? (height - btnCmdGap + padMenu) : padMenu;
 	int totalMenuW = btnCmdW + 2 * padMenu;
-	mainGame->wCmdMenu->setRelativePosition(irr::core::recti(x - totalMenuW / 2, y - mainGame->Scale(20) - totalMenuH, x + totalMenuW / 2, y - mainGame->Scale(20)));
+	// Shift to the right of the card by default so card is not obscured
+	int posX = x + mainGame->Scale(35);
+	if(posX + totalMenuW > mainGame->window_size.Width - mainGame->Scale(10))
+		posX = x - totalMenuW - mainGame->Scale(35);
+	if(posX < mainGame->Scale(5))
+		posX = mainGame->Scale(5);
+
+	int posY = y - totalMenuH / 2;
+	if(posY < mainGame->Scale(10))
+		posY = mainGame->Scale(10);
+	if(posY + totalMenuH > mainGame->window_size.Height - mainGame->Scale(10))
+		posY = mainGame->window_size.Height - totalMenuH - mainGame->Scale(10);
+
+	mainGame->wCmdMenu->setRelativePosition(irr::core::recti(posX, posY, posX + totalMenuW, posY + totalMenuH));
 }
 void ClientField::UpdateChainButtons(irr::gui::IGUIElement* caller) {
 	if(!caller) {
