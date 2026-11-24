@@ -1238,10 +1238,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->lstClans) mainGame->SelectClanItem(mainGame->lstClans->getSelected());
 				break;
 			}
-			case LISTBOX_MAILBOX_ITEMS: {
-				if(mainGame->lstMailboxItems) mainGame->SelectMailboxItem(mainGame->lstMailboxItems->getSelected());
-				break;
-			}
+
 			case LISTBOX_REPLAY_LIST: {
 				int sel = mainGame->lstReplayList->getSelected();
 				mainGame->stReplayInfo->setText(L"");
