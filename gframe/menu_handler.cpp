@@ -668,7 +668,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
-			case BUTTON_CLAN_ROW_VIEW_0 ... BUTTON_CLAN_ROW_VIEW_MAX: {
+			case BUTTON_CLAN_ROW_VIEW_0:
+			case BUTTON_CLAN_ROW_VIEW_1:
+			case BUTTON_CLAN_ROW_VIEW_2:
+			case BUTTON_CLAN_ROW_VIEW_3:
+			case BUTTON_CLAN_ROW_VIEW_4:
+			case BUTTON_CLAN_ROW_VIEW_5: {
 				int row = id - BUTTON_CLAN_ROW_VIEW_0;
 				int idx = mainGame->clanPage * 6 + row;
 				if(idx >= 0 && idx < (int)mainGame->clanList.size()) {
@@ -676,7 +681,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
-			case BUTTON_CLAN_ROW_REQ_0 ... BUTTON_CLAN_ROW_REQ_MAX: {
+			case BUTTON_CLAN_ROW_REQ_0:
+			case BUTTON_CLAN_ROW_REQ_1:
+			case BUTTON_CLAN_ROW_REQ_2:
+			case BUTTON_CLAN_ROW_REQ_3:
+			case BUTTON_CLAN_ROW_REQ_4:
+			case BUTTON_CLAN_ROW_REQ_5: {
 				int row = id - BUTTON_CLAN_ROW_REQ_0;
 				int idx = mainGame->clanPage * 6 + row;
 				if(idx >= 0 && idx < (int)mainGame->clanList.size()) {
@@ -711,21 +721,32 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				}
 				break;
 			}
-			case BUTTON_CLAN_REQ_ACCEPT_0 ... BUTTON_CLAN_REQ_ACCEPT_MAX: {
+			case BUTTON_CLAN_REQ_ACCEPT_0:
+			case BUTTON_CLAN_REQ_ACCEPT_1:
+			case BUTTON_CLAN_REQ_ACCEPT_2:
+			case BUTTON_CLAN_REQ_ACCEPT_3: {
 				int r = id - BUTTON_CLAN_REQ_ACCEPT_0;
 				if(r >= 0 && r < (int)mainGame->clanRequests.size()) {
 					mainGame->RespondClanRequestId(mainGame->clanRequests[r].id, true);
 				}
 				break;
 			}
-			case BUTTON_CLAN_REQ_REJECT_0 ... BUTTON_CLAN_REQ_REJECT_MAX: {
+			case BUTTON_CLAN_REQ_REJECT_0:
+			case BUTTON_CLAN_REQ_REJECT_1:
+			case BUTTON_CLAN_REQ_REJECT_2:
+			case BUTTON_CLAN_REQ_REJECT_3: {
 				int r = id - BUTTON_CLAN_REQ_REJECT_0;
 				if(r >= 0 && r < (int)mainGame->clanRequests.size()) {
 					mainGame->RespondClanRequestId(mainGame->clanRequests[r].id, false);
 				}
 				break;
 			}
-			case BUTTON_CLAN_MEM_KICK_0 ... BUTTON_CLAN_MEM_KICK_MAX: {
+			case BUTTON_CLAN_MEM_KICK_0:
+			case BUTTON_CLAN_MEM_KICK_1:
+			case BUTTON_CLAN_MEM_KICK_2:
+			case BUTTON_CLAN_MEM_KICK_3:
+			case BUTTON_CLAN_MEM_KICK_4:
+			case BUTTON_CLAN_MEM_KICK_5: {
 				int r = id - BUTTON_CLAN_MEM_KICK_0;
 				int idx = mainGame->clanMemberPage * 6 + r;
 				if(idx >= 0 && idx < (int)mainGame->clanMembers.size()) {

@@ -1702,6 +1702,7 @@ public:
 	void RefreshProfileAvatarsPage();
 	void ActivateAvatarIdx(int slotIdx);
 	void SelectProfileMedal(int idx);
+	void SelectClanItem(int idx);
 	void RequestBuyAvatarIdx(int storeIdx, bool useCD);
 	void RequestBuyBoosterIdx(int storeIdx, bool useCD);
 	void RequestBuyVipIdx(int storeIdx);
