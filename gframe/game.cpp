@@ -406,6 +406,12 @@ void Game::Initialize() {
 	btnLobbyQuickDuel = env->addButton(irr::core::recti(0, 0, 140, 44), wMainMenu, BUTTON_QUICK_DUEL, L"Duelo R\u00E1pido");
 	applyBtnStyle(btnLobbyQuickDuel, L"Duelo R\u00E1pido");
 
+	btnLobbyReplays = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_REPLAYS, L"Repeticiones");
+	applyBtnStyle(btnLobbyReplays, L"Repeticiones");
+
+	btnLobbyTutorials = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_TUTORIALES, L"Tutoriales");
+	applyBtnStyle(btnLobbyTutorials, L"Tutoriales");
+
 	// Left: Avatar Base Pedestal (Created BEFORE Avatar so Avatar renders ON TOP of it!)
 	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 450, 34), false, false, wMainMenu);
 	stLobbyWelcomeTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
@@ -561,15 +567,14 @@ void Game::Initialize() {
 	stTopNavBrand->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginUiFont) stTopNavBrand->setOverrideFont(loginUiFont);
 	{
-		const wchar_t* navLabels[7] = {
-			L"Lobby", L"Perfil", L"Duelos", L"Aventura", L"Tutoriales", L"Repeticiones", L"Salir"
+		const wchar_t* navLabels[5] = {
+			L"Lobby", L"Perfil", L"Duelos", L"Aventura", L"Salir"
 		};
-		const int navIds[7] = {
+		const int navIds[5] = {
 			BUTTON_NAV_INICIO, BUTTON_NAV_PERFIL, BUTTON_NAV_DUELOS,
-			BUTTON_NAV_AVENTURA, BUTTON_NAV_TUTORIALES, BUTTON_NAV_REPLAYS,
-			BUTTON_NAV_SALIR
+			BUTTON_NAV_AVENTURA, BUTTON_NAV_SALIR
 		};
-		for(int ni = 0; ni < 7; ++ni) {
+		for(int ni = 0; ni < 5; ++ni) {
 			btnNavItems[ni] = env->addButton(irr::core::recti(0, 0, 96, 30), wTopNavBar, navIds[ni], navLabels[ni]);
 			btnNavItems[ni]->setImage(tFlatBtnTrans);
 			btnNavItems[ni]->setPressedImage(tFlatBtnTrans);
@@ -578,6 +583,8 @@ void Game::Initialize() {
 			btnNavItems[ni]->setDrawBorder(false);
 			if(loginBtnFont) btnNavItems[ni]->setOverrideFont(loginBtnFont);
 		}
+		btnNavItems[5] = nullptr;
+		btnNavItems[6] = nullptr;
 		btnNavItems[7] = nullptr;
 
 		imgTopNavSS = nullptr;
@@ -3181,16 +3188,16 @@ void Game::ResizeMainMenuScreen() {
 
 		if(stLobbyPlayerName) {
 			stLobbyPlayerName->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(28)));
-			iy += Scale(30);
+			iy += Scale(34);
 		}
 		if(stLobbyPlayerLevel) {
 			stLobbyPlayerLevel->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(20)));
-			iy += Scale(22);
+			iy += Scale(32);
 		}
 		if(stLobbyExpTrack) {
 			const int expTrackW = infoW - 2 * ipPadX;
 			stLobbyExpTrack->setRelativePosition(irr::core::recti(ipPadX, iy, ipPadX + expTrackW, iy + Scale(8)));
-			iy += Scale(10);
+			iy += Scale(14);
 		}
 		if(stLobbyExpText) {
 			stLobbyExpText->setRelativePosition(irr::core::recti(ipPadX, iy, infoW - ipPadX, iy + Scale(20)));
@@ -3304,7 +3311,7 @@ void Game::ResizeMainMenuScreen() {
 	if(btnLobbyQuickDuel)
 		btnLobbyQuickDuel->setRelativePosition(irr::core::recti(quickDuelX, btnRowY, W - padX, btnRowY + duelBtnH));
 
-	// Group Deck, Eventos, and Tienda immediately to the left of Duelo Rápido
+	// Group Deck, Eventos, Tienda, Repeticiones, and Tutoriales to the left of Duelo Rápido
 	int curBtnR = quickDuelX - normBtnGap;
 	if(btnLobbyDeck) {
 		btnLobbyDeck->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
@@ -3316,6 +3323,14 @@ void Game::ResizeMainMenuScreen() {
 	}
 	if(btnLobbyStore) {
 		btnLobbyStore->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
+		curBtnR -= (normBtnW + normBtnGap);
+	}
+	if(btnLobbyReplays) {
+		btnLobbyReplays->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
+		curBtnR -= (normBtnW + normBtnGap);
+	}
+	if(btnLobbyTutorials) {
+		btnLobbyTutorials->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
 	}
 
 	// Settings gear button at bottom-left corner
@@ -3357,13 +3372,13 @@ void Game::ResizeTopNavBar() {
 	if(stTopNavCD)
 		stTopNavCD->setRelativePosition(irr::core::recti(cdX, bubbleY, cdX + bubbleW, bubbleY + bubbleH));
 
-	// Nav buttons distributed between Brand and currency bubbles (7 items)
+	// Nav buttons distributed between Brand and currency bubbles (5 items)
 	const int navStartX = Scale(48) + brandW + Scale(10);
 	const int navEndX = ssX - Scale(8);
 	const int availW = std::max(Scale(300), navEndX - navStartX);
-	const int gap = Scale(6);
-	const int btnCount = 7;
-	const int btnW = std::max(Scale(44), std::min(Scale(95), (availW - (btnCount - 1) * gap) / btnCount));
+	const int gap = Scale(10);
+	const int btnCount = 5;
+	const int btnW = std::max(Scale(50), std::min(Scale(110), (availW - (btnCount - 1) * gap) / btnCount));
 	const int btnH = Scale(32);
 	const int btnY = (navH - btnH) / 2;
 	int curX = navStartX;
@@ -3374,7 +3389,9 @@ void Game::ResizeTopNavBar() {
 		}
 		curX += btnW + gap;
 	}
-	if(btnNavItems[7]) btnNavItems[7]->setVisible(false);
+	for(int i = btnCount; i < 8; ++i) {
+		if(btnNavItems[i]) btnNavItems[i]->setVisible(false);
+	}
 }
 
 void Game::ShowTopNavBar(bool show) {
@@ -9469,6 +9486,8 @@ bool Game::MainLoop() {
 				drawNeon(wLobbyEventCard, irr::video::SColor(180, 251, 191, 36));
 				drawNeon(wLobbyActivityCard, irr::video::SColor(180, 52, 211, 153));
 
+				drawNeon(btnLobbyTutorials, irr::video::SColor(200, 192, 132, 252));
+				drawNeon(btnLobbyReplays, irr::video::SColor(200, 56, 189, 248));
 				drawNeon(btnLobbyStore, irr::video::SColor(200, 52, 211, 153));
 				drawNeon(btnLobbyEvents, irr::video::SColor(200, 251, 191, 36));
 				drawNeon(btnLobbyDeck, irr::video::SColor(200, 56, 189, 248));
