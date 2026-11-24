@@ -2023,7 +2023,6 @@ void Game::PopulateAdventureModeWindow() {
 
 	cbAdventureSeries = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
 	cbAdventureSeries->setMaxSelectionRows(8);
-	if(loginUiFont) cbAdventureSeries->setOverrideFont(loginUiFont);
 
 	imgAdventureSeriesLogo = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
 	imgAdventureSeriesLogo->setScaleImage(true);
@@ -2036,7 +2035,6 @@ void Game::PopulateAdventureModeWindow() {
 
 	cbAdventureArc = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
 	cbAdventureArc->setMaxSelectionRows(10);
-	if(loginUiFont) cbAdventureArc->setOverrideFont(loginUiFont);
 
 	stAdventureArcDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureArcDesc->setWordWrap(true);
@@ -2049,7 +2047,6 @@ void Game::PopulateAdventureModeWindow() {
 
 	cbAdventureUserDeck = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
-	if(loginUiFont) cbAdventureUserDeck->setOverrideFont(loginUiFont);
 
 	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
 	applyAdvBtnStyle(btnAdventureDuel, L"INICIAR DUELO");
@@ -2099,7 +2096,6 @@ void Game::PopulateAdventureModeWindow() {
 	cbAdventureDifficulty->addItem(L"Normal", 0);
 	cbAdventureDifficulty->addItem(L"Leyenda", 1);
 	cbAdventureDifficulty->setSelected(0);
-	if(loginUiFont) cbAdventureDifficulty->setOverrideFont(loginUiFont);
 
 	txtAdventureLore = env->addStaticText(L"HISTORIA Y LEYENDA DEL DUELISTA:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
