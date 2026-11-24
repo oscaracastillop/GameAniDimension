@@ -2595,31 +2595,32 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 			if(positions & filter) count++;
 			filter <<= 1;
 		}
-		if(count == 4) startpos = 10;
-		else if(count == 3) startpos = 82;
-		else startpos = 155;
+		if(count == 4) startpos = 20;
+		else if(count == 3) startpos = 95;
+		else if(count == 2) startpos = 175;
+		else startpos = 255;
 		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
 		if(positions & POS_FACEUP_ATTACK) {
 			mainGame->imageLoading[mainGame->btnPSAU] = code;
-			mainGame->btnPSAU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSAU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
 			mainGame->btnPSAU->setVisible(true);
-			startpos += 145;
+			startpos += 155;
 		} else mainGame->btnPSAU->setVisible(false);
 		if(positions & POS_FACEDOWN_ATTACK) {
-			mainGame->btnPSAD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSAD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
 			mainGame->btnPSAD->setVisible(true);
-			startpos += 145;
+			startpos += 155;
 		} else mainGame->btnPSAD->setVisible(false);
 		if(positions & POS_FACEUP_DEFENSE) {
 			mainGame->imageLoading[mainGame->btnPSDU] = code;
-			mainGame->btnPSDU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSDU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
 			mainGame->btnPSDU->setVisible(true);
-			startpos += 145;
+			startpos += 155;
 		} else mainGame->btnPSDU->setVisible(false);
 		if(positions & POS_FACEDOWN_DEFENSE) {
-			mainGame->btnPSDD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 140, 185));
+			mainGame->btnPSDD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
 			mainGame->btnPSDD->setVisible(true);
-			startpos += 145;
+			startpos += 155;
 		} else mainGame->btnPSDD->setVisible(false);
 		mainGame->PopupElement(mainGame->wPosSelect);
 		return false;

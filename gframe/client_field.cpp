@@ -365,10 +365,10 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 	size_t startpos;
 	size_t ct;
 	if(selectable_cards.size() <= 5) {
-		startpos = 30 + 125 * (5 - selectable_cards.size()) / 2;
+		startpos = 25 + 135 * (5 - selectable_cards.size()) / 2;
 		ct = selectable_cards.size();
 	} else {
-		startpos = 30;
+		startpos = 25;
 		ct = 5;
 	}
 	for(size_t i = 0; i < ct; ++i) {
@@ -382,7 +382,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			mainGame->imageLoading[mainGame->btnCardSelect[i]] = curcard->chain_code;
 		else
 			mainGame->btnCardSelect[i]->setImage(mainGame->imageManager.tCover[curcard->controler]);
-		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 55, static_cast<irr::s32>(startpos + 120 + i * 125), 225));
+		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 135), 62, static_cast<irr::s32>(startpos + 125 + i * 135), 262));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		if(mainGame->dInfo.curMsg != MSG_SORT_CHAIN && mainGame->dInfo.curMsg != MSG_SORT_CARD) {
@@ -457,10 +457,10 @@ void ClientField::ShowChainCard() {
 	size_t startpos;
 	size_t ct;
 	if(selectable_cards.size() <= 5) {
-		startpos = 30 + 125 * (5 - selectable_cards.size()) / 2;
+		startpos = 25 + 135 * (5 - selectable_cards.size()) / 2;
 		ct = selectable_cards.size();
 	} else {
-		startpos = 30;
+		startpos = 25;
 		ct = 5;
 	}
 	for(size_t i = 0; i < ct; ++i) {
@@ -470,7 +470,7 @@ void ClientField::ShowChainCard() {
 			mainGame->imageLoading[mainGame->btnCardSelect[i]] = curcard->code;
 		else
 			mainGame->btnCardSelect[i]->setImage(mainGame->imageManager.tCover[curcard->controler]);
-		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 55, static_cast<irr::s32>(startpos + 120 + i * 125), 225));
+		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 135), 62, static_cast<irr::s32>(startpos + 125 + i * 135), 262));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		curstring->setText(epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),

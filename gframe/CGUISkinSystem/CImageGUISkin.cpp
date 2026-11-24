@@ -93,21 +93,12 @@ void CImageGUISkin::setIcon(EGUI_DEFAULT_ICON icon, u32 index) {
 }
 
 void CImageGUISkin::draw3DButtonPaneStandard(IGUIElement* element, const core::rect<s32>& rect, const core::rect<s32>* clip) {
-	if(element->isEnabled()) {
-		if(!Config.Button.Texture) {
-			FallbackSkin->draw3DButtonPaneStandard(element, rect, clip);
-			return;
-		}
-
-		drawElementStyle(Config.Button, rect, clip);
+	if(element && element->isEnabled()) {
+		VideoDriver->draw2DRectangle(video::SColor(220, 15, 23, 42), rect, clip);
+		VideoDriver->draw2DRectangleOutline(rect, video::SColor(180, 56, 189, 248));
 	} else {
-		if(!Config.ButtonDisabled.Texture) {
-			draw3DButtonPaneDisabled(element, rect, clip);
-			//FallbackSkin->draw3DButtonPaneStandard( element, rect, clip );
-			return;
-		}
-
-		drawElementStyle(Config.ButtonDisabled, rect, clip);
+		VideoDriver->draw2DRectangle(video::SColor(160, 10, 15, 26), rect, clip);
+		VideoDriver->draw2DRectangleOutline(rect, video::SColor(80, 71, 85, 105));
 	}
 }
 
@@ -155,12 +146,8 @@ void CImageGUISkin::draw3DButtonPaneDisabled(IGUIElement* element,
 }
 
 void CImageGUISkin::draw3DButtonPanePressed(IGUIElement* element, const core::rect<s32>& rect, const core::rect<s32>* clip) {
-	if(!Config.Button.Texture) {
-		FallbackSkin->draw3DButtonPanePressed(element, rect, clip);
-		return;
-	}
-
-	drawElementStyle(Config.ButtonPressed, rect, clip);
+	VideoDriver->draw2DRectangle(video::SColor(240, 30, 58, 138), rect, clip);
+	VideoDriver->draw2DRectangleOutline(rect, video::SColor(255, 56, 189, 248));
 }
 
 void CImageGUISkin::draw3DSunkenPane(IGUIElement* element,
@@ -231,21 +218,29 @@ core::rect<s32> CImageGUISkin::draw3DWindowBackground(IGUIElement* element,
 													  const core::rect<s32>& rect,
 													  const core::rect<s32>* clip,
 													  core::rect<s32>* checkClientArea) {
-	if(!Config.Window.Texture) {
-		return FallbackSkin->draw3DWindowBackground(element, drawTitleBar, titleBarColor, rect, clip, checkClientArea);
-	}
-
 	if(checkClientArea) {
 		*checkClientArea = rect;
-		checkClientArea->UpperLeftCorner.Y = rect.UpperLeftCorner.Y + Config.Window.DstBorder.Top;
-		checkClientArea->UpperLeftCorner.X = rect.UpperLeftCorner.X + Config.Window.DstBorder.Left;
-		checkClientArea->LowerRightCorner.X = rect.LowerRightCorner.X - Config.Window.DstBorder.Right;
-		checkClientArea->LowerRightCorner.Y = rect.LowerRightCorner.Y - Config.Window.DstBorder.Bottom;
+		checkClientArea->UpperLeftCorner.Y += 25;
+		checkClientArea->UpperLeftCorner.X += 5;
+		checkClientArea->LowerRightCorner.X -= 5;
+		checkClientArea->LowerRightCorner.Y -= 5;
 	}
 
-	drawElementStyle(Config.Window, rect, clip);
+	// 1. Dark solid glass background - opaque dark #0b0f19 (blocks duel field completely!)
+	VideoDriver->draw2DRectangle(video::SColor(248, 11, 15, 25), rect, clip);
 
-	return core::rect<s32>(rect.UpperLeftCorner.X + Config.Window.DstBorder.Left, rect.UpperLeftCorner.Y, rect.LowerRightCorner.X - Config.Window.DstBorder.Right, rect.UpperLeftCorner.Y + Config.Window.DstBorder.Top);
+	// 2. Title bar if requested
+	if(drawTitleBar) {
+		core::rect<s32> tbar = rect;
+		tbar.LowerRightCorner.Y = tbar.UpperLeftCorner.Y + 25;
+		VideoDriver->draw2DRectangle(video::SColor(255, 15, 23, 42), tbar, clip);
+		VideoDriver->draw2DRectangle(video::SColor(200, 30, 41, 59), core::rect<s32>(tbar.UpperLeftCorner.X, tbar.LowerRightCorner.Y - 1, tbar.LowerRightCorner.X, tbar.LowerRightCorner.Y), clip);
+	}
+
+	// 3. Vibrant Cyan Neon Border
+	VideoDriver->draw2DRectangleOutline(rect, video::SColor(220, 56, 189, 248));
+
+	return core::rect<s32>(rect.UpperLeftCorner.X + 5, rect.UpperLeftCorner.Y, rect.LowerRightCorner.X - 5, rect.UpperLeftCorner.Y + 25);
 }
 
 void CImageGUISkin::draw3DMenuPane(IGUIElement* element,

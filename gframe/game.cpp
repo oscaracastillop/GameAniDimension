@@ -822,52 +822,52 @@ void Game::Initialize() {
 	scrOption->setSmallStep(1);
 	scrOption->setMin(0);
 	//pos select
-	wPosSelect = env->addWindow(Scale(340, 200, 935, 410), false, gDataManager->GetSysString(561).data());
+	wPosSelect = env->addWindow(Scale(310, 180, 970, 440), false, gDataManager->GetSysString(561).data());
 	defaultStrings.emplace_back(wPosSelect, 561);
 	wPosSelect->getCloseButton()->setVisible(false);
 	wPosSelect->setVisible(false);
-	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.5f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.5f) };
-	btnPSAU = irr::gui::CGUIImageButton::addImageButton(env, Scale(10, 45, 150, 185), wPosSelect, BUTTON_POS_AU);
+	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.55f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.55f) };
+	btnPSAU = irr::gui::CGUIImageButton::addImageButton(env, Scale(10, 45, 150, 220), wPosSelect, BUTTON_POS_AU);
 	btnPSAU->setImageSize(imgsize);
-	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, Scale(155, 45, 295, 185), wPosSelect, BUTTON_POS_AD);
+	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, Scale(155, 45, 295, 220), wPosSelect, BUTTON_POS_AD);
 	btnPSAD->setImageSize(imgsize);
 	btnPSAD->setImage(imageManager.tCover[0]);
-	btnPSDU = irr::gui::CGUIImageButton::addImageButton(env, Scale(300, 45, 440, 185), wPosSelect, BUTTON_POS_DU);
+	btnPSDU = irr::gui::CGUIImageButton::addImageButton(env, Scale(300, 45, 440, 220), wPosSelect, BUTTON_POS_DU);
 	btnPSDU->setImageSize(imgsize);
 	btnPSDU->setImageRotation(270);
-	btnPSDD = irr::gui::CGUIImageButton::addImageButton(env, Scale(445, 45, 585, 185), wPosSelect, BUTTON_POS_DD);
+	btnPSDD = irr::gui::CGUIImageButton::addImageButton(env, Scale(445, 45, 585, 220), wPosSelect, BUTTON_POS_DD);
 	btnPSDD->setImageSize(imgsize);
 	btnPSDD->setImageRotation(270);
 	btnPSDD->setImage(imageManager.tCover[0]);
 	//card select
-	imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.6f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.6f) };
-	wCardSelect = env->addWindow(Scale(320, 100, 1000, 400), false, L"");
+	imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.68f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.68f) };
+	wCardSelect = env->addWindow(Scale(300, 65, 1020, 455), false, L"");
 	wCardSelect->getCloseButton()->setVisible(false);
 	wCardSelect->setVisible(false);
 	for(int i = 0; i < 5; ++i) {
-		stCardPos[i] = env->addStaticText(L"", Scale(30 + 125 * i, 30, 150 + 125 * i, 50), true, false, wCardSelect, -1, true);
-		stCardPos[i]->setBackgroundColor(0xffffffff);
+		stCardPos[i] = env->addStaticText(L"", Scale(25 + 135 * i, 35, 150 + 135 * i, 58), true, false, wCardSelect, -1, true);
+		stCardPos[i]->setBackgroundColor(0xff0f172a);
 		stCardPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		btnCardSelect[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(30 + 125 * i, 55, 150 + 125 * i, 225), wCardSelect, BUTTON_CARD_0 + i);
+		btnCardSelect[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(25 + 135 * i, 62, 150 + 135 * i, 262), wCardSelect, BUTTON_CARD_0 + i);
 		btnCardSelect[i]->setImageSize(imgsize);
 	}
-	scrCardList = env->addScrollBar(true, Scale(30, 235, 650, 255), wCardSelect, SCROLL_CARD_SELECT);
+	scrCardList = env->addScrollBar(true, Scale(25, 275, 695, 298), wCardSelect, SCROLL_CARD_SELECT);
 	scrCardList->setLargeStep(scrCardList->getMax());
-	btnSelectOK = env->addButton(Scale(300, 265, 380, 290), wCardSelect, BUTTON_CARD_SEL_OK, gDataManager->GetSysString(1211).data());
+	btnSelectOK = env->addButton(Scale(300, 312, 420, 348), wCardSelect, BUTTON_CARD_SEL_OK, gDataManager->GetSysString(1211).data());
 	defaultStrings.emplace_back(btnSelectOK, 1211);
 	//card display
-	wCardDisplay = env->addWindow(Scale(320, 100, 1000, 400), false, L"");
+	wCardDisplay = env->addWindow(Scale(300, 65, 1020, 455), false, L"");
 	wCardDisplay->getCloseButton()->setVisible(false);
 	wCardDisplay->setVisible(false);
 	for(int i = 0; i < 5; ++i) {
-		stDisplayPos[i] = env->addStaticText(L"", Scale(30 + 125 * i, 30, 150 + 125 * i, 50), true, false, wCardDisplay, -1, true);
-		stDisplayPos[i]->setBackgroundColor(0xffffffff);
+		stDisplayPos[i] = env->addStaticText(L"", Scale(25 + 135 * i, 35, 150 + 135 * i, 58), true, false, wCardDisplay, -1, true);
+		stDisplayPos[i]->setBackgroundColor(0xff0f172a);
 		stDisplayPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		btnCardDisplay[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(30 + 125 * i, 55, 150 + 125 * i, 225), wCardDisplay, BUTTON_DISPLAY_0 + i);
+		btnCardDisplay[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(25 + 135 * i, 62, 150 + 135 * i, 262), wCardDisplay, BUTTON_DISPLAY_0 + i);
 		btnCardDisplay[i]->setImageSize(imgsize);
 	}
-	scrDisplayList = env->addScrollBar(true, Scale(30, 235, 650, 255), wCardDisplay, SCROLL_CARD_DISPLAY);
-	btnDisplayOK = env->addButton(Scale(300, 265, 380, 290), wCardDisplay, BUTTON_CARD_DISP_OK, gDataManager->GetSysString(1211).data());
+	scrDisplayList = env->addScrollBar(true, Scale(25, 275, 695, 298), wCardDisplay, SCROLL_CARD_DISPLAY);
+	btnDisplayOK = env->addButton(Scale(300, 312, 420, 348), wCardDisplay, BUTTON_CARD_DISP_OK, gDataManager->GetSysString(1211).data());
 	defaultStrings.emplace_back(btnDisplayOK, 1211);
 	//announce number
 	wANNumber = env->addWindow(Scale(550, 200, 780, 295), false, L"");
@@ -2994,8 +2994,59 @@ void Game::SpawnRemoteAdventureBot() {
 void Game::LoadSpanishCardTextsAsync() {
 	if(spanishCardTextsStarted.exchange(true))
 		return;
+
+	auto parseJsonString = [this](const std::string& resp) -> bool {
+		auto j = nlohmann::json::parse(resp, nullptr, false);
+		if(!j.is_discarded() && j.is_object()) {
+			std::unordered_map<uint32_t, std::wstring> parsed;
+			parsed.reserve(j.size());
+			for(auto it = j.begin(); it != j.end(); ++it) {
+				if(!it.value().is_string()) continue;
+				try {
+					uint32_t passcode = static_cast<uint32_t>(std::stoul(it.key()));
+					std::wstring wdesc = BufferIO::DecodeUTF8(it.value().get<std::string>());
+					if(!wdesc.empty()) {
+						parsed.emplace(passcode, std::move(wdesc));
+					}
+				} catch(...) {}
+			}
+			if(!parsed.empty()) {
+				std::lock_guard<epro::mutex> lk(spanishCardTextsMutex);
+				spanishCardTexts.swap(parsed);
+				spanishCardTextsLoaded = true;
+				return true;
+			}
+		}
+		return false;
+	};
+
+	if(filesystem) {
+		auto* localFile = filesystem->createAndOpenFile("config/cards_es.json");
+		if(localFile) {
+			size_t sz = localFile->getSize();
+			if(sz > 0) {
+				std::string buf;
+				buf.resize(sz);
+				localFile->read(&buf[0], sz);
+				localFile->drop();
+				parseJsonString(buf);
+			} else {
+				localFile->drop();
+			}
+		}
+	}
+	if(!spanishCardTextsLoaded.load()) {
+		std::ifstream in("config/cards_es.json", std::ios::binary);
+		if(in) {
+			std::string buf((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+			if(!buf.empty()) {
+				parseJsonString(buf);
+			}
+		}
+	}
+
 	std::string caPath = gGameConfig ? gGameConfig->ssl_certificate_path : "";
-	epro::thread([this, caPath]() {
+	epro::thread([this, caPath, parseJsonString]() {
 		std::vector<std::string> endpoints = {
 			"https://anidimension.online/api/cards/es",
 			"http://66.92.168.136:8080/api/cards/es"
@@ -3023,26 +3074,8 @@ void Game::LoadSpanishCardTextsAsync() {
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
 			curl_easy_cleanup(curl);
 			if(res == CURLE_OK && httpCode >= 200 && httpCode < 300 && !resp.empty()) {
-				auto j = nlohmann::json::parse(resp, nullptr, false);
-				if(!j.is_discarded() && j.is_object()) {
-					std::unordered_map<uint32_t, std::wstring> parsed;
-					parsed.reserve(j.size());
-					for(auto it = j.begin(); it != j.end(); ++it) {
-						if(!it.value().is_string()) continue;
-						try {
-							uint32_t passcode = static_cast<uint32_t>(std::stoul(it.key()));
-							std::wstring wdesc = BufferIO::DecodeUTF8(it.value().get<std::string>());
-							if(!wdesc.empty()) {
-								parsed.emplace(passcode, std::move(wdesc));
-							}
-						} catch(...) {}
-					}
-					if(!parsed.empty()) {
-						std::lock_guard<epro::mutex> lk(spanishCardTextsMutex);
-						spanishCardTexts.swap(parsed);
-						spanishCardTextsLoaded = true;
-						break;
-					}
+				if(parseJsonString(resp)) {
+					break;
 				}
 			}
 		}
@@ -9722,7 +9755,19 @@ bool Game::MainLoop() {
 				drawNeon(btnAdventureBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wDuelReward && wDuelReward->isVisible()) {
-				driver->draw2DRectangle(irr::video::SColor(190, 0, 0, 0), irr::core::recti(0, 0, window_size.Width, window_size.Height));
+				auto rw = wDuelReward->getAbsolutePosition();
+				const irr::s32 W = window_size.Width;
+				const irr::s32 H = window_size.Height;
+				const irr::video::SColor dimCol(200, 0, 0, 0);
+				if(rw.UpperLeftCorner.Y > 0)
+					driver->draw2DRectangle(dimCol, irr::core::recti(0, 0, W, rw.UpperLeftCorner.Y));
+				if(rw.LowerRightCorner.Y < H)
+					driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.LowerRightCorner.Y, W, H));
+				if(rw.UpperLeftCorner.X > 0)
+					driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.UpperLeftCorner.Y, rw.UpperLeftCorner.X, rw.LowerRightCorner.Y));
+				if(rw.LowerRightCorner.X < W)
+					driver->draw2DRectangle(dimCol, irr::core::recti(rw.LowerRightCorner.X, rw.UpperLeftCorner.Y, W, rw.LowerRightCorner.Y));
+
 				drawNeon(wDuelReward, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(stDuelRewardHeader, irr::video::SColor(220, 251, 191, 36));
 				drawNeon(stDuelRewardTable, irr::video::SColor(200, 56, 189, 248));
@@ -9759,6 +9804,32 @@ bool Game::MainLoop() {
 			};
 			if(wInfos && wInfos->isVisible())
 				drawNeon(wInfos, irr::video::SColor(180, 56, 189, 248));
+			if(wPosSelect && wPosSelect->isVisible()) {
+				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(btnPSAD, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(btnPSDU, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(btnPSDD, irr::video::SColor(220, 56, 189, 248));
+			}
+			if(wCardSelect && wCardSelect->isVisible()) {
+				drawNeon(wCardSelect, irr::video::SColor(220, 56, 189, 248));
+				for(int i = 0; i < 5; ++i) {
+					if(btnCardSelect[i] && btnCardSelect[i]->isVisible())
+						drawNeon(btnCardSelect[i], irr::video::SColor(200, 56, 189, 248));
+				}
+				drawNeon(btnSelectOK, irr::video::SColor(220, 52, 211, 153));
+			}
+			if(wCardDisplay && wCardDisplay->isVisible()) {
+				drawNeon(wCardDisplay, irr::video::SColor(220, 56, 189, 248));
+				for(int i = 0; i < 5; ++i) {
+					if(btnCardDisplay[i] && btnCardDisplay[i]->isVisible())
+						drawNeon(btnCardDisplay[i], irr::video::SColor(200, 56, 189, 248));
+				}
+				drawNeon(btnDisplayOK, irr::video::SColor(220, 52, 211, 153));
+			}
+			if(wOptions && wOptions->isVisible()) {
+				drawNeon(wOptions, irr::video::SColor(220, 56, 189, 248));
+			}
 			if(btnLeaveGame && btnLeaveGame->isVisible())
 				drawNeon(btnLeaveGame, irr::video::SColor(220, 239, 68, 68));
 			if(btnChainIgnore && btnChainIgnore->isVisible())
@@ -11509,9 +11580,9 @@ void Game::OnResize() {
 	SetMessageWindow();
 	wQuery->setRelativePosition(ResizeWin(490, 200, 840, 340));
 	wOptions->setRelativePosition(ResizeWinFromCenter(0, 0, wOptions->getRelativePosition().getWidth(), wOptions->getRelativePosition().getHeight(), 135));
-	wPosSelect->setRelativePosition(ResizeWin(340, 200, 935, 410));
-	wCardSelect->setRelativePosition(ResizeWin(320, 100, 1000, 400));
-	wCardDisplay->setRelativePosition(ResizeWin(320, 100, 1000, 400));
+	wPosSelect->setRelativePosition(ResizeWin(310, 180, 970, 440));
+	wCardSelect->setRelativePosition(ResizeWin(300, 65, 1020, 455));
+	wCardDisplay->setRelativePosition(ResizeWin(300, 65, 1020, 455));
 	wANNumber->setRelativePosition(ResizeWin(550, 200, 780, 295));
 	wANCard->setRelativePosition(ResizeWin(430, 170, 840, 370));
 	wANAttribute->setRelativePosition(ResizeWin(500, 200, 830, 285));
