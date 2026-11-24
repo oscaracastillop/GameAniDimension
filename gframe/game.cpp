@@ -4420,6 +4420,9 @@ irr::video::ITexture* Game::LoadFlagTexture(const std::string& flagUrl) {
 	return tex;
 }
 
+static std::set<std::string> pendingNetTextures;
+static epro::mutex pendingNetMutex;
+
 irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	if(filename.empty() || !driver) return nullptr;
 	std::string localRel = "textures/avatars/" + filename;
@@ -4429,48 +4432,53 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	if(tex) return tex;
 
-	// Download dynamically from API so newly added avatars on server work without rebuild
-	Utils::MakeDirectory(EPRO_TEXT("textures"));
-	Utils::MakeDirectory(EPRO_TEXT("textures/avatars"));
-	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
-	auto curl = curl_easy_init();
-	if(curl) {
-		for(const auto& host : hosts) {
-			std::string url = host + "/api/avatars/" + filename;
-			std::string bytes;
-			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
-			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
-			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
-			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
-			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
-			long code = 0;
-			auto res = curl_easy_perform(curl);
-			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-			if(res == CURLE_OK && code == 200 && !bytes.empty()) {
-				std::ofstream out(localRel, std::ios::binary);
-				if(out) {
-					out.write(bytes.data(), bytes.size());
-					out.close();
-					tex = driver->getTexture(localRel.c_str());
-				}
-				if(!tex && device && device->getFileSystem()) {
-					auto* memFile = device->getFileSystem()->createMemoryReadFile(
-						const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), localRel.c_str(), false);
-					if(memFile) {
-						tex = driver->getTexture(memFile);
-						memFile->drop();
-					}
-				}
-				if(tex) break;
-			}
+	// Check if already queued or downloading in background
+	{
+		std::lock_guard<epro::mutex> lk(pendingNetMutex);
+		if(pendingNetTextures.find(filename) != pendingNetTextures.end()) {
+			return nullptr;
 		}
-		curl_easy_cleanup(curl);
+		pendingNetTextures.insert(filename);
 	}
-	return tex;
+
+	// Download asynchronously without blocking the UI thread
+	std::thread([filename, localRel]() {
+		Utils::MakeDirectory(EPRO_TEXT("textures"));
+		Utils::MakeDirectory(EPRO_TEXT("textures/avatars"));
+		std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+		auto curl = curl_easy_init();
+		if(curl) {
+			for(const auto& host : hosts) {
+				std::string url = host + "/api/avatars/" + filename;
+				std::string bytes;
+				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+				curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+				curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+				curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+				curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+				curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+				long code = 0;
+				auto res = curl_easy_perform(curl);
+				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+				if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+					std::ofstream out(localRel, std::ios::binary);
+					if(out) {
+						out.write(bytes.data(), bytes.size());
+						out.close();
+					}
+					break;
+				}
+			}
+			curl_easy_cleanup(curl);
+		}
+		std::lock_guard<epro::mutex> lk(pendingNetMutex);
+		pendingNetTextures.erase(filename);
+	}).detach();
+
+	return nullptr;
 }
 
 irr::video::ITexture* Game::LoadCharacterTexture(const std::string& filename) {
@@ -4485,55 +4493,60 @@ irr::video::ITexture* Game::LoadCharacterTexture(const std::string& filename) {
 		if(tex) return tex;
 	}
 
-	Utils::MakeDirectory(EPRO_TEXT("textures"));
-	Utils::MakeDirectory(EPRO_TEXT("textures/characters"));
-	Utils::MakeDirectory(EPRO_TEXT("textures/characters/dm"));
-	Utils::MakeDirectory(EPRO_TEXT("textures/characters/gx"));
-
-	std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
-	auto curl = curl_easy_init();
-	irr::video::ITexture* tex = nullptr;
-	if(curl) {
-		curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 3L);
-		curl_easy_setopt(curl, CURLOPT_TIMEOUT, 8L);
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
-		curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
-		curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
-
-		for(const auto& host : hosts) {
-			for(const auto& rel : localPaths) {
-				std::string url = host + "/" + rel;
-				std::string bytes;
-				curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-				curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
-				long code = 0;
-				auto res = curl_easy_perform(curl);
-				curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
-				if(res == CURLE_OK && code == 200 && !bytes.empty()) {
-					std::ofstream out(rel, std::ios::binary);
-					if(out) {
-						out.write(bytes.data(), bytes.size());
-						out.close();
-						tex = driver->getTexture(rel.c_str());
-					}
-					if(!tex && device && device->getFileSystem()) {
-						auto* memFile = device->getFileSystem()->createMemoryReadFile(
-							const_cast<char*>(bytes.data()), static_cast<irr::s32>(bytes.size()), rel.c_str(), false);
-						if(memFile) {
-							tex = driver->getTexture(memFile);
-							memFile->drop();
-						}
-					}
-					if(tex) break;
-				}
-			}
-			if(tex) break;
+	{
+		std::lock_guard<epro::mutex> lk(pendingNetMutex);
+		if(pendingNetTextures.find("char_" + filename) != pendingNetTextures.end()) {
+			return nullptr;
 		}
-		curl_easy_cleanup(curl);
+		pendingNetTextures.insert("char_" + filename);
 	}
-	return tex;
+
+	std::thread([filename, localPaths]() {
+		Utils::MakeDirectory(EPRO_TEXT("textures"));
+		Utils::MakeDirectory(EPRO_TEXT("textures/characters"));
+		Utils::MakeDirectory(EPRO_TEXT("textures/characters/dm"));
+		Utils::MakeDirectory(EPRO_TEXT("textures/characters/gx"));
+
+		std::vector<std::string> hosts = { "https://anidimension.online", "http://66.92.168.136:8080" };
+		auto curl = curl_easy_init();
+		if(curl) {
+			curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2L);
+			curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
+			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
+			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+
+			for(const auto& host : hosts) {
+				bool downloaded = false;
+				for(const auto& rel : localPaths) {
+					std::string url = host + "/" + rel;
+					std::string bytes;
+					curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+					curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
+					long code = 0;
+					auto res = curl_easy_perform(curl);
+					curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
+					if(res == CURLE_OK && code == 200 && !bytes.empty()) {
+						std::ofstream out(rel, std::ios::binary);
+						if(out) {
+							out.write(bytes.data(), bytes.size());
+							out.close();
+						}
+						downloaded = true;
+						break;
+					}
+				}
+				if(downloaded) break;
+			}
+			curl_easy_cleanup(curl);
+		}
+		std::lock_guard<epro::mutex> lk(pendingNetMutex);
+		pendingNetTextures.erase("char_" + filename);
+	}).detach();
+
+	return nullptr;
 }
 
 irr::video::ITexture* Game::LoadMedalTexture(int npcLevel) {
@@ -4695,11 +4708,7 @@ void Game::PopulateEconomyScreens() {
 			imgStoreHubIcons[si] = env->addImage(irr::core::recti(0, 0, 64, 64), wStoreHubCards[si], -1, 0, true);
 			imgStoreHubIcons[si]->setScaleImage(true);
 			imgStoreHubIcons[si]->setUseAlphaChannel(true);
-			if(si == 4 || si == 5) {
-				uint32_t hubCode = (si == 4) ? 89631139u : 74677422u;
-				storeHubPendingArt[si - 4] = hubCode;
-				imgStoreHubIcons[si]->setImage(imageManager.GetTextureCard(hubCode, ART, false, true));
-			} else if(auto sTex = driver->getTexture(stIcons[si])) {
+			if(auto sTex = driver->getTexture(stIcons[si])) {
 				imgStoreHubIcons[si]->setImage(sTex);
 			}
 			stStoreHubTitles[si] = env->addStaticText(stTitles[si], irr::core::recti(0, 0, 10, 10), false, false, wStoreHubCards[si]);
@@ -4877,6 +4886,10 @@ void Game::PopulateEconomyScreens() {
 		btnBstCardBuySS[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnBstCardBuyCD[i]);
 		btnBstCardBuyCD[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginDescFont) {
+			btnBstCardBuySS[i]->setOverrideFont(loginDescFont);
+			btnBstCardBuyCD[i]->setOverrideFont(loginDescFont);
+		}
 	}
 	btnStoreBstPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_PREV, L"Anterior");
 	stStoreBstPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStoreBoosters);
@@ -5418,14 +5431,14 @@ void Game::ResizeEconomyScreens() {
 					irr::s32 by = cardH - btnH - Scale(10);
 					if(btnStoreHubActions[si])
 						btnStoreHubActions[si]->setRelativePosition(irr::core::recti(Scale(10), by, cardW - Scale(10), by + btnH));
-					irr::s32 dy = by - Scale(56);
+					irr::s32 dy = by - Scale(52);
 					if(stStoreHubDescs[si])
 						stStoreHubDescs[si]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), by - Scale(4)));
 					irr::s32 ty = dy - Scale(22);
 					if(stStoreHubTitles[si])
 						stStoreHubTitles[si]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), dy - Scale(2)));
-					irr::s32 icH = ty - Scale(16);
-					fitImage(imgStoreHubIcons[si], cardW / 2, Scale(10), cardW - Scale(16), icH);
+					irr::s32 icH = ty - Scale(12);
+					fitImage(imgStoreHubIcons[si], cardW / 2, Scale(8), cardW - Scale(16), icH);
 				}
 			}
 		}
@@ -5585,12 +5598,12 @@ void Game::ResizeEconomyScreens() {
 				irr::s32 by = cardH - btnH - Scale(10);
 				if(btnVipCardBuy[i]) btnVipCardBuy[i]->setRelativePosition(irr::core::recti(Scale(12), by, cardW - Scale(12), by + btnH));
 				if(stVipCardPrices[i]) stVipCardPrices[i]->setVisible(false);
-				irr::s32 dy = by - Scale(52);
+				irr::s32 dy = by - Scale(46);
 				if(stVipCardDescs[i]) stVipCardDescs[i]->setRelativePosition(irr::core::recti(Scale(12), dy, cardW - Scale(12), by - Scale(4)));
 				irr::s32 ty = dy - Scale(22);
 				if(stVipCardTitles[i]) stVipCardTitles[i]->setRelativePosition(irr::core::recti(Scale(12), ty, cardW - Scale(12), dy - Scale(2)));
-				irr::s32 icH = ty - Scale(14);
-				fitImage(imgVipCardIcons[i], cardW / 2, Scale(10), cardW - Scale(16), icH);
+				irr::s32 icH = ty - Scale(10);
+				fitImage(imgVipCardIcons[i], cardW / 2, Scale(8), cardW - Scale(16), icH);
 			}
 		}
 	}
@@ -8069,17 +8082,6 @@ bool Game::MainLoop() {
 			ShowDuelRewardWindow();
 			pendingDuelReward.valid = false;
 		}
-		if(wStoreMenu && wStoreMenu->isVisible()) {
-			for(int i = 0; i < 2; ++i) {
-				if(storeHubPendingArt[i] > 0 && imgStoreHubIcons[4 + i]) {
-					auto cTex = imageManager.GetTextureCard(storeHubPendingArt[i], ART, false, true);
-					if(cTex && cTex != imageManager.tCover[0] && cTex != imageManager.tUnknown) {
-						imgStoreHubIcons[4 + i]->setImage(cTex);
-						storeHubPendingArt[i] = 0;
-					}
-				}
-			}
-		}
 		if(wStoreCards && wStoreCards->isVisible()) {
 			for(int i = 0; i < 14; ++i) {
 				if(storeCardPendingArt[i] > 0 && imgCardCardArts[i]) {
@@ -8353,8 +8355,11 @@ bool Game::MainLoop() {
 					cCyan, cPurp, cGold, cGold, cPurp, cEmer
 				};
 				for(int si = 0; si < 6; ++si) {
-					drawNeon(wStoreHubCards[si], stBorder[si]);
-					drawNeon(btnStoreHubActions[si], irr::video::SColor(140, 56, 189, 248));
+					bool show = (storeHubPage == 0 && si < 5) || (storeHubPage == 1 && si == 5);
+					if(show) {
+						drawNeon(wStoreHubCards[si], stBorder[si]);
+						drawNeon(btnStoreHubActions[si], irr::video::SColor(140, 56, 189, 248));
+					}
 				}
 				drawNeon(btnStoreBack, irr::video::SColor(160, 148, 163, 184));
 			}
