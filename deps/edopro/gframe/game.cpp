@@ -179,28 +179,28 @@ void Game::Initialize() {
 	lpcFont = irr::gui::CGUITTFont::createTTFont(env, numfont, fallbackFonts);
 	{
 		auto ltFont = textfont;
-		ltFont.size = Scale(23);
+		ltFont.size = Scale(24);
 		loginTitleFont = irr::gui::CGUITTFont::createTTFont(env, ltFont, fallbackFonts);
 		auto luFont = textfont;
-		luFont.size = Scale(17);
+		luFont.size = Scale(18);
 		loginUiFont = irr::gui::CGUITTFont::createTTFont(env, luFont, fallbackFonts);
 		auto lbFont = textfont;
-		lbFont.size = Scale(16);
+		lbFont.size = Scale(17);
 		loginBtnFont = irr::gui::CGUITTFont::createTTFont(env, lbFont, fallbackFonts);
 		auto ldFont = textfont;
-		ldFont.size = Scale(13);
+		ldFont.size = Scale(14);
 		loginDescFont = irr::gui::CGUITTFont::createTTFont(env, ldFont, fallbackFonts);
 		auto liFont = textfont;
 		liFont.font = EPRO_TEXT("fonts/italic.ttf");
-		liFont.size = Scale(14);
+		liFont.size = Scale(15);
 		loginLogItalicFont = irr::gui::CGUITTFont::createTTFont(env, liFont, fallbackFonts);
 		if(!loginLogItalicFont) {
 			auto fallbackLi = textfont;
-			fallbackLi.size = Scale(14);
+			fallbackLi.size = Scale(15);
 			loginLogItalicFont = irr::gui::CGUITTFont::createTTFont(env, fallbackLi, fallbackFonts);
 		}
 		auto lTimeFont = textfont;
-		lTimeFont.size = Scale(11);
+		lTimeFont.size = Scale(12);
 		loginLogTimeFont = irr::gui::CGUITTFont::createTTFont(env, lTimeFont, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -3077,7 +3077,7 @@ void Game::ResizeMainMenuScreen() {
 	const int contentH = std::max(Scale(180), contentBottomY - contentY);
 
 	// Right column width and position
-	const int rightW = std::max(Scale(460), std::min(Scale(560), (int)(W * 0.49f)));
+	const int rightW = std::max(Scale(480), std::min(Scale(580), (int)(W * 0.50f)));
 	const int rightX = W - padX - rightW;
 
 	// Server status line above right column
@@ -3106,12 +3106,17 @@ void Game::ResizeMainMenuScreen() {
 	int baseH = 0;
 	int baseY = 0;
 	if(imgLobbyAvatarBase) {
-		const int baseW = (int)(avW * 1.35f);
-		baseH = (int)(baseW * 360.0f / 693.0f);
-		const int baseX = avX + (avW - baseW) / 2;
-		// Avatar feet are at avY + avH. Pedestal upper surface is placed directly under feet
-		baseY = avY + avH - (int)(baseH * 0.48f);
-		imgLobbyAvatarBase->setRelativePosition(irr::core::recti(baseX, baseY, baseX + baseW, baseY + baseH));
+		if(imgLobbyAvatarBase->getImage()) {
+			const int baseW = (int)(avW * 1.35f);
+			baseH = (int)(baseW * 360.0f / 693.0f);
+			const int baseX = avX + (avW - baseW) / 2;
+			// Avatar feet are at avY + avH. Pedestal upper surface is placed directly under feet
+			baseY = avY + avH - (int)(baseH * 0.48f);
+			imgLobbyAvatarBase->setRelativePosition(irr::core::recti(baseX, baseY, baseX + baseW, baseY + baseH));
+			imgLobbyAvatarBase->setVisible(true);
+		} else {
+			imgLobbyAvatarBase->setVisible(false);
+		}
 	}
 	if(imgLobbyAvatar) {
 		imgLobbyAvatar->setRelativePosition(irr::core::recti(avX, avY, avX + avW, avY + avH));
@@ -3127,8 +3132,8 @@ void Game::ResizeMainMenuScreen() {
 		stLobbyAvatarPendingGift->setRelativePosition(irr::core::recti(avX + giftSz + Scale(6), giftY, avX + avW + Scale(120), giftY + giftSz));
 
 	// 2. Center Column: Player Stats Card (wLobbyPlayerCard) - wider, moved to the right, taller with enlarged VIP
-	const int infoX = avX + avW + Scale(32);
-	const int infoW = std::min(Scale(320), leftTotalW - (infoX - padX));
+	const int infoX = avX + avW + Scale(44);
+	const int infoW = std::min(Scale(340), leftTotalW - (infoX - padX));
 	const int panelY = contentY;
 
 	if(wLobbyPlayerCard) {
@@ -3171,8 +3176,8 @@ void Game::ResizeMainMenuScreen() {
 		if(stLobbyStarShips) stLobbyStarShips->setVisible(false);
 		if(stLobbyCristales) stLobbyCristales->setVisible(false);
 
-		int vipW = Scale(144);
-		int vipH = Scale(162);
+		int vipW = Scale(156);
+		int vipH = Scale(176);
 		int vipX = (infoW - vipW) / 2;
 		int vipY = iy + Scale(10);
 		if(imgLobbyVip) {
@@ -3253,8 +3258,6 @@ void Game::ResizeMainMenuScreen() {
 	const int duelBtnW = Scale(180);
 	const int normBtnW = Scale(110);
 	const int normBtnGap = Scale(10);
-	const int normBtnH = Scale(38);
-	const int duelBtnH = Scale(44);
 	const int btnYNorm = btnRowY + (duelBtnH - normBtnH) / 2;
 
 	// Duelo Rápido at the far right
@@ -4452,10 +4455,10 @@ irr::video::ITexture* Game::LoadAvatarTexture(const std::string& filename) {
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	if(tex) return tex;
 
-	// Check if already queued or downloading in background
+	// Check if already queued or downloading in background (cap at 4 concurrent downloads to avoid thread exhaustion)
 	{
 		std::lock_guard<epro::mutex> lk(pendingNetMutex);
-		if(pendingNetTextures.find(filename) != pendingNetTextures.end()) {
+		if(pendingNetTextures.find(filename) != pendingNetTextures.end() || pendingNetTextures.size() >= 4) {
 			return nullptr;
 		}
 		pendingNetTextures.insert(filename);
@@ -4632,6 +4635,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wProfileInfo) wProfileInfo->setVisible(false);
 	if(wProfileMedals) wProfileMedals->setVisible(false);
 	if(wProfileAvatars) wProfileAvatars->setVisible(false);
+	if(wEventsHub) wEventsHub->setVisible(false);
 	if(wEventsMenu) wEventsMenu->setVisible(false);
 	if(wClansMenu) wClansMenu->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
@@ -5220,27 +5224,146 @@ void Game::PopulateEconomyScreens() {
 	styleCyanBtn(btnProfileActivateAva);
 	styleDarkBtn(btnProfileAvatarsBack);
 
-	// 4d. Events / Puzzles
+	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
+	makeCanvas(wEventsHub);
+	stEventsHubTitle = env->addStaticText(L"EVENTOS DE ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wEventsHub);
+	stEventsHubTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stEventsHubTitle->setOverrideFont(loginTitleFont);
+	stEventsHubDesc = env->addStaticText(L"Participa en los eventos mensuales del servidor y consigue recompensas exclusivas.", irr::core::recti(0, 0, 10, 10), false, true, wEventsHub);
+	stEventsHubDesc->setWordWrap(true);
+	stEventsHubDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	btnEventsHubBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsHub, BUTTON_EVENTS_HUB_BACK, L"Volver a Lobby");
+	styleDarkBtn(btnEventsHubBack);
+	{
+		const char* evIcons[2] = { "textures/events.png", "textures/starships.png" };
+		const wchar_t* evTitles[2] = { L"Rompecabezas", L"Orbes de Esencia" };
+		const wchar_t* evDescs[2] = {
+			L"Gana duelos NPC o PvP del 5 al 26 de cada mes para desbloquear las 20 piezas, reclama el Top 10 o canjea fichas al cierre.",
+			L"Pr\u00F3ximamente: evento mensual de recolecci\u00F3n de esencias m\u00E1gicas y recompensas dimensionales."
+		};
+		const wchar_t* evBtns[2] = { L"Abrir Rompecabezas", L"Pr\u00F3ximamente" };
+		const int evIds[2] = { BUTTON_EVENTS_HUB_PUZZLE, BUTTON_EVENTS_HUB_ORBS };
+		const irr::video::SColor evColors[2] = { irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 192, 132, 252) };
+		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+		for(int i = 0; i < 2; ++i) {
+			wEventsHubCard[i] = makePanel(wEventsHub);
+			imgEventsHubIcon[i] = env->addImage(irr::core::recti(0, 0, 64, 64), wEventsHubCard[i], -1, 0, true);
+			imgEventsHubIcon[i]->setScaleImage(true);
+			imgEventsHubIcon[i]->setUseAlphaChannel(true);
+			if(auto t = driver->getTexture(evIcons[i])) imgEventsHubIcon[i]->setImage(t);
+
+			stEventsHubCardTitle[i] = env->addStaticText(evTitles[i], irr::core::recti(0, 0, 10, 10), false, false, wEventsHubCard[i]);
+			stEventsHubCardTitle[i]->setOverrideColor(evColors[i]);
+			if(loginUiFont) stEventsHubCardTitle[i]->setOverrideFont(loginUiFont);
+
+			stEventsHubCardDesc[i] = env->addStaticText(evDescs[i], irr::core::recti(0, 0, 10, 10), false, true, wEventsHubCard[i]);
+			stEventsHubCardDesc[i]->setWordWrap(true);
+			stEventsHubCardDesc[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			if(loginDescFont) stEventsHubCardDesc[i]->setOverrideFont(loginDescFont);
+
+			btnEventsHubCardAction[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsHubCard[i], evIds[i], evBtns[i]);
+			if(i == 0) styleCyanBtn(btnEventsHubCardAction[i]);
+			else {
+				styleDarkBtn(btnEventsHubCardAction[i]);
+				btnEventsHubCardAction[i]->setEnabled(false);
+			}
+		}
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
+	}
+
+	// 4d. Events / Dedicated Rompecabezas
 	makeCanvas(wEventsMenu);
-	pnlEventsLeft = makePanel(wEventsMenu);
-	pnlEventsRight = makePanel(wEventsMenu);
-	stEventsTitle = env->addStaticText(L"EVENTOS DE ROMPECABEZAS", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
-	stEventsTitle->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-	if(loginUiFont) stEventsTitle->setOverrideFont(loginUiFont);
+	stEventsSelectLabel = env->addStaticText(L"Evento:", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
+	stEventsSelectLabel->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
+	if(loginBtnFont) stEventsSelectLabel->setOverrideFont(loginBtnFont);
+
 	cbEventsSelect = env->addComboBox(irr::core::recti(0, 0, 10, 10), wEventsMenu, COMBOBOX_EVENTS_SELECT);
-	stEventsMeta = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wEventsMenu);
-	stEventsMeta->setWordWrap(true);
-	stEventsMeta->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	lstEventsPieces = env->addListBox(irr::core::recti(0, 0, 10, 10), wEventsMenu, -1, true);
-	lstEventsPieces->setItemHeight(Scale(22));
-	lstEventsTop10 = env->addListBox(irr::core::recti(0, 0, 10, 10), wEventsMenu, -1, true);
-	lstEventsTop10->setItemHeight(Scale(24));
-	btnEventsClaimTop = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_CLAIM_TOP, L"Reclamar Premio Top 10");
-	btnEventsExchange = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_EXCHANGE, L"Canjear Fichas por SS");
-	btnEventsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_BACK, L"Volver a Perfil");
+
+	stEventsStatusBadge = env->addStaticText(L"ACTIVO", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
+	stEventsStatusBadge->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stEventsStatusBadge->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	stEventsStatusBadge->setBackgroundColor(irr::video::SColor(200, 6, 78, 59));
+	if(loginDescFont) stEventsStatusBadge->setOverrideFont(loginDescFont);
+
+	stEventsDates = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
+	stEventsDates->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stEventsDates->setOverrideFont(loginDescFont);
+
+	btnEventsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsMenu, BUTTON_EVENTS_BACK, L"Volver a Eventos");
+	styleDarkBtn(btnEventsBack);
+
+	// Left: Puzzle Board
+	pnlEventsLeft = makePanel(wEventsMenu);
+	stEventsPuzzleTitle = env->addStaticText(L"Rompecabezas", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsLeft);
+	stEventsPuzzleTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginUiFont) stEventsPuzzleTitle->setOverrideFont(loginUiFont);
+
+	stEventsProgress = env->addStaticText(L"0 / 20 piezas \u00FAnicas \u2022 Total fichas: 0", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsLeft);
+	stEventsProgress->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	stEventsProgress->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginDescFont) stEventsProgress->setOverrideFont(loginDescFont);
+
+	pnlPuzzleBoardWrap = makePanel(pnlEventsLeft);
+	pnlPuzzleBoardWrap->setBackgroundColor(irr::video::SColor(255, 6, 9, 19));
+	for(int i = 0; i < 20; ++i) {
+		pnlPieceCells[i] = makePanel(pnlPuzzleBoardWrap);
+		pnlPieceCells[i]->setBackgroundColor(irr::video::SColor(255, 9, 13, 22));
+		imgPuzzleCells[i] = env->addImage(irr::core::recti(0, 0, 32, 32), pnlPieceCells[i], -1, 0, true);
+		imgPuzzleCells[i]->setScaleImage(true);
+		imgPuzzleCells[i]->setUseAlphaChannel(true);
+
+		stPieceNums[i] = env->addStaticText(epro::format(L"#{}", i + 1).c_str(), irr::core::recti(0, 0, 10, 10), false, false, pnlPieceCells[i]);
+		stPieceNums[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stPieceNums[i]->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
+		stPieceNums[i]->setBackgroundColor(irr::video::SColor(200, 20, 25, 35));
+		if(loginLogTimeFont) stPieceNums[i]->setOverrideFont(loginLogTimeFont);
+
+		stPieceQtys[i] = env->addStaticText(L"x1", irr::core::recti(0, 0, 10, 10), false, false, pnlPieceCells[i]);
+		stPieceQtys[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stPieceQtys[i]->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+		stPieceQtys[i]->setBackgroundColor(irr::video::SColor(230, 124, 58, 237));
+		stPieceQtys[i]->setVisible(false);
+		if(loginLogTimeFont) stPieceQtys[i]->setOverrideFont(loginLogTimeFont);
+	}
+
+	btnEventsClaimTop = env->addButton(irr::core::recti(0, 0, 10, 10), pnlEventsLeft, BUTTON_EVENTS_CLAIM_TOP, L"Reclamar Puesto Top 10");
+	btnEventsExchange = env->addButton(irr::core::recti(0, 0, 10, 10), pnlEventsLeft, BUTTON_EVENTS_EXCHANGE, L"Intercambiar Fichas Restantes (100 SS c/u)");
 	styleCyanBtn(btnEventsClaimTop);
 	styleDarkBtn(btnEventsExchange);
-	styleDarkBtn(btnEventsBack);
+
+	stEventsHint = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlEventsLeft);
+	stEventsHint->setWordWrap(true);
+	stEventsHint->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stEventsHint->setOverrideFont(loginDescFont);
+
+	// Right: Top 10
+	pnlEventsRight = makePanel(wEventsMenu);
+	stEventsTopTitle = env->addStaticText(L"Top 10 Posiciones y Premios", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+	stEventsTopTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginUiFont) stEventsTopTitle->setOverrideFont(loginUiFont);
+
+	stTop10HeaderPos = env->addStaticText(L"#", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+	stTop10HeaderPrize = env->addStaticText(L"PREMIO", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+	stTop10HeaderUser = env->addStaticText(L"JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+	for(auto* h : { stTop10HeaderPos, stTop10HeaderPrize, stTop10HeaderUser }) {
+		h->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) h->setOverrideFont(loginDescFont);
+	}
+
+	for(int r = 0; r < 10; ++r) {
+		stTop10RowPos[r] = env->addStaticText(epro::format(L"#{}", r + 1).c_str(), irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+		stTop10RowPos[r]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		stTop10RowPrize[r] = env->addStaticText(L"—", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+		stTop10RowPrize[r]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		stTop10RowUser[r] = env->addStaticText(L"Disponible", irr::core::recti(0, 0, 10, 10), false, false, pnlEventsRight);
+		stTop10RowUser[r]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
+		if(loginDescFont) {
+			stTop10RowPos[r]->setOverrideFont(loginDescFont);
+			stTop10RowPrize[r]->setOverrideFont(loginDescFont);
+			stTop10RowUser[r]->setOverrideFont(loginDescFont);
+		}
+	}
 
 	// 4e. Clans
 	makeCanvas(wClansMenu);
@@ -5289,24 +5412,86 @@ void Game::PopulateEconomyScreens() {
 	styleCyanBtn(btnClanCreateSubmit);
 	styleDarkBtn(btnClanCreateCancel);
 
-	// 5. Mailbox (dedicated full-screen)
+	// 5. Mailbox (Modern Table with Pagination matching web reference)
 	makeCanvas(wMailbox);
-	pnlMailboxLeft = makePanel(wMailbox);
-	pnlMailboxRight = makePanel(wMailbox);
 	stMailboxTitle = env->addStaticText(L"BUZ\u00D3N DE RECOMPENSAS Y COMPRAS", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
-	stMailboxTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stMailboxTitle->setOverrideFont(loginUiFont);
-	lstMailboxItems = env->addListBox(irr::core::recti(0, 0, 10, 10), wMailbox, LISTBOX_MAILBOX_ITEMS, true);
-	lstMailboxItems->setItemHeight(Scale(28));
-	stMailboxDetail = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wMailbox);
-	stMailboxDetail->setWordWrap(true);
-	stMailboxDetail->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	btnMailboxClaim = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_CLAIM, L"Reclamar");
-	btnMailboxDiscard = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_DISCARD, L"Descartar");
-	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"Volver");
-	styleCyanBtn(btnMailboxClaim);
-	styleDarkBtn(btnMailboxDiscard);
+	stMailboxTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont) stMailboxTitle->setOverrideFont(loginTitleFont);
+
+	stMailboxDesc = env->addStaticText(L"Reclama tus avatares o aplica tus potenciadores directamente a tu avatar activo.", irr::core::recti(0, 0, 10, 10), false, true, wMailbox);
+	stMailboxDesc->setWordWrap(true);
+	stMailboxDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+
+	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnMailboxBack);
+
+	pnlMailboxTable = makePanel(wMailbox);
+
+	thMbStatus = env->addStaticText(L"ESTADO", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	thMbItem = env->addStaticText(L"RECOMPENSA / \u00CDTEM", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	thMbDetail = env->addStaticText(L"DETALLE", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	thMbOrigin = env->addStaticText(L"ORIGEN", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	thMbDate = env->addStaticText(L"FECHA", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	thMbActions = env->addStaticText(L"ACCIONES", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
+	for(auto* th : { thMbStatus, thMbItem, thMbDetail, thMbOrigin, thMbDate, thMbActions }) {
+		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) th->setOverrideFont(loginDescFont);
+	}
+
+	for(int r = 0; r < 8; ++r) {
+		pnlMbRow[r] = makePanel(pnlMailboxTable);
+		pnlMbRow[r]->setBackgroundColor(r % 2 == 0 ? irr::video::SColor(90, 15, 23, 42) : irr::video::SColor(45, 15, 23, 42));
+
+		stMbRowStatus[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
+		stMbRowStatus[r]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		if(loginDescFont) stMbRowStatus[r]->setOverrideFont(loginDescFont);
+
+		stMbRowItem[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
+		stMbRowItem[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginDescFont) stMbRowItem[r]->setOverrideFont(loginDescFont);
+
+		stMbRowDetail[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlMbRow[r]);
+		stMbRowDetail[r]->setWordWrap(true);
+		stMbRowDetail[r]->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
+		if(loginLogTimeFont) stMbRowDetail[r]->setOverrideFont(loginLogTimeFont);
+		else if(loginDescFont) stMbRowDetail[r]->setOverrideFont(loginDescFont);
+
+		stMbRowOrigin[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
+		stMbRowOrigin[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) stMbRowOrigin[r]->setOverrideFont(loginDescFont);
+
+		stMbRowDate[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
+		stMbRowDate[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) stMbRowDate[r]->setOverrideFont(loginDescFont);
+
+		btnMbRowClaim[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlMbRow[r], BUTTON_MAILBOX_ROW_CLAIM_0 + r, L"Reclamar");
+		styleCyanBtn(btnMbRowClaim[r]);
+		if(loginDescFont) btnMbRowClaim[r]->setOverrideFont(loginDescFont);
+
+		btnMbRowDiscard[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlMbRow[r], BUTTON_MAILBOX_ROW_DISC_0 + r, L"Descartar");
+		styleDarkBtn(btnMbRowDiscard[r]);
+		btnMbRowDiscard[r]->setOverrideColor(irr::video::SColor(255, 252, 165, 165));
+		if(loginDescFont) btnMbRowDiscard[r]->setOverrideFont(loginDescFont);
+
+		stMbRowProcessed[r] = env->addStaticText(L"Procesado", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
+		stMbRowProcessed[r]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
+		if(loginDescFont) stMbRowProcessed[r]->setOverrideFont(loginDescFont);
+	}
+
+	stMbInfo = env->addStaticText(L"Total: 0 registro(s)", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
+	stMbInfo->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stMbInfo->setOverrideFont(loginDescFont);
+
+	btnMbPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_PREV, L"Anterior");
+	styleDarkBtn(btnMbPrev);
+
+	stMbPage = env->addStaticText(L"P\u00E1gina 1 de 1", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
+	stMbPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stMbPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginDescFont) stMbPage->setOverrideFont(loginDescFont);
+
+	btnMbNext = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_NEXT, L"Siguiente");
+	styleDarkBtn(btnMbNext);
 
 	// Non-window dark-glass neon confirmation overlay (100% opaque so text is always crisp)
 	wConfirmPurchase = env->addStaticText(L"", irr::core::recti(0, 0, 500, 210), false, false, 0, -1, true);
@@ -5862,20 +6047,128 @@ void Game::ResizeEconomyScreens() {
 		btnProfileActivateAva->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + rw, botY - Scale(10)));
 	}
 
-	// 4d. Events / Puzzles
+	// 4c. Events Hub (2-card layout)
+	if(wEventsHub) {
+		wEventsHub->setRelativePosition(irr::core::recti(0, 0, W, H));
+		stEventsHubTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		stEventsHubDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(190), topY + Scale(54)));
+		btnEventsHubBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
+
+		const irr::s32 gridTop = topY + Scale(64);
+		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop - Scale(16));
+		const irr::s32 cardH = std::min<irr::s32>(Scale(360), availH);
+		const irr::s32 cy = gridTop + (availH - cardH) / 2;
+		const irr::s32 gap = Scale(24);
+		const irr::s32 cardW = std::min<irr::s32>(Scale(360), (W - 2 * pad - gap) / 2);
+		const irr::s32 startX = (W - (2 * cardW + gap)) / 2;
+
+		for(int i = 0; i < 2; ++i) {
+			irr::s32 cx = startX + i * (cardW + gap);
+			if(wEventsHubCard[i]) {
+				wEventsHubCard[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 btnH = Scale(34);
+				irr::s32 by = cardH - btnH - Scale(14);
+				if(btnEventsHubCardAction[i])
+					btnEventsHubCardAction[i]->setRelativePosition(irr::core::recti(Scale(14), by, cardW - Scale(14), by + btnH));
+				irr::s32 dy = by - Scale(56);
+				if(stEventsHubCardDesc[i])
+					stEventsHubCardDesc[i]->setRelativePosition(irr::core::recti(Scale(14), dy, cardW - Scale(14), by - Scale(4)));
+				irr::s32 ty = dy - Scale(24);
+				if(stEventsHubCardTitle[i])
+					stEventsHubCardTitle[i]->setRelativePosition(irr::core::recti(Scale(14), ty, cardW - Scale(14), dy - Scale(2)));
+				irr::s32 icH = ty - Scale(16);
+				fitImage(imgEventsHubIcon[i], cardW / 2, Scale(12), cardW - Scale(28), icH);
+			}
+		}
+	}
+
+	// 4d. Events / Dedicated Rompecabezas
 	if(wEventsMenu) {
 		wEventsMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlEventsLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlEventsRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stEventsTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		cbEventsSelect->setRelativePosition(irr::core::recti(lx, topY + Scale(42), lx + lw, topY + Scale(70)));
-		stEventsMeta->setRelativePosition(irr::core::recti(lx, topY + Scale(76), lx + lw, topY + Scale(142)));
-		lstEventsPieces->setRelativePosition(irr::core::recti(lx, topY + Scale(148), lx + lw, botY - Scale(56)));
-		btnEventsBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
+		// Top Event Selector Bar
+		stEventsSelectLabel->setRelativePosition(irr::core::recti(pad, topY + Scale(4), pad + Scale(58), topY + Scale(34)));
+		cbEventsSelect->setRelativePosition(irr::core::recti(pad + Scale(60), topY + Scale(2), pad + Scale(340), topY + Scale(34)));
+		stEventsStatusBadge->setRelativePosition(irr::core::recti(pad + Scale(348), topY + Scale(4), pad + Scale(425), topY + Scale(34)));
+		stEventsDates->setRelativePosition(irr::core::recti(pad + Scale(435), topY + Scale(6), W - pad - Scale(185), topY + Scale(32)));
+		btnEventsBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
 
-		lstEventsTop10->setRelativePosition(irr::core::recti(rx, topY + Scale(16), rx + rw, botY - Scale(106)));
-		btnEventsClaimTop->setRelativePosition(irr::core::recti(rx, botY - Scale(96), rx + rw, botY - Scale(58)));
-		btnEventsExchange->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + rw, botY - Scale(10)));
+		const irr::s32 contentTop = topY + Scale(40);
+		const irr::s32 contentBot = botY;
+		const irr::s32 gap = Scale(12);
+		const irr::s32 totalW = W - 2 * pad;
+		const irr::s32 leftW = (totalW - gap) * 60 / 100;
+		const irr::s32 rightW = totalW - gap - leftW;
+
+		// Left Panel: Puzzle Board
+		if(pnlEventsLeft) {
+			pnlEventsLeft->setRelativePosition(irr::core::recti(pad, contentTop, pad + leftW, contentBot));
+			stEventsPuzzleTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(6), leftW - Scale(220), Scale(28)));
+			stEventsProgress->setRelativePosition(irr::core::recti(leftW - Scale(220), Scale(6), leftW - Scale(14), Scale(28)));
+
+			const irr::s32 panelH = contentBot - contentTop;
+			const irr::s32 actH = Scale(62);
+			const irr::s32 availGridH = panelH - Scale(32) - actH - Scale(10);
+			const irr::s32 availGridW = leftW - Scale(24);
+			// 5 cols x 4 rows aspect ratio 1375 / 768 (~1.79)
+			irr::s32 boardW = availGridW;
+			irr::s32 boardH = (boardW * 768) / 1375;
+			if(boardH > availGridH) {
+				boardH = availGridH;
+				boardW = (boardH * 1375) / 768;
+			}
+			irr::s32 boardX = (leftW - boardW) / 2;
+			irr::s32 boardY = Scale(32) + (availGridH - boardH) / 2;
+			if(pnlPuzzleBoardWrap) {
+				pnlPuzzleBoardWrap->setRelativePosition(irr::core::recti(boardX, boardY, boardX + boardW, boardY + boardH));
+				irr::s32 cellW = boardW / 5;
+				irr::s32 cellH = boardH / 4;
+				for(int i = 0; i < 20; ++i) {
+					int r = i / 5;
+					int c = i % 5;
+					irr::s32 cx = c * cellW;
+					irr::s32 cy = r * cellH;
+					if(pnlPieceCells[i]) {
+						pnlPieceCells[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cellW, cy + cellH));
+						if(imgPuzzleCells[i])
+							imgPuzzleCells[i]->setRelativePosition(irr::core::recti(0, 0, cellW, cellH));
+						if(stPieceNums[i])
+							stPieceNums[i]->setRelativePosition(irr::core::recti(Scale(2), Scale(2), Scale(28), Scale(18)));
+						if(stPieceQtys[i])
+							stPieceQtys[i]->setRelativePosition(irr::core::recti(cellW - Scale(28), cellH - Scale(18), cellW - Scale(2), cellH - Scale(2)));
+					}
+				}
+			}
+
+			irr::s32 actY = boardY + boardH + Scale(8);
+			irr::s32 btnW = (leftW - Scale(38)) / 2;
+			if(btnEventsClaimTop) btnEventsClaimTop->setRelativePosition(irr::core::recti(Scale(14), actY, Scale(14) + btnW, actY + Scale(32)));
+			if(btnEventsExchange) btnEventsExchange->setRelativePosition(irr::core::recti(Scale(24) + btnW, actY, leftW - Scale(14), actY + Scale(32)));
+			if(stEventsHint) stEventsHint->setRelativePosition(irr::core::recti(Scale(14), actY + Scale(34), leftW - Scale(14), actY + Scale(58)));
+		}
+
+		// Right Panel: Top 10
+		if(pnlEventsRight) {
+			irr::s32 rx = pad + leftW + gap;
+			pnlEventsRight->setRelativePosition(irr::core::recti(rx, contentTop, rx + rightW, contentBot));
+			stEventsTopTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(6), rightW - Scale(12), Scale(28)));
+
+			irr::s32 thY = Scale(32);
+			irr::s32 posW = Scale(28);
+			irr::s32 userW = Scale(105);
+			irr::s32 prizeW = rightW - Scale(24) - posW - userW;
+			if(stTop10HeaderPos) stTop10HeaderPos->setRelativePosition(irr::core::recti(Scale(12), thY, Scale(12) + posW, thY + Scale(20)));
+			if(stTop10HeaderPrize) stTop10HeaderPrize->setRelativePosition(irr::core::recti(Scale(12) + posW, thY, Scale(12) + posW + prizeW, thY + Scale(20)));
+			if(stTop10HeaderUser) stTop10HeaderUser->setRelativePosition(irr::core::recti(rightW - Scale(12) - userW, thY, rightW - Scale(12), thY + Scale(20)));
+
+			irr::s32 rowTop = thY + Scale(22);
+			irr::s32 rowH = ((contentBot - contentTop) - rowTop - Scale(10)) / 10;
+			for(int r = 0; r < 10; ++r) {
+				irr::s32 ry = rowTop + r * rowH;
+				if(stTop10RowPos[r]) stTop10RowPos[r]->setRelativePosition(irr::core::recti(Scale(12), ry, Scale(12) + posW, ry + rowH - 1));
+				if(stTop10RowPrize[r]) stTop10RowPrize[r]->setRelativePosition(irr::core::recti(Scale(12) + posW, ry, Scale(12) + posW + prizeW, ry + rowH - 1));
+				if(stTop10RowUser[r]) stTop10RowUser[r]->setRelativePosition(irr::core::recti(rightW - Scale(12) - userW, ry, rightW - Scale(12), ry + rowH - 1));
+			}
+		}
 	}
 
 	// 4e. Clans
@@ -5906,18 +6199,74 @@ void Game::ResizeEconomyScreens() {
 		}
 	}
 
-	// 5. Mailbox
+	// 5. Mailbox (Full-screen table canvas with pagination)
 	if(wMailbox) {
 		wMailbox->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlMailboxLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlMailboxRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stMailboxTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		lstMailboxItems->setRelativePosition(irr::core::recti(lx, topY + Scale(44), lx + lw, botY - Scale(56)));
-		btnMailboxBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
+		stMailboxTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		if(stMailboxDesc) stMailboxDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(190), topY + Scale(54)));
+		btnMailboxBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
 
-		stMailboxDetail->setRelativePosition(irr::core::recti(rx, topY + Scale(18), rx + rw, botY - Scale(104)));
-		btnMailboxClaim->setRelativePosition(irr::core::recti(rx, botY - Scale(94), rx + rw, botY - Scale(56)));
-		btnMailboxDiscard->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + rw, botY - Scale(10)));
+		const irr::s32 gridTop = topY + Scale(60);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 tableH = botY - gridTop - pageBarH - Scale(8);
+		if(pnlMailboxTable) {
+			pnlMailboxTable->setRelativePosition(irr::core::recti(pad, gridTop, W - pad, gridTop + tableH));
+
+			const irr::s32 tw = W - 2 * pad;
+			const irr::s32 statusW = Scale(95);
+			const irr::s32 originW = Scale(75);
+			const irr::s32 dateW = Scale(85);
+			const irr::s32 actionsW = Scale(155);
+			const irr::s32 remainingW = tw - statusW - originW - dateW - actionsW - Scale(24);
+			const irr::s32 itemW = remainingW * 35 / 100;
+			const irr::s32 detailW = remainingW - itemW;
+
+			irr::s32 x0 = Scale(10);
+			irr::s32 x1 = x0 + statusW;
+			irr::s32 x2 = x1 + itemW;
+			irr::s32 x3 = x2 + detailW;
+			irr::s32 x4 = x3 + originW;
+			irr::s32 x5 = x4 + dateW;
+
+			// Headers
+			const irr::s32 thH = Scale(24);
+			if(thMbStatus) thMbStatus->setRelativePosition(irr::core::recti(x0, Scale(6), x1 - Scale(6), Scale(6) + thH));
+			if(thMbItem) thMbItem->setRelativePosition(irr::core::recti(x1, Scale(6), x2 - Scale(6), Scale(6) + thH));
+			if(thMbDetail) thMbDetail->setRelativePosition(irr::core::recti(x2, Scale(6), x3 - Scale(6), Scale(6) + thH));
+			if(thMbOrigin) thMbOrigin->setRelativePosition(irr::core::recti(x3, Scale(6), x4 - Scale(6), Scale(6) + thH));
+			if(thMbDate) thMbDate->setRelativePosition(irr::core::recti(x4, Scale(6), x5 - Scale(6), Scale(6) + thH));
+			if(thMbActions) thMbActions->setRelativePosition(irr::core::recti(x5, Scale(6), tw - Scale(10), Scale(6) + thH));
+
+			// Rows
+			irr::s32 rowTop = Scale(6) + thH + Scale(4);
+			irr::s32 rowH = (tableH - rowTop - Scale(6)) / 8;
+			for(int r = 0; r < 8; ++r) {
+				irr::s32 ry = rowTop + r * rowH;
+				if(pnlMbRow[r]) {
+					pnlMbRow[r]->setRelativePosition(irr::core::recti(Scale(4), ry, tw - Scale(4), ry + rowH - Scale(2)));
+					irr::s32 innerH = rowH - Scale(2);
+					irr::s32 midY = (innerH - Scale(20)) / 2;
+					if(stMbRowStatus[r]) stMbRowStatus[r]->setRelativePosition(irr::core::recti(x0 - Scale(4), midY, x1 - Scale(10), midY + Scale(20)));
+					if(stMbRowItem[r]) stMbRowItem[r]->setRelativePosition(irr::core::recti(x1 - Scale(4), midY, x2 - Scale(10), midY + Scale(20)));
+					if(stMbRowDetail[r]) stMbRowDetail[r]->setRelativePosition(irr::core::recti(x2 - Scale(4), Scale(2), x3 - Scale(10), innerH - Scale(2)));
+					if(stMbRowOrigin[r]) stMbRowOrigin[r]->setRelativePosition(irr::core::recti(x3 - Scale(4), midY, x4 - Scale(10), midY + Scale(20)));
+					if(stMbRowDate[r]) stMbRowDate[r]->setRelativePosition(irr::core::recti(x4 - Scale(4), midY, x5 - Scale(10), midY + Scale(20)));
+
+					irr::s32 actBtnH = Scale(26);
+					irr::s32 actY = (innerH - actBtnH) / 2;
+					irr::s32 halfAct = (actionsW - Scale(12)) / 2;
+					if(btnMbRowClaim[r]) btnMbRowClaim[r]->setRelativePosition(irr::core::recti(x5 - Scale(4), actY, x5 - Scale(4) + halfAct, actY + actBtnH));
+					if(btnMbRowDiscard[r]) btnMbRowDiscard[r]->setRelativePosition(irr::core::recti(x5 - Scale(4) + halfAct + Scale(6), actY, tw - Scale(14), actY + actBtnH));
+					if(stMbRowProcessed[r]) stMbRowProcessed[r]->setRelativePosition(irr::core::recti(x5 - Scale(4), midY, tw - Scale(14), midY + Scale(20)));
+				}
+			}
+		}
+
+		irr::s32 py = botY - pageBarH;
+		if(stMbInfo) stMbInfo->setRelativePosition(irr::core::recti(pad, py + Scale(6), pad + Scale(200), botY));
+		if(btnMbPrev) btnMbPrev->setRelativePosition(irr::core::recti(W / 2 - Scale(170), py, W / 2 - Scale(60), botY));
+		if(stMbPage) stMbPage->setRelativePosition(irr::core::recti(W / 2 - Scale(55), py, W / 2 + Scale(55), botY));
+		if(btnMbNext) btnMbNext->setRelativePosition(irr::core::recti(W / 2 + Scale(60), py, W / 2 + Scale(170), botY));
 	}
 
 	if(wConfirmPurchase) {
@@ -7185,14 +7534,20 @@ void Game::ActivateSelectedAvatar() {
 	}
 }
 
+void Game::OpenEventsHub() {
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	HideAllEcosystemScreens();
+	ResizeEconomyScreens();
+	wEventsHub->setVisible(true);
+}
+
 void Game::OpenEventsMenu(int eventoId) {
 	HideAllEcosystemScreens();
 	std::string ep = eventoId > 0 ? epro::format("/api/events/puzzles?eventoId={}", eventoId) : "/api/events/puzzles";
 	auto resp = CallSessionApi(ep, sessionToken);
 	eventIds.clear();
 	if(cbEventsSelect) cbEventsSelect->clear();
-	lstEventsPieces->clear();
-	lstEventsTop10->clear();
 	selectedEventId = 0;
 
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
@@ -7217,9 +7572,38 @@ void Game::OpenEventsMenu(int eventoId) {
 			}
 			if(cbEventsSelect && !eventIds.empty()) cbEventsSelect->setSelected(selIdx);
 		}
+
+		std::string carpeta = "evento_1";
+		std::string estadoActual = "ACTIVO";
+		int uniqueCount = 0;
+		int totalCount = 0;
 		if(resp.contains("selected") && resp["selected"].is_object()) {
 			const auto& s = resp["selected"];
-			int uniq = 0, tot = 0;
+			carpeta = SafeJsonStr(s, "CarpetaAssets", "evento_1");
+			estadoActual = SafeJsonStr(s, "EstadoActual", "ACTIVO");
+			if(stEventsPuzzleTitle) stEventsPuzzleTitle->setText(BufferIO::DecodeUTF8(SafeJsonStr(s, "Titulo", "Rompecabezas")).c_str());
+			if(stEventsStatusBadge) {
+				stEventsStatusBadge->setText(BufferIO::DecodeUTF8(estadoActual).c_str());
+				stEventsStatusBadge->setOverrideColor(estadoActual == "ACTIVO" ? irr::video::SColor(255, 52, 211, 153) : irr::video::SColor(255, 239, 68, 68));
+				stEventsStatusBadge->setBackgroundColor(estadoActual == "ACTIVO" ? irr::video::SColor(200, 6, 78, 59) : irr::video::SColor(200, 127, 29, 29));
+			}
+
+			auto fmtDate = [](const std::string& ds) -> std::wstring {
+				if(ds.length() >= 16) {
+					std::string d = ds.substr(8, 2);
+					std::string m = ds.substr(5, 2);
+					std::string y = ds.substr(0, 4);
+					std::string t = ds.substr(11, 5);
+					return BufferIO::DecodeUTF8(d + "/" + m + "/" + y + " " + t);
+				}
+				return L"—";
+			};
+			std::string fIni = SafeJsonStr(s, "FechaInicio", "");
+			std::string fFin = SafeJsonStr(s, "FechaFin", "");
+			if(stEventsDates) {
+				stEventsDates->setText(epro::format(L"Inicio: {} \u2022 Fin: {}", fmtDate(fIni), fmtDate(fFin)).c_str());
+			}
+
 			std::unordered_map<int, int> pMap;
 			if(resp.contains("pieces") && resp["pieces"].is_array()) {
 				for(const auto& pc : resp["pieces"]) {
@@ -7228,32 +7612,102 @@ void Game::OpenEventsMenu(int eventoId) {
 					if(num > 0) pMap[num] = qty;
 				}
 			}
-			for(int p = 1; p <= 20; ++p) {
-				int q = pMap[p];
-				if(q > 0) { uniq++; tot += q; }
-				lstEventsPieces->addItem(epro::format(L"Pieza #{}: {}", p, q > 0 ? epro::format(L"Obtenida (x{})", q) : L"Faltante").c_str());
+
+			for(int i = 1; i <= 20; ++i) {
+				int qty = pMap[i];
+				if(qty > 0) { uniqueCount++; totalCount += qty; }
+				int idx = i - 1;
+				if(imgPuzzleCells[idx]) {
+					auto tex = LoadPuzzlePieceTexture(carpeta, i);
+					if(tex) imgPuzzleCells[idx]->setImage(tex);
+					if(qty > 0) {
+						imgPuzzleCells[idx]->setColor(irr::video::SColor(255, 255, 255, 255));
+						if(stPieceNums[idx]) {
+							stPieceNums[idx]->setBackgroundColor(irr::video::SColor(220, 16, 185, 129));
+							stPieceNums[idx]->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+						}
+						if(stPieceQtys[idx]) {
+							if(qty > 1) {
+								stPieceQtys[idx]->setText(epro::format(L"x{}", qty).c_str());
+								stPieceQtys[idx]->setVisible(true);
+							} else {
+								stPieceQtys[idx]->setVisible(false);
+							}
+						}
+					} else {
+						imgPuzzleCells[idx]->setColor(irr::video::SColor(180, 45, 45, 45));
+						if(stPieceNums[idx]) {
+							stPieceNums[idx]->setBackgroundColor(irr::video::SColor(180, 20, 25, 35));
+							stPieceNums[idx]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+						}
+						if(stPieceQtys[idx]) stPieceQtys[idx]->setVisible(false);
+					}
+				}
 			}
-			stEventsMeta->setText(epro::format(
-				L"{} [{}]\nProgreso: {}/20 fichas \u00FAnicas ({} totales)\nCanje tras finalizar: 100 SS por ficha sobrante",
-				BufferIO::DecodeUTF8(SafeJsonStr(s, "Titulo", "")),
-				BufferIO::DecodeUTF8(SafeJsonStr(s, "EstadoActual", "")),
-				uniq, tot
-			).c_str());
-		} else {
-			stEventsMeta->setText(L"No hay eventos de rompecabezas activos.");
+			if(stEventsProgress) {
+				stEventsProgress->setText(epro::format(L"{}/20 piezas \u00FAnicas \u2022 Total fichas: {}", uniqueCount, totalCount).c_str());
+			}
+		}
+
+		// Top 10
+		int myUserId = resp.value("userId", 0);
+		bool myClaim = false;
+		bool hasOpenSlot = false;
+		for(int r = 0; r < 10; ++r) {
+			if(stTop10RowPos[r]) stTop10RowPos[r]->setText(epro::format(L"#{}", r + 1).c_str());
+			if(stTop10RowPrize[r]) stTop10RowPrize[r]->setText(L"—");
+			if(stTop10RowUser[r]) {
+				stTop10RowUser[r]->setText(L"Disponible");
+				stTop10RowUser[r]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
+			}
 		}
 		if(resp.contains("top10") && resp["top10"].is_array()) {
-			int rank = 1;
-			for(const auto& t : resp["top10"]) {
-				lstEventsTop10->addItem(epro::format(
-					L"#{}  {}  (Completado)",
-					rank++,
-					BufferIO::DecodeUTF8(SafeJsonStr(t, "Usuario", ""))
-				).c_str());
+			const auto& tList = resp["top10"];
+			for(size_t i = 0; i < tList.size() && i < 10; ++i) {
+				const auto& t = tList[i];
+				int pos = SafeJsonInt(t, "Posicion", (int)i + 1);
+				int r = pos - 1;
+				if(r >= 0 && r < 10) {
+					std::string premio = SafeJsonStr(t, "PremioTexto", "—");
+					std::string usuario = SafeJsonStr(t, "UsuarioNombre", "");
+					int uId = SafeJsonInt(t, "UsuarioId", 0);
+					if(stTop10RowPrize[r]) stTop10RowPrize[r]->setText(BufferIO::DecodeUTF8(premio).c_str());
+					if(!usuario.empty() && uId > 0) {
+						if(stTop10RowUser[r]) {
+							stTop10RowUser[r]->setText(BufferIO::DecodeUTF8(usuario).c_str());
+							stTop10RowUser[r]->setOverrideColor(irr::video::SColor(255, 110, 231, 183));
+						}
+						if(uId == myUserId) myClaim = true;
+					} else {
+						hasOpenSlot = true;
+						if(stTop10RowUser[r]) {
+							stTop10RowUser[r]->setText(L"Disponible");
+							stTop10RowUser[r]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
+						}
+					}
+				}
 			}
 		}
-		if(lstEventsTop10->getItemCount() == 0)
-			lstEventsTop10->addItem(L"A\u00FAn nadie ha completado las 20 fichas.");
+
+		bool isActive = (estadoActual == "ACTIVO");
+		bool isFinished = (estadoActual == "FINALIZADO" || estadoActual == "INACTIVO");
+
+		if(btnEventsClaimTop) btnEventsClaimTop->setEnabled(isActive && uniqueCount >= 20 && !myClaim && hasOpenSlot);
+		if(btnEventsExchange) btnEventsExchange->setEnabled(isFinished && totalCount > 0);
+
+		if(stEventsHint) {
+			if(myClaim) {
+				stEventsHint->setText(L"\u00A1Ya reclamaste tu puesto en el Top 10 de este evento!");
+			} else if(isActive && uniqueCount < 20) {
+				stEventsHint->setText(epro::format(L"Te faltan {} pieza(s) distinta(s) para habilitar el reclamo del Top 10.", 20 - uniqueCount).c_str());
+			} else if(isActive && !hasOpenSlot) {
+				stEventsHint->setText(L"Los 10 puestos del Top ya fueron reclamados. Al finalizar podr\u00E1s canjear tus fichas por StarShips.");
+			} else if(isFinished && totalCount > 0) {
+				stEventsHint->setText(epro::format(L"El evento finaliz\u00F3: puedes canjear tus {} ficha(s) por {} StarShips.", totalCount, totalCount * 100).c_str());
+			} else {
+				stEventsHint->setText(L"");
+			}
+		}
 	}
 	ResizeEconomyScreens();
 	wEventsMenu->setVisible(true);
@@ -7431,7 +7885,6 @@ void Game::OpenMailbox(int returnTo) {
 
 	auto resp = CallSessionApi("/api/mailbox", sessionToken);
 	mailboxItems.clear();
-	lstMailboxItems->clear();
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		if(resp.contains("items") && resp["items"].is_array()) {
 			for(const auto& x : resp["items"]) {
@@ -7441,43 +7894,76 @@ void Game::OpenMailbox(int returnTo) {
 				it.referenciaId = SafeJsonInt(x, "referenciaId", 0);
 				it.titulo = BufferIO::DecodeUTF8(SafeJsonStr(x, "titulo", ""));
 				it.descripcion = BufferIO::DecodeUTF8(SafeJsonStr(x, "descripcion", ""));
-				it.origen = BufferIO::DecodeUTF8(SafeJsonStr(x, "origen", ""));
+				it.origen = BufferIO::DecodeUTF8(SafeJsonStr(x, "origen", "TIENDA"));
 				it.estado = SafeJsonStr(x, "estado", "PENDIENTE");
+				std::string fStr = SafeJsonStr(x, "fechaCreacion", "");
+				if(!fStr.empty() && fStr.length() >= 10) {
+					std::string y = fStr.substr(0, 4);
+					std::string m = fStr.substr(5, 2);
+					std::string d = fStr.substr(8, 2);
+					it.fecha = BufferIO::DecodeUTF8(d + "/" + m + "/" + y);
+				} else {
+					it.fecha = L"—";
+				}
 				mailboxItems.push_back(it);
-				lstMailboxItems->addItem(epro::format(L"[{}] {}", BufferIO::DecodeUTF8(it.estado), it.titulo).c_str());
 			}
 		}
 	}
-	if(!mailboxItems.empty()) {
-		lstMailboxItems->setSelected(0);
-		SelectMailboxItem(0);
-	} else {
-		stMailboxDetail->setText(L"Tu buz\u00F3n est\u00E1 vac\u00EDo.");
-		btnMailboxClaim->setEnabled(false);
-		btnMailboxDiscard->setEnabled(false);
-	}
+	mailboxPage = 0;
+	RefreshMailboxPage();
 	ResizeEconomyScreens();
 	wMailbox->setVisible(true);
 }
 
-void Game::SelectMailboxItem(int idx) {
-	if(idx < 0 || idx >= (int)mailboxItems.size()) return;
-	const auto& it = mailboxItems[idx];
-	bool pend = (it.estado == "PENDIENTE");
-	stMailboxDetail->setText(epro::format(
-		L"{}\n\nTipo: {} | Origen: {} | Estado: {}\n\n{}",
-		it.titulo, BufferIO::DecodeUTF8(it.tipoItem), it.origen, BufferIO::DecodeUTF8(it.estado), it.descripcion
-	).c_str());
-	btnMailboxClaim->setText(it.tipoItem == "POTENCIADOR" ? L"Reclamar y Potenciar Avatar" : L"Reclamar");
-	btnMailboxClaim->setEnabled(pend);
-	btnMailboxDiscard->setEnabled(pend);
+void Game::RefreshMailboxPage() {
+	int total = (int)mailboxItems.size();
+	int totalPages = std::max(1, (total + MAILBOX_PAGE_SIZE - 1) / MAILBOX_PAGE_SIZE);
+	if(mailboxPage >= totalPages) mailboxPage = totalPages - 1;
+	if(mailboxPage < 0) mailboxPage = 0;
+
+	if(stMbInfo) stMbInfo->setText(epro::format(L"Total: {} registro(s)", total).c_str());
+	if(stMbPage) stMbPage->setText(epro::format(L"P\u00E1gina {} de {}", mailboxPage + 1, totalPages).c_str());
+	if(btnMbPrev) btnMbPrev->setEnabled(mailboxPage > 0);
+	if(btnMbNext) btnMbNext->setEnabled(mailboxPage + 1 < totalPages);
+
+	for(int r = 0; r < 8; ++r) {
+		int itemIdx = mailboxPage * MAILBOX_PAGE_SIZE + r;
+		if(itemIdx < total) {
+			const auto& it = mailboxItems[itemIdx];
+			if(pnlMbRow[r]) pnlMbRow[r]->setVisible(true);
+			bool pend = (it.estado == "PENDIENTE");
+			if(stMbRowStatus[r]) {
+				stMbRowStatus[r]->setText(BufferIO::DecodeUTF8(it.estado).c_str());
+				stMbRowStatus[r]->setOverrideColor(pend ? irr::video::SColor(255, 251, 191, 36) : irr::video::SColor(255, 52, 211, 153));
+			}
+			if(stMbRowItem[r]) stMbRowItem[r]->setText(it.titulo.c_str());
+			if(stMbRowDetail[r]) stMbRowDetail[r]->setText(it.descripcion.c_str());
+			if(stMbRowOrigin[r]) stMbRowOrigin[r]->setText(it.origen.c_str());
+			if(stMbRowDate[r]) stMbRowDate[r]->setText(it.fecha.c_str());
+
+			if(pend) {
+				if(stMbRowProcessed[r]) stMbRowProcessed[r]->setVisible(false);
+				if(btnMbRowClaim[r]) {
+					btnMbRowClaim[r]->setText((it.tipoItem == "POTENCIADOR" || it.tipoItem == "POTENCIADOR_CUSTOM") ? L"Reclamar y Potenciar" : L"Reclamar");
+					btnMbRowClaim[r]->setVisible(true);
+				}
+				if(btnMbRowDiscard[r]) btnMbRowDiscard[r]->setVisible(true);
+			} else {
+				if(btnMbRowClaim[r]) btnMbRowClaim[r]->setVisible(false);
+				if(btnMbRowDiscard[r]) btnMbRowDiscard[r]->setVisible(false);
+				if(stMbRowProcessed[r]) stMbRowProcessed[r]->setVisible(true);
+			}
+		} else {
+			if(pnlMbRow[r]) pnlMbRow[r]->setVisible(false);
+		}
+	}
 }
 
-void Game::ResolveSelectedMailboxItem(bool claim) {
-	int idx = lstMailboxItems ? lstMailboxItems->getSelected() : -1;
-	if(idx < 0 || idx >= (int)mailboxItems.size()) return;
+void Game::ResolveMailboxRow(int r, bool claim) {
+	int itemIdx = mailboxPage * MAILBOX_PAGE_SIZE + r;
+	if(itemIdx < 0 || itemIdx >= (int)mailboxItems.size()) return;
 	nlohmann::json body;
-	body["buzonId"] = mailboxItems[idx].id;
+	body["buzonId"] = mailboxItems[itemIdx].id;
 	body["accion"] = claim ? "RECLAMAR" : "DESCARTAR";
 	auto resp = CallSessionApi("/api/mailbox/resolve", sessionToken, body.dump());
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
@@ -8210,8 +8696,9 @@ bool Game::MainLoop() {
 				(wStoreVip && wStoreVip->isVisible()) || (wStoreCards && wStoreCards->isVisible()) ||
 				(wStorePacks && wStorePacks->isVisible()) || (wPlayerProfile && wPlayerProfile->isVisible()) ||
 				(wProfileInfo && wProfileInfo->isVisible()) || (wProfileMedals && wProfileMedals->isVisible()) ||
-				(wProfileAvatars && wProfileAvatars->isVisible()) || (wEventsMenu && wEventsMenu->isVisible()) ||
-				(wClansMenu && wClansMenu->isVisible()) || (wMailbox && wMailbox->isVisible());
+				(wProfileAvatars && wProfileAvatars->isVisible()) || (wEventsHub && wEventsHub->isVisible()) ||
+				(wEventsMenu && wEventsMenu->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
+				(wMailbox && wMailbox->isVisible());
 		};
 		{
 			bool shouldShowNav = !dInfo.isInDuel && !is_building && isEcosystemVisible();
@@ -8436,12 +8923,17 @@ bool Game::MainLoop() {
 			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
 			if(wProfileMedals && wProfileMedals->isVisible()) { drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan); }
 			if(wProfileAvatars && wProfileAvatars->isVisible()) { drawNeon(pnlProfileLeft, cCyan); drawNeon(pnlProfileRight, cPurp); }
+			if(wEventsHub && wEventsHub->isVisible()) {
+				drawNeon(wEventsHubCard[0], cEmer);
+				drawNeon(wEventsHubCard[1], cPurp);
+				drawNeon(btnEventsHubBack, irr::video::SColor(160, 148, 163, 184));
+			}
 			if(wEventsMenu && wEventsMenu->isVisible()) { drawNeon(pnlEventsLeft, cEmer); drawNeon(pnlEventsRight, cGold); }
 			if(wClansMenu && wClansMenu->isVisible()) {
 				drawNeon(pnlClansLeft, cCyan); drawNeon(pnlClansRight, cPurp);
 				drawNeon(pnlClanCreate, cGold);
 			}
-			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxLeft, cGold); drawNeon(pnlMailboxRight, cCyan); }
+			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
 			drawNeon(wConfirmPurchase, cCyan);
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = (wMainMenu && wMainMenu->isVisible()) ? 0 : 1;

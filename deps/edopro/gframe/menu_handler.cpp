@@ -266,6 +266,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					int pos = mainGame->storeCardPage * 14 + slot;
 					if(pos >= 0 && pos < (int)mainGame->storeCardFiltered.size())
 						mainGame->RequestBuyCardIdx(mainGame->storeCardFiltered[pos], true);
+				} else if(id >= BUTTON_MAILBOX_ROW_CLAIM_0 && id <= BUTTON_MAILBOX_ROW_CLAIM_MAX) {
+					mainGame->ResolveMailboxRow(id - BUTTON_MAILBOX_ROW_CLAIM_0, true);
+				} else if(id >= BUTTON_MAILBOX_ROW_DISC_0 && id <= BUTTON_MAILBOX_ROW_DISC_MAX) {
+					mainGame->ResolveMailboxRow(id - BUTTON_MAILBOX_ROW_DISC_0, false);
 				}
 				break;
 			}
@@ -365,7 +369,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_NAV_EVENTOS:
 			case BUTTON_PROF_HUB_EVENTS: {
-				mainGame->OpenEventsMenu();
+				mainGame->OpenEventsHub();
 				break;
 			}
 			case BUTTON_NAV_CLAN:
@@ -589,9 +593,27 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_PROF_INFO_BACK:
 			case BUTTON_PROF_MEDALS_BACK:
 			case BUTTON_PROF_AVATARS_BACK:
-			case BUTTON_EVENTS_BACK:
 			case BUTTON_CLAN_BACK: {
 				mainGame->OpenPlayerProfile();
+				break;
+			}
+			case BUTTON_EVENTS_HUB_BACK: {
+				mainGame->HideAllEcosystemScreens();
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
+				mainGame->FetchLobbyStatsAsync();
+				break;
+			}
+			case BUTTON_EVENTS_HUB_PUZZLE: {
+				mainGame->OpenEventsMenu();
+				break;
+			}
+			case BUTTON_EVENTS_HUB_ORBS: {
+				mainGame->PopupMessage(L"Pr\u00F3ximamente", L"El evento de Orbes de Esencia estar\u00E1 disponible en una pr\u00F3xima actualizaci\u00F3n.");
+				break;
+			}
+			case BUTTON_EVENTS_BACK: {
+				mainGame->OpenEventsHub();
 				break;
 			}
 			case BUTTON_PROF_MEDAL_HIGHLIGHT: {
@@ -657,12 +679,16 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
-			case BUTTON_MAILBOX_CLAIM: {
-				mainGame->ResolveSelectedMailboxItem(true);
+			case BUTTON_MAILBOX_PREV: {
+				if(mainGame->mailboxPage > 0) {
+					mainGame->mailboxPage--;
+					mainGame->RefreshMailboxPage();
+				}
 				break;
 			}
-			case BUTTON_MAILBOX_DISCARD: {
-				mainGame->ResolveSelectedMailboxItem(false);
+			case BUTTON_MAILBOX_NEXT: {
+				mainGame->mailboxPage++;
+				mainGame->RefreshMailboxPage();
 				break;
 			}
 			case BUTTON_MAILBOX_BACK: {
