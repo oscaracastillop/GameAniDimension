@@ -3,12 +3,12 @@ libs/
 obj/
 release/
 bugreports/
-src/main/assets/**
+src/main/assets/*
 !src/main/assets/cacert.pem
-!src/main/assets/deck/**
-!src/main/assets/WindBot/**
-!src/main/assets/textures/**
-!src/main/assets/config/**
+!src/main/assets/deck/
+!src/main/assets/WindBot/
+!src/main/assets/textures/
+!src/main/assets/config/
 .gradle/
 .id*/
 *vs/
