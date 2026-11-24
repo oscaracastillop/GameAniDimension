@@ -162,6 +162,9 @@ void Game::Initialize() {
 	env = device->getGUIEnvironment();
 	env->getRootGUIElement()->setRelativePosition({ {}, {(irr::s32)(1024 * dpi_scale), (irr::s32)(640 * dpi_scale) } });
 	auto textfont = gGameConfig->textfont;
+#if EDOPRO_ANDROID
+	textfont.size += 1;
+#endif
 	textfont.size = Scale(textfont.size);
 	auto fallbackFonts = gGameConfig->fallbackFonts;
 	for(auto& font : fallbackFonts)
@@ -714,6 +717,23 @@ void Game::Initialize() {
 	btnEP = AlignElementWithParent(env->addButton(Scale(320, 0, 370, 20), wPhase, BUTTON_EP, L"\xff25\xff30"));
 	btnEP->setVisible(false);
 
+	auto applyDuelBtnStyle = [&](irr::gui::IGUIButton* b) {
+		if(!b) return;
+		if(tFlatBtnDark) {
+			b->setImage(tFlatBtnDark);
+			b->setPressedImage(tFlatBtnDark);
+			b->setScaleImage(true);
+			b->setUseAlphaChannel(true);
+		}
+		b->setDrawBorder(false);
+	};
+	applyDuelBtnStyle(btnDP);
+	applyDuelBtnStyle(btnSP);
+	applyDuelBtnStyle(btnM1);
+	applyDuelBtnStyle(btnBP);
+	applyDuelBtnStyle(btnM2);
+	applyDuelBtnStyle(btnEP);
+
 	PopulateTabSettingsWindow();
 	PopulateSettingsWindow();
 
@@ -926,6 +946,32 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnOperation, 1161);
 	btnReset = env->addButton(Scale(1, 190, 99, 210), wCmdMenu, BUTTON_CMD_RESET, gDataManager->GetSysString(1162).data());
 	defaultStrings.emplace_back(btnReset, 1162);
+
+	auto applyCmdBtnStyle = [&](irr::gui::IGUIButton* b) {
+		if(!b) return;
+		if(tFlatBtnBlue) {
+			b->setImage(tFlatBtnBlue);
+			b->setPressedImage(tFlatBtnBlue);
+			b->setScaleImage(true);
+			b->setUseAlphaChannel(true);
+		} else if(tFlatBtnDark) {
+			b->setImage(tFlatBtnDark);
+			b->setPressedImage(tFlatBtnDark);
+			b->setScaleImage(true);
+			b->setUseAlphaChannel(true);
+		}
+		b->setDrawBorder(false);
+	};
+	applyCmdBtnStyle(btnActivate);
+	applyCmdBtnStyle(btnSummon);
+	applyCmdBtnStyle(btnSPSummon);
+	applyCmdBtnStyle(btnMSet);
+	applyCmdBtnStyle(btnSSet);
+	applyCmdBtnStyle(btnRepos);
+	applyCmdBtnStyle(btnAttack);
+	applyCmdBtnStyle(btnShowList);
+	applyCmdBtnStyle(btnOperation);
+	applyCmdBtnStyle(btnReset);
 	//deck edit
 	wDeckEdit = AlignElementWithParent(env->addStaticText(L"", Scale(309, 8, 605, 130), true, false, 0, -1, true));
 	wDeckEdit->setVisible(false);
@@ -1268,6 +1314,15 @@ void Game::Initialize() {
 	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 90), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
 	defaultStrings.emplace_back(btnRestartSingle, 1366);
 	btnRestartSingle->setVisible(false);
+
+	applyDuelBtnStyle(btnSpectatorSwap);
+	applyDuelBtnStyle(btnChainIgnore);
+	applyDuelBtnStyle(btnChainAlways);
+	applyDuelBtnStyle(btnChainWhenAvail);
+	applyDuelBtnStyle(btnShuffle);
+	applyDuelBtnStyle(btnCancelOrFinish);
+	applyDuelBtnStyle(btnLeaveGame);
+	applyDuelBtnStyle(btnRestartSingle);
 	//tip
 	stTip = env->addStaticText(L"", Scale(0, 0, 150, 150), false, true, 0, -1, true);
 	stTip->setBackgroundColor(skin::DUELFIELD_TOOLTIP_TEXT_BACKGROUND_COLOR_VAL);
@@ -8817,12 +8872,14 @@ void Game::PopulateTabSettingsWindow() {
 			tabSettings.scrMusicVolume->setSmallStep(1);
 			cur_y += y_incr;
 		}
-		tabSettings.chkNoChainDelay = env->addCheckBox(gGameConfig->chkWaitChain, GetNextRect(), tabPanel, CHECKBOX_NO_CHAIN_DELAY, gDataManager->GetSysString(1277).data());
+		tabSettings.chkNoChainDelay = env->addCheckBox(gGameConfig->chkWaitChain, irr::core::recti(0, 0, 0, 0), tabPanel, CHECKBOX_NO_CHAIN_DELAY, gDataManager->GetSysString(1277).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkNoChainDelay);
 		defaultStrings.emplace_back(tabSettings.chkNoChainDelay, 1277);
-		tabSettings.chkIgnoreDeckContents = env->addCheckBox(gGameConfig->ignoreDeckContents, GetNextRect(), tabPanel, CHECKBOX_IGNORE_DECK_CONTENTS, gDataManager->GetSysString(12119).data());
+		tabSettings.chkNoChainDelay->setVisible(false);
+		tabSettings.chkIgnoreDeckContents = env->addCheckBox(gGameConfig->ignoreDeckContents, irr::core::recti(0, 0, 0, 0), tabPanel, CHECKBOX_IGNORE_DECK_CONTENTS, gDataManager->GetSysString(12119).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreDeckContents);
 		defaultStrings.emplace_back(tabSettings.chkIgnoreDeckContents, 12119);
+		tabSettings.chkIgnoreDeckContents->setVisible(false);
 		// Check OnResize for button placement information
 		cur_y += 5;
 		btnTabShowSettings = env->addButton(GetNextRect(), tabPanel, BUTTON_SHOW_SETTINGS, gDataManager->GetSysString(2059).data());
@@ -9517,6 +9574,9 @@ bool Game::MainLoop() {
 		if(wAdventureMode && wAdventureMode->isVisible()) {
 			mTopMenu->setVisible(false);
 		}
+		if(dInfo.isInDuel && wTopNavBar) {
+			wTopNavBar->setVisible(false);
+		}
 		EnableMaterial2D(true);
 		DrawGUI();
 		DrawSpec();
@@ -9705,6 +9765,53 @@ bool Game::MainLoop() {
 				if(btnNavItems[activeIdx]) {
 					auto r = btnNavItems[activeIdx]->getAbsolutePosition();
 					driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
+				}
+			}
+		}
+		if(dInfo.isInDuel) {
+			auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
+				if(el && el->isVisible()) {
+					irr::gui::IGUIElement* p = el->getParent();
+					bool parentVis = true;
+					while(p) {
+						if(!p->isVisible()) { parentVis = false; break; }
+						p = p->getParent();
+					}
+					if(parentVis)
+						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
+				}
+			};
+			if(btnLeaveGame && btnLeaveGame->isVisible())
+				drawNeon(btnLeaveGame, irr::video::SColor(220, 239, 68, 68));
+			if(btnChainIgnore && btnChainIgnore->isVisible())
+				drawNeon(btnChainIgnore, btnChainIgnore->isPressed() ? irr::video::SColor(220, 239, 68, 68) : irr::video::SColor(140, 100, 116, 139));
+			if(btnChainAlways && btnChainAlways->isVisible())
+				drawNeon(btnChainAlways, btnChainAlways->isPressed() ? irr::video::SColor(220, 251, 191, 36) : irr::video::SColor(140, 100, 116, 139));
+			if(btnChainWhenAvail && btnChainWhenAvail->isVisible())
+				drawNeon(btnChainWhenAvail, btnChainWhenAvail->isPressed() ? irr::video::SColor(220, 56, 189, 248) : irr::video::SColor(140, 100, 116, 139));
+			if(btnShuffle && btnShuffle->isVisible())
+				drawNeon(btnShuffle, irr::video::SColor(200, 56, 189, 248));
+			if(btnCancelOrFinish && btnCancelOrFinish->isVisible())
+				drawNeon(btnCancelOrFinish, irr::video::SColor(220, 251, 191, 36));
+
+			irr::gui::IGUIButton* phaseBtns[] = { btnDP, btnSP, btnM1, btnBP, btnM2, btnEP };
+			for(auto* pb : phaseBtns) {
+				if(pb && pb->isVisible()) {
+					if(pb->isEnabled())
+						drawNeon(pb, irr::video::SColor(220, 251, 191, 36));
+					else
+						drawNeon(pb, irr::video::SColor(200, 56, 189, 248));
+				}
+			}
+
+			if(wCmdMenu && wCmdMenu->isVisible()) {
+				irr::gui::IGUIButton* cmdBtns[] = {
+					btnActivate, btnSummon, btnSPSummon, btnMSet, btnSSet, btnRepos, btnAttack, btnShowList, btnOperation, btnReset
+				};
+				for(auto* b : cmdBtns) {
+					if(b && b->isVisible()) {
+						drawNeon(b, irr::video::SColor(220, 56, 189, 248));
+					}
 				}
 			}
 		}

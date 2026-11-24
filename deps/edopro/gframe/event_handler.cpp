@@ -2636,26 +2636,30 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 		mainGame->wCmdMenu->setVisible(false);
 		return;
 	}
-	int height = mainGame->Scale(1);
-	auto increase = mainGame->Scale(21);
+	const int btnCmdW = mainGame->Scale(110);
+	const int btnCmdH = mainGame->Scale(28);
+	const int btnCmdGap = mainGame->Scale(5);
+	const int padMenu = mainGame->Scale(4);
+	int height = padMenu;
+	auto increase = btnCmdH + btnCmdGap;
 	if(flag & COMMAND_ACTIVATE) {
 		mainGame->btnActivate->setVisible(true);
-		mainGame->btnActivate->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnActivate->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnActivate->setVisible(false);
 	if(flag & COMMAND_SUMMON) {
 		mainGame->btnSummon->setVisible(true);
-		mainGame->btnSummon->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnSummon->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnSummon->setVisible(false);
 	if(flag & COMMAND_SPSUMMON) {
 		mainGame->btnSPSummon->setVisible(true);
-		mainGame->btnSPSummon->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnSPSummon->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnSPSummon->setVisible(false);
 	if(flag & COMMAND_MSET) {
 		mainGame->btnMSet->setVisible(true);
-		mainGame->btnMSet->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnMSet->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnMSet->setVisible(false);
 	if(flag & COMMAND_SSET) {
@@ -2664,7 +2668,7 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 		else
 			mainGame->btnSSet->setText(gDataManager->GetSysString(1159).data());
 		mainGame->btnSSet->setVisible(true);
-		mainGame->btnSSet->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnSSet->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnSSet->setVisible(false);
 	if(flag & COMMAND_REPOS) {
@@ -2675,27 +2679,27 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 		else
 			mainGame->btnRepos->setText(gDataManager->GetSysString(1156).data());
 		mainGame->btnRepos->setVisible(true);
-		mainGame->btnRepos->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnRepos->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnRepos->setVisible(false);
 	if(flag & COMMAND_ATTACK) {
 		mainGame->btnAttack->setVisible(true);
-		mainGame->btnAttack->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnAttack->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnAttack->setVisible(false);
 	if(flag & COMMAND_LIST) {
 		mainGame->btnShowList->setVisible(true);
-		mainGame->btnShowList->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnShowList->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnShowList->setVisible(false);
 	if(flag & COMMAND_OPERATION) {
 		mainGame->btnOperation->setVisible(true);
-		mainGame->btnOperation->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnOperation->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnOperation->setVisible(false);
 	if(flag & COMMAND_RESET) {
 		mainGame->btnReset->setVisible(true);
-		mainGame->btnReset->setRelativePosition(irr::core::vector2di(1, height));
+		mainGame->btnReset->setRelativePosition(irr::core::recti(padMenu, height, padMenu + btnCmdW, height + btnCmdH));
 		height += increase;
 	} else mainGame->btnReset->setVisible(false);
 	panel = mainGame->wCmdMenu;
@@ -2703,7 +2707,9 @@ void ClientField::ShowMenu(int flag, int x, int y) {
 	irr::core::vector2di mouse = mainGame->Resize(x, y);
 	x = mouse.X;
 	y = mouse.Y;
-	mainGame->wCmdMenu->setRelativePosition(irr::core::recti(x - mainGame->Scale(20), y - mainGame->Scale(20) - height, x + mainGame->Scale(80), y - mainGame->Scale(20)));
+	int totalMenuH = (height > padMenu) ? (height - btnCmdGap + padMenu) : padMenu;
+	int totalMenuW = btnCmdW + 2 * padMenu;
+	mainGame->wCmdMenu->setRelativePosition(irr::core::recti(x - totalMenuW / 2, y - mainGame->Scale(20) - totalMenuH, x + totalMenuW / 2, y - mainGame->Scale(20)));
 }
 void ClientField::UpdateChainButtons(irr::gui::IGUIElement* caller) {
 	if(!caller) {
