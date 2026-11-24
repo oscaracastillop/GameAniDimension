@@ -4679,6 +4679,28 @@ void Game::PopulateEconomyScreens() {
 		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
+	auto stylePurpBtn = [&](irr::gui::IGUIButton* b) {
+		if(!b) return;
+		b->setImage(tFlatBtnDark);
+		b->setPressedImage(tFlatBtnDark);
+		b->setScaleImage(true);
+		b->setUseAlphaChannel(true);
+		b->setDrawBorder(false);
+		b->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		else if(loginUiFont) b->setOverrideFont(loginUiFont);
+	};
+	auto styleEmerBtn = [&](irr::gui::IGUIButton* b) {
+		if(!b) return;
+		b->setImage(tFlatBtnDark);
+		b->setPressedImage(tFlatBtnDark);
+		b->setScaleImage(true);
+		b->setUseAlphaChannel(true);
+		b->setDrawBorder(false);
+		b->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		else if(loginUiFont) b->setOverrideFont(loginUiFont);
+	};
 
 	// 1. Store Menu (dedicated full-screen 3x2 neon cards matching Perfil Hub)
 	makeCanvas(wStoreMenu);
