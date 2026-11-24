@@ -1457,17 +1457,22 @@ public:
 	irr::gui::IGUIButton* btnProfMedalHighlight{ nullptr };
 	irr::gui::IGUIButton* btnProfMedalsBack{ nullptr };
 
-	// 4c. Profile Avatars (Full-screen canvas)
+	// 4c. Profile Avatars (Full-screen 5x2 card grid with pagination & stat rules banner)
 	irr::gui::IGUIStaticText* wProfileAvatars{ nullptr };
-	irr::gui::IGUIStaticText* pnlProfileLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlProfileRight{ nullptr };
 	irr::gui::IGUIStaticText* stProfileAvaTitle{ nullptr };
-	irr::gui::IGUIImage* imgProfileAvatar{ nullptr };
-	irr::gui::IGUIStaticText* stProfileActiveStats{ nullptr };
-	irr::gui::IGUIListBox* lstProfileAvatars{ nullptr };
-	irr::gui::IGUIStaticText* stProfileSelectedInfo{ nullptr };
-	irr::gui::IGUIButton* btnProfileActivateAva{ nullptr };
+	irr::gui::IGUIStaticText* stProfileAvaBanner{ nullptr };
 	irr::gui::IGUIButton* btnProfileAvatarsBack{ nullptr };
+	irr::gui::IGUIStaticText* wMyAvaCards[10]{ nullptr };
+	irr::gui::IGUIImage* imgMyAvaIcons[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaTitles[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaStats[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaOrigin[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaActiveBadge[10]{ nullptr };
+	irr::gui::IGUIButton* btnMyAvaActivate[10]{ nullptr };
+	irr::gui::IGUIButton* btnMyAvaPrev{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaPage{ nullptr };
+	irr::gui::IGUIButton* btnMyAvaNext{ nullptr };
+	int myAvaPage{ 0 };
 
 	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
 	irr::gui::IGUIStaticText* wEventsHub{ nullptr };
@@ -1624,10 +1629,10 @@ public:
 	void OpenMailbox(int returnTo = 0);
 	void RefreshMailboxPage();
 	void ResolveMailboxRow(int rowIdx, bool claim);
-	void SelectProfileAvatar(int idx);
+	void RefreshProfileAvatarsPage();
+	void ActivateAvatarIdx(int slotIdx);
 	void SelectProfileMedal(int idx);
 	void SelectClanItem(int idx);
-	void SelectMailboxItem(int idx);
 	void RequestBuyAvatarIdx(int storeIdx, bool useCD);
 	void RequestBuyBoosterIdx(int storeIdx, bool useCD);
 	void RequestBuyVipIdx(int storeIdx);
