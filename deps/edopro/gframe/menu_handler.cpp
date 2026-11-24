@@ -634,16 +634,15 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->OpenClansMenu(mainGame->ebClanSearch ? mainGame->ebClanSearch->getText() : L"");
 				break;
 			}
-			case BUTTON_CLAN_REQUEST: {
-				mainGame->RequestJoinSelectedClan();
-				break;
-			}
 			case BUTTON_CLAN_MY_CLAN: {
-				mainGame->OpenMyClanView();
+				if(mainGame->myClanId > 0) mainGame->OpenClanDetail(mainGame->myClanId);
 				break;
 			}
 			case BUTTON_CLAN_CREATE_OPEN: {
-				if(mainGame->pnlClanCreate) mainGame->pnlClanCreate->setVisible(true);
+				if(mainGame->pnlClanCreate) {
+					mainGame->pnlClanCreate->setVisible(true);
+					mainGame->env->getRootGUIElement()->bringToFront(mainGame->pnlClanCreate);
+				}
 				break;
 			}
 			case BUTTON_CLAN_CREATE_CANCEL: {
@@ -654,16 +653,84 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->SubmitCreateClan();
 				break;
 			}
-			case BUTTON_CLAN_LEAVE: {
+			case BUTTON_CLAN_PREV_PAGE: {
+				if(mainGame->clanPage > 0) {
+					mainGame->clanPage--;
+					mainGame->RefreshClansPage();
+				}
+				break;
+			}
+			case BUTTON_CLAN_NEXT_PAGE: {
+				int totalP = std::max(1, ((int)mainGame->clanList.size() + 5) / 6);
+				if(mainGame->clanPage + 1 < totalP) {
+					mainGame->clanPage++;
+					mainGame->RefreshClansPage();
+				}
+				break;
+			}
+			case BUTTON_CLAN_ROW_VIEW_0 ... BUTTON_CLAN_ROW_VIEW_MAX: {
+				int row = id - BUTTON_CLAN_ROW_VIEW_0;
+				int idx = mainGame->clanPage * 6 + row;
+				if(idx >= 0 && idx < (int)mainGame->clanList.size()) {
+					mainGame->OpenClanDetail(mainGame->clanList[idx].id);
+				}
+				break;
+			}
+			case BUTTON_CLAN_ROW_REQ_0 ... BUTTON_CLAN_ROW_REQ_MAX: {
+				int row = id - BUTTON_CLAN_ROW_REQ_0;
+				int idx = mainGame->clanPage * 6 + row;
+				if(idx >= 0 && idx < (int)mainGame->clanList.size()) {
+					mainGame->RequestJoinClanId(mainGame->clanList[idx].id);
+				}
+				break;
+			}
+			case BUTTON_CLAN_DETAIL_BACK: {
+				mainGame->OpenClansMenu(mainGame->ebClanSearch ? mainGame->ebClanSearch->getText() : L"");
+				break;
+			}
+			case BUTTON_CLAN_DETAIL_LEAVE: {
 				mainGame->RequestLeaveMyClan();
 				break;
 			}
-			case BUTTON_CLAN_ACCEPT_REQ: {
-				mainGame->RespondClanRequest(true);
+			case BUTTON_CLAN_DETAIL_REQUEST: {
+				mainGame->RequestJoinClanId(mainGame->currentViewingClanId);
 				break;
 			}
-			case BUTTON_CLAN_REJECT_REQ: {
-				mainGame->RespondClanRequest(false);
+			case BUTTON_CLAN_MEMBERS_PREV: {
+				if(mainGame->clanMemberPage > 0) {
+					mainGame->clanMemberPage--;
+					mainGame->RefreshClanMembersPage();
+				}
+				break;
+			}
+			case BUTTON_CLAN_MEMBERS_NEXT: {
+				int totalP = std::max(1, ((int)mainGame->clanMembers.size() + 5) / 6);
+				if(mainGame->clanMemberPage + 1 < totalP) {
+					mainGame->clanMemberPage++;
+					mainGame->RefreshClanMembersPage();
+				}
+				break;
+			}
+			case BUTTON_CLAN_REQ_ACCEPT_0 ... BUTTON_CLAN_REQ_ACCEPT_MAX: {
+				int r = id - BUTTON_CLAN_REQ_ACCEPT_0;
+				if(r >= 0 && r < (int)mainGame->clanRequests.size()) {
+					mainGame->RespondClanRequestId(mainGame->clanRequests[r].id, true);
+				}
+				break;
+			}
+			case BUTTON_CLAN_REQ_REJECT_0 ... BUTTON_CLAN_REQ_REJECT_MAX: {
+				int r = id - BUTTON_CLAN_REQ_REJECT_0;
+				if(r >= 0 && r < (int)mainGame->clanRequests.size()) {
+					mainGame->RespondClanRequestId(mainGame->clanRequests[r].id, false);
+				}
+				break;
+			}
+			case BUTTON_CLAN_MEM_KICK_0 ... BUTTON_CLAN_MEM_KICK_MAX: {
+				int r = id - BUTTON_CLAN_MEM_KICK_0;
+				int idx = mainGame->clanMemberPage * 6 + r;
+				if(idx >= 0 && idx < (int)mainGame->clanMembers.size()) {
+					mainGame->KickClanMember(mainGame->clanMembers[idx].usuarioId);
+				}
 				break;
 			}
 			case BUTTON_MY_AVA_PREV: {
@@ -1241,10 +1308,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->lstProfMedals) mainGame->SelectProfileMedal(mainGame->lstProfMedals->getSelected());
 				break;
 			}
-			case LISTBOX_CLANS: {
-				if(mainGame->lstClans) mainGame->SelectClanItem(mainGame->lstClans->getSelected());
-				break;
-			}
+
 
 			case LISTBOX_REPLAY_LIST: {
 				int sel = mainGame->lstReplayList->getSelected();

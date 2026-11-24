@@ -1228,8 +1228,18 @@ public:
 	};
 	struct ClanRequestItem {
 		int id{ 0 };
+		int usuarioId{ 0 };
 		std::wstring usuario;
 		int nivel{ 1 };
+		std::wstring fechaSolicitud;
+	};
+	struct ClanMemberItem {
+		int usuarioId{ 0 };
+		std::wstring usuario;
+		std::wstring rol;
+		int nivel{ 1 };
+		long long expAportada{ 0 };
+		std::wstring fechaIngreso;
 	};
 	struct UserAvatarItem {
 		int usuarioAvatarId{ 0 };
@@ -1514,29 +1524,83 @@ public:
 	irr::gui::IGUIStaticText* stTop10RowPrize[10]{ nullptr };
 	irr::gui::IGUIStaticText* stTop10RowUser[10]{ nullptr };
 
-	// 4e. Clans (Full-screen canvas)
+	// 4e. Clans (Full-screen table canvas with pagination matching web reference)
 	irr::gui::IGUIStaticText* wClansMenu{ nullptr };
-	irr::gui::IGUIStaticText* pnlClansLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlClansRight{ nullptr };
+	irr::gui::IGUIStaticText* pnlClansTable{ nullptr };
 	irr::gui::IGUIStaticText* stClansTitle{ nullptr };
+	irr::gui::IGUIStaticText* stClansDesc{ nullptr };
 	irr::gui::IGUIEditBox* ebClanSearch{ nullptr };
 	irr::gui::IGUIButton* btnClanSearch{ nullptr };
-	irr::gui::IGUIListBox* lstClans{ nullptr };
-	irr::gui::IGUIStaticText* stClanDetail{ nullptr };
-	irr::gui::IGUIListBox* lstClanRequests{ nullptr };
-	irr::gui::IGUIButton* btnClanRequest{ nullptr };
 	irr::gui::IGUIButton* btnClanMyClan{ nullptr };
 	irr::gui::IGUIButton* btnClanCreateOpen{ nullptr };
-	irr::gui::IGUIButton* btnClanLeave{ nullptr };
-	irr::gui::IGUIButton* btnClanAcceptReq{ nullptr };
-	irr::gui::IGUIButton* btnClanRejectReq{ nullptr };
+	irr::gui::IGUIButton* btnClansBack{ nullptr };
+	irr::gui::IGUIStaticText* thClanColClan{ nullptr };
+	irr::gui::IGUIStaticText* thClanColLevel{ nullptr };
+	irr::gui::IGUIStaticText* thClanColMembers{ nullptr };
+	irr::gui::IGUIStaticText* thClanColMinLevel{ nullptr };
+	irr::gui::IGUIStaticText* thClanColBonus{ nullptr };
+	irr::gui::IGUIStaticText* thClanColActions{ nullptr };
+	irr::gui::IGUIStaticText* stClanRowName[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanRowLevel[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanRowMembers[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanRowMinLevel[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanRowBonus[6]{ nullptr };
+	irr::gui::IGUIButton* btnClanRowView[6]{ nullptr };
+	irr::gui::IGUIButton* btnClanRowReq[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClansTotal{ nullptr };
+	irr::gui::IGUIButton* btnClansPrev{ nullptr };
+	irr::gui::IGUIStaticText* stClansPage{ nullptr };
+	irr::gui::IGUIButton* btnClansNext{ nullptr };
+	int clanPage{ 0 };
+
+	// 4e-bis. Clan Detail / Mi Clan (Dedicated screen matching web reference)
+	irr::gui::IGUIStaticText* wClanDetail{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailTitle{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailDesc{ nullptr };
+	irr::gui::IGUIButton* btnClanDetailBack{ nullptr };
+	irr::gui::IGUIButton* btnClanDetailLeave{ nullptr };
+	irr::gui::IGUIButton* btnClanDetailRequest{ nullptr };
+	irr::gui::IGUIStaticText* pnlClanSummary{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailName{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailBadges{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailSummary{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailBonuses{ nullptr };
+	irr::gui::IGUIStaticText* stClanDetailExpInfo{ nullptr };
+	irr::gui::IGUIStaticText* pnlClanRequestsTable{ nullptr };
+	irr::gui::IGUIStaticText* stClanRequestsTitle{ nullptr };
+	irr::gui::IGUIStaticText* stClanNoRequests{ nullptr };
+	irr::gui::IGUIStaticText* stClanReqUser[4]{ nullptr };
+	irr::gui::IGUIButton* btnClanReqAccept[4]{ nullptr };
+	irr::gui::IGUIButton* btnClanReqReject[4]{ nullptr };
+	irr::gui::IGUIStaticText* pnlClanMembersTable{ nullptr };
+	irr::gui::IGUIStaticText* stClanMembersTitle{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemUser{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemRole{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemLevel{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemExp{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemDate{ nullptr };
+	irr::gui::IGUIStaticText* thClanMemAction{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemUser[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemRole[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemLevel[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemExp[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemDate[6]{ nullptr };
+	irr::gui::IGUIButton* btnClanMemKick[6]{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemTotal{ nullptr };
+	irr::gui::IGUIButton* btnClanMemPrev{ nullptr };
+	irr::gui::IGUIStaticText* stClanMemPage{ nullptr };
+	irr::gui::IGUIButton* btnClanMemNext{ nullptr };
+	int clanMemberPage{ 0 };
+	std::vector<ClanMemberItem> clanMembers;
+	int currentViewingClanId{ 0 };
+
+	// Modal Crear Clan
 	irr::gui::IGUIStaticText* pnlClanCreate{ nullptr };
 	irr::gui::IGUIEditBox* ebClanCreateName{ nullptr };
 	irr::gui::IGUIEditBox* ebClanCreateDesc{ nullptr };
 	irr::gui::IGUIEditBox* ebClanCreateMinLvl{ nullptr };
 	irr::gui::IGUIButton* btnClanCreateSubmit{ nullptr };
 	irr::gui::IGUIButton* btnClanCreateCancel{ nullptr };
-	irr::gui::IGUIButton* btnClansBack{ nullptr };
 
 	// 5. Mailbox (Full-screen table canvas with pagination)
 	irr::gui::IGUIStaticText* wMailbox{ nullptr };
@@ -1626,13 +1690,18 @@ public:
 	void OpenEventsHub();
 	void OpenEventsMenu(int eventoId = 0);
 	void OpenClansMenu(const std::wstring& search = L"");
+	void RefreshClansPage();
+	void OpenClanDetail(int clanId);
+	void RefreshClanMembersPage();
+	void RequestJoinClanId(int clanId);
+	void RespondClanRequestId(int reqId, bool accept);
+	void KickClanMember(int targetUserId);
 	void OpenMailbox(int returnTo = 0);
 	void RefreshMailboxPage();
 	void ResolveMailboxRow(int rowIdx, bool claim);
 	void RefreshProfileAvatarsPage();
 	void ActivateAvatarIdx(int slotIdx);
 	void SelectProfileMedal(int idx);
-	void SelectClanItem(int idx);
 	void RequestBuyAvatarIdx(int storeIdx, bool useCD);
 	void RequestBuyBoosterIdx(int storeIdx, bool useCD);
 	void RequestBuyVipIdx(int storeIdx);
