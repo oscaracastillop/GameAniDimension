@@ -209,6 +209,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ShowTopNavBar(true);
 				break;
 			}
 			case BUTTON_ADVENTURE_DUEL: {
@@ -332,12 +333,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_NAV_AVENTURA: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
-				mainGame->ShowTopNavBar(false);
+				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(true);
 				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->isAdventureMode = true;
 				mainGame->mTopMenu->setVisible(false);

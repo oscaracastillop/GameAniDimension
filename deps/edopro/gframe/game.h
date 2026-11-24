@@ -177,8 +177,8 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIStaticText* wLobbyActivityCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityHeader{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyActivityText{ nullptr };
-	irr::gui::IGUIStaticText* stLobbyLogText[3]{ nullptr };
-	irr::gui::IGUIStaticText* stLobbyLogTime[3]{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyLogText[4]{ nullptr };
+	irr::gui::IGUIStaticText* stLobbyLogTime[4]{ nullptr };
 	irr::gui::IGUIStaticText* wLobbyPlayerCard{ nullptr };
 	irr::gui::IGUIStaticText* stLobbyAvatarPendingGift{ nullptr };
 	irr::gui::IGUIImage* imgLobbyPendingGift{ nullptr };
@@ -994,6 +994,7 @@ public:
 	irr::gui::CGUITTFont* loginDescFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
+	irr::gui::CGUITTFont* lobbyPlayerNameFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;
