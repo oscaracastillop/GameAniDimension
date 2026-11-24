@@ -224,6 +224,8 @@ struct main_menu_panel_elements {
 	irr::video::ITexture* tFlatBtnTrans{ nullptr };
 	irr::video::ITexture* tFlatBtnCyan{ nullptr };
 	irr::video::ITexture* tFlatBtnDark{ nullptr };
+	irr::video::ITexture* tFlatBtnBlue{ nullptr };
+	irr::video::ITexture* tFlatBtnLocked{ nullptr };
 	irr::gui::IGUIWindow* wCommitsLog;
 	irr::gui::IGUIContextMenu* mTopMenu;
 	irr::gui::IGUIContextMenu* mRepositoriesInfo;
