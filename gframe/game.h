@@ -1251,6 +1251,7 @@ public:
 		std::wstring descripcion;
 		std::wstring origen;
 		std::string estado;
+		std::wstring fecha;
 	};
 
 	irr::gui::IGUIButton* btnStoreMode{ nullptr };
@@ -1468,18 +1469,45 @@ public:
 	irr::gui::IGUIButton* btnProfileActivateAva{ nullptr };
 	irr::gui::IGUIButton* btnProfileAvatarsBack{ nullptr };
 
-	// 4d. Events / Puzzles (Full-screen canvas)
+	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
+	irr::gui::IGUIStaticText* wEventsHub{ nullptr };
+	irr::gui::IGUIStaticText* stEventsHubTitle{ nullptr };
+	irr::gui::IGUIStaticText* stEventsHubDesc{ nullptr };
+	irr::gui::IGUIButton* btnEventsHubBack{ nullptr };
+	irr::gui::IGUIStaticText* wEventsHubCard[2]{ nullptr };
+	irr::gui::IGUIImage* imgEventsHubIcon[2]{ nullptr };
+	irr::gui::IGUIStaticText* stEventsHubCardTitle[2]{ nullptr };
+	irr::gui::IGUIStaticText* stEventsHubCardDesc[2]{ nullptr };
+	irr::gui::IGUIButton* btnEventsHubCardAction[2]{ nullptr };
+
+	// 4d. Events / Puzzles (Dedicated Rompecabezas Screen)
 	irr::gui::IGUIStaticText* wEventsMenu{ nullptr };
 	irr::gui::IGUIStaticText* pnlEventsLeft{ nullptr };
 	irr::gui::IGUIStaticText* pnlEventsRight{ nullptr };
-	irr::gui::IGUIStaticText* stEventsTitle{ nullptr };
+	irr::gui::IGUIStaticText* stEventsSelectLabel{ nullptr };
 	irr::gui::IGUIComboBox* cbEventsSelect{ nullptr };
-	irr::gui::IGUIStaticText* stEventsMeta{ nullptr };
-	irr::gui::IGUIListBox* lstEventsPieces{ nullptr };
-	irr::gui::IGUIListBox* lstEventsTop10{ nullptr };
+	irr::gui::IGUIStaticText* stEventsStatusBadge{ nullptr };
+	irr::gui::IGUIStaticText* stEventsDates{ nullptr };
+	irr::gui::IGUIButton* btnEventsBack{ nullptr };
+	// Left: Puzzle Board
+	irr::gui::IGUIStaticText* stEventsPuzzleTitle{ nullptr };
+	irr::gui::IGUIStaticText* stEventsProgress{ nullptr };
+	irr::gui::IGUIStaticText* pnlPuzzleBoardWrap{ nullptr };
+	irr::gui::IGUIStaticText* pnlPieceCells[20]{ nullptr };
+	irr::gui::IGUIImage* imgPuzzleCells[20]{ nullptr };
+	irr::gui::IGUIStaticText* stPieceNums[20]{ nullptr };
+	irr::gui::IGUIStaticText* stPieceQtys[20]{ nullptr };
 	irr::gui::IGUIButton* btnEventsClaimTop{ nullptr };
 	irr::gui::IGUIButton* btnEventsExchange{ nullptr };
-	irr::gui::IGUIButton* btnEventsBack{ nullptr };
+	irr::gui::IGUIStaticText* stEventsHint{ nullptr };
+	// Right: Top 10 Posiciones y Premios
+	irr::gui::IGUIStaticText* stEventsTopTitle{ nullptr };
+	irr::gui::IGUIStaticText* stTop10HeaderPos{ nullptr };
+	irr::gui::IGUIStaticText* stTop10HeaderPrize{ nullptr };
+	irr::gui::IGUIStaticText* stTop10HeaderUser{ nullptr };
+	irr::gui::IGUIStaticText* stTop10RowPos[10]{ nullptr };
+	irr::gui::IGUIStaticText* stTop10RowPrize[10]{ nullptr };
+	irr::gui::IGUIStaticText* stTop10RowUser[10]{ nullptr };
 
 	// 4e. Clans (Full-screen canvas)
 	irr::gui::IGUIStaticText* wClansMenu{ nullptr };
@@ -1505,16 +1533,33 @@ public:
 	irr::gui::IGUIButton* btnClanCreateCancel{ nullptr };
 	irr::gui::IGUIButton* btnClansBack{ nullptr };
 
-	// 5. Mailbox (Full-screen canvas)
+	// 5. Mailbox (Full-screen table canvas with pagination)
 	irr::gui::IGUIStaticText* wMailbox{ nullptr };
-	irr::gui::IGUIStaticText* pnlMailboxLeft{ nullptr };
-	irr::gui::IGUIStaticText* pnlMailboxRight{ nullptr };
+	irr::gui::IGUIStaticText* pnlMailboxTable{ nullptr };
 	irr::gui::IGUIStaticText* stMailboxTitle{ nullptr };
-	irr::gui::IGUIListBox* lstMailboxItems{ nullptr };
-	irr::gui::IGUIStaticText* stMailboxDetail{ nullptr };
-	irr::gui::IGUIButton* btnMailboxClaim{ nullptr };
-	irr::gui::IGUIButton* btnMailboxDiscard{ nullptr };
+	irr::gui::IGUIStaticText* stMailboxDesc{ nullptr };
 	irr::gui::IGUIButton* btnMailboxBack{ nullptr };
+	irr::gui::IGUIStaticText* thMbStatus{ nullptr };
+	irr::gui::IGUIStaticText* thMbItem{ nullptr };
+	irr::gui::IGUIStaticText* thMbDetail{ nullptr };
+	irr::gui::IGUIStaticText* thMbOrigin{ nullptr };
+	irr::gui::IGUIStaticText* thMbDate{ nullptr };
+	irr::gui::IGUIStaticText* thMbActions{ nullptr };
+	static const int MAILBOX_PAGE_SIZE = 8;
+	irr::gui::IGUIStaticText* pnlMbRow[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowStatus[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowItem[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowDetail[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowOrigin[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowDate[8]{ nullptr };
+	irr::gui::IGUIButton* btnMbRowClaim[8]{ nullptr };
+	irr::gui::IGUIButton* btnMbRowDiscard[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbRowProcessed[8]{ nullptr };
+	irr::gui::IGUIStaticText* stMbInfo{ nullptr };
+	irr::gui::IGUIButton* btnMbPrev{ nullptr };
+	irr::gui::IGUIStaticText* stMbPage{ nullptr };
+	irr::gui::IGUIButton* btnMbNext{ nullptr };
+	int mailboxPage{ 0 };
 
 	// Purchase / Action confirmation overlay (non-window dark-glass neon panel)
 	irr::gui::IGUIStaticText* wConfirmPurchase{ nullptr };
@@ -1573,9 +1618,12 @@ public:
 	void OpenProfileInfo();
 	void OpenProfileMedals();
 	void OpenProfileAvatars();
+	void OpenEventsHub();
 	void OpenEventsMenu(int eventoId = 0);
 	void OpenClansMenu(const std::wstring& search = L"");
 	void OpenMailbox(int returnTo = 0);
+	void RefreshMailboxPage();
+	void ResolveMailboxRow(int rowIdx, bool claim);
 	void SelectProfileAvatar(int idx);
 	void SelectProfileMedal(int idx);
 	void SelectClanItem(int idx);
