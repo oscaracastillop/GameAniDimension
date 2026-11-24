@@ -270,6 +270,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->ResolveMailboxRow(id - BUTTON_MAILBOX_ROW_CLAIM_0, true);
 				} else if(id >= BUTTON_MAILBOX_ROW_DISC_0 && id <= BUTTON_MAILBOX_ROW_DISC_MAX) {
 					mainGame->ResolveMailboxRow(id - BUTTON_MAILBOX_ROW_DISC_0, false);
+				} else if(id >= BUTTON_MY_AVA_ACTIVATE_0 && id <= BUTTON_MY_AVA_ACTIVATE_MAX) {
+					mainGame->ActivateAvatarIdx(id - BUTTON_MY_AVA_ACTIVATE_0);
 				}
 				break;
 			}
@@ -664,8 +666,16 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->RespondClanRequest(false);
 				break;
 			}
-			case BUTTON_PROFILE_ACTIVATE_AVA: {
-				mainGame->ActivateSelectedAvatar();
+			case BUTTON_MY_AVA_PREV: {
+				if(mainGame->myAvaPage > 0) {
+					mainGame->myAvaPage--;
+					mainGame->RefreshProfileAvatarsPage();
+				}
+				break;
+			}
+			case BUTTON_MY_AVA_NEXT: {
+				mainGame->myAvaPage++;
+				mainGame->RefreshProfileAvatarsPage();
 				break;
 			}
 			case BUTTON_PROFILE_MAILBOX: {
@@ -1226,10 +1236,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->UpdateAdventureNPCDisplay();
 				break;
 			}
-			case LISTBOX_PROFILE_AVATARS: {
-				if(mainGame->lstProfileAvatars) mainGame->SelectProfileAvatar(mainGame->lstProfileAvatars->getSelected());
-				break;
-			}
+
 			case LISTBOX_PROF_MEDALS: {
 				if(mainGame->lstProfMedals) mainGame->SelectProfileMedal(mainGame->lstProfMedals->getSelected());
 				break;

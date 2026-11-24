@@ -5201,28 +5201,64 @@ void Game::PopulateEconomyScreens() {
 	styleCyanBtn(btnProfMedalHighlight);
 	styleDarkBtn(btnProfMedalsBack);
 
-	// 4c. Profile Avatars
+	// 4c. Profile Avatars (5x2 grid + pagination)
 	makeCanvas(wProfileAvatars);
-	pnlProfileLeft = makePanel(wProfileAvatars);
-	pnlProfileRight = makePanel(wProfileAvatars);
 	stProfileAvaTitle = env->addStaticText(L"MIS AVATARES", irr::core::recti(0, 0, 10, 10), false, false, wProfileAvatars);
 	stProfileAvaTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stProfileAvaTitle->setOverrideFont(loginUiFont);
-	imgProfileAvatar = env->addImage(irr::core::recti(0, 0, 10, 10), wProfileAvatars);
-	imgProfileAvatar->setScaleImage(true);
-	imgProfileAvatar->setUseAlphaChannel(true);
-	stProfileActiveStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileAvatars);
-	stProfileActiveStats->setWordWrap(true);
-	stProfileActiveStats->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-	lstProfileAvatars = env->addListBox(irr::core::recti(0, 0, 10, 10), wProfileAvatars, LISTBOX_PROFILE_AVATARS, true);
-	lstProfileAvatars->setItemHeight(Scale(28));
-	stProfileSelectedInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileAvatars);
-	stProfileSelectedInfo->setWordWrap(true);
-	stProfileSelectedInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	btnProfileActivateAva = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROFILE_ACTIVATE_AVA, L"Activar Avatar");
+	if(loginTitleFont) stProfileAvaTitle->setOverrideFont(loginTitleFont);
+
 	btnProfileAvatarsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROF_AVATARS_BACK, L"Volver a Perfil");
-	styleCyanBtn(btnProfileActivateAva);
 	styleDarkBtn(btnProfileAvatarsBack);
+
+	stProfileAvaBanner = env->addStaticText(
+		L"Escalamiento Progresivo de Estad\u00EDsticas: Para mantener un crecimiento equilibrado en tu avatar activo, las mejoras dependen entre s\u00ED:\n"
+		L"\u2022 Equilibrio EXP \u2194 StarShips: La diferencia entre tu total de EXP y StarShips no puede superar el 30% (m\u00E1ximo 300% en cada una).\n"
+		L"\u2022 Desbloqueo de Luck (Santo Grial): Cada 3% conjunto en ambas estad\u00EDsticas (EXP y StarShips) desbloquea 1% m\u00E1ximo de Luck (hasta 100% Luck).",
+		irr::core::recti(0, 0, 10, 10), false, true, wProfileAvatars
+	);
+	stProfileAvaBanner->setWordWrap(true);
+	stProfileAvaBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stProfileAvaBanner->setOverrideFont(loginDescFont);
+
+	for(int i = 0; i < 10; ++i) {
+		wMyAvaCards[i] = makePanel(wProfileAvatars);
+		imgMyAvaIcons[i] = env->addImage(irr::core::recti(0, 0, 64, 64), wMyAvaCards[i], -1, 0, true);
+		imgMyAvaIcons[i]->setScaleImage(true);
+		imgMyAvaIcons[i]->setUseAlphaChannel(true);
+
+		stMyAvaTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
+		stMyAvaTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginUiFont) stMyAvaTitles[i]->setOverrideFont(loginUiFont);
+
+		stMyAvaStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wMyAvaCards[i]);
+		stMyAvaStats[i]->setWordWrap(true);
+		stMyAvaStats[i]->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+		if(loginDescFont) stMyAvaStats[i]->setOverrideFont(loginDescFont);
+
+		stMyAvaOrigin[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
+		stMyAvaOrigin[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) stMyAvaOrigin[i]->setOverrideFont(loginDescFont);
+
+		stMyAvaActiveBadge[i] = env->addStaticText(L"[ACTIVO]", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
+		stMyAvaActiveBadge[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stMyAvaActiveBadge[i]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		stMyAvaActiveBadge[i]->setBackgroundColor(irr::video::SColor(60, 52, 211, 153));
+		stMyAvaActiveBadge[i]->setDrawBackground(true);
+		if(loginDescFont) stMyAvaActiveBadge[i]->setOverrideFont(loginDescFont);
+
+		btnMyAvaActivate[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wMyAvaCards[i], BUTTON_MY_AVA_ACTIVATE_0 + i, L"Activar");
+		styleDarkBtn(btnMyAvaActivate[i]);
+		btnMyAvaActivate[i]->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+		if(loginDescFont) btnMyAvaActivate[i]->setOverrideFont(loginDescFont);
+	}
+
+	btnMyAvaPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_MY_AVA_PREV, L"Anterior");
+	stMyAvaPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wProfileAvatars);
+	stMyAvaPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stMyAvaPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	btnMyAvaNext = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_MY_AVA_NEXT, L"Siguiente");
+	styleDarkBtn(btnMyAvaPrev);
+	styleDarkBtn(btnMyAvaNext);
 
 	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
 	makeCanvas(wEventsHub);
@@ -6032,19 +6068,40 @@ void Game::ResizeEconomyScreens() {
 	}
 
 	// 4c. Profile Avatars
+	// 4c. Profile Avatars (5x2 grid)
 	if(wProfileAvatars) {
 		wProfileAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlProfileLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlProfileRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stProfileAvaTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		irr::s32 imgH = std::max<irr::s32>(Scale(140), (botY - topY) * 42 / 100);
-		fitImage(imgProfileAvatar, lx + lw / 2, topY + Scale(44), lw, imgH);
-		stProfileActiveStats->setRelativePosition(irr::core::recti(lx, topY + Scale(52) + imgH, lx + lw, botY - Scale(56)));
-		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
+		stProfileAvaTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		stProfileAvaBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad, topY + Scale(84)));
 
-		lstProfileAvatars->setRelativePosition(irr::core::recti(rx, topY + Scale(16), rx + rw, topY + (botY - topY) * 52 / 100));
-		stProfileSelectedInfo->setRelativePosition(irr::core::recti(rx, topY + (botY - topY) * 54 / 100, rx + rw, botY - Scale(58)));
-		btnProfileActivateAva->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + rw, botY - Scale(10)));
+		const irr::s32 gridTop = topY + Scale(88);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gap = Scale(10);
+		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
+		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		for(int i = 0; i < 10; ++i) {
+			int row = i / 5;
+			int col = i % 5;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
+			if(wMyAvaCards[i]) {
+				wMyAvaCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 icH = cardH - Scale(84);
+				fitImage(imgMyAvaIcons[i], cardW / 2, Scale(6), cardW - Scale(16), icH);
+				if(stMyAvaTitles[i]) stMyAvaTitles[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(76), cardW - Scale(8), cardH - Scale(54)));
+				if(stMyAvaStats[i]) stMyAvaStats[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(54), cardW - Scale(8), cardH - Scale(36)));
+				irr::s32 halfB = (cardW - Scale(22)) / 2;
+				if(stMyAvaOrigin[i]) stMyAvaOrigin[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), Scale(8) + halfB, cardH - Scale(8)));
+				if(stMyAvaActiveBadge[i]) stMyAvaActiveBadge[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				if(btnMyAvaActivate[i]) btnMyAvaActivate[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+			}
+		}
+		irr::s32 py = botY - pageBarH;
+		if(btnMyAvaPrev) btnMyAvaPrev->setRelativePosition(irr::core::recti(W / 2 - Scale(180), py, W / 2 - Scale(70), botY));
+		if(stMyAvaPage) stMyAvaPage->setRelativePosition(irr::core::recti(W / 2 - Scale(65), py, W / 2 + Scale(65), botY));
+		if(btnMyAvaNext) btnMyAvaNext->setRelativePosition(irr::core::recti(W / 2 + Scale(70), py, W / 2 + Scale(180), botY));
 	}
 
 	// 4c. Events Hub (2-card layout)
@@ -7461,9 +7518,7 @@ void Game::OpenProfileAvatars() {
 	HideAllEcosystemScreens();
 	auto resp = CallSessionApi("/api/profile", sessionToken);
 	profileAvatars.clear();
-	lstProfileAvatars->clear();
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
-		const UserAvatarItem* activePtr = nullptr;
 		if(resp.contains("avatars") && resp["avatars"].is_array()) {
 			for(const auto& a : resp["avatars"]) {
 				UserAvatarItem it;
@@ -7484,51 +7539,72 @@ void Game::OpenProfileAvatars() {
 				it.esActivo = a.value("esActivo", false);
 				it.origen = BufferIO::DecodeUTF8(SafeJsonStr(a, "origen", ""));
 				profileAvatars.push_back(it);
-				lstProfileAvatars->addItem(epro::format(L"{}{} (#{})", it.esActivo ? L"[ACTIVO] " : L"", it.nombre, it.usuarioAvatarId).c_str());
-				if(it.esActivo) activePtr = &profileAvatars.back();
 			}
 		}
-		if(activePtr) {
-			imgProfileAvatar->setImage(LoadAvatarTexture(activePtr->archivo));
-			stProfileActiveStats->setText(epro::format(
-				L"Avatar Activo: {} ({})\n- EXP: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 300%\n- StarShips: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 300%\n- Luck: {:.2f}% (Base {:.2f}% + Pot. {:.2f}%) / 100%",
-				activePtr->nombre, BufferIO::DecodeUTF8(activePtr->codigo),
-				activePtr->totalExp, activePtr->baseExp, activePtr->bonusExp,
-				activePtr->totalSS, activePtr->baseSS, activePtr->bonusSS,
-				activePtr->totalLuck, activePtr->baseLuck, activePtr->bonusLuck
-			).c_str());
-		} else {
-			imgProfileAvatar->setImage(nullptr);
-			stProfileActiveStats->setText(L"Sin avatar activo.");
-		}
-		if(!profileAvatars.empty()) {
-			lstProfileAvatars->setSelected(0);
-			SelectProfileAvatar(0);
-		}
 	}
+	myAvaPage = 0;
+	RefreshProfileAvatarsPage();
 	ResizeEconomyScreens();
 	wProfileAvatars->setVisible(true);
 }
 
-void Game::SelectProfileAvatar(int idx) {
-	if(idx < 0 || idx >= (int)profileAvatars.size()) return;
-	const auto& it = profileAvatars[idx];
-	stProfileSelectedInfo->setText(epro::format(
-		L"Instancia #{} - {} ({})\nOrigen: {} | Estado: {}\nEXP: {:.2f}% / 300% | SS: {:.2f}% / 300% | Luck: {:.2f}% / 100%",
-		it.usuarioAvatarId, it.nombre, BufferIO::DecodeUTF8(it.codigo), it.origen,
-		it.esActivo ? L"ACTIVO" : L"Inactivo", it.totalExp, it.totalSS, it.totalLuck
-	).c_str());
-	if(btnProfileActivateAva) btnProfileActivateAva->setEnabled(!it.esActivo);
+void Game::RefreshProfileAvatarsPage() {
+	int totalPages = std::max(1, ((int)profileAvatars.size() + 9) / 10);
+	if(myAvaPage >= totalPages) myAvaPage = totalPages - 1;
+	if(myAvaPage < 0) myAvaPage = 0;
+	for(int slot = 0; slot < 10; ++slot) {
+		int pos = myAvaPage * 10 + slot;
+		if(pos < (int)profileAvatars.size()) {
+			const auto& a = profileAvatars[pos];
+			if(wMyAvaCards[slot]) wMyAvaCards[slot]->setVisible(true);
+			if(imgMyAvaIcons[slot]) {
+				imgMyAvaIcons[slot]->setImage(LoadAvatarTexture(a.archivo));
+				imgMyAvaIcons[slot]->setVisible(true);
+			}
+			if(stMyAvaTitles[slot]) {
+				std::wstring title = a.esActivo ? (L"[ACTIVO] " + a.nombre + L" (#" + std::to_wstring(a.usuarioAvatarId) + L")")
+				                                : (a.nombre + L" (#" + std::to_wstring(a.usuarioAvatarId) + L")");
+				stMyAvaTitles[slot]->setText(title.c_str());
+				stMyAvaTitles[slot]->setOverrideColor(a.esActivo ? irr::video::SColor(255, 52, 211, 153) : irr::video::SColor(255, 248, 250, 252));
+			}
+			if(stMyAvaStats[slot]) {
+				stMyAvaStats[slot]->setText(epro::format(
+					L"EXP +{:.0f}%  \u2022  SS +{:.0f}%  \u2022  Luck +{:.0f}%",
+					a.totalExp, a.totalSS, a.totalLuck
+				).c_str());
+			}
+			if(stMyAvaOrigin[slot]) {
+				stMyAvaOrigin[slot]->setText(a.origen.empty() ? L"ORIGEN: -" : a.origen.c_str());
+			}
+			if(stMyAvaActiveBadge[slot]) {
+				stMyAvaActiveBadge[slot]->setVisible(a.esActivo);
+			}
+			if(btnMyAvaActivate[slot]) {
+				btnMyAvaActivate[slot]->setVisible(!a.esActivo);
+			}
+		} else {
+			if(wMyAvaCards[slot]) wMyAvaCards[slot]->setVisible(false);
+		}
+	}
+	if(stMyAvaPage) {
+		stMyAvaPage->setText(epro::format(L"P\u00E1gina {} / {}  ({} avatares)", myAvaPage + 1, totalPages, (int)profileAvatars.size()).c_str());
+	}
+	if(btnMyAvaPrev) btnMyAvaPrev->setEnabled(myAvaPage > 0);
+	if(btnMyAvaNext) btnMyAvaNext->setEnabled(myAvaPage + 1 < totalPages);
+	ResizeEconomyScreens();
 }
 
-void Game::ActivateSelectedAvatar() {
-	int idx = lstProfileAvatars ? lstProfileAvatars->getSelected() : -1;
-	if(idx < 0 || idx >= (int)profileAvatars.size()) return;
+void Game::ActivateAvatarIdx(int slotIdx) {
+	int pos = myAvaPage * 10 + slotIdx;
+	if(pos < 0 || pos >= (int)profileAvatars.size()) return;
+	const auto& a = profileAvatars[pos];
+	if(a.esActivo) return;
 	nlohmann::json body;
-	body["usuarioAvatarId"] = profileAvatars[idx].usuarioAvatarId;
+	body["usuarioAvatarId"] = a.usuarioAvatarId;
 	auto resp = CallSessionApi("/api/profile/avatar/activate", sessionToken, body.dump());
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		OpenProfileAvatars();
+		FetchLobbyStatsAsync();
 	} else {
 		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo activar el avatar.")));
 	}
@@ -8922,7 +8998,19 @@ bool Game::MainLoop() {
 			}
 			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
 			if(wProfileMedals && wProfileMedals->isVisible()) { drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan); }
-			if(wProfileAvatars && wProfileAvatars->isVisible()) { drawNeon(pnlProfileLeft, cCyan); drawNeon(pnlProfileRight, cPurp); }
+			if(wProfileAvatars && wProfileAvatars->isVisible()) {
+				for(int i = 0; i < 10; ++i) {
+					int pos = myAvaPage * 10 + i;
+					if(pos < (int)profileAvatars.size()) {
+						if(profileAvatars[pos].esActivo) {
+							drawNeon(wMyAvaCards[i], cEmer);
+						} else {
+							drawNeon(wMyAvaCards[i], cPurp);
+						}
+					}
+				}
+				drawNeon(btnProfileAvatarsBack, irr::video::SColor(160, 148, 163, 184));
+			}
 			if(wEventsHub && wEventsHub->isVisible()) {
 				drawNeon(wEventsHubCard[0], cEmer);
 				drawNeon(wEventsHubCard[1], cPurp);
