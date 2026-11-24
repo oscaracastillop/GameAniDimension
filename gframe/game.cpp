@@ -1970,37 +1970,54 @@ void Game::PopulateAdventureModeWindow() {
 		imgAdventureBg->setVisible(false);
 	}
 
-	// 6 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3.1, 3.2, 4, 5)
-	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureLeft->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+	// 6 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3.1, 3.2, 4, 5) matching Lobby cards
+	const irr::video::SColor cCardBg(185, 10, 15, 28);
+	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureLeft->setBackgroundColor(cCardBg);
 
 	stAdventureTitle = env->addStaticText(L"MODO AVENTURA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	stAdventureTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	stAdventureTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
-	if(loginUiFont)
-		stAdventureTitle->setOverrideFont(loginUiFont);
+	stAdventureTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont)
+		stAdventureTitle->setOverrideFont(loginTitleFont);
 
-	pnlAdventureCenter = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureCenter->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+	pnlAdventureCenter = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureCenter->setBackgroundColor(cCardBg);
 
-	pnlAdventureDetails = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureDetails->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+	pnlAdventureDetails = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureDetails->setBackgroundColor(cCardBg);
 
-	pnlAdventureDetailsRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureDetailsRight->setBackgroundColor(irr::video::SColor(225, 14, 18, 28));
+	pnlAdventureDetailsRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureDetailsRight->setBackgroundColor(cCardBg);
 
-	pnlAdventureRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureRight->setBackgroundColor(irr::video::SColor(230, 13, 16, 26));
+	pnlAdventureRight = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureRight->setBackgroundColor(cCardBg);
 
-	pnlAdventureStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	pnlAdventureStats->setBackgroundColor(irr::video::SColor(230, 13, 16, 26));
+	pnlAdventureStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	pnlAdventureStats->setBackgroundColor(cCardBg);
+
+	auto applyAdvBtnStyle = [&](irr::gui::IGUIButton* b, const wchar_t* label) {
+		if(!b) return;
+		if(label) b->setText(label);
+		if(tFlatBtnDark) {
+			b->setImage(tFlatBtnDark);
+			b->setPressedImage(tFlatBtnDark);
+			b->setScaleImage(true);
+			b->setUseAlphaChannel(true);
+		}
+		b->setDrawBorder(false);
+		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		else if(loginUiFont) b->setOverrideFont(loginUiFont);
+	};
 
 	// ==================== PANEL IZQUIERDO ====================
 	txtAdventureSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureSerie->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureSerie->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) txtAdventureSerie->setOverrideFont(loginUiFont);
 
 	cbAdventureSeries = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
 	cbAdventureSeries->setMaxSelectionRows(8);
+	if(loginUiFont) cbAdventureSeries->setOverrideFont(loginUiFont);
 
 	imgAdventureSeriesLogo = env->addImage(irr::core::recti(0, 0, 10, 10), wAdventureMode);
 	imgAdventureSeriesLogo->setScaleImage(true);
@@ -2008,32 +2025,41 @@ void Game::PopulateAdventureModeWindow() {
 	imgAdventureSeriesLogo->setVisible(false);
 
 	txtAdventureArco = env->addStaticText(L"2. ARCO HISTORICO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureArco->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureArco->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) txtAdventureArco->setOverrideFont(loginUiFont);
 
 	cbAdventureArc = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
 	cbAdventureArc->setMaxSelectionRows(10);
+	if(loginUiFont) cbAdventureArc->setOverrideFont(loginUiFont);
 
-	stAdventureArcDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
+	stAdventureArcDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureArcDesc->setWordWrap(true);
 	stAdventureArcDesc->setOverrideColor(irr::video::SColor(255, 175, 220, 250));
 	stAdventureArcDesc->setVisible(false);
 
 	txtAdventureDeck = env->addStaticText(L"3. TU BARAJA (DECK):", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureDeck->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureDeck->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) txtAdventureDeck->setOverrideFont(loginUiFont);
 
 	cbAdventureUserDeck = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
+	if(loginUiFont) cbAdventureUserDeck->setOverrideFont(loginUiFont);
 
 	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
+	applyAdvBtnStyle(btnAdventureDuel, L"INICIAR DUELO");
+
 	btnAdventureBack = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
+	applyAdvBtnStyle(btnAdventureBack, L"VOLVER AL MENU");
 
 	// ==================== PANEL CENTRAL: CATALOGO 4x5 ====================
 	txtAdventureCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureCat->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureCat->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+	if(loginUiFont) txtAdventureCat->setOverrideFont(loginUiFont);
 
 	for(int i = 0; i < 20; ++i) {
 		btnAdventureNpcs[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_NPC_0 + i, L"");
 		btnAdventureNpcs[i]->setIsPushButton(true);
+		applyAdvBtnStyle(btnAdventureNpcs[i], nullptr);
 		btnAdventureNpcs[i]->setVisible(false);
 	}
 
@@ -2055,46 +2081,56 @@ void Game::PopulateAdventureModeWindow() {
 	imgAdventureMedal->setUseAlphaChannel(true);
 	imgAdventureMedal->setVisible(false);
 
-	stAdventureNPCName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wAdventureMode);
+	stAdventureNPCName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginUiFont) stAdventureNPCName->setOverrideFont(loginUiFont);
 
 	txtAdventureDiff = env->addStaticText(L"DIFICULTAD NPC:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureDiff->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureDiff->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginUiFont) txtAdventureDiff->setOverrideFont(loginUiFont);
 
 	cbAdventureDifficulty = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
 	cbAdventureDifficulty->addItem(L"Normal", 0);
 	cbAdventureDifficulty->addItem(L"Leyenda", 1);
 	cbAdventureDifficulty->setSelected(0);
+	if(loginUiFont) cbAdventureDifficulty->setOverrideFont(loginUiFont);
 
 	txtAdventureLore = env->addStaticText(L"HISTORIA Y LEYENDA DEL DUELISTA:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
+	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginUiFont) txtAdventureLore->setOverrideFont(loginUiFont);
 
 	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
-	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 225, 230, 240));
+	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginDescFont) stAdventureNPCDesc->setOverrideFont(loginDescFont);
 
 	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureDeckDesc->setWordWrap(true);
 	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+	if(loginDescFont) stAdventureDeckDesc->setOverrideFont(loginDescFont);
 
 	stAdventureDiffDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureDiffDesc->setWordWrap(true);
 	stAdventureDiffDesc->setOverrideColor(irr::video::SColor(255, 190, 205, 225));
+	if(loginDescFont) stAdventureDiffDesc->setOverrideFont(loginDescFont);
 
 	stAdventurePrize = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrize->setWordWrap(true);
 	stAdventurePrize->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginDescFont) stAdventurePrize->setOverrideFont(loginDescFont);
 
 	stAdventurePrizeStatus = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrizeStatus->setWordWrap(true);
-	stAdventurePrizeStatus->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+	stAdventurePrizeStatus->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginDescFont) stAdventurePrizeStatus->setOverrideFont(loginDescFont);
 
-	wAdventureStatsBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, wAdventureMode, -1, true);
-	wAdventureStatsBox->setBackgroundColor(irr::video::SColor(210, 10, 16, 32));
+	wAdventureStatsBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
+	wAdventureStatsBox->setBackgroundColor(cCardBg);
 
 	stAdventureStatsText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureStatsText->setWordWrap(true);
 	stAdventureStatsText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginDescFont) stAdventureStatsText->setOverrideFont(loginDescFont);
 
 	stAdventureNPCLevel = stAdventureNPCName;
 	stAdventureNPCDeck = stAdventureDeckDesc;
@@ -2159,34 +2195,36 @@ void Game::ResizeAdventureMode() {
 	if(imgAdventureBg)
 		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
+	// Top Nav Bar space allocation
+	const int navH = Scale(48);
 	const int padX = std::max(12, (int)(W * 0.015f));
-	const int padY = std::max(12, (int)(H * 0.018f));
-	const int gap = std::max(10, (int)(W * 0.010f));
-	const int innerPad = Scale(12);
+	const int pnlTop = navH + Scale(8);
+	const int pnlBottom = H - Scale(8);
+	const int gap = Scale(12); // generous breathing room between blocks to reveal background
+	const int innerPad = Scale(10);
 
 	const int usableW = W - 2 * padX - gap;
-	const int pnlTop = padY;
-	const int pnlBottom = H - padY;
-
-	const int actionBtnH = Scale(38);
-	const int statsH = Scale(52);
-	const int bloque5H = innerPad + statsH + Scale(8) + actionBtnH + innerPad;
+	const int actionBtnH = Scale(34);
+	const int statsH = Scale(44);
+	const int bloque5H = innerPad + statsH + Scale(6) + actionBtnH + innerPad;
 	const int bloque5Top = pnlBottom - bloque5H;
 	const int bloque4Bottom = bloque5Top - gap;
-	const int bloque4H = std::max(Scale(180), bloque4Bottom - pnlTop);
-	const int avatarStageH = std::max(Scale(160), bloque4H - 2 * innerPad);
+	const int bloque4H = std::max(Scale(160), bloque4Bottom - pnlTop);
+	const int avatarStageH = std::max(Scale(140), bloque4H - 2 * innerPad);
 
-	// Bloque 4 sizing tightly hugs character portrait ratio (896x1200 ~ 0.747) so image stays crisp & large
-	const int targetRightW = (int)(avatarStageH * 0.747f) + 2 * innerPad;
-	const int colRightW = std::max(Scale(280), std::min((int)(usableW * 0.36f), targetRightW));
+	// Bloque 4 sizing: character portrait ratio (approx. 0.75)
+	const int targetRightW = (int)(avatarStageH * 0.75f) + 2 * innerPad;
+	const int colRightW = std::max(Scale(260), std::min((int)(usableW * 0.33f), targetRightW));
 	const int leftAreaW = usableW - colRightW;
 
 	const int xLeft = padX;
 	const int xRight = xLeft + leftAreaW + gap;
 
-	// ==================== BLOQUE 1: TITULO CENTRADO + SELECTORES EN UNA SOLA FILA ====================
-	const int titleH = Scale(26);
-	const int topBarH = innerPad + titleH + Scale(6) + Scale(20) + Scale(4) + Scale(30) + innerPad;
+	// ==================== BLOQUE 1: TITULO CENTRADO + SELECTORES EN UNA FILA ====================
+	const int titleH = Scale(28);
+	const int comboH = Scale(28);
+	const int labelH = Scale(18);
+	const int topBarH = innerPad + titleH + Scale(4) + labelH + Scale(2) + comboH + innerPad;
 	if(pnlAdventureLeft)
 		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + leftAreaW, pnlTop + topBarH));
 
@@ -2200,35 +2238,35 @@ void Game::ResizeAdventureMode() {
 	if(lstAdventureNPC)
 		lstAdventureNPC->setVisible(false);
 
-	const int selGap = Scale(10);
+	const int selGap = Scale(8);
 	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
-	const int selY = pnlTop + innerPad + titleH + Scale(6);
+	const int selY = pnlTop + innerPad + titleH + Scale(4);
 
 	if(txtAdventureSerie)
-		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + Scale(20)));
+		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + labelH));
 	if(cbAdventureSeries)
-		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + Scale(24), xLeft + innerPad + selW, selY + Scale(54)));
+		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + labelH + Scale(2), xLeft + innerPad + selW, selY + labelH + Scale(2) + comboH));
 
 	const int xCol2 = xLeft + innerPad + selW + selGap;
 	if(txtAdventureArco)
-		txtAdventureArco->setRelativePosition(irr::core::recti(xCol2, selY, xCol2 + selW, selY + Scale(20)));
+		txtAdventureArco->setRelativePosition(irr::core::recti(xCol2, selY, xCol2 + selW, selY + labelH));
 	if(cbAdventureArc)
-		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + Scale(24), xCol2 + selW, selY + Scale(54)));
+		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + labelH + Scale(2), xCol2 + selW, selY + labelH + Scale(2) + comboH));
 
 	const int xCol3 = xCol2 + selW + selGap;
 	if(txtAdventureDeck)
-		txtAdventureDeck->setRelativePosition(irr::core::recti(xCol3, selY, xLeft + leftAreaW - innerPad, selY + Scale(20)));
+		txtAdventureDeck->setRelativePosition(irr::core::recti(xCol3, selY, xLeft + leftAreaW - innerPad, selY + labelH));
 	if(cbAdventureUserDeck)
-		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + Scale(24), xLeft + leftAreaW - innerPad, selY + Scale(54)));
+		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + labelH + Scale(2), xLeft + leftAreaW - innerPad, selY + labelH + Scale(2) + comboH));
 
-	// ==================== BLOQUE 2: CATALOGO 4x5 (BOTONES MISMO ALTO QUE INICIAR DUELO) ====================
+	// ==================== BLOQUE 2: CATALOGO 4x5 ====================
 	const int catTop = pnlTop + topBarH + gap;
 	const int cols = 4;
 	const int rows = 5;
-	const int cellGapX = Scale(8);
-	const int cellGapY = Scale(6);
-	const int btnCellH = actionBtnH; // Exact same height as INICIAR DUELO / VOLVER AL MENU
-	const int gridHeaderH = Scale(26);
+	const int cellGapX = Scale(6);
+	const int cellGapY = Scale(4);
+	const int btnCellH = Scale(28);
+	const int gridHeaderH = Scale(22);
 	const int catH = innerPad + gridHeaderH + rows * btnCellH + (rows - 1) * cellGapY + innerPad;
 	const int catBottom = catTop + catH;
 
@@ -2238,10 +2276,10 @@ void Game::ResizeAdventureMode() {
 	const int cx = xLeft + innerPad;
 	const int cw = leftAreaW - 2 * innerPad;
 	if(txtAdventureCat)
-		txtAdventureCat->setRelativePosition(irr::core::recti(cx, catTop + innerPad, cx + cw, catTop + innerPad + Scale(22)));
+		txtAdventureCat->setRelativePosition(irr::core::recti(cx, catTop + innerPad, cx + cw, catTop + innerPad + gridHeaderH));
 
 	const int gridTop = catTop + innerPad + gridHeaderH;
-	const int btnCellW = std::max(Scale(60), (cw - (cols - 1) * cellGapX) / cols);
+	const int btnCellW = std::max(Scale(50), (cw - (cols - 1) * cellGapX) / cols);
 
 	for(int i = 0; i < 20; ++i) {
 		if(!btnAdventureNpcs[i]) continue;
@@ -2252,62 +2290,63 @@ void Game::ResizeAdventureMode() {
 		btnAdventureNpcs[i]->setRelativePosition(irr::core::recti(bx, by, bx + btnCellW, by + btnCellH));
 	}
 
-	// ==================== BLOQUES 3.1 y 3.2 SEPARADOS ====================
+	// ==================== BLOQUES 3.1 y 3.2: REDUCED HEIGHT FOR MORE BREATHING ROOM ====================
 	const int detailsTop = catBottom + gap;
+	const int detailsBottom = pnlBottom;
 	const int subGap = gap;
-	const int subLeftW = (int)((leftAreaW - subGap) * 0.50f);
+	const int subLeftW = (leftAreaW - subGap) / 2;
 	const int subRightW = (leftAreaW - subGap) - subLeftW;
 	const int subRightPanelX = xLeft + subLeftW + subGap;
 
 	if(pnlAdventureDetails)
-		pnlAdventureDetails->setRelativePosition(irr::core::recti(xLeft, detailsTop, xLeft + subLeftW, pnlBottom));
+		pnlAdventureDetails->setRelativePosition(irr::core::recti(xLeft, detailsTop, xLeft + subLeftW, detailsBottom));
 	if(pnlAdventureDetailsRight)
-		pnlAdventureDetailsRight->setRelativePosition(irr::core::recti(subRightPanelX, detailsTop, xLeft + leftAreaW, pnlBottom));
+		pnlAdventureDetailsRight->setRelativePosition(irr::core::recti(subRightPanelX, detailsTop, xLeft + leftAreaW, detailsBottom));
 
 	const int dy = detailsTop + innerPad;
-	const int dh = std::max(Scale(84), (pnlBottom - innerPad) - dy);
+	const int dh = std::max(Scale(70), detailsBottom - innerPad - dy);
 
-	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia + Descripcion sencilla del Deck
+	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia + Deck
 	const int dx = xLeft + innerPad;
 	const int dw = subLeftW - 2 * innerPad;
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(22)));
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(20)));
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(24), dx + dw, dy + Scale(42)));
-	const int loreAvail = std::max(Scale(44), dh - Scale(44));
-	const int loreH = std::max(Scale(24), (int)(loreAvail * 0.54f));
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(22), dx + dw, dy + Scale(38)));
+	const int loreAvail = std::max(Scale(36), dh - Scale(40));
+	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.50f));
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(44), dx + dw, dy + Scale(44) + loreH));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(40), dx + dw, dy + Scale(40) + loreH));
 	if(stAdventureDeckDesc) {
 		stAdventureDeckDesc->setVisible(true);
-		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(48) + loreH, dx + dw, dy + dh));
+		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(42) + loreH, dx + dw, detailsBottom - innerPad));
 	}
 
-	// Bloque 3.2 (Derecha): Dificultad + Descripcion dificultad + Premios + Estado + Medalla grande
+	// Bloque 3.2 (Derecha): Dificultad + Premios + Medalla
 	const int rx32 = subRightPanelX + innerPad;
 	const int rw32 = subRightW - 2 * innerPad;
-	const int diffLabelW = Scale(116);
+	const int diffLabelW = Scale(100);
 	if(txtAdventureDiff)
-		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(3), rx32 + diffLabelW, dy + Scale(24)));
+		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(2), rx32 + diffLabelW, dy + Scale(22)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(6), dy, rx32 + rw32, dy + Scale(26)));
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(6), dy, rx32 + rw32, dy + Scale(24)));
 	if(stAdventureDiffDesc)
-		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(30), rx32 + rw32, dy + Scale(62)));
+		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(26), rx32 + rw32, dy + Scale(50)));
 
-	const int prizeTop = dy + Scale(66);
-	const int prizeAvailH = std::max(Scale(52), (dy + dh) - prizeTop);
-	const int mSize = std::min(prizeAvailH, Scale(82));
+	const int prizeTop = dy + Scale(52);
+	const int prizeAvailH = std::max(Scale(40), detailsBottom - innerPad - prizeTop);
+	const int mSize = std::min(prizeAvailH, Scale(70));
 	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
-	const int prizeTextW = showMedal ? (rw32 - mSize - Scale(10)) : rw32;
+	const int prizeTextW = showMedal ? (rw32 - mSize - Scale(8)) : rw32;
 
 	if(imgAdventureMedal)
 		imgAdventureMedal->setRelativePosition(irr::core::recti(rx32 + rw32 - mSize, prizeTop, rx32 + rw32, prizeTop + mSize));
 	if(stAdventurePrize)
-		stAdventurePrize->setRelativePosition(irr::core::recti(rx32, prizeTop, rx32 + prizeTextW, prizeTop + Scale(36)));
+		stAdventurePrize->setRelativePosition(irr::core::recti(rx32, prizeTop, rx32 + prizeTextW, prizeTop + Scale(30)));
 	if(stAdventurePrizeStatus)
-		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx32, prizeTop + Scale(38), rx32 + prizeTextW, prizeTop + prizeAvailH));
+		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx32, prizeTop + Scale(32), rx32 + prizeTextW, prizeTop + prizeAvailH));
 
-	// ==================== BLOQUE 4: IMAGEN DEL PERSONAJE (SOLO IMAGEN, ALTA CALIDAD) ====================
+	// ==================== BLOQUE 4: IMAGEN DEL PERSONAJE ====================
 	if(pnlAdventureRight)
 		pnlAdventureRight->setRelativePosition(irr::core::recti(xRight, pnlTop, xRight + colRightW, bloque4Bottom));
 
@@ -2315,7 +2354,7 @@ void Game::ResizeAdventureMode() {
 	const int rw = colRightW - 2 * innerPad;
 	UpdateAdventureNPCImagePosition(rx, pnlTop + innerPad, rw, avatarStageH);
 
-	// ==================== BLOQUE 5: WIN RATE + BOTONES INICIAR DUELO / VOLVER AL MENU ====================
+	// ==================== BLOQUE 5: WIN RATE + BOTONES INICIAR DUELO / VOLVER ====================
 	if(pnlAdventureStats)
 		pnlAdventureStats->setRelativePosition(irr::core::recti(xRight, bloque5Top, xRight + colRightW, pnlBottom));
 
@@ -2323,16 +2362,20 @@ void Game::ResizeAdventureMode() {
 	if(wAdventureStatsBox)
 		wAdventureStatsBox->setRelativePosition(irr::core::recti(rx, statsY, rx + rw, statsY + statsH));
 	if(stAdventureStatsText)
-		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(8), statsY + Scale(5), rx + rw - Scale(8), statsY + statsH - Scale(5)));
+		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(6), statsY + Scale(4), rx + rw - Scale(6), statsY + statsH - Scale(4)));
 
-	const int actionBtnGap = Scale(10);
+	const int actionBtnGap = Scale(8);
 	const int actionBtnW = (rw - actionBtnGap) / 2;
-	const int actionBtnY = statsY + statsH + Scale(8);
+	const int actionBtnY = statsY + statsH + Scale(6);
 
 	if(btnAdventureDuel)
 		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
 	if(btnAdventureBack)
 		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
+
+	if(wTopNavBar && wTopNavBar->isVisible()) {
+		env->getRootGUIElement()->bringToFront(wTopNavBar);
+	}
 }
 
 void Game::OnAdventureSeriesChanged() {
@@ -4640,6 +4683,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wClansMenu) wClansMenu->setVisible(false);
 	if(wClanDetail) wClanDetail->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
+	if(wAdventureMode) wAdventureMode->setVisible(false);
 	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
 	if(wPackPoolOverlay) wPackPoolOverlay->setVisible(false);
 	if(wAvatarPreviewOverlay) wAvatarPreviewOverlay->setVisible(false);
@@ -9296,7 +9340,8 @@ bool Game::MainLoop() {
 				(wProfileAvatars && wProfileAvatars->isVisible()) || (wEventsHub && wEventsHub->isVisible()) ||
 				(wEventsMenu && wEventsMenu->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
 				(wClanDetail && wClanDetail->isVisible()) ||
-				(wMailbox && wMailbox->isVisible());
+				(wMailbox && wMailbox->isVisible()) ||
+				(wAdventureMode && wAdventureMode->isVisible());
 		};
 		{
 			bool shouldShowNav = !dInfo.isInDuel && !is_building && isEcosystemVisible();
@@ -9552,8 +9597,39 @@ bool Game::MainLoop() {
 			}
 			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
 			drawNeon(wConfirmPurchase, cCyan);
+			if(wAdventureMode && wAdventureMode->isVisible()) {
+				drawNeon(pnlAdventureLeft, cCyan);
+				drawNeon(pnlAdventureCenter, cPurp);
+				drawNeon(pnlAdventureDetails, cCyan);
+				drawNeon(pnlAdventureDetailsRight, cGold);
+				drawNeon(pnlAdventureRight, cPurp);
+				drawNeon(pnlAdventureStats, cCyan);
+
+				drawNeon(cbAdventureSeries, cPurp);
+				drawNeon(cbAdventureArc, cPurp);
+				drawNeon(cbAdventureUserDeck, cPurp);
+				drawNeon(cbAdventureDifficulty, cPurp);
+
+				int selNpc = -1;
+				if(lstAdventureNPC) selNpc = lstAdventureNPC->getSelected();
+				if(selNpc < 0 && cbAdventureNPC) selNpc = cbAdventureNPC->getSelected();
+
+				for(int i = 0; i < 20; ++i) {
+					if(btnAdventureNpcs[i] && btnAdventureNpcs[i]->isVisible()) {
+						if(i == selNpc)
+							drawNeon(btnAdventureNpcs[i], cGold);
+						else
+							drawNeon(btnAdventureNpcs[i], cPurp);
+					}
+				}
+				drawNeon(btnAdventureDuel, cEmer);
+				drawNeon(btnAdventureBack, irr::video::SColor(160, 148, 163, 184));
+			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
-				int activeIdx = (wMainMenu && wMainMenu->isVisible()) ? 0 : 1;
+				int activeIdx = 0;
+				if(wAdventureMode && wAdventureMode->isVisible()) activeIdx = 3;
+				else if(wMainMenu && wMainMenu->isVisible()) activeIdx = 0;
+				else activeIdx = 1;
 				if(btnNavItems[activeIdx]) {
 					auto r = btnNavItems[activeIdx]->getAbsolutePosition();
 					driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
