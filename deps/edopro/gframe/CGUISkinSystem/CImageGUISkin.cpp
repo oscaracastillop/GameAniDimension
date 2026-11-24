@@ -272,43 +272,30 @@ void CImageGUISkin::draw3DToolBar(IGUIElement* element,
 
 void CImageGUISkin::draw3DTabButton(IGUIElement* element, bool active,
 									const core::rect<s32>& rect, const core::rect<s32>* clip, gui::EGUI_ALIGNMENT alignment) {
-	if(active) {
-		if(!Config.TabButtonPressed.Texture) {
-			FallbackSkin->draw3DTabButton(element, active, rect, clip, alignment);
-			return;
-		}
-
-		drawElementStyle(Config.TabButtonPressed, rect, clip);
-	} else {
-		if(!Config.TabButton.Texture) {
-			FallbackSkin->draw3DTabButton(element, active, rect, clip, alignment);
-			return;
-		}
-
-		drawElementStyle(Config.TabButton, rect, clip);
-	}
+	if(!VideoDriver)
+		return;
+	video::SColor bgCol = active ? video::SColor(240, 15, 23, 42) : video::SColor(180, 10, 15, 26);
+	VideoDriver->draw2DRectangle(bgCol, rect, clip);
+	video::SColor borderCol = active ? video::SColor(255, 56, 189, 248) : video::SColor(110, 56, 189, 248);
+	VideoDriver->draw2DRectangleOutline(rect, borderCol);
 }
 
 void CImageGUISkin::draw3DTabBody(IGUIElement* element, bool border, bool background,
 								  const core::rect<s32>& rect, const core::rect<s32>* clip, s32 tabHeight, gui::EGUI_ALIGNMENT alignment) {
-	core::rect<s32> newclip, newrect;
-
-
-	if(!Config.TabBody.Texture) {
-		FallbackSkin->draw3DTabBody(element, border, background, rect, clip, tabHeight, alignment);
+	if(!VideoDriver)
 		return;
+	core::rect<s32> newrect = rect;
+	if(alignment == gui::EGUIA_UPPERLEFT) {
+		newrect.UpperLeftCorner.Y += tabHeight;
+	} else {
+		newrect.LowerRightCorner.Y -= tabHeight;
 	}
-	if(!border && !background)
-		return;
-	newclip.LowerRightCorner.set(clip->LowerRightCorner);
-	newclip.UpperLeftCorner.set(clip->UpperLeftCorner.X, clip->UpperLeftCorner.Y + tabHeight);
-
-
-	newrect.LowerRightCorner.set(rect.LowerRightCorner);
-	newrect.UpperLeftCorner.set(rect.UpperLeftCorner.X, rect.LowerRightCorner.Y + tabHeight);
-
-	drawElementStyle(Config.TabBody, newclip, &newclip);
-
+	if(background) {
+		VideoDriver->draw2DRectangle(video::SColor(230, 10, 14, 24), newrect, clip);
+	}
+	if(border) {
+		VideoDriver->draw2DRectangleOutline(newrect, video::SColor(180, 56, 189, 248));
+	}
 }
 
 void CImageGUISkin::drawIcon(IGUIElement* element, EGUI_DEFAULT_ICON icon,
