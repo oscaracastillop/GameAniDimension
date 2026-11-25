@@ -5883,21 +5883,21 @@ void Game::PopulateEconomyScreens() {
 	styleDarkBtn(btnConfirmNo);
 
 	// Unified Post-Duel Reward Window (uses bg_reward.jpg)
-	wDuelReward = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, false, 0, -1, true);
-	wDuelReward->setBackgroundColor(irr::video::SColor(245, 10, 14, 24));
+	wDuelReward = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, 0, -1, false);
+	wDuelReward->setBackgroundColor(irr::video::SColor(255, 11, 15, 25));
 	wDuelReward->setVisible(false);
 
 	imgDuelRewardBg = env->addImage(irr::core::recti(0, 0, 10, 10), wDuelReward);
 	imgDuelRewardBg->setScaleImage(true);
 	imgDuelRewardBg->setUseAlphaChannel(false);
 
-	stDuelRewardHeader = env->addStaticText(L"\u00A1\u00A1 VICTORIA EN DUELO !!", irr::core::recti(0, 0, 10, 10), false, false, wDuelReward, -1, true);
-	stDuelRewardHeader->setBackgroundColor(irr::video::SColor(210, 16, 22, 38));
+	stDuelRewardHeader = env->addStaticText(L"\u00A1\u00A1 VICTORIA EN DUELO !!", irr::core::recti(0, 0, 10, 10), false, false, wDuelReward, -1, false);
+	stDuelRewardHeader->setBackgroundColor(irr::video::SColor(230, 15, 23, 42));
 	stDuelRewardHeader->setOverrideColor(irr::video::SColor(255, 255, 215, 80));
 	stDuelRewardHeader->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 
-	stDuelRewardTable = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
-	stDuelRewardTable->setBackgroundColor(irr::video::SColor(200, 10, 16, 28));
+	stDuelRewardTable = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wDuelReward, -1, false);
+	stDuelRewardTable->setBackgroundColor(irr::video::SColor(215, 12, 18, 30));
 	stDuelRewardTable->setOverrideColor(irr::video::SColor(255, 255, 215, 80));
 
 	stDuelRewardColConcept = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, stDuelRewardTable, -1, false);
@@ -5909,13 +5909,13 @@ void Game::PopulateEconomyScreens() {
 	stDuelRewardColSS->setOverrideColor(irr::video::SColor(255, 110, 231, 183));
 	stDuelRewardColSS->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT);
 
-	stDuelRewardTotal = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
-	stDuelRewardTotal->setBackgroundColor(irr::video::SColor(220, 12, 42, 58));
+	stDuelRewardTotal = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wDuelReward, -1, false);
+	stDuelRewardTotal->setBackgroundColor(irr::video::SColor(235, 12, 36, 52));
 	stDuelRewardTotal->setOverrideColor(irr::video::SColor(255, 110, 245, 200));
 	stDuelRewardTotal->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 
-	stDuelRewardEventBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
-	stDuelRewardEventBox->setBackgroundColor(irr::video::SColor(200, 12, 18, 32));
+	stDuelRewardEventBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wDuelReward, -1, false);
+	stDuelRewardEventBox->setBackgroundColor(irr::video::SColor(215, 12, 18, 30));
 	stDuelRewardEventBox->setOverrideColor(irr::video::SColor(255, 255, 215, 80));
 
 	imgDuelRewardEvent = env->addImage(irr::core::recti(0, 0, 10, 10), wDuelReward);
@@ -5927,8 +5927,8 @@ void Game::PopulateEconomyScreens() {
 	stDuelRewardEventText->setOverrideColor(irr::video::SColor(255, 252, 225, 130));
 	stDuelRewardEventText->setWordWrap(true);
 
-	stDuelRewardLuck = env->addStaticText(L"SUERTE TOTAL: +0.0%", irr::core::recti(0, 0, 10, 10), true, false, wDuelReward, -1, true);
-	stDuelRewardLuck->setBackgroundColor(irr::video::SColor(210, 14, 24, 42));
+	stDuelRewardLuck = env->addStaticText(L"SUERTE TOTAL: +0.0%", irr::core::recti(0, 0, 10, 10), false, false, wDuelReward, -1, false);
+	stDuelRewardLuck->setBackgroundColor(irr::video::SColor(220, 14, 24, 42));
 	stDuelRewardLuck->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	stDuelRewardLuck->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 
@@ -5936,20 +5936,16 @@ void Game::PopulateEconomyScreens() {
 	imgDuelRewardCard->setScaleImage(true);
 	imgDuelRewardCard->setUseAlphaChannel(true);
 
-	stDuelRewardCardInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), true, true, wDuelReward, -1, true);
-	stDuelRewardCardInfo->setBackgroundColor(irr::video::SColor(210, 12, 16, 26));
+	stDuelRewardCardInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wDuelReward, -1, false);
+	stDuelRewardCardInfo->setBackgroundColor(irr::video::SColor(220, 12, 16, 26));
 	stDuelRewardCardInfo->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 	stDuelRewardCardInfo->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stDuelRewardCardInfo->setWordWrap(true);
 
 	btnDuelRewardSaveReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_SAVE_REPLAY, L"GUARDAR REPETICION");
-	btnDuelRewardSaveReplay->setImage(tFlatBtnDark);
-	btnDuelRewardSaveReplay->setDrawBorder(false);
-	btnDuelRewardSaveReplay->setUseAlphaChannel(true);
 	btnDuelRewardAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_ACCEPT, L"ACEPTAR");
-	btnDuelRewardAccept->setImage(tFlatBtnBlue);
-	btnDuelRewardAccept->setDrawBorder(false);
-	btnDuelRewardAccept->setUseAlphaChannel(true);
+	styleDarkBtn(btnDuelRewardSaveReplay);
+	styleCyanBtn(btnDuelRewardAccept);
 
 	ResizeEconomyScreens();
 }
@@ -7113,6 +7109,18 @@ void Game::ShowDuelRewardWindow() {
 	if(btnDuelRewardSaveReplay) {
 		btnDuelRewardSaveReplay->setText(L"GUARDAR REPETICION");
 		btnDuelRewardSaveReplay->setEnabled(true);
+		btnDuelRewardSaveReplay->setImage(tFlatBtnDark);
+		btnDuelRewardSaveReplay->setPressedImage(tFlatBtnDark);
+		btnDuelRewardSaveReplay->setDrawBorder(false);
+		btnDuelRewardSaveReplay->setUseAlphaChannel(true);
+		btnDuelRewardSaveReplay->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	}
+	if(btnDuelRewardAccept) {
+		btnDuelRewardAccept->setImage(tFlatBtnDark);
+		btnDuelRewardAccept->setPressedImage(tFlatBtnDark);
+		btnDuelRewardAccept->setDrawBorder(false);
+		btnDuelRewardAccept->setUseAlphaChannel(true);
+		btnDuelRewardAccept->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	}
 
 	if(wMessage && wMessage->isVisible())
@@ -9758,7 +9766,8 @@ bool Game::MainLoop() {
 				auto rw = wDuelReward->getAbsolutePosition();
 				const irr::s32 W = window_size.Width;
 				const irr::s32 H = window_size.Height;
-				const irr::video::SColor dimCol(200, 0, 0, 0);
+				// Oscurecer profundamente solo el fondo perimétrico (interfaz de aventura detrás)
+				const irr::video::SColor dimCol(225, 4, 6, 14);
 				if(rw.UpperLeftCorner.Y > 0)
 					driver->draw2DRectangle(dimCol, irr::core::recti(0, 0, W, rw.UpperLeftCorner.Y));
 				if(rw.LowerRightCorner.Y < H)
@@ -9768,15 +9777,19 @@ bool Game::MainLoop() {
 				if(rw.LowerRightCorner.X < W)
 					driver->draw2DRectangle(dimCol, irr::core::recti(rw.LowerRightCorner.X, rw.UpperLeftCorner.Y, W, rw.LowerRightCorner.Y));
 
-				drawNeon(wDuelReward, irr::video::SColor(220, 56, 189, 248));
-				drawNeon(stDuelRewardHeader, irr::video::SColor(220, 251, 191, 36));
+				// Bordes neón propios Ani Dimension (sin elementos morados del skin)
+				drawNeon(wDuelReward, irr::video::SColor(240, 56, 189, 248));
+				drawNeon(stDuelRewardHeader, irr::video::SColor(240, 251, 191, 36));
 				drawNeon(stDuelRewardTable, irr::video::SColor(200, 56, 189, 248));
-				drawNeon(stDuelRewardTotal, irr::video::SColor(220, 52, 211, 153));
+				drawNeon(stDuelRewardTotal, irr::video::SColor(240, 52, 211, 153));
 				drawNeon(stDuelRewardEventBox, irr::video::SColor(220, 251, 191, 36));
 				drawNeon(stDuelRewardCardInfo, irr::video::SColor(200, 56, 189, 248));
-				drawNeon(stDuelRewardLuck, irr::video::SColor(200, 192, 132, 252));
-				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 192, 132, 252));
-				drawNeon(btnDuelRewardAccept, irr::video::SColor(220, 56, 189, 248));
+				drawNeon(stDuelRewardLuck, irr::video::SColor(200, 56, 189, 248));
+				if(imgDuelRewardCard && imgDuelRewardCard->isVisible()) {
+					drawNeon(imgDuelRewardCard, irr::video::SColor(180, 56, 189, 248));
+				}
+				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
+				drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
 			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
