@@ -1016,6 +1016,7 @@ public:
 	void PopulateAdventureModeWindow();
 	void ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb);
 	void ApplyRoomSelectFont(irr::gui::IGUIComboBox* cb);
+	void ApplyDuelBtnStyle(irr::gui::IGUIButton* b);
 	void RefreshAdventureMode();
 	void OnAdventureSeriesChanged();
 	void OnAdventureArcChanged();

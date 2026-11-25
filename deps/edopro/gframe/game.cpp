@@ -2320,6 +2320,17 @@ void Game::ApplyRoomSelectFont(irr::gui::IGUIComboBox* cb) {
 	}
 }
 
+void Game::ApplyDuelBtnStyle(irr::gui::IGUIButton* b) {
+	if(!b) return;
+	if(tFlatBtnDark) {
+		b->setImage(tFlatBtnDark);
+		b->setPressedImage(tFlatBtnDark);
+		b->setScaleImage(true);
+		b->setUseAlphaChannel(true);
+	}
+	b->setDrawBorder(false);
+}
+
 void Game::ResizeAdventureMode() {
 	if(!wAdventureMode)
 		return;
