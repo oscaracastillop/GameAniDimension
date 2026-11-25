@@ -1092,7 +1092,7 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 	win->setEnabled(false);
 	for(auto fit = fadingList.begin(); fit != fadingList.end(); ++fit) {
 		if(win == fit->guiFading) {
-			if(win != wOptions) // the size of wOptions is always set by ClientField::ShowSelectOption before showing it
+			if(win != wOptions && win != wPosSelect)
 				fu.fadingSize = fit->fadingSize;
 			fu.wasEnabled = fit->wasEnabled;
 		}
@@ -1110,10 +1110,10 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 	fu.autoFadeoutFrame = autoframe * 1000 / 60;
 	fu.signalAction = 0;
 	if(win == wPosSelect) {
-		btnPSAU->setDrawImage(false);
-		btnPSAD->setDrawImage(false);
-		btnPSDU->setDrawImage(false);
-		btnPSDD->setDrawImage(false);
+		btnPSAU->setDrawImage(true);
+		btnPSAD->setDrawImage(true);
+		btnPSDU->setDrawImage(true);
+		btnPSDD->setDrawImage(true);
 	}
 	if(win == wCardSelect) {
 		for(int i = 0; i < 5; ++i)
@@ -1123,7 +1123,8 @@ void Game::ShowElement(irr::gui::IGUIElement * win, int autoframe) {
 		for(int i = 0; i < 5; ++i)
 			btnCardDisplay[i]->setDrawImage(false);
 	}
-	win->setRelativePosition(Scale(center.X, center.Y, 0, 0));
+	if(win != wPosSelect)
+		win->setRelativePosition(Scale(center.X, center.Y, 0, 0));
 	fadingList.push_back(fu);
 }
 void Game::HideElement(irr::gui::IGUIElement * win, bool set_action) {

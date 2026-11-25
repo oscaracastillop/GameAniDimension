@@ -877,7 +877,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(wPosSelect, 561);
 	wPosSelect->getCloseButton()->setVisible(false);
 	wPosSelect->setVisible(false);
-	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.70f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.70f) };
+	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.72f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.72f) };
 	btnPSAU = irr::gui::CGUIImageButton::addImageButton(env, Scale(10, 45, 150, 220), wPosSelect, BUTTON_POS_AU);
 	btnPSAU->setImageSize(imgsize);
 	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, Scale(155, 45, 295, 220), wPosSelect, BUTTON_POS_AD);
@@ -11849,7 +11849,7 @@ void Game::OnResize() {
 	SetMessageWindow();
 	wQuery->setRelativePosition(ResizeWin(490, 200, 840, 340));
 	wOptions->setRelativePosition(ResizeWinFromCenter(0, 0, wOptions->getRelativePosition().getWidth(), wOptions->getRelativePosition().getHeight(), 135));
-	wPosSelect->setRelativePosition(ResizeWin(310, 180, 970, 440));
+	if(!wPosSelect->isVisible()) wPosSelect->setRelativePosition(ResizeWin(310, 180, 970, 440));
 	wCardSelect->setRelativePosition(ResizeWin(300, 65, 1020, 455));
 	wCardDisplay->setRelativePosition(ResizeWin(300, 65, 1020, 455));
 	wANNumber->setRelativePosition(ResizeWin(550, 200, 780, 295));
