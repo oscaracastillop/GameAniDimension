@@ -5467,41 +5467,40 @@ void Game::PopulateEconomyScreens() {
 	btnProfileBack = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_BACK, L"Volver al Lobby");
 	styleDarkBtn(btnProfileBack);
 	{
-		const char* hubIcons[8] = {
+		const char* hubIcons[7] = {
 			"textures/shop.png", "textures/info_player.png", "textures/buzon.png", "textures/medals.png",
-			"textures/avatars.png", "textures/inventario.png", "textures/events.png", "textures/clan.png"
+			"textures/avatars.png", "textures/events.png", "textures/clan.png"
 		};
-		const wchar_t* hubTitles[8] = {
+		const wchar_t* hubTitles[7] = {
 			L"Tienda", L"Informaci\u00F3n Jugador", L"Buz\u00F3n", L"Medallas",
-			L"Avatares", L"Inventario & Decks", L"Eventos", L"Clanes"
+			L"Avatares", L"Eventos", L"Clanes"
 		};
-		const wchar_t* hubDescs[8] = {
+		const wchar_t* hubDescs[7] = {
 			L"Compra Avatares, Potenciadores, VIP, Sobres y Cartas.",
 			L"Consulta tu Nivel, EXP, StarShips, Cristales, Bonos y WinRate.",
 			L"Reclama avatares, regalos, premios o aplica potenciadores.",
 			L"Explora medallas legendarias de Modo Aventura y destaca una.",
 			L"Administra tus avatares adquiridos y elige cu\u00E1l activar.",
-			L"Explora tus cartas adquiridas y arma tus 3 slots de Deck.",
 			L"Rompecabezas mensuales, Top 10 del evento y canje de fichas.",
 			L"\u00DAnete a un clan o funda el tuyo (Nv. 50+ y 350k SS)."
 		};
-		const wchar_t* hubBtns[8] = {
+		const wchar_t* hubBtns[7] = {
 			L"Ir a la Tienda", L"Ver Informaci\u00F3n", L"Abrir Buz\u00F3n", L"Ver Medallas",
-			L"Mis Avatares", L"Abrir Deck Builder", L"Ver Eventos", L"Explorar Clanes"
+			L"Mis Avatares", L"Ver Eventos", L"Explorar Clanes"
 		};
-		const int hubIds[8] = {
+		const int hubIds[7] = {
 			BUTTON_PROF_HUB_STORE, BUTTON_PROF_HUB_INFO, BUTTON_PROF_HUB_MAILBOX, BUTTON_PROF_HUB_MEDALS,
-			BUTTON_PROF_HUB_AVATARS, BUTTON_PROF_HUB_DECKS, BUTTON_PROF_HUB_EVENTS, BUTTON_PROF_HUB_CLANS
+			BUTTON_PROF_HUB_AVATARS, BUTTON_PROF_HUB_EVENTS, BUTTON_PROF_HUB_CLANS
 		};
-		const irr::video::SColor hubColors[8] = {
+		const irr::video::SColor hubColors[7] = {
 			irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 56, 189, 248),
 			irr::video::SColor(255, 251, 191, 36), irr::video::SColor(255, 251, 191, 36),
-			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 192, 132, 252),
-			irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 56, 189, 248)
+			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 52, 211, 153),
+			irr::video::SColor(255, 56, 189, 248)
 		};
 		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
-		for(int hi = 0; hi < 8; ++hi) {
+		for(int hi = 0; hi < 7; ++hi) {
 			wProfileHubCards[hi] = makePanel(wPlayerProfile);
 			imgProfileHubIcons[hi] = env->addImage(irr::core::recti(0, 0, 44, 44), wProfileHubCards[hi], -1, 0, true);
 			imgProfileHubIcons[hi]->setScaleImage(true);
@@ -6569,11 +6568,17 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(130), (botY - gridTop - gap) / 2);
-		for(int hi = 0; hi < 8; ++hi) {
-			int row = hi / 4;
-			int col = hi % 4;
-			irr::s32 cx = pad + col * (cardW + gap);
-			irr::s32 cy = gridTop + row * (cardH + gap);
+		if(wProfileHubCards[7]) wProfileHubCards[7]->setVisible(false);
+		for(int hi = 0; hi < 7; ++hi) {
+			irr::s32 cx, cy;
+			if(hi < 4) {
+				cx = pad + hi * (cardW + gap);
+				cy = gridTop;
+			} else {
+				irr::s32 row2Pad = (W - (3 * cardW + 2 * gap)) / 2;
+				cx = row2Pad + (hi - 4) * (cardW + gap);
+				cy = gridTop + cardH + gap;
+			}
 			if(wProfileHubCards[hi]) {
 				wProfileHubCards[hi]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
 				irr::s32 maxIcW = cardW - Scale(24);
@@ -9774,7 +9779,25 @@ bool Game::MainLoop() {
 					tRoomBg = driver->getTexture("textures/bg_duel.jpg");
 				DrawBackImage(tRoomBg ? tRoomBg : imageManager.tBackGround, resized);
 			} else if(isEcosystemVisible()) {
-				if(wProfileAvatars && wProfileAvatars->isVisible() && tBgInterfaces) {
+				auto isProfileSectionVisible = [&]() -> bool {
+					return (wPlayerProfile && wPlayerProfile->isVisible()) ||
+						(wStoreMenu && wStoreMenu->isVisible()) ||
+						(wStoreDonations && wStoreDonations->isVisible()) ||
+						(wStoreAvatars && wStoreAvatars->isVisible()) ||
+						(wStoreBoosters && wStoreBoosters->isVisible()) ||
+						(wStoreVip && wStoreVip->isVisible()) ||
+						(wStoreCards && wStoreCards->isVisible()) ||
+						(wStorePacks && wStorePacks->isVisible()) ||
+						(wProfileInfo && wProfileInfo->isVisible()) ||
+						(wMailbox && wMailbox->isVisible()) ||
+						(wProfileMedals && wProfileMedals->isVisible()) ||
+						(wProfileAvatars && wProfileAvatars->isVisible()) ||
+						(wEventsHub && wEventsHub->isVisible()) ||
+						(wEventsMenu && wEventsMenu->isVisible()) ||
+						(wClansMenu && wClansMenu->isVisible()) ||
+						(wClanDetail && wClanDetail->isVisible());
+				};
+				if(isProfileSectionVisible() && tBgInterfaces) {
 					DrawBackImage(tBgInterfaces, resized);
 				} else {
 					// Fondo degradado oscuro estilo web para Lobby, Perfil, Tienda, Buzon, Medallas, Eventos y Clanes
@@ -9947,13 +9970,13 @@ bool Game::MainLoop() {
 				}
 			}
 			if(wPlayerProfile && wPlayerProfile->isVisible()) {
-				const irr::video::SColor hubBorder[8] = {
+				const irr::video::SColor hubBorder[7] = {
 					irr::video::SColor(150, 52, 211, 153), irr::video::SColor(150, 56, 189, 248),
 					irr::video::SColor(150, 251, 191, 36), irr::video::SColor(150, 251, 191, 36),
-					irr::video::SColor(150, 56, 189, 248), irr::video::SColor(150, 192, 132, 252),
-					irr::video::SColor(150, 52, 211, 153), irr::video::SColor(150, 56, 189, 248)
+					irr::video::SColor(150, 56, 189, 248), irr::video::SColor(150, 52, 211, 153),
+					irr::video::SColor(150, 56, 189, 248)
 				};
-				for(int hi = 0; hi < 8; ++hi) {
+				for(int hi = 0; hi < 7; ++hi) {
 					drawNeon(wProfileHubCards[hi], hubBorder[hi]);
 					drawNeon(btnProfileHubActions[hi], irr::video::SColor(140, 56, 189, 248));
 				}
