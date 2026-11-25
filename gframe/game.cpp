@@ -208,6 +208,12 @@ void Game::Initialize() {
 		auto lTimeFont = textfont;
 		lTimeFont.size = Scale(12);
 		loginLogTimeFont = irr::gui::CGUITTFont::createTTFont(env, lTimeFont, fallbackFonts);
+		auto lctFont = textfont;
+		lctFont.size = Scale(15);
+		loginCardTitleFont = irr::gui::CGUITTFont::createTTFont(env, lctFont, fallbackFonts);
+		auto lcdFont = textfont;
+		lcdFont.size = Scale(13);
+		loginCardDescFont = irr::gui::CGUITTFont::createTTFont(env, lcdFont, fallbackFonts);
 #if EDOPRO_ANDROID
 		auto cif = textfont;
 		cif.size = Scale(gGameConfig->textfont.size + 2);
@@ -1831,7 +1837,8 @@ void Game::PopulateGameHostWindows() {
 	}
 
 	//host(single) - Sala de duelo amplia y organizada (3 columnas + avatares grandes + VIP + Clan)
-	wHostPrepare = env->addWindow(Scale(48, 22, 976, 618), false, L"Sala de Duelo");
+	wHostPrepare = env->addWindow(Scale(48, 22, 976, 618), false, L"");
+	wHostPrepare->setText(L"");
 	wHostPrepare->getCloseButton()->setVisible(false);
 	wHostPrepare->setVisible(false);
 	wHostPrepareR = env->addWindow(Scale(0, 0, 1, 1), false, L"");
@@ -4610,13 +4617,7 @@ void Game::ProcessPendingHostPrepTextures() {
 			}
 		}
 		if(imgHostPrepVip[pos]) {
-			auto vTex = LoadVipTexture(hostPrepPendingVipName[pos]);
-			if(vTex) {
-				imgHostPrepVip[pos]->setImage(vTex);
-				imgHostPrepVip[pos]->setVisible(true);
-			} else {
-				imgHostPrepVip[pos]->setVisible(false);
-			}
+			imgHostPrepVip[pos]->setVisible(false);
 		}
 	}
 }
@@ -4860,6 +4861,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wProfileInfo) wProfileInfo->setVisible(false);
 	if(wProfileMedals) wProfileMedals->setVisible(false);
 	if(wProfileAvatars) wProfileAvatars->setVisible(false);
+	if(wMyAvaHelpModal) wMyAvaHelpModal->setVisible(false);
 	if(wEventsHub) wEventsHub->setVisible(false);
 	if(wEventsMenu) wEventsMenu->setVisible(false);
 	if(wClansMenu) wClansMenu->setVisible(false);
@@ -4867,6 +4869,15 @@ void Game::HideAllEcosystemScreens() {
 	if(wMailbox) wMailbox->setVisible(false);
 	if(wAdventureMode) wAdventureMode->setVisible(false);
 	if(wRoomListPlaceholder) wRoomListPlaceholder->setVisible(false);
+	if(wLanWindow) wLanWindow->setVisible(false);
+	if(wCreateHost) wCreateHost->setVisible(false);
+	if(wHostPrepare) wHostPrepare->setVisible(false);
+	if(wHostPrepareR) wHostPrepareR->setVisible(false);
+	if(wHostPrepareL) wHostPrepareL->setVisible(false);
+	if(wDuelReward) wDuelReward->setVisible(false);
+	if(wSinglePlay) wSinglePlay->setVisible(false);
+	if(wReplay) wReplay->setVisible(false);
+	if(wRules) wRules->setVisible(false);
 	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
 	if(wPackPoolOverlay) wPackPoolOverlay->setVisible(false);
 	if(wAvatarPreviewOverlay) wAvatarPreviewOverlay->setVisible(false);
@@ -4928,11 +4939,14 @@ void Game::PopulateEconomyScreens() {
 		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
+	if(!tBgInterfaces) {
+		tBgInterfaces = driver->getTexture("textures/bg_interfaces.png");
+	}
 
 	// 1. Store Menu (dedicated full-screen 3x2 neon cards matching Perfil Hub)
 	makeCanvas(wStoreMenu);
 	stStoreTitle = env->addStaticText(L"TIENDA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
-	stStoreTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stStoreTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stStoreTitle->setOverrideFont(loginTitleFont);
 	stStoreDesc = env->addStaticText(L"Adquiere avatares exclusivos, potenciadores, pases VIP, sobres y cartas individuales para equipar tu cuenta.", irr::core::recti(0, 0, 10, 10), false, true, wStoreMenu);
 	stStoreDesc->setWordWrap(true);
@@ -4976,7 +4990,8 @@ void Game::PopulateEconomyScreens() {
 			irr::video::SColor(255, 192, 132, 252), irr::video::SColor(255, 52, 211, 153)
 		};
 		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
-		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
+		driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
 		for(int si = 0; si < 6; ++si) {
 			wStoreHubCards[si] = makePanel(wStoreMenu);
 			imgStoreHubIcons[si] = env->addImage(irr::core::recti(0, 0, 64, 64), wStoreHubCards[si], -1, 0, true);
@@ -4987,13 +5002,20 @@ void Game::PopulateEconomyScreens() {
 			}
 			stStoreHubTitles[si] = env->addStaticText(stTitles[si], irr::core::recti(0, 0, 10, 10), false, false, wStoreHubCards[si]);
 			stStoreHubTitles[si]->setOverrideColor(stColors[si]);
-			if(loginUiFont) stStoreHubTitles[si]->setOverrideFont(loginUiFont);
+			if(loginCardTitleFont) stStoreHubTitles[si]->setOverrideFont(loginCardTitleFont);
+			else if(loginBtnFont) stStoreHubTitles[si]->setOverrideFont(loginBtnFont);
+			else if(loginUiFont) stStoreHubTitles[si]->setOverrideFont(loginUiFont);
 			stStoreHubDescs[si] = env->addStaticText(stDescs[si], irr::core::recti(0, 0, 10, 10), false, true, wStoreHubCards[si]);
 			stStoreHubDescs[si]->setWordWrap(true);
 			stStoreHubDescs[si]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-			if(loginDescFont) stStoreHubDescs[si]->setOverrideFont(loginDescFont);
+			if(loginCardDescFont) stStoreHubDescs[si]->setOverrideFont(loginCardDescFont);
+			else if(loginLogTimeFont) stStoreHubDescs[si]->setOverrideFont(loginLogTimeFont);
+			else if(loginDescFont) stStoreHubDescs[si]->setOverrideFont(loginDescFont);
 			btnStoreHubActions[si] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreHubCards[si], stIds[si], stBtns[si]);
 			styleDarkBtn(btnStoreHubActions[si]);
+			btnStoreHubActions[si]->setOverrideColor(stColors[si]);
+			if(loginCardDescFont) btnStoreHubActions[si]->setOverrideFont(loginCardDescFont);
+			else if(loginLogTimeFont) btnStoreHubActions[si]->setOverrideFont(loginLogTimeFont);
 		}
 		btnStoreHubPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_HUB_PREV, L"Anterior");
 		stStoreHubPage = env->addStaticText(L"P\u00E1gina 1 / 2", irr::core::recti(0, 0, 10, 10), false, false, wStoreMenu);
@@ -5002,6 +5024,10 @@ void Game::PopulateEconomyScreens() {
 		btnStoreHubNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreMenu, BUTTON_STORE_HUB_NEXT, L"Siguiente");
 		styleDarkBtn(btnStoreHubPrev);
 		styleDarkBtn(btnStoreHubNext);
+		if(loginCardDescFont) {
+			btnStoreHubPrev->setOverrideFont(loginCardDescFont);
+			btnStoreHubNext->setOverrideFont(loginCardDescFont);
+		}
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
 
@@ -5352,48 +5378,48 @@ void Game::PopulateEconomyScreens() {
 	// 4. Player Profile Hub (8 neon cards matching web profile hub)
 	makeCanvas(wPlayerProfile);
 	stProfileTitle = env->addStaticText(L"PERFIL DEL JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, wPlayerProfile);
-	stProfileTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stProfileTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stProfileTitle->setOverrideFont(loginTitleFont);
 	stProfileSubtitle = env->addStaticText(L"Administra tu cuenta, avatares, tienda, buz\u00F3n, medallas, eventos y clanes.", irr::core::recti(0, 0, 10, 10), false, false, wPlayerProfile);
 	stProfileSubtitle->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
 	btnProfileBack = env->addButton(irr::core::recti(0, 0, 10, 10), wPlayerProfile, BUTTON_PROFILE_BACK, L"Volver al Lobby");
 	styleDarkBtn(btnProfileBack);
 	{
-		const char* hubIcons[8] = {
+		const char* hubIcons[7] = {
 			"textures/shop.png", "textures/info_player.png", "textures/buzon.png", "textures/medals.png",
-			"textures/avatars.png", "textures/inventario.png", "textures/events.png", "textures/clan.png"
+			"textures/avatars.png", "textures/events.png", "textures/clan.png"
 		};
-		const wchar_t* hubTitles[8] = {
+		const wchar_t* hubTitles[7] = {
 			L"Tienda", L"Informaci\u00F3n Jugador", L"Buz\u00F3n", L"Medallas",
-			L"Avatares", L"Inventario & Decks", L"Eventos", L"Clanes"
+			L"Avatares", L"Eventos", L"Clanes"
 		};
-		const wchar_t* hubDescs[8] = {
+		const wchar_t* hubDescs[7] = {
 			L"Compra Avatares, Potenciadores, VIP, Sobres y Cartas.",
 			L"Consulta tu Nivel, EXP, StarShips, Cristales, Bonos y WinRate.",
 			L"Reclama avatares, regalos, premios o aplica potenciadores.",
 			L"Explora medallas legendarias de Modo Aventura y destaca una.",
 			L"Administra tus avatares adquiridos y elige cu\u00E1l activar.",
-			L"Explora tus cartas adquiridas y arma tus 3 slots de Deck.",
 			L"Rompecabezas mensuales, Top 10 del evento y canje de fichas.",
 			L"\u00DAnete a un clan o funda el tuyo (Nv. 50+ y 350k SS)."
 		};
-		const wchar_t* hubBtns[8] = {
+		const wchar_t* hubBtns[7] = {
 			L"Ir a la Tienda", L"Ver Informaci\u00F3n", L"Abrir Buz\u00F3n", L"Ver Medallas",
-			L"Mis Avatares", L"Abrir Deck Builder", L"Ver Eventos", L"Explorar Clanes"
+			L"Mis Avatares", L"Ver Eventos", L"Explorar Clanes"
 		};
-		const int hubIds[8] = {
+		const int hubIds[7] = {
 			BUTTON_PROF_HUB_STORE, BUTTON_PROF_HUB_INFO, BUTTON_PROF_HUB_MAILBOX, BUTTON_PROF_HUB_MEDALS,
-			BUTTON_PROF_HUB_AVATARS, BUTTON_PROF_HUB_DECKS, BUTTON_PROF_HUB_EVENTS, BUTTON_PROF_HUB_CLANS
+			BUTTON_PROF_HUB_AVATARS, BUTTON_PROF_HUB_EVENTS, BUTTON_PROF_HUB_CLANS
 		};
-		const irr::video::SColor hubColors[8] = {
+		const irr::video::SColor hubColors[7] = {
 			irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 56, 189, 248),
 			irr::video::SColor(255, 251, 191, 36), irr::video::SColor(255, 251, 191, 36),
-			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 192, 132, 252),
-			irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 56, 189, 248)
+			irr::video::SColor(255, 56, 189, 248), irr::video::SColor(255, 52, 211, 153),
+			irr::video::SColor(255, 56, 189, 248)
 		};
 		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
-		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
-		for(int hi = 0; hi < 8; ++hi) {
+		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, true);
+		driver->setTextureCreationFlag(irr::video::ETCF_OPTIMIZED_FOR_QUALITY, true);
+		for(int hi = 0; hi < 7; ++hi) {
 			wProfileHubCards[hi] = makePanel(wPlayerProfile);
 			imgProfileHubIcons[hi] = env->addImage(irr::core::recti(0, 0, 44, 44), wProfileHubCards[hi], -1, 0, true);
 			imgProfileHubIcons[hi]->setScaleImage(true);
@@ -5402,12 +5428,17 @@ void Game::PopulateEconomyScreens() {
 				imgProfileHubIcons[hi]->setImage(hTex);
 			stProfileHubTitles[hi] = env->addStaticText(hubTitles[hi], irr::core::recti(0, 0, 10, 10), false, false, wProfileHubCards[hi]);
 			stProfileHubTitles[hi]->setOverrideColor(hubColors[hi]);
-			if(loginUiFont) stProfileHubTitles[hi]->setOverrideFont(loginUiFont);
+			if(loginCardTitleFont) stProfileHubTitles[hi]->setOverrideFont(loginCardTitleFont);
+			else if(loginUiFont) stProfileHubTitles[hi]->setOverrideFont(loginUiFont);
 			stProfileHubDescs[hi] = env->addStaticText(hubDescs[hi], irr::core::recti(0, 0, 10, 10), false, true, wProfileHubCards[hi]);
 			stProfileHubDescs[hi]->setWordWrap(true);
 			stProfileHubDescs[hi]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			if(loginCardDescFont) stProfileHubDescs[hi]->setOverrideFont(loginCardDescFont);
+			else if(loginDescFont) stProfileHubDescs[hi]->setOverrideFont(loginDescFont);
 			btnProfileHubActions[hi] = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileHubCards[hi], hubIds[hi], hubBtns[hi]);
 			styleDarkBtn(btnProfileHubActions[hi]);
+			btnProfileHubActions[hi]->setOverrideColor(hubColors[hi]);
+			if(loginCardDescFont) btnProfileHubActions[hi]->setOverrideFont(loginCardDescFont);
 		}
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
@@ -5454,21 +5485,40 @@ void Game::PopulateEconomyScreens() {
 	// 4c. Profile Avatars (5x2 grid + pagination)
 	makeCanvas(wProfileAvatars);
 	stProfileAvaTitle = env->addStaticText(L"MIS AVATARES", irr::core::recti(0, 0, 10, 10), false, false, wProfileAvatars);
-	stProfileAvaTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	stProfileAvaTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stProfileAvaTitle->setOverrideFont(loginTitleFont);
+
+	btnMyAvaHelp = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_MY_AVA_HELP, L"?");
+	styleDarkBtn(btnMyAvaHelp);
+	if(loginCardTitleFont) btnMyAvaHelp->setOverrideFont(loginCardTitleFont);
+
+	wMyAvaHelpModal = env->addWindow(irr::core::recti(0, 0, 10, 10), false, L"REGLAS DE ESCALAMIENTO PROGRESIVO");
+	wMyAvaHelpModal->getCloseButton()->setVisible(false);
+	wMyAvaHelpModal->setVisible(false);
+
+	stMyAvaHelpText = env->addStaticText(
+		L"Escalamiento Progresivo de Estad\u00EDsticas:\n\n"
+		L"Para mantener un crecimiento equilibrado en tu avatar activo, las mejoras dependen entre s\u00ED:\n\n"
+		L"\u2022 Equilibrio EXP \u2194 StarShips:\n"
+		L"  La diferencia entre tu total de EXP y StarShips no puede superar el 30% (m\u00E1ximo 300% en cada una).\n\n"
+		L"\u2022 Desbloqueo de Luck (Santo Grial):\n"
+		L"  Cada 3% conjunto en ambas estad\u00EDsticas (EXP y StarShips) desbloquea 1% m\u00E1ximo de Luck (hasta 100% Luck).\n\n"
+		L"Activa tu mejor avatar estrat\u00E9gicamente seg\u00FAn el modo de juego y aprovecha las bonificaciones en duelos y recompensas.",
+		irr::core::recti(0, 0, 10, 10), false, true, wMyAvaHelpModal
+	);
+	stMyAvaHelpText->setWordWrap(true);
+	stMyAvaHelpText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginDescFont) stMyAvaHelpText->setOverrideFont(loginDescFont);
+
+	btnMyAvaHelpClose = env->addButton(irr::core::recti(0, 0, 10, 10), wMyAvaHelpModal, BUTTON_MY_AVA_HELP_CLOSE, L"Entendido");
+	styleDarkBtn(btnMyAvaHelpClose);
+	if(loginCardTitleFont) btnMyAvaHelpClose->setOverrideFont(loginCardTitleFont);
 
 	btnProfileAvatarsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_PROF_AVATARS_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnProfileAvatarsBack);
 
-	stProfileAvaBanner = env->addStaticText(
-		L"Escalamiento Progresivo de Estad\u00EDsticas: Para mantener un crecimiento equilibrado en tu avatar activo, las mejoras dependen entre s\u00ED:\n"
-		L"\u2022 Equilibrio EXP \u2194 StarShips: La diferencia entre tu total de EXP y StarShips no puede superar el 30% (m\u00E1ximo 300% en cada una).\n"
-		L"\u2022 Desbloqueo de Luck (Santo Grial): Cada 3% conjunto en ambas estad\u00EDsticas (EXP y StarShips) desbloquea 1% m\u00E1ximo de Luck (hasta 100% Luck).",
-		irr::core::recti(0, 0, 10, 10), false, true, wProfileAvatars
-	);
-	stProfileAvaBanner->setWordWrap(true);
-	stProfileAvaBanner->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginDescFont) stProfileAvaBanner->setOverrideFont(loginDescFont);
+	stProfileAvaBanner = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wProfileAvatars);
+	stProfileAvaBanner->setVisible(false);
 
 	for(int i = 0; i < 10; ++i) {
 		wMyAvaCards[i] = makePanel(wProfileAvatars);
@@ -5478,28 +5528,33 @@ void Game::PopulateEconomyScreens() {
 
 		stMyAvaTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
 		stMyAvaTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginUiFont) stMyAvaTitles[i]->setOverrideFont(loginUiFont);
+		if(loginCardTitleFont) stMyAvaTitles[i]->setOverrideFont(loginCardTitleFont);
+		else if(loginUiFont) stMyAvaTitles[i]->setOverrideFont(loginUiFont);
 
 		stMyAvaStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wMyAvaCards[i]);
 		stMyAvaStats[i]->setWordWrap(true);
 		stMyAvaStats[i]->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-		if(loginDescFont) stMyAvaStats[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMyAvaStats[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMyAvaStats[i]->setOverrideFont(loginDescFont);
 
 		stMyAvaOrigin[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
 		stMyAvaOrigin[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) stMyAvaOrigin[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMyAvaOrigin[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMyAvaOrigin[i]->setOverrideFont(loginDescFont);
 
 		stMyAvaActiveBadge[i] = env->addStaticText(L"[ACTIVO]", irr::core::recti(0, 0, 10, 10), false, false, wMyAvaCards[i]);
 		stMyAvaActiveBadge[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 		stMyAvaActiveBadge[i]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 		stMyAvaActiveBadge[i]->setBackgroundColor(irr::video::SColor(60, 52, 211, 153));
 		stMyAvaActiveBadge[i]->setDrawBackground(true);
-		if(loginDescFont) stMyAvaActiveBadge[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMyAvaActiveBadge[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMyAvaActiveBadge[i]->setOverrideFont(loginDescFont);
 
 		btnMyAvaActivate[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wMyAvaCards[i], BUTTON_MY_AVA_ACTIVATE_0 + i, L"Activar");
 		styleDarkBtn(btnMyAvaActivate[i]);
 		btnMyAvaActivate[i]->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
-		if(loginDescFont) btnMyAvaActivate[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) btnMyAvaActivate[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) btnMyAvaActivate[i]->setOverrideFont(loginDescFont);
 	}
 
 	btnMyAvaPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_MY_AVA_PREV, L"Anterior");
@@ -5513,7 +5568,7 @@ void Game::PopulateEconomyScreens() {
 	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
 	makeCanvas(wEventsHub);
 	stEventsHubTitle = env->addStaticText(L"EVENTOS DE ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wEventsHub);
-	stEventsHubTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stEventsHubTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stEventsHubTitle->setOverrideFont(loginTitleFont);
 	stEventsHubDesc = env->addStaticText(L"Participa en los eventos mensuales del servidor y consigue recompensas exclusivas.", irr::core::recti(0, 0, 10, 10), false, true, wEventsHub);
 	stEventsHubDesc->setWordWrap(true);
@@ -5560,6 +5615,14 @@ void Game::PopulateEconomyScreens() {
 
 	// 4d. Events / Dedicated Rompecabezas
 	makeCanvas(wEventsMenu);
+	stEventsMenuTitle = env->addStaticText(L"EVENTOS ESPECIALES ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
+	stEventsMenuTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont) stEventsMenuTitle->setOverrideFont(loginTitleFont);
+
+	stEventsMenuDesc = env->addStaticText(L"Colecciona las piezas del rompecabezas para reclamar premios y puestos en el Top 10.", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
+	stEventsMenuDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stEventsMenuDesc->setOverrideFont(loginDescFont);
+
 	stEventsSelectLabel = env->addStaticText(L"Evento:", irr::core::recti(0, 0, 10, 10), false, false, wEventsMenu);
 	stEventsSelectLabel->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
 	if(loginBtnFont) stEventsSelectLabel->setOverrideFont(loginBtnFont);
@@ -5615,8 +5678,10 @@ void Game::PopulateEconomyScreens() {
 
 	btnEventsClaimTop = env->addButton(irr::core::recti(0, 0, 10, 10), pnlEventsLeft, BUTTON_EVENTS_CLAIM_TOP, L"Reclamar Puesto Top 10");
 	btnEventsExchange = env->addButton(irr::core::recti(0, 0, 10, 10), pnlEventsLeft, BUTTON_EVENTS_EXCHANGE, L"Intercambiar Fichas Restantes (100 SS c/u)");
-	styleCyanBtn(btnEventsClaimTop);
+	styleDarkBtn(btnEventsClaimTop);
 	styleDarkBtn(btnEventsExchange);
+	btnEventsClaimTop->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	btnEventsExchange->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 
 	stEventsHint = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlEventsLeft);
 	stEventsHint->setWordWrap(true);
@@ -5654,7 +5719,7 @@ void Game::PopulateEconomyScreens() {
 	// 4e. Clans (Full-screen table canvas with pagination matching web reference)
 	makeCanvas(wClansMenu);
 	stClansTitle = env->addStaticText(L"CLANES DE ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wClansMenu);
-	stClansTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stClansTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stClansTitle->setOverrideFont(loginTitleFont);
 
 	stClansDesc = env->addStaticText(L"M\u00E1ximo 30 miembros por clan. Gana EXP de clan derrotando a jugadores con clan en PvP Online.", irr::core::recti(0, 0, 10, 10), false, true, wClansMenu);
@@ -5864,7 +5929,7 @@ void Game::PopulateEconomyScreens() {
 	// 5. Mailbox (Modern Table with Pagination matching web reference)
 	makeCanvas(wMailbox);
 	stMailboxTitle = env->addStaticText(L"BUZ\u00D3N DE RECOMPENSAS Y COMPRAS", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
-	stMailboxTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stMailboxTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stMailboxTitle->setOverrideFont(loginTitleFont);
 
 	stMailboxDesc = env->addStaticText(L"Reclama tus avatares o aplica tus potenciadores directamente a tu avatar activo.", irr::core::recti(0, 0, 10, 10), false, true, wMailbox);
@@ -6419,11 +6484,17 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(130), (botY - gridTop - gap) / 2);
-		for(int hi = 0; hi < 8; ++hi) {
-			int row = hi / 4;
-			int col = hi % 4;
-			irr::s32 cx = pad + col * (cardW + gap);
-			irr::s32 cy = gridTop + row * (cardH + gap);
+		if(wProfileHubCards[7]) wProfileHubCards[7]->setVisible(false);
+		for(int hi = 0; hi < 7; ++hi) {
+			irr::s32 cx, cy;
+			if(hi < 4) {
+				cx = pad + hi * (cardW + gap);
+				cy = gridTop;
+			} else {
+				irr::s32 row2Pad = (W - (3 * cardW + 2 * gap)) / 2;
+				cx = row2Pad + (hi - 4) * (cardW + gap);
+				cy = gridTop + cardH + gap;
+			}
 			if(wProfileHubCards[hi]) {
 				wProfileHubCards[hi]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
 				irr::s32 maxIcW = cardW - Scale(24);
@@ -6486,16 +6557,17 @@ void Game::ResizeEconomyScreens() {
 	// 4c. Profile Avatars (5x2 grid)
 	if(wProfileAvatars) {
 		wProfileAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stProfileAvaTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		stProfileAvaTitle->setRelativePosition(irr::core::recti(pad, topY, pad + Scale(210), topY + Scale(32)));
+		if(btnMyAvaHelp) btnMyAvaHelp->setRelativePosition(irr::core::recti(pad + Scale(218), topY + Scale(2), pad + Scale(252), topY + Scale(32)));
 		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stProfileAvaBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad, topY + Scale(84)));
+		stProfileAvaBanner->setVisible(false);
 
-		const irr::s32 gridTop = topY + Scale(88);
+		const irr::s32 gridTop = topY + Scale(44);
 		const irr::s32 pageBarH = Scale(34);
 		const irr::s32 gridBot = botY - pageBarH - Scale(8);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
-		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
+		const irr::s32 cardH = std::max<irr::s32>(Scale(150), (gridBot - gridTop - gap) / 2);
 		for(int i = 0; i < 10; ++i) {
 			int row = i / 5;
 			int col = i % 5;
@@ -6513,10 +6585,22 @@ void Game::ResizeEconomyScreens() {
 				if(btnMyAvaActivate[i]) btnMyAvaActivate[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
 			}
 		}
+		const irr::s32 pageW = Scale(240);
+		const irr::s32 btnW = Scale(110);
 		irr::s32 py = botY - pageBarH;
-		if(btnMyAvaPrev) btnMyAvaPrev->setRelativePosition(irr::core::recti(W / 2 - Scale(180), py, W / 2 - Scale(70), botY));
-		if(stMyAvaPage) stMyAvaPage->setRelativePosition(irr::core::recti(W / 2 - Scale(65), py, W / 2 + Scale(65), botY));
-		if(btnMyAvaNext) btnMyAvaNext->setRelativePosition(irr::core::recti(W / 2 + Scale(70), py, W / 2 + Scale(180), botY));
+		if(stMyAvaPage) stMyAvaPage->setRelativePosition(irr::core::recti((W - pageW) / 2, py, (W + pageW) / 2, botY));
+		if(btnMyAvaPrev) btnMyAvaPrev->setRelativePosition(irr::core::recti((W - pageW) / 2 - btnW - Scale(10), py, (W - pageW) / 2 - Scale(10), botY));
+		if(btnMyAvaNext) btnMyAvaNext->setRelativePosition(irr::core::recti((W + pageW) / 2 + Scale(10), py, (W + pageW) / 2 + btnW + Scale(10), botY));
+
+		if(wMyAvaHelpModal) {
+			irr::s32 mw = std::min<irr::s32>(Scale(650), W - Scale(40));
+			irr::s32 mh = Scale(320);
+			irr::s32 mx = (W - mw) / 2;
+			irr::s32 my = (H - mh) / 2;
+			wMyAvaHelpModal->setRelativePosition(irr::core::recti(mx, my, mx + mw, my + mh));
+			if(stMyAvaHelpText) stMyAvaHelpText->setRelativePosition(irr::core::recti(Scale(20), Scale(36), mw - Scale(20), mh - Scale(50)));
+			if(btnMyAvaHelpClose) btnMyAvaHelpClose->setRelativePosition(irr::core::recti(mw / 2 - Scale(70), mh - Scale(44), mw / 2 + Scale(70), mh - Scale(12)));
+		}
 	}
 
 	// 4c. Events Hub (2-card layout)
@@ -6557,14 +6641,19 @@ void Game::ResizeEconomyScreens() {
 	// 4d. Events / Dedicated Rompecabezas
 	if(wEventsMenu) {
 		wEventsMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		// Top Event Selector Bar
-		stEventsSelectLabel->setRelativePosition(irr::core::recti(pad, topY + Scale(4), pad + Scale(58), topY + Scale(34)));
-		cbEventsSelect->setRelativePosition(irr::core::recti(pad + Scale(60), topY + Scale(2), pad + Scale(340), topY + Scale(34)));
-		stEventsStatusBadge->setRelativePosition(irr::core::recti(pad + Scale(348), topY + Scale(4), pad + Scale(425), topY + Scale(34)));
-		stEventsDates->setRelativePosition(irr::core::recti(pad + Scale(435), topY + Scale(6), W - pad - Scale(185), topY + Scale(32)));
-		btnEventsBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(2), W - pad, topY + Scale(36)));
 
-		const irr::s32 contentTop = topY + Scale(40);
+		if(stEventsMenuTitle) stEventsMenuTitle->setRelativePosition(irr::core::recti(pad, topY, pad + Scale(500), topY + Scale(24)));
+		if(stEventsMenuDesc) stEventsMenuDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(24), pad + Scale(600), topY + Scale(42)));
+		btnEventsBack->setRelativePosition(irr::core::recti(W - pad - Scale(160), topY + Scale(2), W - pad, topY + Scale(38)));
+
+		const irr::s32 barY = topY + Scale(46);
+		// Top Event Selector Bar
+		stEventsSelectLabel->setRelativePosition(irr::core::recti(pad, barY + Scale(4), pad + Scale(58), barY + Scale(34)));
+		cbEventsSelect->setRelativePosition(irr::core::recti(pad + Scale(60), barY + Scale(2), pad + Scale(340), barY + Scale(34)));
+		stEventsStatusBadge->setRelativePosition(irr::core::recti(pad + Scale(348), barY + Scale(4), pad + Scale(425), barY + Scale(34)));
+		stEventsDates->setRelativePosition(irr::core::recti(pad + Scale(435), barY + Scale(6), W - pad, barY + Scale(32)));
+
+		const irr::s32 contentTop = barY + Scale(40);
 		const irr::s32 contentBot = botY;
 		const irr::s32 gap = Scale(12);
 		const irr::s32 totalW = W - 2 * pad;
@@ -9624,15 +9713,19 @@ bool Game::MainLoop() {
 					tRoomBg = driver->getTexture("textures/bg_duel.jpg");
 				DrawBackImage(tRoomBg ? tRoomBg : imageManager.tBackGround, resized);
 			} else if(isEcosystemVisible()) {
-				// Fondo degradado oscuro estilo web para Lobby, Perfil, Tienda, Buzon, Medallas, Eventos y Clanes
-				const irr::core::recti fullRect(0, 0, (irr::s32)window_size.Width, (irr::s32)window_size.Height);
-				driver->draw2DRectangle(
-					fullRect,
-					irr::video::SColor(255, 6, 9, 19),
-					irr::video::SColor(255, 11, 22, 46),
-					irr::video::SColor(255, 4, 7, 15),
-					irr::video::SColor(255, 8, 14, 30)
-				);
+				if(wProfileAvatars && wProfileAvatars->isVisible() && tBgInterfaces) {
+					DrawBackImage(tBgInterfaces, resized);
+				} else {
+					// Fondo degradado oscuro estilo web para Lobby, Perfil, Tienda, Buzon, Medallas, Eventos y Clanes
+					const irr::core::recti fullRect(0, 0, (irr::s32)window_size.Width, (irr::s32)window_size.Height);
+					driver->draw2DRectangle(
+						fullRect,
+						irr::video::SColor(255, 6, 9, 19),
+						irr::video::SColor(255, 11, 22, 46),
+						irr::video::SColor(255, 4, 7, 15),
+						irr::video::SColor(255, 8, 14, 30)
+					);
+				}
 			} else {
 				DrawBackImage(imageManager.tBackGround_menu, resized);
 			}
@@ -9692,9 +9785,62 @@ bool Game::MainLoop() {
 			if(wCardDisplay && wCardDisplay->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wCardDisplay->getAbsolutePosition());
 			}
+			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wMyAvaHelpModal->getAbsolutePosition());
+			}
 		}
 		DrawGUI();
 		DrawSpec();
+#if !EDOPRO_ANDROID
+		irr::gui::IGUIElement* openPopupEl = nullptr;
+		irr::core::recti openPopupRect(0, 0, 0, 0);
+		{
+			irr::gui::IGUIElement* f = env->getFocus();
+			while(f) {
+				if(f->getType() == irr::gui::EGUIET_LIST_BOX && f->getParent() && f->getParent()->getType() == irr::gui::EGUIET_COMBO_BOX) {
+					openPopupEl = f;
+					openPopupRect = f->getAbsolutePosition();
+					break;
+				}
+				f = f->getParent();
+			}
+			if(!openPopupEl) {
+				irr::gui::IGUIComboBox* allCbs[] = {
+					cbAdventureSeries, cbAdventureArc, cbAdventureUserDeck, cbAdventureDifficulty,
+					cbDeckSelect, serverChoice, cbFilterRule, cbFilterBanlist, cbEventsSelect
+				};
+				for(auto* cb : allCbs) {
+					if(cb && cb->isVisible()) {
+						const auto& children = cb->getChildren();
+						for(auto it = children.begin(); it != children.end(); ++it) {
+							if((*it)->getType() == irr::gui::EGUIET_LIST_BOX && (*it)->isVisible()) {
+								openPopupEl = *it;
+								openPopupRect = (*it)->getAbsolutePosition();
+								break;
+							}
+						}
+						if(openPopupEl) break;
+					}
+				}
+			}
+		}
+#endif
+		auto isDescendant = [](irr::gui::IGUIElement* el, irr::gui::IGUIElement* root) {
+			if(!el || !root) return false;
+			if(el == root) return true;
+			irr::gui::IGUIElement* p = el->getParent();
+			while(p) {
+				if(p == root) return true;
+				p = p->getParent();
+			}
+			return false;
+		};
+
+		irr::gui::IGUIElement* activeModals[] = {
+			wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
+			wMyAvaHelpModal, wAvatarPreviewOverlay, wPackRevealOverlay, wPackPoolOverlay
+		};
+
 		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
 			if(el && el->isVisible()) {
 				irr::gui::IGUIElement* p = el->getParent();
@@ -9703,8 +9849,21 @@ bool Game::MainLoop() {
 					if(!p->isVisible()) { parentVis = false; break; }
 					p = p->getParent();
 				}
-				if(parentVis)
+				if(parentVis) {
+#if !EDOPRO_ANDROID
+					if(openPopupEl && openPopupRect.isRectCollided(el->getAbsolutePosition())) {
+						return;
+					}
+#endif
+					for(auto* m : activeModals) {
+						if(m && m->isVisible() && !isDescendant(el, m)) {
+							if(m->getAbsolutePosition().isRectCollided(el->getAbsolutePosition())) {
+								return;
+							}
+						}
+					}
 					driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
+				}
 			}
 		};
 		if(!dInfo.isInDuel && wDuelReward && wDuelReward->isVisible()) {
@@ -9766,15 +9925,15 @@ bool Game::MainLoop() {
 				}
 			}
 			if(wPlayerProfile && wPlayerProfile->isVisible()) {
-				const irr::video::SColor hubBorder[8] = {
+				const irr::video::SColor hubBorder[7] = {
 					irr::video::SColor(150, 52, 211, 153), irr::video::SColor(150, 56, 189, 248),
 					irr::video::SColor(150, 251, 191, 36), irr::video::SColor(150, 251, 191, 36),
-					irr::video::SColor(150, 56, 189, 248), irr::video::SColor(150, 192, 132, 252),
-					irr::video::SColor(150, 52, 211, 153), irr::video::SColor(150, 56, 189, 248)
+					irr::video::SColor(150, 56, 189, 248), irr::video::SColor(150, 52, 211, 153),
+					irr::video::SColor(150, 56, 189, 248)
 				};
-				for(int hi = 0; hi < 8; ++hi) {
+				for(int hi = 0; hi < 7; ++hi) {
 					drawNeon(wProfileHubCards[hi], hubBorder[hi]);
-					drawNeon(btnProfileHubActions[hi], irr::video::SColor(140, 56, 189, 248));
+					drawNeon(btnProfileHubActions[hi], hubBorder[hi]);
 				}
 				drawNeon(btnProfileBack, irr::video::SColor(160, 148, 163, 184));
 			}
@@ -9791,10 +9950,12 @@ bool Game::MainLoop() {
 					bool show = (storeHubPage == 0 && si < 5) || (storeHubPage == 1 && si == 5);
 					if(show) {
 						drawNeon(wStoreHubCards[si], stBorder[si]);
-						drawNeon(btnStoreHubActions[si], irr::video::SColor(140, 56, 189, 248));
+						drawNeon(btnStoreHubActions[si], stBorder[si]);
 					}
 				}
 				drawNeon(btnStoreBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreHubPrev, cCyan);
+				drawNeon(btnStoreHubNext, cCyan);
 			}
 			if(wStoreDonations && wStoreDonations->isVisible()) {
 				for(int di = 0; di < 5; ++di) drawNeon(wDonCards[di], di == 4 ? cGold : cPurp);
@@ -9854,13 +10015,27 @@ bool Game::MainLoop() {
 					}
 				}
 				drawNeon(btnProfileAvatarsBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnMyAvaHelp, cCyan);
+				drawNeon(btnMyAvaPrev, cCyan);
+				drawNeon(btnMyAvaNext, cCyan);
+				if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
+					drawNeon(wMyAvaHelpModal, cCyan);
+					drawNeon(btnMyAvaHelpClose, cGold);
+				}
 			}
 			if(wEventsHub && wEventsHub->isVisible()) {
 				drawNeon(wEventsHubCard[0], cEmer);
 				drawNeon(wEventsHubCard[1], cPurp);
 				drawNeon(btnEventsHubBack, irr::video::SColor(160, 148, 163, 184));
 			}
-			if(wEventsMenu && wEventsMenu->isVisible()) { drawNeon(pnlEventsLeft, cEmer); drawNeon(pnlEventsRight, cGold); }
+			if(wEventsMenu && wEventsMenu->isVisible()) {
+				drawNeon(pnlEventsLeft, cEmer);
+				drawNeon(pnlEventsRight, cGold);
+				drawNeon(cbEventsSelect, cPurp);
+				drawNeon(btnEventsBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnEventsClaimTop, cEmer);
+				drawNeon(btnEventsExchange, cCyan);
+			}
 			if(wClansMenu && wClansMenu->isVisible()) {
 				drawNeon(pnlClansTable, cCyan);
 				drawNeon(pnlClanCreate, cGold);
@@ -9872,7 +10047,12 @@ bool Game::MainLoop() {
 				}
 				drawNeon(pnlClanMembersTable, cPurp);
 			}
-			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
+			if(wMailbox && wMailbox->isVisible()) {
+				drawNeon(pnlMailboxTable, cCyan);
+				drawNeon(btnMailboxBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnMbPrev, cCyan);
+				drawNeon(btnMbNext, cCyan);
+			}
 			drawNeon(wConfirmPurchase, cCyan);
 			if(wAdventureMode && wAdventureMode->isVisible() && (!wDuelReward || !wDuelReward->isVisible())) {
 				drawNeon(pnlAdventureLeft, cCyan);
@@ -9911,6 +10091,26 @@ bool Game::MainLoop() {
 				drawNeon(btnJoinHost2, irr::video::SColor(220, 52, 211, 153));
 				drawNeon(btnJoinCancel2, irr::video::SColor(200, 239, 68, 68));
 			}
+			if(wHostPrepare && wHostPrepare->isVisible()) {
+				drawNeon(wHostPrepare, irr::video::SColor(180, 56, 189, 248));
+				drawNeon(pnlHostPrepRules, cCyan);
+				drawNeon(cbDeckSelect, cPurp);
+				if(btnHostPrepReady && btnHostPrepReady->isVisible()) drawNeon(btnHostPrepReady, cEmer);
+				if(btnHostPrepNotReady && btnHostPrepNotReady->isVisible()) drawNeon(btnHostPrepNotReady, cGold);
+				if(btnHostPrepStart && btnHostPrepStart->isVisible()) drawNeon(btnHostPrepStart, cCyan);
+				if(btnHostPrepCancel && btnHostPrepCancel->isVisible()) drawNeon(btnHostPrepCancel, irr::video::SColor(200, 239, 68, 68));
+				for(int i = 0; i < 6; ++i) {
+					if(stHostPrepDuelist[i] && stHostPrepDuelist[i]->isVisible()) {
+						drawNeon(stHostPrepDuelist[i], i < dInfo.team1 ? cCyan : cPurp);
+					}
+					if(btnHostPrepKick[i] && btnHostPrepKick[i]->isVisible()) {
+						drawNeon(btnHostPrepKick[i], irr::video::SColor(200, 239, 68, 68));
+					}
+				}
+				if(btnHostPrepDuelist && btnHostPrepDuelist->isVisible()) drawNeon(btnHostPrepDuelist, cCyan);
+				if(btnHostPrepOB && btnHostPrepOB->isVisible()) drawNeon(btnHostPrepOB, cPurp);
+				if(btnHostPrepWindBot && btnHostPrepWindBot->isVisible()) drawNeon(btnHostPrepWindBot, cGold);
+			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
 				if(wAdventureMode && wAdventureMode->isVisible()) activeIdx = 3;
@@ -9922,6 +10122,11 @@ bool Game::MainLoop() {
 					driver->draw2DRectangle(irr::video::SColor(255, 56, 189, 248), irr::core::recti(r.UpperLeftCorner.X + 8, r.LowerRightCorner.Y + 2, r.LowerRightCorner.X - 8, r.LowerRightCorner.Y + 4));
 				}
 			}
+#if !EDOPRO_ANDROID
+			if(openPopupEl && openPopupEl->isVisible()) {
+				openPopupEl->draw();
+			}
+#endif
 		}
 		if(dInfo.isInDuel) {
 			auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
@@ -10000,13 +10205,20 @@ bool Game::MainLoop() {
 			if(btnCancelOrFinish && btnCancelOrFinish->isVisible())
 				drawNeon(btnCancelOrFinish, irr::video::SColor(220, 251, 191, 36));
 
-			irr::gui::IGUIButton* phaseBtns[] = { btnDP, btnSP, btnM1, btnBP, btnM2, btnEP };
-			for(auto* pb : phaseBtns) {
-				if(pb && pb->isVisible()) {
-					if(pb->isEnabled())
-						drawNeon(pb, irr::video::SColor(220, 251, 191, 36));
-					else
-						drawNeon(pb, irr::video::SColor(200, 56, 189, 248));
+			bool duelModalActive = (wCardSelect && wCardSelect->isVisible())
+				|| (wCardDisplay && wCardDisplay->isVisible())
+				|| (wQuery && wQuery->isVisible())
+				|| (wOptions && wOptions->isVisible());
+
+			if(!duelModalActive) {
+				irr::gui::IGUIButton* phaseBtns[] = { btnDP, btnSP, btnM1, btnBP, btnM2, btnEP };
+				for(auto* pb : phaseBtns) {
+					if(pb && pb->isVisible()) {
+						if(pb->isEnabled())
+							drawNeon(pb, irr::video::SColor(220, 251, 191, 36));
+						else
+							drawNeon(pb, irr::video::SColor(200, 56, 189, 248));
+					}
 				}
 			}
 
@@ -11677,6 +11889,10 @@ void Game::ResizeRoomListScreen() {
 }
 void Game::LayoutHostPrepareChildren() {
 	if(!wHostPrepare) return;
+	wHostPrepare->setText(L"");
+	for(int i = 0; i < 6; ++i) {
+		if(imgHostPrepVip[i]) imgHostPrepVip[i]->setVisible(false);
+	}
 	const auto rect = wHostPrepare->getRelativePosition();
 	const int w = rect.getWidth();
 	const int h = rect.getHeight();

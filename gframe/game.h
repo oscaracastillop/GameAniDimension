@@ -999,6 +999,8 @@ public:
 	irr::gui::CGUITTFont* loginDescFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
+	irr::gui::CGUITTFont* loginCardTitleFont{ nullptr };
+	irr::gui::CGUITTFont* loginCardDescFont{ nullptr };
 	irr::gui::CGUITTFont* cardInfoFont{ nullptr };
 	irr::gui::CGUITTFont* adventureSelectFont{ nullptr };
 	void ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb);
@@ -1481,8 +1483,13 @@ public:
 	// 4c. Profile Avatars (Full-screen 5x2 card grid with pagination & stat rules banner)
 	irr::gui::IGUIStaticText* wProfileAvatars{ nullptr };
 	irr::gui::IGUIStaticText* stProfileAvaTitle{ nullptr };
+	irr::gui::IGUIButton* btnMyAvaHelp{ nullptr };
+	irr::gui::IGUIWindow* wMyAvaHelpModal{ nullptr };
+	irr::gui::IGUIStaticText* stMyAvaHelpText{ nullptr };
+	irr::gui::IGUIButton* btnMyAvaHelpClose{ nullptr };
 	irr::gui::IGUIStaticText* stProfileAvaBanner{ nullptr };
 	irr::gui::IGUIButton* btnProfileAvatarsBack{ nullptr };
+	irr::video::ITexture* tBgInterfaces{ nullptr };
 	irr::gui::IGUIStaticText* wMyAvaCards[10]{ nullptr };
 	irr::gui::IGUIImage* imgMyAvaIcons[10]{ nullptr };
 	irr::gui::IGUIStaticText* stMyAvaTitles[10]{ nullptr };
@@ -1508,6 +1515,8 @@ public:
 
 	// 4d. Events / Puzzles (Dedicated Rompecabezas Screen)
 	irr::gui::IGUIStaticText* wEventsMenu{ nullptr };
+	irr::gui::IGUIStaticText* stEventsMenuTitle{ nullptr };
+	irr::gui::IGUIStaticText* stEventsMenuDesc{ nullptr };
 	irr::gui::IGUIStaticText* pnlEventsLeft{ nullptr };
 	irr::gui::IGUIStaticText* pnlEventsRight{ nullptr };
 	irr::gui::IGUIStaticText* stEventsSelectLabel{ nullptr };
