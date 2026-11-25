@@ -11653,7 +11653,6 @@ void Game::ResizeRoomListScreen() {
 	ApplyRoomSelectFont(cbFilterRule);
 	ApplyRoomSelectFont(cbFilterBanlist);
 }
-}
 void Game::LayoutHostPrepareChildren() {
 	if(!wHostPrepare) return;
 	const auto rect = wHostPrepare->getRelativePosition();
