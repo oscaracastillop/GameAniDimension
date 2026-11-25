@@ -9680,6 +9680,30 @@ bool Game::MainLoop() {
 			if(wPosSelect && wPosSelect->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
 			}
+			if(wQuery && wQuery->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wQuery->getAbsolutePosition());
+			}
+			if(wOptions && wOptions->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wOptions->getAbsolutePosition());
+			}
+			if(wQuery && wQuery->isVisible()) {
+				drawNeon(wQuery, irr::video::SColor(220, 56, 189, 248));
+				if(btnYes && btnYes->isVisible()) drawNeon(btnYes, irr::video::SColor(220, 52, 211, 153));
+				if(btnNo && btnNo->isVisible()) drawNeon(btnNo, irr::video::SColor(220, 239, 68, 68));
+			}
+			if(wOptions && wOptions->isVisible()) {
+				drawNeon(wOptions, irr::video::SColor(220, 56, 189, 248));
+				for(int i = 0; i < 5; ++i) {
+					if(btnOption[i] && btnOption[i]->isVisible())
+						drawNeon(btnOption[i], irr::video::SColor(200, 56, 189, 248));
+				}
+			}
+			if(wCardSelect && wCardSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wCardSelect->getAbsolutePosition());
+			}
+			if(wCardDisplay && wCardDisplay->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wCardDisplay->getAbsolutePosition());
+			}
 		}
 		DrawGUI();
 		DrawSpec();

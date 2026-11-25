@@ -394,6 +394,26 @@ epro::wstringview DataManager::GetDesc(uint64_t strCode, bool compat) const {
 	const auto& desc = csit->second.GetStrings().desc[stringid];
 	if(desc.empty())
 		return unknown_string;
+	static const std::unordered_map<std::wstring, std::wstring> optTrans = {
+		{ L"Add the card(s) to your hand", L"A\u00f1adir la(s) carta(s) a tu mano" },
+		{ L"Add the card to your hand", L"A\u00f1adir la carta a tu mano" },
+		{ L"Add to hand", L"A\u00f1adir a la mano" },
+		{ L"Special Summon this card", L"Invocar esta carta de Modo Especial" },
+		{ L"Special Summon from your hand", L"Invocar de Modo Especial desde tu mano" },
+		{ L"Special Summon from your GY", L"Invocar de Modo Especial desde tu Cementerio" },
+		{ L"Activate this card", L"Activar esta carta" },
+		{ L"Activate the card", L"Activar la carta" },
+		{ L"Send to the GY", L"Enviar al Cementerio" },
+		{ L"Send it to the GY", L"Enviar al Cementerio" },
+		{ L"Banish this card", L"Desterrar esta carta" },
+		{ L"Banish it", L"Desterrarlo" },
+		{ L"Destroy this card", L"Destruir esta carta" },
+		{ L"Draw 1 card", L"Robar 1 carta" },
+		{ L"Draw 2 cards", L"Robar 2 cartas" }
+	};
+	auto itTr = optTrans.find(std::wstring(desc));
+	if(itTr != optTrans.end())
+		return itTr->second;
 	return desc;
 }
 std::vector<uint16_t> DataManager::GetSetCode(const std::vector<epro::wstringview>& setname) const {
