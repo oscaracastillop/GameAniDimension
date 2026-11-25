@@ -210,7 +210,7 @@ void Game::Initialize() {
 		cardInfoFont = irr::gui::CGUITTFont::createTTFont(env, cif, fallbackFonts);
 #endif
 		auto asf = textfont;
-		asf.size = Scale(gGameConfig->textfont.size + 1);
+		asf.size = Scale(gGameConfig->textfont.size);
 		adventureSelectFont = irr::gui::CGUITTFont::createTTFont(env, asf, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -2399,27 +2399,28 @@ void Game::ResizeAdventureMode() {
 	const int dx = xLeft + innerPad;
 	const int dw = subLeftW - 2 * innerPad;
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(22)));
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(20)));
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(28), dx + dw, dy + Scale(48)));
-	const int loreAvail = std::max(Scale(30), dh - Scale(52));
-	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.45f));
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(24), dx + dw, dy + Scale(44)));
+	const int loreTop = dy + Scale(54); // Aire generoso entre título de historia y descripción
+	const int loreAvail = std::max(Scale(30), dh - Scale(62));
+	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.40f));
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(52), dx + dw, dy + Scale(52) + loreH));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, loreTop, dx + dw, loreTop + loreH));
 	if(stAdventureDeckDesc) {
 		stAdventureDeckDesc->setVisible(true);
-		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(56) + loreH, dx + dw, detailsBottom - innerPad));
+		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, loreTop + loreH + Scale(10), dx + dw, detailsBottom - innerPad));
 	}
 
 	// Bloque 3.2 (Derecha): Dificultad + Premios + Medalla
 	const int rx32 = subRightPanelX + innerPad;
 	const int rw32 = subRightW - 2 * innerPad;
-	const int diffLabelW = Scale(130);
+	const int diffLabelW = Scale(185);
 	const int diffComboW = Scale(120);
 	if(txtAdventureDiff)
 		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(2), rx32 + diffLabelW, dy + Scale(24)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(8), dy, rx32 + diffLabelW + Scale(8) + diffComboW, dy + Scale(26)));
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(6), dy, rx32 + diffLabelW + Scale(6) + diffComboW, dy + Scale(26)));
 	if(stAdventureDiffDesc)
 		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(32), rx32 + rw32, dy + Scale(54)));
 
@@ -9638,6 +9639,14 @@ bool Game::MainLoop() {
 			wTopNavBar->setVisible(false);
 		}
 		EnableMaterial2D(true);
+		if(dInfo.isInDuel) {
+			if(wFTSelect && wFTSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wFTSelect->getAbsolutePosition());
+			}
+			if(wPosSelect && wPosSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
+			}
+		}
 		DrawGUI();
 		DrawSpec();
 		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
@@ -9886,7 +9895,6 @@ bool Game::MainLoop() {
 					drawNeon(tabSettings.scrMusicVolume, irr::video::SColor(180, 56, 189, 248));
 			}
 			if(wFTSelect && wFTSelect->isVisible()) {
-				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wFTSelect->getAbsolutePosition());
 				drawNeon(wFTSelect, irr::video::SColor(220, 56, 189, 248));
 				if(btnFirst && btnFirst->isVisible())
 					drawNeon(btnFirst, irr::video::SColor(220, 56, 189, 248));
@@ -9894,7 +9902,6 @@ bool Game::MainLoop() {
 					drawNeon(btnSecond, irr::video::SColor(220, 56, 189, 248));
 			}
 			if(wPosSelect && wPosSelect->isVisible()) {
-				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
 				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAD, irr::video::SColor(220, 56, 189, 248));
@@ -10211,7 +10218,6 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 	skin->setColor(irr::gui::EGDC_3D_FACE, irr::video::SColor(240, 15, 23, 42));
 	skin->setColor(irr::gui::EGDC_3D_DARK_SHADOW, irr::video::SColor(255, 10, 15, 26));
 	skin->setColor(irr::gui::EGDC_3D_SHADOW, irr::video::SColor(255, 30, 41, 59));
-	skin->setColor(irr::gui::EGDC_3D_HIGH_LIGHT, irr::video::SColor(255, 56, 189, 248));
 	if(wInfos) {
 		wInfos->setTabHeight(skin->getSize(irr::gui::EGDS_BUTTON_HEIGHT) + Scale(2));
 		wInfos->setTabVerticalAlignment(irr::gui::EGUIA_UPPERLEFT);
