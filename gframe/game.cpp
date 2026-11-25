@@ -7095,9 +7095,14 @@ void Game::ShowDuelRewardWindow() {
 	if(stDuelRewardColExp) stDuelRewardColExp->setText(cExp.c_str());
 	if(stDuelRewardColSS) stDuelRewardColSS->setText(cSS.c_str());
 
-	std::wstring tot = (d.expTotalGained < 0)
-		? epro::format(L"TOTAL: {} EXP (Ranked)  |  +{} STARSHIPS", d.expTotalGained, d.ssTotalGained)
-		: epro::format(L"TOTAL GANADO: +{} EXP  |  +{} STARSHIPS", d.expTotalGained, d.ssTotalGained);
+	std::wstring tot;
+	if(!d.isWin) {
+		tot = epro::format(L"TOTAL GANADO: +0 EXP  |  +0 STARSHIPS");
+	} else if(d.expTotalGained < 0) {
+		tot = epro::format(L"TOTAL: {} EXP (Ranked)  |  +{} STARSHIPS", d.expTotalGained, d.ssTotalGained);
+	} else {
+		tot = epro::format(L"TOTAL GANADO: +{} EXP  |  +{} STARSHIPS", d.expTotalGained, d.ssTotalGained);
+	}
 	if(d.leveledUp) tot += epro::format(L"  (\u00A1NIVEL {}!)", d.newLevel);
 	if(stDuelRewardTotal) stDuelRewardTotal->setText(tot.c_str());
 
@@ -9635,19 +9640,52 @@ bool Game::MainLoop() {
 		EnableMaterial2D(true);
 		DrawGUI();
 		DrawSpec();
-		if(!dInfo.isInDuel && !is_building && isEcosystemVisible()) {
-			auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
-				if(el && el->isVisible()) {
-					irr::gui::IGUIElement* p = el->getParent();
-					bool parentVis = true;
-					while(p) {
-						if(!p->isVisible()) { parentVis = false; break; }
-						p = p->getParent();
-					}
-					if(parentVis)
-						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
+		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
+			if(el && el->isVisible()) {
+				irr::gui::IGUIElement* p = el->getParent();
+				bool parentVis = true;
+				while(p) {
+					if(!p->isVisible()) { parentVis = false; break; }
+					p = p->getParent();
 				}
-			};
+				if(parentVis)
+					driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
+			}
+		};
+		if(!dInfo.isInDuel && wDuelReward && wDuelReward->isVisible()) {
+			auto rw = wDuelReward->getAbsolutePosition();
+			const irr::s32 W = window_size.Width;
+			const irr::s32 H = window_size.Height;
+			// Oscurecer profundamente solo el fondo perimétrico (interfaz detrás: Aventura, Salas PvP o Lobby)
+			const irr::video::SColor dimCol(225, 4, 6, 14);
+			if(rw.UpperLeftCorner.Y > 0)
+				driver->draw2DRectangle(dimCol, irr::core::recti(0, 0, W, rw.UpperLeftCorner.Y));
+			if(rw.LowerRightCorner.Y < H)
+				driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.LowerRightCorner.Y, W, H));
+			if(rw.UpperLeftCorner.X > 0)
+				driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.UpperLeftCorner.Y, rw.UpperLeftCorner.X, rw.LowerRightCorner.Y));
+			if(rw.LowerRightCorner.X < W)
+				driver->draw2DRectangle(dimCol, irr::core::recti(rw.LowerRightCorner.X, rw.UpperLeftCorner.Y, W, rw.LowerRightCorner.Y));
+
+			// Bordes neón propios Ani Dimension (estilo unificado para PvP, Ranked y NPCs)
+			drawNeon(wDuelReward, irr::video::SColor(240, 56, 189, 248));
+			drawNeon(stDuelRewardHeader, irr::video::SColor(240, 251, 191, 36));
+			drawNeon(stDuelRewardTable, irr::video::SColor(200, 56, 189, 248));
+			drawNeon(stDuelRewardTotal, irr::video::SColor(240, 52, 211, 153));
+			drawNeon(stDuelRewardEventBox, irr::video::SColor(220, 251, 191, 36));
+			drawNeon(stDuelRewardCardInfo, irr::video::SColor(200, 56, 189, 248));
+			drawNeon(stDuelRewardLuck, irr::video::SColor(200, 56, 189, 248));
+			if(imgDuelRewardCard && imgDuelRewardCard->isVisible()) {
+				drawNeon(imgDuelRewardCard, irr::video::SColor(180, 56, 189, 248));
+			}
+			if(btnDuelRewardSaveReplay && btnDuelRewardSaveReplay->isVisible()) {
+				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
+			}
+			if(btnDuelRewardAccept && btnDuelRewardAccept->isVisible()) {
+				drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
+			}
+		}
+		if(!dInfo.isInDuel && !is_building && isEcosystemVisible()) {
 			if(wMainMenu && wMainMenu->isVisible()) {
 				drawNeon(wLobbyPlayerCard, irr::video::SColor(180, 56, 189, 248));
 				drawNeon(wLobbyBonusCard, irr::video::SColor(180, 56, 189, 248));
@@ -9808,41 +9846,6 @@ bool Game::MainLoop() {
 				}
 				drawNeon(btnAdventureDuel, cEmer);
 				drawNeon(btnAdventureBack, irr::video::SColor(160, 148, 163, 184));
-			}
-			if(wDuelReward && wDuelReward->isVisible()) {
-				auto rw = wDuelReward->getAbsolutePosition();
-				const irr::s32 W = window_size.Width;
-				const irr::s32 H = window_size.Height;
-				// Oscurecer profundamente solo el fondo perimétrico (interfaz de aventura detrás)
-				const irr::video::SColor dimCol(225, 4, 6, 14);
-				if(rw.UpperLeftCorner.Y > 0)
-					driver->draw2DRectangle(dimCol, irr::core::recti(0, 0, W, rw.UpperLeftCorner.Y));
-				if(rw.LowerRightCorner.Y < H)
-					driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.LowerRightCorner.Y, W, H));
-				if(rw.UpperLeftCorner.X > 0)
-					driver->draw2DRectangle(dimCol, irr::core::recti(0, rw.UpperLeftCorner.Y, rw.UpperLeftCorner.X, rw.LowerRightCorner.Y));
-				if(rw.LowerRightCorner.X < W)
-					driver->draw2DRectangle(dimCol, irr::core::recti(rw.LowerRightCorner.X, rw.UpperLeftCorner.Y, W, rw.LowerRightCorner.Y));
-
-				// Bordes neón propios Ani Dimension (sin elementos morados del skin)
-				drawNeon(wDuelReward, irr::video::SColor(240, 56, 189, 248));
-				drawNeon(stDuelRewardHeader, irr::video::SColor(240, 251, 191, 36));
-				drawNeon(stDuelRewardTable, irr::video::SColor(200, 56, 189, 248));
-				drawNeon(stDuelRewardTotal, irr::video::SColor(240, 52, 211, 153));
-				drawNeon(stDuelRewardEventBox, irr::video::SColor(220, 251, 191, 36));
-				drawNeon(stDuelRewardCardInfo, irr::video::SColor(200, 56, 189, 248));
-				drawNeon(stDuelRewardLuck, irr::video::SColor(200, 56, 189, 248));
-				if(imgDuelRewardCard && imgDuelRewardCard->isVisible()) {
-					drawNeon(imgDuelRewardCard, irr::video::SColor(180, 56, 189, 248));
-				}
-				if(btnDuelRewardSaveReplay && btnDuelRewardSaveReplay->isVisible()) {
-					driver->draw2DRectangle(irr::video::SColor(255, 15, 23, 42), btnDuelRewardSaveReplay->getAbsolutePosition());
-					drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
-				}
-				if(btnDuelRewardAccept && btnDuelRewardAccept->isVisible()) {
-					driver->draw2DRectangle(irr::video::SColor(255, 20, 45, 80), btnDuelRewardAccept->getAbsolutePosition());
-					drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
-				}
 			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
