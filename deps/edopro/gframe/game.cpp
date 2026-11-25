@@ -97,6 +97,8 @@ Game::~Game() {
 		adventureSelectFont->drop();
 	if(roomSelectFont)
 		roomSelectFont->drop();
+	if(phaseBtnFont)
+		phaseBtnFont->drop();
 	if(numFont)
 		numFont->drop();
 	if(adFont)
@@ -233,6 +235,9 @@ void Game::Initialize() {
 		rsf.size = Scale(gGameConfig->textfont.size + 1);
 #endif
 		roomSelectFont = irr::gui::CGUITTFont::createTTFont(env, rsf, fallbackFonts);
+		auto pbf = textfont;
+		pbf.size = Scale(gGameConfig->textfont.size + 1);
+		phaseBtnFont = irr::gui::CGUITTFont::createTTFont(env, pbf, fallbackFonts);
 #endif
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -758,6 +763,16 @@ void Game::Initialize() {
 	applyDuelBtnStyle(btnM1);
 	applyDuelBtnStyle(btnBP);
 	applyDuelBtnStyle(btnM2);
+#if EDOPRO_ANDROID
+	if(phaseBtnFont) {
+		btnDP->setOverrideFont(phaseBtnFont);
+		btnSP->setOverrideFont(phaseBtnFont);
+		btnM1->setOverrideFont(phaseBtnFont);
+		btnBP->setOverrideFont(phaseBtnFont);
+		btnM2->setOverrideFont(phaseBtnFont);
+		btnEP->setOverrideFont(phaseBtnFont);
+	}
+#endif
 	applyDuelBtnStyle(btnEP);
 
 	PopulateTabSettingsWindow();
@@ -1317,15 +1332,15 @@ void Game::Initialize() {
 	ebChatInput = env->addEditBox(L"", Scale(3, 2, 710, 22), true, wChat, EDITBOX_CHAT);
 	ebChatInput->setAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_LOWERRIGHT);
 	//swap
-	btnSpectatorSwap = AlignElementWithParent(env->addButton(Scale(205, 100, 295, 135), 0, BUTTON_REPLAY_SWAP, gDataManager->GetSysString(1346).data()));
+	btnSpectatorSwap = AlignElementWithParent(env->addButton(Scale(205, 12, 295, 44), 0, BUTTON_REPLAY_SWAP, gDataManager->GetSysString(1346).data()));
 	defaultStrings.emplace_back(btnSpectatorSwap, 1346);
 	btnSpectatorSwap->setVisible(false);
 	//chain buttons
-	btnChainIgnore = AlignElementWithParent(env->addButton(Scale(205, 100, 295, 135), 0, BUTTON_CHAIN_IGNORE, gDataManager->GetSysString(1292).data()));
+	btnChainIgnore = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 82), 0, BUTTON_CHAIN_IGNORE, gDataManager->GetSysString(1292).data()));
 	defaultStrings.emplace_back(btnChainIgnore, 1292);
-	btnChainAlways = AlignElementWithParent(env->addButton(Scale(205, 140, 295, 175), 0, BUTTON_CHAIN_ALWAYS, gDataManager->GetSysString(1293).data()));
+	btnChainAlways = AlignElementWithParent(env->addButton(Scale(205, 88, 295, 120), 0, BUTTON_CHAIN_ALWAYS, gDataManager->GetSysString(1293).data()));
 	defaultStrings.emplace_back(btnChainAlways, 1293);
-	btnChainWhenAvail = AlignElementWithParent(env->addButton(Scale(205, 180, 295, 215), 0, BUTTON_CHAIN_WHENAVAIL, gDataManager->GetSysString(1294).data()));
+	btnChainWhenAvail = AlignElementWithParent(env->addButton(Scale(205, 126, 295, 158), 0, BUTTON_CHAIN_WHENAVAIL, gDataManager->GetSysString(1294).data()));
 	defaultStrings.emplace_back(btnChainWhenAvail, 1294);
 	btnChainIgnore->setIsPushButton(true);
 	btnChainAlways->setIsPushButton(true);
@@ -1337,15 +1352,19 @@ void Game::Initialize() {
 	btnShuffle = AlignElementWithParent(env->addButton(Scale(0, 0, 50, 20), wPhase, BUTTON_CMD_SHUFFLE, gDataManager->GetSysString(1307).data()));
 	defaultStrings.emplace_back(btnShuffle, 1307);
 	btnShuffle->setVisible(false);
+#if EDOPRO_ANDROID
+	if(phaseBtnFont)
+		btnShuffle->setOverrideFont(phaseBtnFont);
+#endif
 	//cancel or finish
-	btnCancelOrFinish = AlignElementWithParent(env->addButton(Scale(205, 230, 295, 265), 0, BUTTON_CANCEL_OR_FINISH, gDataManager->GetSysString(1295).data()));
+	btnCancelOrFinish = AlignElementWithParent(env->addButton(Scale(205, 164, 295, 196), 0, BUTTON_CANCEL_OR_FINISH, gDataManager->GetSysString(1295).data()));
 	defaultStrings.emplace_back(btnCancelOrFinish, 1295);
 	btnCancelOrFinish->setVisible(false);
 	//leave/surrender/exit
-	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 55, 295, 90), 0, BUTTON_LEAVE_GAME, L""));
+	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 12, 295, 44), 0, BUTTON_LEAVE_GAME, L""));
 	btnLeaveGame->setVisible(false);
 	//restart single
-	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 90), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
+	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 12, 295, 44), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
 	defaultStrings.emplace_back(btnRestartSingle, 1366);
 	btnRestartSingle->setVisible(false);
 
@@ -1364,8 +1383,8 @@ void Game::Initialize() {
 	if(tmp_color != 0)
 		stTip->setOverrideColor(tmp_color);
 	stTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	if(cardInfoFont)
-		stTip->setOverrideFont(cardInfoFont);
+	if(textFont)
+		stTip->setOverrideFont(textFont);
 	stTip->setVisible(false);
 	//tip for cards in select / display list
 	stCardListTip = env->addStaticText(L"", Scale(0, 0, 150, 150), false, true, wCardSelect, TEXT_CARD_LIST_TIP, true);
@@ -11151,7 +11170,11 @@ int Game::GetMasterRule(uint64_t param, uint32_t forbidden, int* truerule) {
 }
 void Game::ResizePhaseButtons() {
 	if(gGameConfig->alternative_phase_layout) {
+#if EDOPRO_ANDROID
+		wPhase->setRelativePosition(Resize(934, 76, 994, 344));
+#else
 		wPhase->setRelativePosition(Resize(940, 80, 990, 340));
+#endif
 		return;
 	} else if(!gGameConfig->keep_aspect_ratio) {
 		if(dInfo.HasFieldFlag(DUEL_3_COLUMNS_FIELD | DUEL_EMZONE))
@@ -11196,7 +11219,11 @@ void Game::SetPhaseButtons(bool visibility) {
 	// set the phase window to the "default" size so that it's easier to
 	// work with the relative button positions by using non scaled values
 	if(gGameConfig->alternative_phase_layout)
+#if EDOPRO_ANDROID
+		wPhase->setRelativePosition({ 934, 76, 994, 344 });
+#else
 		wPhase->setRelativePosition({ 940, 80, 990, 340 });
+#endif
 	else if(dInfo.HasFieldFlag(DUEL_3_COLUMNS_FIELD | DUEL_EMZONE))
 		wPhase->setRelativePosition({ 480, 290, 855, 350 });
 	else
@@ -11204,6 +11231,15 @@ void Game::SetPhaseButtons(bool visibility) {
 
 	auto UpdatePhaseButtons = [&] {
 		if(gGameConfig->alternative_phase_layout) {
+#if EDOPRO_ANDROID
+			btnDP->setRelativePosition({ 0, 0, 56, 26 });
+			btnSP->setRelativePosition({ 0, 38, 56, 64 });
+			btnM1->setRelativePosition({ 0, 76, 56, 102 });
+			btnBP->setRelativePosition({ 0, 114, 56, 140 });
+			btnM2->setRelativePosition({ 0, 152, 56, 178 });
+			btnEP->setRelativePosition({ 0, 190, 56, 216 });
+			btnShuffle->setRelativePosition({ 0, 228, 56, 254 });
+#else
 			btnDP->setRelativePosition({ 0, 0, 50, 20 });
 			btnSP->setRelativePosition({ 0, 40, 50, 60 });
 			btnM1->setRelativePosition({ 0, 80, 50, 100 });
@@ -11211,6 +11247,7 @@ void Game::SetPhaseButtons(bool visibility) {
 			btnM2->setRelativePosition({ 0, 160, 50, 180 });
 			btnEP->setRelativePosition({ 0, 200, 50, 220 });
 			btnShuffle->setRelativePosition({ 0, 240, 50, 260 });
+#endif
 			return;
 		}
 		// reset master rule 4 phase button position

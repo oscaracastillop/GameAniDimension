@@ -78,7 +78,7 @@ int SingleMode::SinglePlayThread(DuelOptions&& duelOptions) {
 		last_replay.Flush();
 		new_replay.Write<uint64_t>(opt);
 	};
-	mainGame->btnLeaveGame->setRelativePosition(mainGame->Resize(205, 5, 295, 45));
+	mainGame->btnLeaveGame->setRelativePosition(mainGame->Resize(205, 12, 295, 44));
 	is_continuing = false;
 	is_restarting = false;
 	auto rnd = Utils::GetRandomNumberGenerator();

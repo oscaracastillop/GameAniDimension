@@ -1004,6 +1004,7 @@ public:
 	irr::gui::CGUITTFont* cardInfoYellowFont{ nullptr };
 	irr::gui::CGUITTFont* adventureSelectFont{ nullptr };
 	irr::gui::CGUITTFont* roomSelectFont{ nullptr };
+	irr::gui::CGUITTFont* phaseBtnFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;
