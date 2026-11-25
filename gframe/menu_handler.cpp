@@ -176,6 +176,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_JOIN_CANCEL2: {
 				mainGame->HideElement(mainGame->wRoomListPlaceholder);
 				mainGame->ShowElement(mainGame->wMainMenu);
+				mainGame->ResizeMainMenuScreen();
 				break;
 			}
 			case BUTTON_ROOMPASSWORD_OK: {
@@ -325,11 +326,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
 				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
 				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
-				mainGame->ShowTopNavBar(false);
+				mainGame->ShowTopNavBar(true);
 				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->isHostingOnline = true;
 				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
+				mainGame->ResizeRoomListScreen();
 				break;
 			}
 			case BUTTON_NAV_AVENTURA: {

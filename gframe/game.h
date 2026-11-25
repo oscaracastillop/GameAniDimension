@@ -473,6 +473,7 @@ struct server_lobby_page_elements {
 	irr::gui::IGUIStaticText* wRoomListPlaceholder;
 	irr::gui::IGUIStaticText* pnlRoomListTitle{ nullptr };
 	irr::gui::IGUIStaticText* stRoomListTitle{ nullptr };
+	irr::gui::IGUIStaticText* stRoomListDesc{ nullptr };
 	irr::gui::IGUIStaticText* pnlRoomBlock1{ nullptr };
 	irr::gui::IGUIStaticText* pnlRoomBlock2{ nullptr };
 	irr::gui::IGUIStaticText* stRoomServerLbl{ nullptr };
@@ -1001,6 +1002,8 @@ public:
 	irr::gui::CGUITTFont* cardInfoFont{ nullptr };
 	irr::gui::CGUITTFont* adventureSelectFont{ nullptr };
 	void ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb);
+	irr::gui::CGUITTFont* roomSelectFont{ nullptr };
+	void ApplyRoomSelectFont(irr::gui::IGUIComboBox* cb);
 	void ApplyDuelBtnStyle(irr::gui::IGUIButton* b);
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
