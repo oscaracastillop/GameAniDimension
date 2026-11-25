@@ -1314,14 +1314,14 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnRestartSingle, 1366);
 	btnRestartSingle->setVisible(false);
 
-	applyDuelBtnStyle(btnSpectatorSwap);
-	applyDuelBtnStyle(btnChainIgnore);
-	applyDuelBtnStyle(btnChainAlways);
-	applyDuelBtnStyle(btnChainWhenAvail);
-	applyDuelBtnStyle(btnShuffle);
-	applyDuelBtnStyle(btnCancelOrFinish);
-	applyDuelBtnStyle(btnLeaveGame);
-	applyDuelBtnStyle(btnRestartSingle);
+	ApplyDuelBtnStyle(btnSpectatorSwap);
+	ApplyDuelBtnStyle(btnChainIgnore);
+	ApplyDuelBtnStyle(btnChainAlways);
+	ApplyDuelBtnStyle(btnChainWhenAvail);
+	ApplyDuelBtnStyle(btnShuffle);
+	ApplyDuelBtnStyle(btnCancelOrFinish);
+	ApplyDuelBtnStyle(btnLeaveGame);
+	ApplyDuelBtnStyle(btnRestartSingle);
 	//tip
 	stTip = env->addStaticText(L"", Scale(0, 0, 150, 150), false, true, 0, -1, true);
 	stTip->setBackgroundColor(skin::DUELFIELD_TOOLTIP_TEXT_BACKGROUND_COLOR_VAL);
