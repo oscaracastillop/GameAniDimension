@@ -1297,11 +1297,11 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnSpectatorSwap, 1346);
 	btnSpectatorSwap->setVisible(false);
 	//chain buttons
-	btnChainIgnore = AlignElementWithParent(env->addButton(Scale(205, 100, 295, 135), 0, BUTTON_CHAIN_IGNORE, gDataManager->GetSysString(1292).data()));
+	btnChainIgnore = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 82), 0, BUTTON_CHAIN_IGNORE, gDataManager->GetSysString(1292).data()));
 	defaultStrings.emplace_back(btnChainIgnore, 1292);
-	btnChainAlways = AlignElementWithParent(env->addButton(Scale(205, 140, 295, 175), 0, BUTTON_CHAIN_ALWAYS, gDataManager->GetSysString(1293).data()));
+	btnChainAlways = AlignElementWithParent(env->addButton(Scale(205, 88, 295, 120), 0, BUTTON_CHAIN_ALWAYS, gDataManager->GetSysString(1293).data()));
 	defaultStrings.emplace_back(btnChainAlways, 1293);
-	btnChainWhenAvail = AlignElementWithParent(env->addButton(Scale(205, 180, 295, 215), 0, BUTTON_CHAIN_WHENAVAIL, gDataManager->GetSysString(1294).data()));
+	btnChainWhenAvail = AlignElementWithParent(env->addButton(Scale(205, 126, 295, 158), 0, BUTTON_CHAIN_WHENAVAIL, gDataManager->GetSysString(1294).data()));
 	defaultStrings.emplace_back(btnChainWhenAvail, 1294);
 	btnChainIgnore->setIsPushButton(true);
 	btnChainAlways->setIsPushButton(true);
@@ -1314,14 +1314,14 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnShuffle, 1307);
 	btnShuffle->setVisible(false);
 	//cancel or finish
-	btnCancelOrFinish = AlignElementWithParent(env->addButton(Scale(205, 230, 295, 265), 0, BUTTON_CANCEL_OR_FINISH, gDataManager->GetSysString(1295).data()));
+	btnCancelOrFinish = AlignElementWithParent(env->addButton(Scale(205, 164, 295, 196), 0, BUTTON_CANCEL_OR_FINISH, gDataManager->GetSysString(1295).data()));
 	defaultStrings.emplace_back(btnCancelOrFinish, 1295);
 	btnCancelOrFinish->setVisible(false);
 	//leave/surrender/exit
-	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 55, 295, 90), 0, BUTTON_LEAVE_GAME, L""));
+	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 12, 295, 44), 0, BUTTON_LEAVE_GAME, L""));
 	btnLeaveGame->setVisible(false);
 	//restart single
-	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 90), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
+	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 12, 295, 44), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
 	defaultStrings.emplace_back(btnRestartSingle, 1366);
 	btnRestartSingle->setVisible(false);
 
@@ -1336,6 +1336,7 @@ void Game::Initialize() {
 	//tip
 	stTip = env->addStaticText(L"", Scale(0, 0, 150, 150), false, true, 0, -1, true);
 	stTip->setBackgroundColor(skin::DUELFIELD_TOOLTIP_TEXT_BACKGROUND_COLOR_VAL);
+	if(textFont) stTip->setOverrideFont(textFont);
 	tmp_color = skin::DUELFIELD_TOOLTIP_TEXT_COLOR_VAL;
 	if(tmp_color != 0)
 		stTip->setOverrideColor(tmp_color);

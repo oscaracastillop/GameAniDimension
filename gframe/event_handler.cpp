@@ -1571,7 +1571,15 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 				if(mainGame->stTip->isVisible()) {
 					should_show_tip = true;
 					irr::core::recti tpos = mainGame->stTip->getRelativePosition();
-					mainGame->stTip->setRelativePosition(irr::core::vector2di(mousepos.X - tpos.getWidth() - mainGame->Scale(10), mcard ? mousepos.Y - tpos.getHeight() - mainGame->Scale(10) : y + mainGame->Scale(10)));
+					int tipW = tpos.getWidth();
+					int tipH = tpos.getHeight();
+					int tipX = mousepos.X - mainGame->Scale(10) - tipW;
+					int tipY = mcard ? mousepos.Y - mainGame->Scale(10) - tipH : y + mainGame->Scale(10);
+					if(tipX < mainGame->Scale(10)) tipX = mousepos.X + mainGame->Scale(15);
+					if(tipY < mainGame->Scale(10)) tipY = mousepos.Y + mainGame->Scale(15);
+					if(tipX + tipW > mainGame->window_size.Width) tipX = mainGame->window_size.Width - tipW - mainGame->Scale(5);
+					if(tipY + tipH > mainGame->window_size.Height) tipY = mainGame->window_size.Height - tipH - mainGame->Scale(5);
+					mainGame->stTip->setRelativePosition(irr::core::recti(tipX, tipY, tipX + tipW, tipY + tipH));
 				}
 			}
 			if(mcard != hovered_card) {
@@ -1636,8 +1644,32 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 								str.append(epro::format(L"\n*{}", gDataManager->GetDesc(iter->first, mainGame->dInfo.compat_mode)));
 							}
 							should_show_tip = true;
-							auto dtip = mainGame->textFont->getDimensionustring(str) + mainGame->Scale(irr::core::dimension2d<uint32_t>(10, 10));
-							mainGame->stTip->setRelativePosition(irr::core::recti(mousepos.X - mainGame->Scale(10) - dtip.Width, mousepos.Y - mainGame->Scale(10) - dtip.Height, mousepos.X - mainGame->Scale(10), mousepos.Y - mainGame->Scale(10)));
+							auto font = mainGame->textFont ? mainGame->textFont : mainGame->guiFont;
+							std::wstringstream wss(str);
+							std::wstring line;
+							uint32_t maxLineW = 0;
+							uint32_t totalTextH = 0;
+							size_t lineCount = 0;
+							while(std::getline(wss, line)) {
+								if(!line.empty() && line.back() == L'\r') line.pop_back();
+								auto dim = font->getDimension(line.c_str());
+								if(dim.Width > maxLineW) maxLineW = dim.Width;
+								totalTextH += dim.Height;
+								lineCount++;
+							}
+							if(lineCount > 1) {
+								totalTextH += (uint32_t)((lineCount - 1) * mainGame->Scale(2));
+							}
+							int tipW = (int)maxLineW + mainGame->Scale(20);
+							int tipH = (int)totalTextH + mainGame->Scale(14);
+							int tipX = mousepos.X - mainGame->Scale(10) - tipW;
+							int tipY = mousepos.Y - mainGame->Scale(10) - tipH;
+							if(tipX < mainGame->Scale(10)) tipX = mousepos.X + mainGame->Scale(15);
+							if(tipY < mainGame->Scale(10)) tipY = mousepos.Y + mainGame->Scale(15);
+							if(tipX + tipW > mainGame->window_size.Width) tipX = mainGame->window_size.Width - tipW - mainGame->Scale(5);
+							if(tipY + tipH > mainGame->window_size.Height) tipY = mainGame->window_size.Height - tipH - mainGame->Scale(5);
+							mainGame->stTip->setOverrideFont(font);
+							mainGame->stTip->setRelativePosition(irr::core::recti(tipX, tipY, tipX + tipW, tipY + tipH));
 							mainGame->stTip->setText(str.data());
 						}
 					} else {
@@ -1663,8 +1695,31 @@ bool ClientField::OnEvent(const irr::SEvent& event) {
 						player_name.append(epro::format(L"\n*{}", gDataManager->GetDesc(hint.first, mainGame->dInfo.compat_mode)));
 					}
 					should_show_tip = true;
-					auto dtip = mainGame->textFont->getDimensionustring(player_name) + mainGame->Scale(irr::core::dimension2d<uint32_t>(10, 10));
-					mainGame->stTip->setRelativePosition(irr::core::recti(mousepos.X - mainGame->Scale(10) - dtip.Width, mousepos.Y + mainGame->Scale(10), mousepos.X - mainGame->Scale(10), mousepos.Y + mainGame->Scale(10) + dtip.Height));
+					auto font = mainGame->textFont ? mainGame->textFont : mainGame->guiFont;
+					std::wstringstream wss(player_name);
+					std::wstring line;
+					uint32_t maxLineW = 0;
+					uint32_t totalTextH = 0;
+					size_t lineCount = 0;
+					while(std::getline(wss, line)) {
+						if(!line.empty() && line.back() == L'\r') line.pop_back();
+						auto dim = font->getDimension(line.c_str());
+						if(dim.Width > maxLineW) maxLineW = dim.Width;
+						totalTextH += dim.Height;
+						lineCount++;
+					}
+					if(lineCount > 1) {
+						totalTextH += (uint32_t)((lineCount - 1) * mainGame->Scale(2));
+					}
+					int tipW = (int)maxLineW + mainGame->Scale(20);
+					int tipH = (int)totalTextH + mainGame->Scale(14);
+					int tipX = mousepos.X - mainGame->Scale(10) - tipW;
+					int tipY = mousepos.Y + mainGame->Scale(10);
+					if(tipX < mainGame->Scale(10)) tipX = mousepos.X + mainGame->Scale(15);
+					if(tipX + tipW > mainGame->window_size.Width) tipX = mainGame->window_size.Width - tipW - mainGame->Scale(5);
+					if(tipY + tipH > mainGame->window_size.Height) tipY = mainGame->window_size.Height - tipH - mainGame->Scale(5);
+					mainGame->stTip->setOverrideFont(font);
+					mainGame->stTip->setRelativePosition(irr::core::recti(tipX, tipY, tipX + tipW, tipY + tipH));
 					mainGame->stTip->setText(player_name.data());
 				}
 				hovered_player = mplayer;

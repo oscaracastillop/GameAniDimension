@@ -362,15 +362,38 @@ void ClientField::ClearChainSelect() {
 }
 // needs to be synchronized with EGET_SCROLL_BAR_CHANGED
 void ClientField::ShowSelectCard(bool buttonok, bool chain) {
-	size_t startpos;
-	size_t ct;
-	if(selectable_cards.size() <= 5) {
-		startpos = 25 + 135 * (5 - selectable_cards.size()) / 2;
-		ct = selectable_cards.size();
+	sort_list.clear();
+	size_t ct = std::min((size_t)5, selectable_cards.size());
+	if(ct == 0) ct = 1;
+
+	const bool hasScroll = (selectable_cards.size() > 5);
+	const int cardW = mainGame->Scale(125);
+	const int cardH = mainGame->Scale(200);
+	const int cardGap = mainGame->Scale(10);
+	const int padX = mainGame->Scale(20);
+
+	int winW = 0;
+	if(!hasScroll) {
+		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
+		winW = std::max(mainGame->Scale(380), contentW);
 	} else {
-		startpos = 25;
-		ct = 5;
+		winW = mainGame->Scale(715);
 	}
+
+	int winH = 0;
+	if(hasScroll) {
+		winH = buttonok ? mainGame->Scale(350) : mainGame->Scale(308);
+	} else {
+		winH = buttonok ? mainGame->Scale(326) : mainGame->Scale(278);
+	}
+
+	int winX = (mainGame->window_size.Width - winW) / 2;
+	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
+
+	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
+	int startpos = (winW - totalCardsW) / 2;
+
 	for(size_t i = 0; i < ct; ++i) {
 		auto& curstring = mainGame->stCardPos[i];
 		auto& curcard = selectable_cards[i];
@@ -382,7 +405,9 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			mainGame->imageLoading[mainGame->btnCardSelect[i]] = curcard->chain_code;
 		else
 			mainGame->btnCardSelect[i]->setImage(mainGame->imageManager.tCover[curcard->controler]);
-		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 135), 62, static_cast<irr::s32>(startpos + 125 + i * 135), 262));
+
+		int cardX = startpos + (int)i * (cardW + cardGap);
+		mainGame->btnCardSelect[i]->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(62), cardX + cardW, mainGame->Scale(62) + cardH));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		if(mainGame->dInfo.curMsg != MSG_SORT_CHAIN && mainGame->dInfo.curMsg != MSG_SORT_CARD) {
@@ -434,7 +459,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 			curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
 		}
 		curstring->setVisible(true);
-		curstring->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 30, static_cast<irr::s32>(startpos + 120 + i * 125), 50));
+		curstring->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(32), cardX + cardW, mainGame->Scale(56)));
 	}
 	if(selectable_cards.size() <= 5) {
 		for(auto i = selectable_cards.size(); i < 5; ++i) {
@@ -445,24 +470,57 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		mainGame->scrCardList->setVisible(false);
 	} else {
 		mainGame->scrCardList->setVisible(true);
+		mainGame->scrCardList->setRelativePosition(irr::core::recti(padX, mainGame->Scale(270), winW - padX, mainGame->Scale(292)));
 		mainGame->scrCardList->setMin(0);
 		mainGame->scrCardList->setMax(static_cast<irr::s32>(selectable_cards.size() - 5) * 10 + 9);
 		mainGame->scrCardList->setPos(0);
 	}
-	mainGame->btnSelectOK->setVisible(buttonok);
+	if(buttonok) {
+		int okW = mainGame->Scale(120);
+		int okH = mainGame->Scale(34);
+		int okX = (winW - okW) / 2;
+		int okY = hasScroll ? mainGame->Scale(300) : mainGame->Scale(276);
+		mainGame->btnSelectOK->setRelativePosition(irr::core::recti(okX, okY, okX + okW, okY + okH));
+		mainGame->btnSelectOK->setVisible(true);
+	} else {
+		mainGame->btnSelectOK->setVisible(false);
+	}
 	mainGame->PopupElement(mainGame->wCardSelect);
 }
 void ClientField::ShowChainCard() {
 	sort_list.clear();
-	size_t startpos;
-	size_t ct;
-	if(selectable_cards.size() <= 5) {
-		startpos = 25 + 135 * (5 - selectable_cards.size()) / 2;
-		ct = selectable_cards.size();
+	size_t ct = std::min((size_t)5, selectable_cards.size());
+	if(ct == 0) ct = 1;
+
+	const bool hasScroll = (selectable_cards.size() > 5);
+	const int cardW = mainGame->Scale(125);
+	const int cardH = mainGame->Scale(200);
+	const int cardGap = mainGame->Scale(10);
+	const int padX = mainGame->Scale(20);
+
+	int winW = 0;
+	if(!hasScroll) {
+		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
+		winW = std::max(mainGame->Scale(380), contentW);
 	} else {
-		startpos = 25;
-		ct = 5;
+		winW = mainGame->Scale(715);
 	}
+
+	const bool showOk = !chain_forced;
+	int winH = 0;
+	if(hasScroll) {
+		winH = showOk ? mainGame->Scale(350) : mainGame->Scale(308);
+	} else {
+		winH = showOk ? mainGame->Scale(326) : mainGame->Scale(278);
+	}
+
+	int winX = (mainGame->window_size.Width - winW) / 2;
+	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
+
+	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
+	int startpos = (winW - totalCardsW) / 2;
+
 	for(size_t i = 0; i < ct; ++i) {
 		auto& curstring = mainGame->stCardPos[i];
 		auto& curcard = selectable_cards[i];
@@ -470,7 +528,9 @@ void ClientField::ShowChainCard() {
 			mainGame->imageLoading[mainGame->btnCardSelect[i]] = curcard->code;
 		else
 			mainGame->btnCardSelect[i]->setImage(mainGame->imageManager.tCover[curcard->controler]);
-		mainGame->btnCardSelect[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 135), 62, static_cast<irr::s32>(startpos + 125 + i * 135), 262));
+
+		int cardX = startpos + (int)i * (cardW + cardGap);
+		mainGame->btnCardSelect[i]->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(62), cardX + cardW, mainGame->Scale(62) + cardH));
 		mainGame->btnCardSelect[i]->setPressed(false);
 		mainGame->btnCardSelect[i]->setVisible(true);
 		curstring->setText(epro::format(L"{}[{}]", gDataManager->FormatLocation(curcard->location, curcard->sequence),
@@ -489,7 +549,7 @@ void ClientField::ShowChainCard() {
 				curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
 		}
 		curstring->setVisible(true);
-		curstring->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 30, static_cast<irr::s32>(startpos + 120 + i * 125), 50));
+		curstring->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(32), cardX + cardW, mainGame->Scale(56)));
 	}
 	if(selectable_cards.size() <= 5) {
 		for(auto i = selectable_cards.size(); i < 5; ++i) {
@@ -500,25 +560,49 @@ void ClientField::ShowChainCard() {
 		mainGame->scrCardList->setVisible(false);
 	} else {
 		mainGame->scrCardList->setVisible(true);
+		mainGame->scrCardList->setRelativePosition(irr::core::recti(padX, mainGame->Scale(270), winW - padX, mainGame->Scale(292)));
 		mainGame->scrCardList->setMin(0);
 		mainGame->scrCardList->setMax(static_cast<irr::s32>(selectable_cards.size() - 5) * 10 + 9);
 		mainGame->scrCardList->setPos(0);
 	}
-	if(!chain_forced)
+	if(showOk) {
+		int okW = mainGame->Scale(120);
+		int okH = mainGame->Scale(34);
+		int okX = (winW - okW) / 2;
+		int okY = hasScroll ? mainGame->Scale(300) : mainGame->Scale(276);
+		mainGame->btnSelectOK->setRelativePosition(irr::core::recti(okX, okY, okX + okW, okY + okH));
 		mainGame->btnSelectOK->setVisible(true);
-	else mainGame->btnSelectOK->setVisible(false);
+	} else {
+		mainGame->btnSelectOK->setVisible(false);
+	}
 	mainGame->PopupElement(mainGame->wCardSelect);
 }
 void ClientField::ShowLocationCard() {
-	size_t startpos;
-	size_t ct;
-	if(display_cards.size() <= 5) {
-		startpos = 30 + 125 * (5 - display_cards.size()) / 2;
-		ct = display_cards.size();
+	size_t ct = std::min((size_t)5, display_cards.size());
+	if(ct == 0) ct = 1;
+
+	const bool hasScroll = (display_cards.size() > 5);
+	const int cardW = mainGame->Scale(125);
+	const int cardH = mainGame->Scale(200);
+	const int cardGap = mainGame->Scale(10);
+	const int padX = mainGame->Scale(20);
+
+	int winW = 0;
+	if(!hasScroll) {
+		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
+		winW = std::max(mainGame->Scale(380), contentW);
 	} else {
-		startpos = 30;
-		ct = 5;
+		winW = mainGame->Scale(715);
 	}
+
+	int winH = hasScroll ? mainGame->Scale(350) : mainGame->Scale(326);
+	int winX = (mainGame->window_size.Width - winW) / 2;
+	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	mainGame->wCardDisplay->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
+
+	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
+	int startpos = (winW - totalCardsW) / 2;
+
 	for(size_t i = 0; i < ct; ++i) {
 		auto& curstring = mainGame->stDisplayPos[i];
 		auto& curcard = display_cards[i];
@@ -527,7 +611,9 @@ void ClientField::ShowLocationCard() {
 			mainGame->imageLoading[mainGame->btnCardDisplay[i]] = curcard->code;
 		else
 			mainGame->btnCardDisplay[i]->setImage(mainGame->imageManager.tCover[curcard->controler]);
-		mainGame->btnCardDisplay[i]->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 55, static_cast<irr::s32>(startpos + 120 + i * 125), 225));
+
+		int cardX = startpos + (int)i * (cardW + cardGap);
+		mainGame->btnCardDisplay[i]->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(62), cardX + cardW, mainGame->Scale(62) + cardH));
 		mainGame->btnCardDisplay[i]->setPressed(false);
 		mainGame->btnCardDisplay[i]->setVisible(true);
 		std::wstring text;
@@ -560,7 +646,7 @@ void ClientField::ShowLocationCard() {
 				curstring->setBackgroundColor(skin::DUELFIELD_CARD_SELF_WINDOW_BACKGROUND_VAL);
 		}
 		curstring->setVisible(true);
-		curstring->setRelativePosition(mainGame->Scale<irr::s32>(static_cast<irr::s32>(startpos + i * 125), 30, static_cast<irr::s32>(startpos + 120 + i * 125), 50));
+		curstring->setRelativePosition(irr::core::recti(cardX, mainGame->Scale(32), cardX + cardW, mainGame->Scale(56)));
 	}
 	if(display_cards.size() <= 5) {
 		for(auto i = display_cards.size(); i < 5; ++i) {
@@ -571,10 +657,16 @@ void ClientField::ShowLocationCard() {
 		mainGame->scrDisplayList->setVisible(false);
 	} else {
 		mainGame->scrDisplayList->setVisible(true);
+		mainGame->scrDisplayList->setRelativePosition(irr::core::recti(padX, mainGame->Scale(270), winW - padX, mainGame->Scale(292)));
 		mainGame->scrDisplayList->setMin(0);
 		mainGame->scrDisplayList->setMax(static_cast<irr::s32>(display_cards.size() - 5) * 10 + 9);
 		mainGame->scrDisplayList->setPos(0);
 	}
+	int okW = mainGame->Scale(120);
+	int okH = mainGame->Scale(34);
+	int okX = (winW - okW) / 2;
+	int okY = hasScroll ? mainGame->Scale(300) : mainGame->Scale(276);
+	mainGame->btnDisplayOK->setRelativePosition(irr::core::recti(okX, okY, okX + okW, okY + okH));
 	mainGame->btnDisplayOK->setVisible(true);
 	mainGame->PopupElement(mainGame->wCardDisplay);
 }
