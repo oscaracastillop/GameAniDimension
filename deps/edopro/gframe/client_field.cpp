@@ -387,8 +387,10 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		winH = buttonok ? mainGame->Scale(326) : mainGame->Scale(278);
 	}
 
-	int winX = ((int)mainGame->window_size.Width - winW) / 2;
-	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
+	int fieldLeft = mainGame->Scale(300);
+	int fieldW = (int)mainGame->window_size.Width - fieldLeft;
+	int winX = fieldLeft + (fieldW - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(55), ((int)mainGame->window_size.Height - winH) / 2 - mainGame->Scale(25));
 	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
@@ -514,8 +516,10 @@ void ClientField::ShowChainCard() {
 		winH = showOk ? mainGame->Scale(326) : mainGame->Scale(278);
 	}
 
-	int winX = ((int)mainGame->window_size.Width - winW) / 2;
-	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
+	int fieldLeft = mainGame->Scale(300);
+	int fieldW = (int)mainGame->window_size.Width - fieldLeft;
+	int winX = fieldLeft + (fieldW - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(55), ((int)mainGame->window_size.Height - winH) / 2 - mainGame->Scale(25));
 	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
@@ -596,8 +600,10 @@ void ClientField::ShowLocationCard() {
 	}
 
 	int winH = hasScroll ? mainGame->Scale(350) : mainGame->Scale(326);
-	int winX = ((int)mainGame->window_size.Width - winW) / 2;
-	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
+	int fieldLeft = mainGame->Scale(300);
+	int fieldW = (int)mainGame->window_size.Width - fieldLeft;
+	int winX = fieldLeft + (fieldW - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(55), ((int)mainGame->window_size.Height - winH) / 2 - mainGame->Scale(25));
 	mainGame->wCardDisplay->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;

@@ -174,9 +174,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_JOIN_CANCEL2: {
-				mainGame->HideElement(mainGame->wRoomListPlaceholder);
-				mainGame->ShowElement(mainGame->wMainMenu);
+				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(true);
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
 				mainGame->ResizeMainMenuScreen();
+				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
 			case BUTTON_ROOMPASSWORD_OK: {
@@ -206,11 +209,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->btnAdventureDuel->setEnabled(true);
 				if(mainGame->stAdventureNPCDeck)
 					mainGame->stAdventureNPCDeck->setText(L"");
-				mainGame->wAdventureMode->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(true);
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
-				mainGame->ShowTopNavBar(true);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
 			case BUTTON_ADVENTURE_DUEL: {
@@ -279,35 +284,29 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_STORE_OPEN:
 			case BUTTON_NAV_TIENDA: {
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->OpenStoreMenu();
 				break;
 			}
 			case BUTTON_PROFILE_OPEN:
 			case BUTTON_NAV_PERFIL: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(true);
 				mainGame->OpenPlayerProfile();
 				break;
 			}
 			case BUTTON_NAV_INICIO: {
 				mainGame->HideAllEcosystemScreens();
+				mainGame->ShowTopNavBar(true);
+				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ResizeMainMenuScreen();
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
 			case BUTTON_NAV_DECK: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->ShowTopNavBar(false);
 				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->RefreshDeck(mainGame->cbDBDecks);
@@ -321,15 +320,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_QUICK_DUEL:
 			case BUTTON_NAV_DUELOS: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->ShowTopNavBar(true);
 				if(mainGame->isLoggedIn) mainGame->FetchUserInventoryAndDecks();
 				mainGame->isHostingOnline = true;
-				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->ShowElement(mainGame->wRoomListPlaceholder);
 				mainGame->ResizeRoomListScreen();
 				break;
@@ -341,18 +335,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->isAdventureMode = true;
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(false);
-				mainGame->wMainMenu->setVisible(false);
 				mainGame->wAdventureMode->setVisible(true);
 				mainGame->ResizeAdventureMode();
 				mainGame->RefreshAdventureMode();
 				break;
 			}
 			case BUTTON_NAV_REPLAYS: {
-				if(mainGame->wStoreMenu) mainGame->wStoreMenu->setVisible(false);
-				if(mainGame->wStoreAvatars) mainGame->wStoreAvatars->setVisible(false);
-				if(mainGame->wStoreBoosters) mainGame->wStoreBoosters->setVisible(false);
-				if(mainGame->wPlayerProfile) mainGame->wPlayerProfile->setVisible(false);
-				if(mainGame->wMailbox) mainGame->wMailbox->setVisible(false);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->ShowTopNavBar(false);
 				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->stReplayInfo->setText(L"");
@@ -595,7 +584,21 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_PROF_MEDALS_BACK:
 			case BUTTON_PROF_AVATARS_BACK:
 			case BUTTON_CLAN_BACK: {
+				if(mainGame->wMyAvaHelpModal) mainGame->wMyAvaHelpModal->setVisible(false);
 				mainGame->OpenPlayerProfile();
+				break;
+			}
+			case BUTTON_MY_AVA_HELP: {
+				if(mainGame->wMyAvaHelpModal) {
+					mainGame->wMyAvaHelpModal->setVisible(true);
+					mainGame->env->getRootGUIElement()->bringToFront(mainGame->wMyAvaHelpModal);
+				}
+				break;
+			}
+			case BUTTON_MY_AVA_HELP_CLOSE: {
+				if(mainGame->wMyAvaHelpModal) {
+					mainGame->wMyAvaHelpModal->setVisible(false);
+				}
 				break;
 			}
 			case BUTTON_EVENTS_HUB_BACK: {
@@ -992,20 +995,16 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_HP_CANCEL: {
 				DuelClient::StopClient();
 				mainGame->dInfo.isInLobby = false;
-				mainGame->btnCreateHost->setEnabled(mainGame->coreloaded);
-				mainGame->btnJoinHost->setEnabled(true);
-				mainGame->btnJoinCancel->setEnabled(true);
-				mainGame->HideElement(mainGame->wHostPrepare);
+				mainGame->HideAllEcosystemScreens();
 				mainGame->HideElement(mainGame->gBot.window);
-				if (mainGame->wHostPrepareR)
-					mainGame->wHostPrepareR->setVisible(false);
-				if (mainGame->wHostPrepareL)
-					mainGame->wHostPrepareL->setVisible(false);
-				if(mainGame->isHostingOnline)
-					mainGame->ShowElement(mainGame->wRoomListPlaceholder);
-				else
-					mainGame->ShowElement(mainGame->wLanWindow);
 				mainGame->wChat->setVisible(false);
+				if(mainGame->isHostingOnline) {
+					mainGame->ShowTopNavBar(true);
+					mainGame->ShowElement(mainGame->wRoomListPlaceholder);
+					mainGame->ResizeRoomListScreen();
+				} else {
+					mainGame->ShowElement(mainGame->wLanWindow);
+				}
 				break;
 			}
 			case BUTTON_REPLAY_MODE: {
