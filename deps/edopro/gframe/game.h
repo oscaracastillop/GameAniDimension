@@ -1000,6 +1000,8 @@ public:
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
 	irr::gui::CGUITTFont* lobbyPlayerNameFont{ nullptr };
 	irr::gui::CGUITTFont* cardInfoFont{ nullptr };
+	irr::gui::CGUITTFont* cardInfoYellowFont{ nullptr };
+	irr::gui::CGUITTFont* adventureSelectFont{ nullptr };
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;
@@ -1010,6 +1012,7 @@ public:
 	void ResizeRoomListScreen();
 	void PopulateAIBotWindow();
 	void PopulateAdventureModeWindow();
+	void ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb);
 	void RefreshAdventureMode();
 	void OnAdventureSeriesChanged();
 	void OnAdventureArcChanged();

@@ -91,6 +91,10 @@ Game::~Game() {
 		textFont->drop();
 	if(cardInfoFont)
 		cardInfoFont->drop();
+	if(cardInfoYellowFont)
+		cardInfoYellowFont->drop();
+	if(adventureSelectFont)
+		adventureSelectFont->drop();
 	if(numFont)
 		numFont->drop();
 	if(adFont)
@@ -214,6 +218,12 @@ void Game::Initialize() {
 		auto cif = textfont;
 		cif.size = Scale(gGameConfig->textfont.size + 2);
 		cardInfoFont = irr::gui::CGUITTFont::createTTFont(env, cif, fallbackFonts);
+		auto cyf = textfont;
+		cyf.size = Scale(gGameConfig->textfont.size + 3);
+		cardInfoYellowFont = irr::gui::CGUITTFont::createTTFont(env, cyf, fallbackFonts);
+		auto asf = textfont;
+		asf.size = Scale(gGameConfig->textfont.size + 1);
+		adventureSelectFont = irr::gui::CGUITTFont::createTTFont(env, asf, fallbackFonts);
 #endif
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -768,19 +778,21 @@ void Game::Initialize() {
 		btnHand[i]->setImage(imageManager.tHand[i]);
 	}
 	//
-	wFTSelect = env->addWindow(Scale(550, 240, 780, 340), false, L"");
+	wFTSelect = env->addWindow(Scale(550, 240, 780, 345), false, L"");
 	wFTSelect->getCloseButton()->setVisible(false);
 	wFTSelect->setDraggable(false);
 	wFTSelect->setDrawTitlebar(false);
 	wFTSelect->setVisible(false);
-	btnFirst = env->addButton(Scale(10, 30, 220, 55), wFTSelect, BUTTON_FIRST, gDataManager->GetSysString(100).data());
+	btnFirst = env->addButton(Scale(12, 12, 218, 48), wFTSelect, BUTTON_FIRST, L"Ir primero");
 	defaultStrings.emplace_back(btnFirst, 100);
 	applyDuelBtnStyle(btnFirst);
 	btnFirst->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	btnSecond = env->addButton(Scale(10, 60, 220, 85), wFTSelect, BUTTON_SECOND, gDataManager->GetSysString(101).data());
+	if(adventureSelectFont) btnFirst->setOverrideFont(adventureSelectFont);
+	btnSecond = env->addButton(Scale(12, 57, 218, 93), wFTSelect, BUTTON_SECOND, L"Ir segundo");
 	defaultStrings.emplace_back(btnSecond, 101);
 	applyDuelBtnStyle(btnSecond);
 	btnSecond->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(adventureSelectFont) btnSecond->setOverrideFont(adventureSelectFont);
 	//message (310)
 	wMessage = env->addWindow(Scale(490, 200, 840, 340), false, gDataManager->GetSysString(1216).data());
 	defaultStrings.emplace_back(wMessage, 1216);
@@ -841,7 +853,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(wPosSelect, 561);
 	wPosSelect->getCloseButton()->setVisible(false);
 	wPosSelect->setVisible(false);
-	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.55f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.55f) };
+	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.70f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.70f) };
 	btnPSAU = irr::gui::CGUIImageButton::addImageButton(env, Scale(10, 45, 150, 220), wPosSelect, BUTTON_POS_AU);
 	btnPSAU->setImageSize(imgsize);
 	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, Scale(155, 45, 295, 220), wPosSelect, BUTTON_POS_AD);
@@ -1321,7 +1333,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnCancelOrFinish, 1295);
 	btnCancelOrFinish->setVisible(false);
 	//leave/surrender/exit
-	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 5, 295, 80), 0, BUTTON_LEAVE_GAME, L""));
+	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 55, 295, 90), 0, BUTTON_LEAVE_GAME, L""));
 	btnLeaveGame->setVisible(false);
 	//restart single
 	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 90), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
@@ -1343,6 +1355,8 @@ void Game::Initialize() {
 	if(tmp_color != 0)
 		stTip->setOverrideColor(tmp_color);
 	stTip->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	if(cardInfoFont)
+		stTip->setOverrideFont(cardInfoFont);
 	stTip->setVisible(false);
 	//tip for cards in select / display list
 	stCardListTip = env->addStaticText(L"", Scale(0, 0, 150, 150), false, true, wCardSelect, TEXT_CARD_LIST_TIP, true);
@@ -2268,6 +2282,15 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 	imgAdventureNPC->setRelativePosition(targetRect);
 }
 
+void Game::ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb) {
+	if(!cb || !adventureSelectFont) return;
+	for(auto child : cb->getChildren()) {
+		if(child->getType() == irr::gui::EGUIET_STATIC_TEXT) {
+			((irr::gui::IGUIStaticText*)child)->setOverrideFont(adventureSelectFont);
+		}
+	}
+}
+
 void Game::ResizeAdventureMode() {
 	if(!wAdventureMode)
 		return;
@@ -2397,16 +2420,16 @@ void Game::ResizeAdventureMode() {
 	const int dx = xLeft + innerPad;
 	const int dw = subLeftW - 2 * innerPad;
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(22)));
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(20)));
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(28), dx + dw, dy + Scale(48)));
-	const int loreAvail = std::max(Scale(30), dh - Scale(52));
-	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.45f));
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(24), dx + dw, dy + Scale(44)));
+	const int loreAvail = std::max(Scale(30), dh - Scale(58));
+	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.42f));
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(52), dx + dw, dy + Scale(52) + loreH));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(48), dx + dw, dy + Scale(48) + loreH));
 	if(stAdventureDeckDesc) {
 		stAdventureDeckDesc->setVisible(true);
-		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(56) + loreH, dx + dw, detailsBottom - innerPad));
+		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(58) + loreH, dx + dw, detailsBottom - innerPad));
 	}
 
 	// Bloque 3.2 (Derecha): Dificultad + Premios + Medalla
@@ -2460,6 +2483,11 @@ void Game::ResizeAdventureMode() {
 		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
 	if(btnAdventureBack)
 		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
+
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
 
 	if(wTopNavBar && wTopNavBar->isVisible()) {
 		env->getRootGUIElement()->bringToFront(wTopNavBar);
@@ -2521,6 +2549,11 @@ void Game::OnAdventureSeriesChanged() {
 	}
 	if (cbAdventureArc->getItemCount() > 0)
 		cbAdventureArc->setSelected(0);
+
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
 
 	OnAdventureArcChanged();
 }
@@ -2775,6 +2808,12 @@ void Game::UpdateAdventureNPCDisplay() {
 	} else {
 		stAdventureDeckDesc->setText(L"Estrategia del Deck: Invocaciones tacticas y hechizos milenarios.");
 	}
+	if(stAdventureDeckDesc) {
+		stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginDescFont) stAdventureDeckDesc->setOverrideFont(loginDescFont);
+	}
+	if(btnAdventureDuel)
+		btnAdventureDuel->setText(L"INICIAR DUELO");
 
 	bool isAdm = isPlayerAdmin || (loggedInUser == L"admin" || loggedInUser == L"Admin" || playerLevel >= 300);
 	bool unlockedByLevel = isAdm || (playerLevel >= npc.level);
@@ -2876,6 +2915,11 @@ void Game::RefreshAdventureMode() {
 	}
 	}
 
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
+
 	OnAdventureSeriesChanged();
 }
 
@@ -2967,7 +3011,10 @@ void Game::StartAdventureDuel() {
 
 	// Keep adventure mode window visible until duel starts to avoid empty screens and ghost windows
 	btnAdventureDuel->setEnabled(false);
-	stAdventureNPCDeck->setText(L"Iniciando duelo...");
+	btnAdventureDuel->setText(L"INICIANDO...");
+	stAdventureNPCDeck->setText(L"\u26A1 \u00A1INICIANDO DUELO...");
+	if(loginUiFont) stAdventureNPCDeck->setOverrideFont(loginUiFont);
+	stAdventureNPCDeck->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 }
 
 void Game::SpawnRemoteAdventureBot() {
@@ -6005,10 +6052,14 @@ void Game::PopulateEconomyScreens() {
 
 	btnDuelRewardSaveReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_SAVE_REPLAY, L"GUARDAR REPETICION");
 	btnDuelRewardSaveReplay->setImage(tFlatBtnDark);
+	btnDuelRewardSaveReplay->setPressedImage(tFlatBtnDark);
+	btnDuelRewardSaveReplay->setScaleImage(true);
 	btnDuelRewardSaveReplay->setDrawBorder(false);
 	btnDuelRewardSaveReplay->setUseAlphaChannel(true);
 	btnDuelRewardAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wDuelReward, BUTTON_DUEL_REWARD_ACCEPT, L"ACEPTAR");
 	btnDuelRewardAccept->setImage(tFlatBtnBlue);
+	btnDuelRewardAccept->setPressedImage(tFlatBtnBlue);
+	btnDuelRewardAccept->setScaleImage(true);
 	btnDuelRewardAccept->setDrawBorder(false);
 	btnDuelRewardAccept->setUseAlphaChannel(true);
 
@@ -8827,9 +8878,9 @@ void Game::PopulateTabSettingsWindow() {
 		stText->setWordWrap(true);
 		if(cardInfoFont) {
 			stName->setOverrideFont(cardInfoFont);
-			stInfo->setOverrideFont(cardInfoFont);
-			stDataInfo->setOverrideFont(cardInfoFont);
-			stSetName->setOverrideFont(cardInfoFont);
+			stInfo->setOverrideFont(cardInfoYellowFont ? cardInfoYellowFont : cardInfoFont);
+			stDataInfo->setOverrideFont(cardInfoYellowFont ? cardInfoYellowFont : cardInfoFont);
+			stSetName->setOverrideFont(cardInfoYellowFont ? cardInfoYellowFont : cardInfoFont);
 			stPasscodeScope->setOverrideFont(cardInfoFont);
 			stText->setOverrideFont(cardInfoFont);
 		}
@@ -9839,8 +9890,14 @@ bool Game::MainLoop() {
 				drawNeon(stDuelRewardEventBox, irr::video::SColor(220, 251, 191, 36));
 				drawNeon(stDuelRewardCardInfo, irr::video::SColor(200, 56, 189, 248));
 				drawNeon(stDuelRewardLuck, irr::video::SColor(200, 192, 132, 252));
-				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 192, 132, 252));
-				drawNeon(btnDuelRewardAccept, irr::video::SColor(220, 56, 189, 248));
+				if(btnDuelRewardSaveReplay && btnDuelRewardSaveReplay->isVisible()) {
+					driver->draw2DRectangle(irr::video::SColor(255, 15, 23, 42), btnDuelRewardSaveReplay->getAbsolutePosition());
+					drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
+				}
+				if(btnDuelRewardAccept && btnDuelRewardAccept->isVisible()) {
+					driver->draw2DRectangle(irr::video::SColor(255, 20, 45, 80), btnDuelRewardAccept->getAbsolutePosition());
+					drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
+				}
 			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
@@ -9871,6 +9928,7 @@ bool Game::MainLoop() {
 			if(wInfos && wInfos->isVisible())
 				drawNeon(wInfos, irr::video::SColor(180, 56, 189, 248));
 			if(wFTSelect && wFTSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wFTSelect->getAbsolutePosition());
 				drawNeon(wFTSelect, irr::video::SColor(220, 56, 189, 248));
 				if(btnFirst && btnFirst->isVisible())
 					drawNeon(btnFirst, irr::video::SColor(220, 56, 189, 248));
@@ -9878,6 +9936,7 @@ bool Game::MainLoop() {
 					drawNeon(btnSecond, irr::video::SColor(220, 56, 189, 248));
 			}
 			if(wPosSelect && wPosSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
 				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAD, irr::video::SColor(220, 56, 189, 248));
@@ -10685,8 +10744,7 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 	std::wstring englishDesc(gDataManager->GetText(code));
 	std::wstring spanishDesc = GetSpanishCardText(code);
 	if(!spanishDesc.empty()) {
-		std::wstring combined = L"[ESPA\u00d1OL]\n" + spanishDesc + L"\n\n[ENGLISH]\n" + englishDesc;
-		stText->setText(combined.data());
+		stText->setText(spanishDesc.data());
 	} else {
 		stText->setText(englishDesc.data());
 	}
@@ -11654,7 +11712,7 @@ void Game::OnResize() {
 	gBot.window->setRelativePosition(irr::core::vector2di(wHostPrepare->getAbsolutePosition().LowerRightCorner.X, wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 
 	wHand->setRelativePosition(ResizeWin(500, 450, 825, 605));
-	wFTSelect->setRelativePosition(ResizeWin(550, 240, 780, 340));
+	wFTSelect->setRelativePosition(ResizeWin(550, 240, 780, 345));
 	SetMessageWindow();
 	wQuery->setRelativePosition(ResizeWin(490, 200, 840, 340));
 	wOptions->setRelativePosition(ResizeWinFromCenter(0, 0, wOptions->getRelativePosition().getWidth(), wOptions->getRelativePosition().getHeight(), 135));
