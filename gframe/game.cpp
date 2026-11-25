@@ -2472,7 +2472,6 @@ void Game::ResizeAdventureMode() {
 		env->getRootGUIElement()->bringToFront(wTopNavBar);
 	}
 }
-}
 
 void Game::OnAdventureSeriesChanged() {
 	int sel = cbAdventureSeries->getSelected();
