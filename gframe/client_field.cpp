@@ -375,7 +375,7 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 	int winW = 0;
 	if(!hasScroll) {
 		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
-		winW = std::max(mainGame->Scale(380), contentW);
+		winW = std::max<int>(mainGame->Scale(380), contentW);
 	} else {
 		winW = mainGame->Scale(715);
 	}
@@ -387,8 +387,8 @@ void ClientField::ShowSelectCard(bool buttonok, bool chain) {
 		winH = buttonok ? mainGame->Scale(326) : mainGame->Scale(278);
 	}
 
-	int winX = (mainGame->window_size.Width - winW) / 2;
-	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	int winX = ((int)mainGame->window_size.Width - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
 	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
@@ -501,7 +501,7 @@ void ClientField::ShowChainCard() {
 	int winW = 0;
 	if(!hasScroll) {
 		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
-		winW = std::max(mainGame->Scale(380), contentW);
+		winW = std::max<int>(mainGame->Scale(380), contentW);
 	} else {
 		winW = mainGame->Scale(715);
 	}
@@ -514,8 +514,8 @@ void ClientField::ShowChainCard() {
 		winH = showOk ? mainGame->Scale(326) : mainGame->Scale(278);
 	}
 
-	int winX = (mainGame->window_size.Width - winW) / 2;
-	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	int winX = ((int)mainGame->window_size.Width - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
 	mainGame->wCardSelect->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;
@@ -590,14 +590,14 @@ void ClientField::ShowLocationCard() {
 	int winW = 0;
 	if(!hasScroll) {
 		int contentW = padX * 2 + (int)ct * cardW + ((int)ct - 1) * cardGap;
-		winW = std::max(mainGame->Scale(380), contentW);
+		winW = std::max<int>(mainGame->Scale(380), contentW);
 	} else {
 		winW = mainGame->Scale(715);
 	}
 
 	int winH = hasScroll ? mainGame->Scale(350) : mainGame->Scale(326);
-	int winX = (mainGame->window_size.Width - winW) / 2;
-	int winY = std::max(mainGame->Scale(40), (mainGame->window_size.Height - winH) / 2);
+	int winX = ((int)mainGame->window_size.Width - winW) / 2;
+	int winY = std::max<int>(mainGame->Scale(40), ((int)mainGame->window_size.Height - winH) / 2);
 	mainGame->wCardDisplay->setRelativePosition(irr::core::recti(winX, winY, winX + winW, winY + winH));
 
 	int totalCardsW = (int)ct * cardW + ((int)ct - 1) * cardGap;

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <sstream>
 #include <cassert>
 #include "utils.h"
 #include "game_config.h"
