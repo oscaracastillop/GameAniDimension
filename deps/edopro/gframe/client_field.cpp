@@ -715,7 +715,10 @@ void ClientField::ShowSelectOption(uint64_t select_hint, bool should_lock) {
 		pos.LowerRightCorner.Y = pos.UpperLeftCorner.Y + mainGame->Scale(140);
 		mainGame->wOptions->setRelativePosition(pos);
 	}
-	mainGame->wOptions->setText(gDataManager->GetDesc(select_hint ? select_hint : 555, mainGame->dInfo.compat_mode).data());
+	std::wstring optTitle = gDataManager->GetDesc(select_hint ? select_hint : 555, mainGame->dInfo.compat_mode).data();
+	if(optTitle.empty() || optTitle == L"Select an option")
+		optTitle = L"Selecciona una opci\u00f3n";
+	mainGame->wOptions->setText(optTitle.data());
 	mainGame->PopupElement(mainGame->wOptions);
 }
 void ClientField::ReplaySwap() {
