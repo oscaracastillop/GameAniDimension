@@ -9713,7 +9713,25 @@ bool Game::MainLoop() {
 					tRoomBg = driver->getTexture("textures/bg_duel.jpg");
 				DrawBackImage(tRoomBg ? tRoomBg : imageManager.tBackGround, resized);
 			} else if(isEcosystemVisible()) {
-				if(wProfileAvatars && wProfileAvatars->isVisible() && tBgInterfaces) {
+				auto isProfileSectionVisible = [&]() -> bool {
+					return (wPlayerProfile && wPlayerProfile->isVisible()) ||
+						(wStoreMenu && wStoreMenu->isVisible()) ||
+						(wStoreDonations && wStoreDonations->isVisible()) ||
+						(wStoreAvatars && wStoreAvatars->isVisible()) ||
+						(wStoreBoosters && wStoreBoosters->isVisible()) ||
+						(wStoreVip && wStoreVip->isVisible()) ||
+						(wStoreCards && wStoreCards->isVisible()) ||
+						(wStorePacks && wStorePacks->isVisible()) ||
+						(wProfileInfo && wProfileInfo->isVisible()) ||
+						(wMailbox && wMailbox->isVisible()) ||
+						(wProfileMedals && wProfileMedals->isVisible()) ||
+						(wProfileAvatars && wProfileAvatars->isVisible()) ||
+						(wEventsHub && wEventsHub->isVisible()) ||
+						(wEventsMenu && wEventsMenu->isVisible()) ||
+						(wClansMenu && wClansMenu->isVisible()) ||
+						(wClanDetail && wClanDetail->isVisible());
+				};
+				if(isProfileSectionVisible() && tBgInterfaces) {
 					DrawBackImage(tBgInterfaces, resized);
 				} else {
 					// Fondo degradado oscuro estilo web para Lobby, Perfil, Tienda, Buzon, Medallas, Eventos y Clanes
