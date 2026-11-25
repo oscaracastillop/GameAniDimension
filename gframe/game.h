@@ -999,6 +999,9 @@ public:
 	irr::gui::CGUITTFont* loginLogItalicFont{ nullptr };
 	irr::gui::CGUITTFont* loginLogTimeFont{ nullptr };
 	irr::gui::CGUITTFont* cardInfoFont{ nullptr };
+	irr::gui::CGUITTFont* adventureSelectFont{ nullptr };
+	void ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb);
+	void ApplyDuelBtnStyle(irr::gui::IGUIButton* b);
 	std::map<irr::gui::CGUIImageButton*, uint32_t> imageLoading;
 	//hint text
 	irr::gui::IGUIStaticText* stHintMsg;

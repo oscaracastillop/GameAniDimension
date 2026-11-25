@@ -209,6 +209,9 @@ void Game::Initialize() {
 		cif.size = Scale(gGameConfig->textfont.size + 2);
 		cardInfoFont = irr::gui::CGUITTFont::createTTFont(env, cif, fallbackFonts);
 #endif
+		auto asf = textfont;
+		asf.size = Scale(gGameConfig->textfont.size + 1);
+		adventureSelectFont = irr::gui::CGUITTFont::createTTFont(env, asf, fallbackFonts);
 	}
 	if(!numFont || !adFont || !lpcFont)
 		throw std::runtime_error("Failed to load numbers font");
@@ -686,8 +689,8 @@ void Game::Initialize() {
 	PopulateEconomyScreens();
 
 	//img
-	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), true, false, 0, -1, true);
-	wCardImg->setBackgroundColor(skin::CARDINFO_IMAGE_BACKGROUND_VAL);
+	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), false, false, 0, -1, true);
+	wCardImg->setBackgroundColor(irr::video::SColor(245, 11, 15, 25));
 	wCardImg->setVisible(false);
 	imgCard = AlignElementWithParent(env->addImage(Scale(10, 9, 10 + CARD_IMG_WIDTH, 9 + CARD_IMG_HEIGHT), wCardImg));
 	imgCard->setImage(imageManager.tCover[0]);
@@ -715,22 +718,12 @@ void Game::Initialize() {
 	btnEP = AlignElementWithParent(env->addButton(Scale(320, 0, 370, 20), wPhase, BUTTON_EP, L"\xff25\xff30"));
 	btnEP->setVisible(false);
 
-	auto applyDuelBtnStyle = [&](irr::gui::IGUIButton* b) {
-		if(!b) return;
-		if(tFlatBtnDark) {
-			b->setImage(tFlatBtnDark);
-			b->setPressedImage(tFlatBtnDark);
-			b->setScaleImage(true);
-			b->setUseAlphaChannel(true);
-		}
-		b->setDrawBorder(false);
-	};
-	applyDuelBtnStyle(btnDP);
-	applyDuelBtnStyle(btnSP);
-	applyDuelBtnStyle(btnM1);
-	applyDuelBtnStyle(btnBP);
-	applyDuelBtnStyle(btnM2);
-	applyDuelBtnStyle(btnEP);
+	ApplyDuelBtnStyle(btnDP);
+	ApplyDuelBtnStyle(btnSP);
+	ApplyDuelBtnStyle(btnM1);
+	ApplyDuelBtnStyle(btnBP);
+	ApplyDuelBtnStyle(btnM2);
+	ApplyDuelBtnStyle(btnEP);
 
 	PopulateTabSettingsWindow();
 	PopulateSettingsWindow();
@@ -761,11 +754,17 @@ void Game::Initialize() {
 	//
 	wFTSelect = env->addWindow(Scale(550, 240, 780, 340), false, L"");
 	wFTSelect->getCloseButton()->setVisible(false);
+	wFTSelect->setDraggable(false);
+	wFTSelect->setDrawTitlebar(false);
 	wFTSelect->setVisible(false);
 	btnFirst = env->addButton(Scale(10, 30, 220, 55), wFTSelect, BUTTON_FIRST, gDataManager->GetSysString(100).data());
 	defaultStrings.emplace_back(btnFirst, 100);
+	ApplyDuelBtnStyle(btnFirst);
+	btnFirst->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	btnSecond = env->addButton(Scale(10, 60, 220, 85), wFTSelect, BUTTON_SECOND, gDataManager->GetSysString(101).data());
 	defaultStrings.emplace_back(btnSecond, 101);
+	ApplyDuelBtnStyle(btnSecond);
+	btnSecond->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	//message (310)
 	wMessage = env->addWindow(Scale(490, 200, 840, 340), false, gDataManager->GetSysString(1216).data());
 	defaultStrings.emplace_back(wMessage, 1216);
@@ -2249,6 +2248,26 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 	imgAdventureNPC->setRelativePosition(targetRect);
 }
 
+void Game::ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb) {
+	if(!cb || !adventureSelectFont) return;
+	for(auto child : cb->getChildren()) {
+		if(child->getType() == irr::gui::EGUIET_STATIC_TEXT) {
+			((irr::gui::IGUIStaticText*)child)->setOverrideFont(adventureSelectFont);
+		}
+	}
+}
+
+void Game::ApplyDuelBtnStyle(irr::gui::IGUIButton* b) {
+	if(!b) return;
+	if(tFlatBtnDark) {
+		b->setImage(tFlatBtnDark);
+		b->setPressedImage(tFlatBtnDark);
+		b->setScaleImage(true);
+		b->setUseAlphaChannel(true);
+	}
+	b->setDrawBorder(false);
+}
+
 void Game::ResizeAdventureMode() {
 	if(!wAdventureMode)
 		return;
@@ -2268,13 +2287,14 @@ void Game::ResizeAdventureMode() {
 	const int innerPad = Scale(10);
 
 	const int usableW = W - 2 * padX - gap;
-	const int actionBtnH = Scale(34);
-	const int statsH = Scale(44);
-	const int bloque5H = innerPad + statsH + Scale(6) + actionBtnH + innerPad;
+	const int actionBtnH = Scale(38);
+	const int statsH = Scale(62);
+	const int gapBetweenStatsAndBtns = Scale(8);
+	const int bloque5H = innerPad + statsH + gapBetweenStatsAndBtns + actionBtnH + innerPad;
 	const int bloque5Top = pnlBottom - bloque5H;
 	const int bloque4Bottom = bloque5Top - gap;
-	const int bloque4H = std::max(Scale(160), bloque4Bottom - pnlTop);
-	const int avatarStageH = std::max(Scale(140), bloque4H - 2 * innerPad);
+	const int bloque4H = std::max(Scale(140), bloque4Bottom - pnlTop);
+	const int avatarStageH = std::max(Scale(120), bloque4H - 2 * innerPad);
 
 	// Bloque 4 sizing: character portrait ratio (approx. 0.75)
 	const int targetRightW = (int)(avatarStageH * 0.75f) + 2 * innerPad;
@@ -2285,10 +2305,12 @@ void Game::ResizeAdventureMode() {
 	const int xRight = xLeft + leftAreaW + gap;
 
 	// ==================== BLOQUE 1: TITULO CENTRADO + SELECTORES EN UNA FILA ====================
-	const int titleH = Scale(28);
+	const int titleH = Scale(26);
+	const int gapTitleSel = Scale(8);
+	const int labelH = Scale(22);
+	const int gapLabelCombo = Scale(6);
 	const int comboH = Scale(28);
-	const int labelH = Scale(18);
-	const int topBarH = innerPad + titleH + Scale(4) + labelH + Scale(2) + comboH + innerPad;
+	const int topBarH = innerPad + titleH + gapTitleSel + labelH + gapLabelCombo + comboH + innerPad;
 	if(pnlAdventureLeft)
 		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + leftAreaW, pnlTop + topBarH));
 
@@ -2304,34 +2326,35 @@ void Game::ResizeAdventureMode() {
 
 	const int selGap = Scale(8);
 	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
-	const int selY = pnlTop + innerPad + titleH + Scale(4);
+	const int selY = pnlTop + innerPad + titleH + gapTitleSel;
 
 	if(txtAdventureSerie)
 		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + labelH));
 	if(cbAdventureSeries)
-		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + labelH + Scale(2), xLeft + innerPad + selW, selY + labelH + Scale(2) + comboH));
+		cbAdventureSeries->setRelativePosition(irr::core::recti(xLeft + innerPad, selY + labelH + gapLabelCombo, xLeft + innerPad + selW, selY + labelH + gapLabelCombo + comboH));
 
 	const int xCol2 = xLeft + innerPad + selW + selGap;
 	if(txtAdventureArco)
 		txtAdventureArco->setRelativePosition(irr::core::recti(xCol2, selY, xCol2 + selW, selY + labelH));
 	if(cbAdventureArc)
-		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + labelH + Scale(2), xCol2 + selW, selY + labelH + Scale(2) + comboH));
+		cbAdventureArc->setRelativePosition(irr::core::recti(xCol2, selY + labelH + gapLabelCombo, xCol2 + selW, selY + labelH + gapLabelCombo + comboH));
 
 	const int xCol3 = xCol2 + selW + selGap;
 	if(txtAdventureDeck)
 		txtAdventureDeck->setRelativePosition(irr::core::recti(xCol3, selY, xLeft + leftAreaW - innerPad, selY + labelH));
 	if(cbAdventureUserDeck)
-		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + labelH + Scale(2), xLeft + leftAreaW - innerPad, selY + labelH + Scale(2) + comboH));
+		cbAdventureUserDeck->setRelativePosition(irr::core::recti(xCol3, selY + labelH + gapLabelCombo, xLeft + leftAreaW - innerPad, selY + labelH + gapLabelCombo + comboH));
 
 	// ==================== BLOQUE 2: CATALOGO 4x5 ====================
 	const int catTop = pnlTop + topBarH + gap;
 	const int cols = 4;
 	const int rows = 5;
-	const int cellGapX = Scale(6);
-	const int cellGapY = Scale(4);
-	const int btnCellH = Scale(28);
-	const int gridHeaderH = Scale(22);
-	const int catH = innerPad + gridHeaderH + rows * btnCellH + (rows - 1) * cellGapY + innerPad;
+	const int cellGapX = Scale(10);
+	const int cellGapY = Scale(8);
+	const int btnCellH = Scale(32);
+	const int gridHeaderH = Scale(24);
+	const int gridHeaderGap = Scale(10);
+	const int catH = innerPad + gridHeaderH + gridHeaderGap + rows * btnCellH + (rows - 1) * cellGapY + innerPad;
 	const int catBottom = catTop + catH;
 
 	if(pnlAdventureCenter)
@@ -2342,7 +2365,7 @@ void Game::ResizeAdventureMode() {
 	if(txtAdventureCat)
 		txtAdventureCat->setRelativePosition(irr::core::recti(cx, catTop + innerPad, cx + cw, catTop + innerPad + gridHeaderH));
 
-	const int gridTop = catTop + innerPad + gridHeaderH;
+	const int gridTop = catTop + innerPad + gridHeaderH + gridHeaderGap;
 	const int btnCellW = std::max(Scale(50), (cw - (cols - 1) * cellGapX) / cols);
 
 	for(int i = 0; i < 20; ++i) {
@@ -2368,47 +2391,48 @@ void Game::ResizeAdventureMode() {
 		pnlAdventureDetailsRight->setRelativePosition(irr::core::recti(subRightPanelX, detailsTop, xLeft + leftAreaW, detailsBottom));
 
 	const int dy = detailsTop + innerPad;
-	const int dh = std::max(Scale(70), detailsBottom - innerPad - dy);
+	const int dh = std::max(Scale(60), detailsBottom - innerPad - dy);
 
 	// Bloque 3.1 (Izquierda): Nombre + Nivel + Historia + Deck
 	const int dx = xLeft + innerPad;
 	const int dw = subLeftW - 2 * innerPad;
 	if(stAdventureNPCName)
-		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(20)));
+		stAdventureNPCName->setRelativePosition(irr::core::recti(dx, dy, dx + dw, dy + Scale(22)));
 	if(txtAdventureLore)
-		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(22), dx + dw, dy + Scale(38)));
-	const int loreAvail = std::max(Scale(36), dh - Scale(40));
-	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.50f));
+		txtAdventureLore->setRelativePosition(irr::core::recti(dx, dy + Scale(28), dx + dw, dy + Scale(48)));
+	const int loreAvail = std::max(Scale(30), dh - Scale(52));
+	const int loreH = std::max(Scale(20), (int)(loreAvail * 0.45f));
 	if(stAdventureNPCDesc)
-		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(40), dx + dw, dy + Scale(40) + loreH));
+		stAdventureNPCDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(52), dx + dw, dy + Scale(52) + loreH));
 	if(stAdventureDeckDesc) {
 		stAdventureDeckDesc->setVisible(true);
-		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(42) + loreH, dx + dw, detailsBottom - innerPad));
+		stAdventureDeckDesc->setRelativePosition(irr::core::recti(dx, dy + Scale(56) + loreH, dx + dw, detailsBottom - innerPad));
 	}
 
 	// Bloque 3.2 (Derecha): Dificultad + Premios + Medalla
 	const int rx32 = subRightPanelX + innerPad;
 	const int rw32 = subRightW - 2 * innerPad;
-	const int diffLabelW = Scale(100);
+	const int diffLabelW = Scale(130);
+	const int diffComboW = Scale(120);
 	if(txtAdventureDiff)
-		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(2), rx32 + diffLabelW, dy + Scale(22)));
+		txtAdventureDiff->setRelativePosition(irr::core::recti(rx32, dy + Scale(2), rx32 + diffLabelW, dy + Scale(24)));
 	if(cbAdventureDifficulty)
-		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(6), dy, rx32 + rw32, dy + Scale(24)));
+		cbAdventureDifficulty->setRelativePosition(irr::core::recti(rx32 + diffLabelW + Scale(8), dy, rx32 + diffLabelW + Scale(8) + diffComboW, dy + Scale(26)));
 	if(stAdventureDiffDesc)
-		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(26), rx32 + rw32, dy + Scale(50)));
+		stAdventureDiffDesc->setRelativePosition(irr::core::recti(rx32, dy + Scale(32), rx32 + rw32, dy + Scale(54)));
 
-	const int prizeTop = dy + Scale(52);
-	const int prizeAvailH = std::max(Scale(40), detailsBottom - innerPad - prizeTop);
-	const int mSize = std::min(prizeAvailH, Scale(70));
+	const int prizeTop = dy + Scale(58);
+	const int prizeAvailH = std::max(Scale(36), detailsBottom - innerPad - prizeTop);
+	const int mSize = std::min(prizeAvailH, Scale(60));
 	const bool showMedal = (imgAdventureMedal && imgAdventureMedal->isVisible());
 	const int prizeTextW = showMedal ? (rw32 - mSize - Scale(8)) : rw32;
 
 	if(imgAdventureMedal)
 		imgAdventureMedal->setRelativePosition(irr::core::recti(rx32 + rw32 - mSize, prizeTop, rx32 + rw32, prizeTop + mSize));
 	if(stAdventurePrize)
-		stAdventurePrize->setRelativePosition(irr::core::recti(rx32, prizeTop, rx32 + prizeTextW, prizeTop + Scale(30)));
+		stAdventurePrize->setRelativePosition(irr::core::recti(rx32, prizeTop, rx32 + prizeTextW, prizeTop + Scale(26)));
 	if(stAdventurePrizeStatus)
-		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx32, prizeTop + Scale(32), rx32 + prizeTextW, prizeTop + prizeAvailH));
+		stAdventurePrizeStatus->setRelativePosition(irr::core::recti(rx32, prizeTop + Scale(28), rx32 + prizeTextW, prizeTop + prizeAvailH));
 
 	// ==================== BLOQUE 4: IMAGEN DEL PERSONAJE ====================
 	if(pnlAdventureRight)
@@ -2426,20 +2450,26 @@ void Game::ResizeAdventureMode() {
 	if(wAdventureStatsBox)
 		wAdventureStatsBox->setRelativePosition(irr::core::recti(rx, statsY, rx + rw, statsY + statsH));
 	if(stAdventureStatsText)
-		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(6), statsY + Scale(4), rx + rw - Scale(6), statsY + statsH - Scale(4)));
+		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(8), statsY + Scale(6), rx + rw - Scale(8), statsY + statsH - Scale(6)));
 
 	const int actionBtnGap = Scale(8);
 	const int actionBtnW = (rw - actionBtnGap) / 2;
-	const int actionBtnY = statsY + statsH + Scale(6);
+	const int actionBtnY = statsY + statsH + gapBetweenStatsAndBtns;
 
 	if(btnAdventureDuel)
 		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
 	if(btnAdventureBack)
 		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
 
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
+
 	if(wTopNavBar && wTopNavBar->isVisible()) {
 		env->getRootGUIElement()->bringToFront(wTopNavBar);
 	}
+}
 }
 
 void Game::OnAdventureSeriesChanged() {
@@ -2497,6 +2527,11 @@ void Game::OnAdventureSeriesChanged() {
 	}
 	if (cbAdventureArc->getItemCount() > 0)
 		cbAdventureArc->setSelected(0);
+
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
 
 	OnAdventureArcChanged();
 }
@@ -2823,6 +2858,11 @@ void Game::RefreshAdventureMode() {
 		}
 	}
 	}
+
+	ApplyAdventureSelectFont(cbAdventureSeries);
+	ApplyAdventureSelectFont(cbAdventureArc);
+	ApplyAdventureSelectFont(cbAdventureUserDeck);
+	ApplyAdventureSelectFont(cbAdventureDifficulty);
 
 	OnAdventureSeriesChanged();
 }
@@ -8789,8 +8829,10 @@ void Game::PopulateTabSettingsWindow() {
 		lstLog->setItemHeight(Scale(18));
 		btnClearLog = env->addButton(Scale(160, 300, 260, 325), tabLog, BUTTON_CLEAR_LOG, gDataManager->GetSysString(1272).data());
 		defaultStrings.emplace_back(btnClearLog, 1272);
+		ApplyDuelBtnStyle(btnClearLog);
 		btnExpandLog = env->addButton(Scale(40, 300, 140, 325), tabLog, BUTTON_EXPAND_INFOBOX, gDataManager->GetSysString(2043).data());
 		defaultStrings.emplace_back(btnExpandLog, 2043);
+		ApplyDuelBtnStyle(btnExpandLog);
 	}
 	//chat
 	{
@@ -8800,8 +8842,10 @@ void Game::PopulateTabSettingsWindow() {
 		lstChat->setItemHeight(Scale(18));
 		btnClearChat = env->addButton(Scale(160, 300, 260, 325), tabChat, BUTTON_CLEAR_CHAT, gDataManager->GetSysString(1282).data());
 		defaultStrings.emplace_back(btnClearChat, 1282);
+		ApplyDuelBtnStyle(btnClearChat);
 		btnExpandChat = env->addButton(Scale(40, 300, 140, 325), tabChat, BUTTON_EXPAND_INFOBOX, gDataManager->GetSysString(2043).data());
 		defaultStrings.emplace_back(btnExpandChat, 2043);
+		ApplyDuelBtnStyle(btnExpandChat);
 	}
 	//system
 	{
@@ -8892,6 +8936,8 @@ void Game::PopulateTabSettingsWindow() {
 		cur_y += 5;
 		btnTabShowSettings = env->addButton(GetNextRect(), tabPanel, BUTTON_SHOW_SETTINGS, gDataManager->GetSysString(2059).data());
 		defaultStrings.emplace_back(btnTabShowSettings, 2059);
+		ApplyDuelBtnStyle(btnTabShowSettings);
+		btnTabShowSettings->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 		/* padding = */ env->addStaticText(L"", Scale(20, cur_y, 280, cur_y + 10), false, true, tabPanel, -1, false);
 	}
 	//repositories (oculta del tab bar)
@@ -9815,8 +9861,27 @@ bool Game::MainLoop() {
 						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
 				}
 			};
-			if(wInfos && wInfos->isVisible())
+			if(wCardImg && wCardImg->isVisible())
+				drawNeon(wCardImg, irr::video::SColor(220, 56, 189, 248));
+			if(wInfos && wInfos->isVisible()) {
 				drawNeon(wInfos, irr::video::SColor(180, 56, 189, 248));
+				if(btnClearLog && btnClearLog->isVisible()) drawNeon(btnClearLog, irr::video::SColor(180, 56, 189, 248));
+				if(btnExpandLog && btnExpandLog->isVisible()) drawNeon(btnExpandLog, irr::video::SColor(180, 56, 189, 248));
+				if(btnClearChat && btnClearChat->isVisible()) drawNeon(btnClearChat, irr::video::SColor(180, 56, 189, 248));
+				if(btnExpandChat && btnExpandChat->isVisible()) drawNeon(btnExpandChat, irr::video::SColor(180, 56, 189, 248));
+				if(btnTabShowSettings && btnTabShowSettings->isVisible()) drawNeon(btnTabShowSettings, irr::video::SColor(220, 56, 189, 248));
+				if(tabSettings.scrSoundVolume && tabSettings.scrSoundVolume->isVisible())
+					drawNeon(tabSettings.scrSoundVolume, irr::video::SColor(180, 56, 189, 248));
+				if(tabSettings.scrMusicVolume && tabSettings.scrMusicVolume->isVisible())
+					drawNeon(tabSettings.scrMusicVolume, irr::video::SColor(180, 56, 189, 248));
+			}
+			if(wFTSelect && wFTSelect->isVisible()) {
+				drawNeon(wFTSelect, irr::video::SColor(220, 56, 189, 248));
+				if(btnFirst && btnFirst->isVisible())
+					drawNeon(btnFirst, irr::video::SColor(220, 56, 189, 248));
+				if(btnSecond && btnSecond->isVisible())
+					drawNeon(btnSecond, irr::video::SColor(220, 56, 189, 248));
+			}
 			if(wPosSelect && wPosSelect->isVisible()) {
 				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
@@ -10039,7 +10104,7 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 	static epro::path_string prev_skin = EPRO_TEXT("");
 	bool applied = true;
 	auto reapply_colors = [&] () {
-		wCardImg->setBackgroundColor(skin::CARDINFO_IMAGE_BACKGROUND_VAL);
+		wCardImg->setBackgroundColor(irr::video::SColor(245, 11, 15, 25));
 		stInfo->setOverrideColor(skin::CARDINFO_TYPES_COLOR_VAL);
 		stDataInfo->setOverrideColor(skin::CARDINFO_STATS_COLOR_VAL);
 		stSetName->setOverrideColor(skin::CARDINFO_ARCHETYPE_TEXT_COLOR_VAL);
@@ -10130,6 +10195,11 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 	SKIN_SCALE(irr::gui::EGDS_TEXT_DISTANCE_Y)
 	SKIN_SCALE(irr::gui::EGDS_MESSAGE_BOX_GAP_SPACE)
 #undef SKIN_SCALE
+	skin->setColor(irr::gui::EGDC_SCROLLBAR, irr::video::SColor(240, 15, 23, 42));
+	skin->setColor(irr::gui::EGDC_3D_FACE, irr::video::SColor(240, 15, 23, 42));
+	skin->setColor(irr::gui::EGDC_3D_DARK_SHADOW, irr::video::SColor(255, 10, 15, 26));
+	skin->setColor(irr::gui::EGDC_3D_SHADOW, irr::video::SColor(255, 30, 41, 59));
+	skin->setColor(irr::gui::EGDC_3D_HIGH_LIGHT, irr::video::SColor(255, 56, 189, 248));
 	if(wInfos) {
 		wInfos->setTabHeight(skin->getSize(irr::gui::EGDS_BUTTON_HEIGHT) + Scale(2));
 		wInfos->setTabVerticalAlignment(irr::gui::EGUIA_UPPERLEFT);
