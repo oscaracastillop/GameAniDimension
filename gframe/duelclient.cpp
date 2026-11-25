@@ -2590,37 +2590,46 @@ int DuelClient::ClientAnalyze(const uint8_t* msg, uint32_t len) {
 			SetResponseI(positions);
 			return true;
 		}
-		int count = 0, filter = 0x1, startpos;
+		int count = 0, filter = 0x1;
 		while(filter != 0x10) {
 			if(positions & filter) count++;
 			filter <<= 1;
 		}
-		if(count == 4) startpos = 20;
-		else if(count == 3) startpos = 95;
-		else if(count == 2) startpos = 175;
-		else startpos = 255;
+		const irr::s32 cardW = 185;
+		const irr::s32 cardH = 195;
+		const irr::s32 cardGap = 15;
+		const irr::s32 sidePad = 20;
+		const irr::s32 topPad = 40;
+		const irr::s32 botPad = 15;
+		const irr::s32 winH = topPad + cardH + botPad;
+		const irr::s32 winW = sidePad * 2 + count * cardW + (count > 1 ? (count - 1) * cardGap : 0);
+		const irr::s32 winX = (1024 - winW) / 2;
+		const irr::s32 winY = (640 - winH) / 2;
 		std::lock_guard<epro::mutex> lock(mainGame->gMutex);
+		mainGame->wPosSelect->setRelativePosition(mainGame->ResizeWin(winX, winY, winX + winW, winY + winH));
+		mainGame->wPosSelect->setText(L"Selecciona la posici\u00F3n de batalla");
+		irr::s32 curX = sidePad;
 		if(positions & POS_FACEUP_ATTACK) {
 			mainGame->imageLoading[mainGame->btnPSAU] = code;
-			mainGame->btnPSAU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
+			mainGame->btnPSAU->setRelativePosition(mainGame->Scale<irr::s32>(curX, topPad, curX + cardW, topPad + cardH));
 			mainGame->btnPSAU->setVisible(true);
-			startpos += 155;
+			curX += cardW + cardGap;
 		} else mainGame->btnPSAU->setVisible(false);
 		if(positions & POS_FACEDOWN_ATTACK) {
-			mainGame->btnPSAD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
+			mainGame->btnPSAD->setRelativePosition(mainGame->Scale<irr::s32>(curX, topPad, curX + cardW, topPad + cardH));
 			mainGame->btnPSAD->setVisible(true);
-			startpos += 155;
+			curX += cardW + cardGap;
 		} else mainGame->btnPSAD->setVisible(false);
 		if(positions & POS_FACEUP_DEFENSE) {
 			mainGame->imageLoading[mainGame->btnPSDU] = code;
-			mainGame->btnPSDU->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
+			mainGame->btnPSDU->setRelativePosition(mainGame->Scale<irr::s32>(curX, topPad, curX + cardW, topPad + cardH));
 			mainGame->btnPSDU->setVisible(true);
-			startpos += 155;
+			curX += cardW + cardGap;
 		} else mainGame->btnPSDU->setVisible(false);
 		if(positions & POS_FACEDOWN_DEFENSE) {
-			mainGame->btnPSDD->setRelativePosition(mainGame->Scale<irr::s32>(startpos, 45, startpos + 145, 220));
+			mainGame->btnPSDD->setRelativePosition(mainGame->Scale<irr::s32>(curX, topPad, curX + cardW, topPad + cardH));
 			mainGame->btnPSDD->setVisible(true);
-			startpos += 155;
+			curX += cardW + cardGap;
 		} else mainGame->btnPSDD->setVisible(false);
 		mainGame->PopupElement(mainGame->wPosSelect);
 		return false;

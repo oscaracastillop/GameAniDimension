@@ -752,19 +752,21 @@ void Game::Initialize() {
 		btnHand[i]->setImage(imageManager.tHand[i]);
 	}
 	//
-	wFTSelect = env->addWindow(Scale(550, 240, 780, 340), false, L"");
+	wFTSelect = env->addWindow(Scale(550, 240, 780, 345), false, L"");
 	wFTSelect->getCloseButton()->setVisible(false);
 	wFTSelect->setDraggable(false);
 	wFTSelect->setDrawTitlebar(false);
 	wFTSelect->setVisible(false);
-	btnFirst = env->addButton(Scale(10, 30, 220, 55), wFTSelect, BUTTON_FIRST, gDataManager->GetSysString(100).data());
+	btnFirst = env->addButton(Scale(12, 12, 218, 48), wFTSelect, BUTTON_FIRST, L"Ir primero");
 	defaultStrings.emplace_back(btnFirst, 100);
 	ApplyDuelBtnStyle(btnFirst);
 	btnFirst->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	btnSecond = env->addButton(Scale(10, 60, 220, 85), wFTSelect, BUTTON_SECOND, gDataManager->GetSysString(101).data());
+	if(adventureSelectFont) btnFirst->setOverrideFont(adventureSelectFont);
+	btnSecond = env->addButton(Scale(12, 57, 218, 93), wFTSelect, BUTTON_SECOND, L"Ir segundo");
 	defaultStrings.emplace_back(btnSecond, 101);
 	ApplyDuelBtnStyle(btnSecond);
 	btnSecond->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(adventureSelectFont) btnSecond->setOverrideFont(adventureSelectFont);
 	//message (310)
 	wMessage = env->addWindow(Scale(490, 200, 840, 340), false, gDataManager->GetSysString(1216).data());
 	defaultStrings.emplace_back(wMessage, 1216);
@@ -825,7 +827,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(wPosSelect, 561);
 	wPosSelect->getCloseButton()->setVisible(false);
 	wPosSelect->setVisible(false);
-	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.55f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.55f) };
+	irr::core::dimension2di imgsize = { Scale<irr::s32>(CARD_IMG_WIDTH * 0.70f), Scale<irr::s32>(CARD_IMG_HEIGHT * 0.70f) };
 	btnPSAU = irr::gui::CGUIImageButton::addImageButton(env, Scale(10, 45, 150, 220), wPosSelect, BUTTON_POS_AU);
 	btnPSAU->setImageSize(imgsize);
 	btnPSAD = irr::gui::CGUIImageButton::addImageButton(env, Scale(155, 45, 295, 220), wPosSelect, BUTTON_POS_AD);
@@ -1305,7 +1307,7 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnCancelOrFinish, 1295);
 	btnCancelOrFinish->setVisible(false);
 	//leave/surrender/exit
-	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 5, 295, 80), 0, BUTTON_LEAVE_GAME, L""));
+	btnLeaveGame = AlignElementWithParent(env->addButton(Scale(205, 55, 295, 90), 0, BUTTON_LEAVE_GAME, L""));
 	btnLeaveGame->setVisible(false);
 	//restart single
 	btnRestartSingle = AlignElementWithParent(env->addButton(Scale(205, 50, 295, 90), 0, BUTTON_RESTART_SINGLE, gDataManager->GetSysString(1366).data()));
@@ -9834,8 +9836,14 @@ bool Game::MainLoop() {
 				if(imgDuelRewardCard && imgDuelRewardCard->isVisible()) {
 					drawNeon(imgDuelRewardCard, irr::video::SColor(180, 56, 189, 248));
 				}
-				drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
-				drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
+				if(btnDuelRewardSaveReplay && btnDuelRewardSaveReplay->isVisible()) {
+					driver->draw2DRectangle(irr::video::SColor(255, 15, 23, 42), btnDuelRewardSaveReplay->getAbsolutePosition());
+					drawNeon(btnDuelRewardSaveReplay, irr::video::SColor(200, 148, 163, 184));
+				}
+				if(btnDuelRewardAccept && btnDuelRewardAccept->isVisible()) {
+					driver->draw2DRectangle(irr::video::SColor(255, 20, 45, 80), btnDuelRewardAccept->getAbsolutePosition());
+					drawNeon(btnDuelRewardAccept, irr::video::SColor(240, 56, 189, 248));
+				}
 			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
@@ -9876,6 +9884,7 @@ bool Game::MainLoop() {
 					drawNeon(tabSettings.scrMusicVolume, irr::video::SColor(180, 56, 189, 248));
 			}
 			if(wFTSelect && wFTSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wFTSelect->getAbsolutePosition());
 				drawNeon(wFTSelect, irr::video::SColor(220, 56, 189, 248));
 				if(btnFirst && btnFirst->isVisible())
 					drawNeon(btnFirst, irr::video::SColor(220, 56, 189, 248));
@@ -9883,6 +9892,7 @@ bool Game::MainLoop() {
 					drawNeon(btnSecond, irr::video::SColor(220, 56, 189, 248));
 			}
 			if(wPosSelect && wPosSelect->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
 				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAD, irr::video::SColor(220, 56, 189, 248));
@@ -10690,8 +10700,7 @@ void Game::ShowCardInfo(uint32_t code, bool resize, imgType type) {
 	std::wstring englishDesc(gDataManager->GetText(code));
 	std::wstring spanishDesc = GetSpanishCardText(code);
 	if(!spanishDesc.empty()) {
-		std::wstring combined = L"[ESPA\u00d1OL]\n" + spanishDesc + L"\n\n[ENGLISH]\n" + englishDesc;
-		stText->setText(combined.data());
+		stText->setText(spanishDesc.data());
 	} else {
 		stText->setText(englishDesc.data());
 	}
@@ -11659,7 +11668,7 @@ void Game::OnResize() {
 	gBot.window->setRelativePosition(irr::core::vector2di(wHostPrepare->getAbsolutePosition().LowerRightCorner.X, wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 
 	wHand->setRelativePosition(ResizeWin(500, 450, 825, 605));
-	wFTSelect->setRelativePosition(ResizeWin(550, 240, 780, 340));
+	wFTSelect->setRelativePosition(ResizeWin(550, 240, 780, 345));
 	SetMessageWindow();
 	wQuery->setRelativePosition(ResizeWin(490, 200, 840, 340));
 	wOptions->setRelativePosition(ResizeWinFromCenter(0, 0, wOptions->getRelativePosition().getWidth(), wOptions->getRelativePosition().getHeight(), 135));
