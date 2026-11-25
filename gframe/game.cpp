@@ -9686,18 +9686,6 @@ bool Game::MainLoop() {
 			if(wOptions && wOptions->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wOptions->getAbsolutePosition());
 			}
-			if(wQuery && wQuery->isVisible()) {
-				drawNeon(wQuery, irr::video::SColor(220, 56, 189, 248));
-				if(btnYes && btnYes->isVisible()) drawNeon(btnYes, irr::video::SColor(220, 52, 211, 153));
-				if(btnNo && btnNo->isVisible()) drawNeon(btnNo, irr::video::SColor(220, 239, 68, 68));
-			}
-			if(wOptions && wOptions->isVisible()) {
-				drawNeon(wOptions, irr::video::SColor(220, 56, 189, 248));
-				for(int i = 0; i < 5; ++i) {
-					if(btnOption[i] && btnOption[i]->isVisible())
-						drawNeon(btnOption[i], irr::video::SColor(200, 56, 189, 248));
-				}
-			}
 			if(wCardSelect && wCardSelect->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wCardSelect->getAbsolutePosition());
 			}
@@ -9987,8 +9975,17 @@ bool Game::MainLoop() {
 				}
 				drawNeon(btnDisplayOK, irr::video::SColor(220, 52, 211, 153));
 			}
+			if(wQuery && wQuery->isVisible()) {
+				drawNeon(wQuery, irr::video::SColor(220, 56, 189, 248));
+				if(btnYes && btnYes->isVisible()) drawNeon(btnYes, irr::video::SColor(220, 52, 211, 153));
+				if(btnNo && btnNo->isVisible()) drawNeon(btnNo, irr::video::SColor(220, 239, 68, 68));
+			}
 			if(wOptions && wOptions->isVisible()) {
 				drawNeon(wOptions, irr::video::SColor(220, 56, 189, 248));
+				for(int i = 0; i < 5; ++i) {
+					if(btnOption[i] && btnOption[i]->isVisible())
+						drawNeon(btnOption[i], irr::video::SColor(200, 56, 189, 248));
+				}
 			}
 			if(btnLeaveGame && btnLeaveGame->isVisible())
 				drawNeon(btnLeaveGame, irr::video::SColor(220, 239, 68, 68));
