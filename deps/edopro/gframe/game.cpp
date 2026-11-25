@@ -695,8 +695,8 @@ void Game::Initialize() {
 	PopulateEconomyScreens();
 
 	//img
-	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), true, false, 0, -1, true);
-	wCardImg->setBackgroundColor(skin::CARDINFO_IMAGE_BACKGROUND_VAL);
+	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), false, false, 0, -1, true);
+	wCardImg->setBackgroundColor(irr::video::SColor(245, 11, 15, 25));
 	wCardImg->setVisible(false);
 	imgCard = AlignElementWithParent(env->addImage(Scale(10, 9, 10 + CARD_IMG_WIDTH, 9 + CARD_IMG_HEIGHT), wCardImg));
 	imgCard->setImage(imageManager.tCover[0]);
@@ -770,11 +770,17 @@ void Game::Initialize() {
 	//
 	wFTSelect = env->addWindow(Scale(550, 240, 780, 340), false, L"");
 	wFTSelect->getCloseButton()->setVisible(false);
+	wFTSelect->setDraggable(false);
+	wFTSelect->setDrawTitlebar(false);
 	wFTSelect->setVisible(false);
 	btnFirst = env->addButton(Scale(10, 30, 220, 55), wFTSelect, BUTTON_FIRST, gDataManager->GetSysString(100).data());
 	defaultStrings.emplace_back(btnFirst, 100);
+	applyDuelBtnStyle(btnFirst);
+	btnFirst->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	btnSecond = env->addButton(Scale(10, 60, 220, 85), wFTSelect, BUTTON_SECOND, gDataManager->GetSysString(101).data());
 	defaultStrings.emplace_back(btnSecond, 101);
+	applyDuelBtnStyle(btnSecond);
+	btnSecond->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 	//message (310)
 	wMessage = env->addWindow(Scale(490, 200, 840, 340), false, gDataManager->GetSysString(1216).data());
 	defaultStrings.emplace_back(wMessage, 1216);
@@ -9860,8 +9866,17 @@ bool Game::MainLoop() {
 						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
 				}
 			};
+			if(wCardImg && wCardImg->isVisible())
+				drawNeon(wCardImg, irr::video::SColor(220, 56, 189, 248));
 			if(wInfos && wInfos->isVisible())
 				drawNeon(wInfos, irr::video::SColor(180, 56, 189, 248));
+			if(wFTSelect && wFTSelect->isVisible()) {
+				drawNeon(wFTSelect, irr::video::SColor(220, 56, 189, 248));
+				if(btnFirst && btnFirst->isVisible())
+					drawNeon(btnFirst, irr::video::SColor(220, 56, 189, 248));
+				if(btnSecond && btnSecond->isVisible())
+					drawNeon(btnSecond, irr::video::SColor(220, 56, 189, 248));
+			}
 			if(wPosSelect && wPosSelect->isVisible()) {
 				drawNeon(wPosSelect, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSAU, irr::video::SColor(220, 56, 189, 248));
@@ -10084,7 +10099,7 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 	static epro::path_string prev_skin = EPRO_TEXT("");
 	bool applied = true;
 	auto reapply_colors = [&] () {
-		wCardImg->setBackgroundColor(skin::CARDINFO_IMAGE_BACKGROUND_VAL);
+		wCardImg->setBackgroundColor(irr::video::SColor(245, 11, 15, 25));
 		stInfo->setOverrideColor(skin::CARDINFO_TYPES_COLOR_VAL);
 		stDataInfo->setOverrideColor(skin::CARDINFO_STATS_COLOR_VAL);
 		stSetName->setOverrideColor(skin::CARDINFO_ARCHETYPE_TEXT_COLOR_VAL);
@@ -10175,6 +10190,11 @@ bool Game::ApplySkin(const epro::path_string& skinname, bool reload, bool firstr
 	SKIN_SCALE(irr::gui::EGDS_TEXT_DISTANCE_Y)
 	SKIN_SCALE(irr::gui::EGDS_MESSAGE_BOX_GAP_SPACE)
 #undef SKIN_SCALE
+	skin->setColor(irr::gui::EGDC_SCROLLBAR, irr::video::SColor(240, 15, 23, 42));
+	skin->setColor(irr::gui::EGDC_3D_FACE, irr::video::SColor(240, 15, 23, 42));
+	skin->setColor(irr::gui::EGDC_3D_DARK_SHADOW, irr::video::SColor(255, 10, 15, 26));
+	skin->setColor(irr::gui::EGDC_3D_SHADOW, irr::video::SColor(255, 30, 41, 59));
+	skin->setColor(irr::gui::EGDC_3D_HIGH_LIGHT, irr::video::SColor(255, 56, 189, 248));
 	if(wInfos) {
 		wInfos->setTabHeight(skin->getSize(irr::gui::EGDS_BUTTON_HEIGHT) + Scale(2));
 		wInfos->setTabVerticalAlignment(irr::gui::EGUIA_UPPERLEFT);
