@@ -95,6 +95,8 @@ Game::~Game() {
 		cardInfoYellowFont->drop();
 	if(adventureSelectFont)
 		adventureSelectFont->drop();
+	if(roomSelectFont)
+		roomSelectFont->drop();
 	if(numFont)
 		numFont->drop();
 	if(adFont)
@@ -224,6 +226,13 @@ void Game::Initialize() {
 		auto asf = textfont;
 		asf.size = Scale(gGameConfig->textfont.size + 1);
 		adventureSelectFont = irr::gui::CGUITTFont::createTTFont(env, asf, fallbackFonts);
+		auto rsf = textfont;
+#if EDOPRO_ANDROID
+		rsf.size = Scale(gGameConfig->textfont.size + 2);
+#else
+		rsf.size = Scale(gGameConfig->textfont.size + 1);
+#endif
+		roomSelectFont = irr::gui::CGUITTFont::createTTFont(env, rsf, fallbackFonts);
 #endif
 	}
 	if(!numFont || !adFont || !lpcFont)
@@ -1378,21 +1387,28 @@ void Game::Initialize() {
 
 	auto roomlistcolor = skin::ROOMLIST_TEXTS_COLOR_VAL;
 
-	// Semi-dark translucent panels for Title, Bloque 1 and Bloque 2
+	// Semi-dark translucent panels for Title, Bloque 1 and Bloque 2 matching Lobby/Aventura
 	pnlRoomListTitle = env->addStaticText(L"", Scale(10, 6, 1014, 36), true, false, wRoomListPlaceholder, -1, true);
-	pnlRoomListTitle->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+	pnlRoomListTitle->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
+	pnlRoomListTitle->setVisible(false);
 
 	stRoomListTitle = env->addStaticText(L"SALAS DE DUELO ANI DIMENSION", Scale(10, 6, 1014, 36), false, false, wRoomListPlaceholder);
-	stRoomListTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-	stRoomListTitle->setOverrideColor(irr::video::SColor(255, 255, 215, 60));
-	if(loginUiFont)
-		stRoomListTitle->setOverrideFont(loginUiFont);
+	stRoomListTitle->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	stRoomListTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginTitleFont)
+		stRoomListTitle->setOverrideFont(loginTitleFont);
+
+	stRoomListDesc = env->addStaticText(L"Lobby multijugador online. Crea o \u00FAnete a salas de duelo PvP o partidas clasificatorias.", Scale(10, 6, 1014, 36), false, false, wRoomListPlaceholder);
+	stRoomListDesc->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
+	stRoomListDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont)
+		stRoomListDesc->setOverrideFont(loginDescFont);
 
 	pnlRoomBlock1 = env->addStaticText(L"", Scale(10, 42, 320, 142), true, false, wRoomListPlaceholder, -1, true);
-	pnlRoomBlock1->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+	pnlRoomBlock1->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	pnlRoomBlock2 = env->addStaticText(L"", Scale(328, 42, 880, 142), true, false, wRoomListPlaceholder, -1, true);
-	pnlRoomBlock2->setBackgroundColor(irr::video::SColor(215, 14, 18, 28));
+	pnlRoomBlock2->setBackgroundColor(irr::video::SColor(185, 10, 15, 28));
 
 	//server choice dropdownlist
 	stRoomServerLbl = env->addStaticText(gDataManager->GetSysString(2041).data(), Scale(10, 30, 110, 50), false, false, wRoomListPlaceholder, -1, false); // 2041 = Server:
@@ -1405,8 +1421,10 @@ void Game::Initialize() {
 	stRoomUserLbl->setOverrideColor(roomlistcolor);
 	ebNickNameOnline = env->addEditBox(gGameConfig->nickname.data(), Scale(90, 55, 275, 80), true, wRoomListPlaceholder, EDITBOX_NICKNAME);
 
-	//top right host online game button -> Crear Sala
-	btnCreateHost2 = env->addButton(Scale(904, 25, 1014, 50), wRoomListPlaceholder, BUTTON_CREATE_HOST2, L"Crear Sala");
+	//host online game button -> Crear Sala (posicionado abajo en ResizeRoomListScreen)
+	btnCreateHost2 = env->addButton(irr::core::recti(0, 0, 100, 36), wRoomListPlaceholder, BUTTON_CREATE_HOST2, L"Crear Sala");
+	ApplyDuelBtnStyle(btnCreateHost2);
+	if(loginUiFont) btnCreateHost2->setOverrideFont(loginUiFont);
 
 	//filter dropdowns
 	cbFilterRule = AddComboBox(env, Scale(392, 25, 532, 50), wRoomListPlaceholder, CB_FILTER_ALLOWED_CARDS);
@@ -1485,10 +1503,10 @@ void Game::Initialize() {
 	roomListTable->setColumnOrdering(6, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
 	roomListTable->setColumnOrdering(7, irr::gui::EGCO_FLIP_ASCENDING_DESCENDING);
 
-	//refresh button center bottom
-	btnLanRefresh2 = env->addButton(Scale(462, 640 - 10 - 25 - 25 - 5, 562, 640 - 10 - 25 - 5), wRoomListPlaceholder, BUTTON_LAN_REFRESH2, gDataManager->GetSysString(1217).data());
-	defaultStrings.emplace_back(btnLanRefresh2, 1217);
-	btnLanRefresh2->setAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT);
+	// Action buttons (Refresh, Crear Sala, Unirse, Volver al Menu)
+	btnLanRefresh2 = env->addButton(irr::core::recti(0, 0, 100, 36), wRoomListPlaceholder, BUTTON_LAN_REFRESH2, L"Actualizar");
+	ApplyDuelBtnStyle(btnLanRefresh2);
+	if(loginUiFont) btnLanRefresh2->setOverrideFont(loginUiFont);
 
 	//server room password
 	wRoomPassword = env->addWindow(Scale(357, 200, 667, 320), false, L"");
@@ -1505,12 +1523,14 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(btnRPNo, 1212);
 
 	//join cancel buttons
-	btnJoinHost2 = env->addButton(Scale(1024 - 10 - 110, 640 - 20 - 25 - 25 - 5, 1024 - 10, 640 - 20 - 25 - 5), wRoomListPlaceholder, BUTTON_JOIN_HOST2, gDataManager->GetSysString(1223).data());
-	defaultStrings.emplace_back(btnJoinHost2, 1223);
-	btnJoinCancel2 = env->addButton(Scale(1024 - 10 - 110, 640 - 20 - 25, 1024 - 10, 640 - 20), wRoomListPlaceholder, BUTTON_JOIN_CANCEL2, gDataManager->GetSysString(1212).data());
-	defaultStrings.emplace_back(btnJoinCancel2, 1212);
-	btnJoinHost2->setAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT);
-	btnJoinCancel2->setAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_LOWERRIGHT);
+	btnJoinHost2 = env->addButton(irr::core::recti(0, 0, 100, 36), wRoomListPlaceholder, BUTTON_JOIN_HOST2, L"Unirse");
+	btnJoinCancel2 = env->addButton(irr::core::recti(0, 0, 100, 36), wRoomListPlaceholder, BUTTON_JOIN_CANCEL2, L"Volver al Men\u00FA");
+	ApplyDuelBtnStyle(btnJoinHost2);
+	ApplyDuelBtnStyle(btnJoinCancel2);
+	if(loginUiFont) {
+		btnJoinHost2->setOverrideFont(loginUiFont);
+		btnJoinCancel2->setOverrideFont(loginUiFont);
+	}
 
 
 	//load server(s)
@@ -2287,6 +2307,15 @@ void Game::ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb) {
 	for(auto child : cb->getChildren()) {
 		if(child->getType() == irr::gui::EGUIET_STATIC_TEXT) {
 			((irr::gui::IGUIStaticText*)child)->setOverrideFont(adventureSelectFont);
+		}
+	}
+}
+
+void Game::ApplyRoomSelectFont(irr::gui::IGUIComboBox* cb) {
+	if(!cb || !roomSelectFont) return;
+	for(auto child : cb->getChildren()) {
+		if(child->getType() == irr::gui::EGUIET_STATIC_TEXT) {
+			((irr::gui::IGUIStaticText*)child)->setOverrideFont(roomSelectFont);
 		}
 	}
 }
@@ -4901,6 +4930,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wClanDetail) wClanDetail->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
 	if(wAdventureMode) wAdventureMode->setVisible(false);
+	if(wRoomListPlaceholder) wRoomListPlaceholder->setVisible(false);
 	if(wConfirmPurchase) wConfirmPurchase->setVisible(false);
 	if(wPackPoolOverlay) wPackPoolOverlay->setVisible(false);
 	if(wAvatarPreviewOverlay) wAvatarPreviewOverlay->setVisible(false);
@@ -9583,7 +9613,8 @@ bool Game::MainLoop() {
 				(wEventsMenu && wEventsMenu->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
 				(wClanDetail && wClanDetail->isVisible()) ||
 				(wMailbox && wMailbox->isVisible()) ||
-				(wAdventureMode && wAdventureMode->isVisible());
+				(wAdventureMode && wAdventureMode->isVisible()) ||
+				(wRoomListPlaceholder && wRoomListPlaceholder->isVisible());
 		};
 		{
 			bool shouldShowNav = !dInfo.isInDuel && !is_building && isEcosystemVisible();
@@ -9916,9 +9947,19 @@ bool Game::MainLoop() {
 				drawNeon(btnAdventureDuel, cEmer);
 				drawNeon(btnAdventureBack, irr::video::SColor(160, 148, 163, 184));
 			}
+			if(wRoomListPlaceholder && wRoomListPlaceholder->isVisible()) {
+				drawNeon(pnlRoomBlock1, cCyan);
+				drawNeon(pnlRoomBlock2, cPurp);
+				drawNeon(roomListTable, cCyan);
+				drawNeon(btnLanRefresh2, cCyan);
+				drawNeon(btnCreateHost2, cGold);
+				drawNeon(btnJoinHost2, cEmer);
+				drawNeon(btnJoinCancel2, irr::video::SColor(160, 148, 163, 184));
+			}
 			if(wTopNavBar && wTopNavBar->isVisible()) {
 				int activeIdx = 0;
 				if(wAdventureMode && wAdventureMode->isVisible()) activeIdx = 3;
+				else if(wRoomListPlaceholder && wRoomListPlaceholder->isVisible()) activeIdx = 2;
 				else if(wMainMenu && wMainMenu->isVisible()) activeIdx = 0;
 				else activeIdx = 1;
 				if(btnNavItems[activeIdx]) {
@@ -11519,46 +11560,43 @@ void Game::ResizeRoomListScreen() {
 	const int H = window_size.Height;
 	wRoomListPlaceholder->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	const int padX = std::max(10, (int)(W * 0.012f));
+	// Top Nav Bar space allocation (48px)
+	const int navH = Scale(48);
+	const int padX = std::max(12, (int)(W * 0.015f));
 	const int padY = std::max(8, (int)(H * 0.012f));
 	const int gap = std::max(8, (int)(W * 0.008f));
 	const int innerPad = Scale(10);
 
-	// Titulo superior centrado: SALAS DE DUELO ANI DIMENSION
-	const int titleH = Scale(30);
-	if(pnlRoomListTitle)
-		pnlRoomListTitle->setRelativePosition(irr::core::recti(padX, padY, W - padX, padY + titleH));
+	// Título y subtítulo descriptivo alineados a la izquierda (mismo estilo que Lobby y Aventura)
+	const int titleY = navH + padY;
+	const int titleH = Scale(24);
+	const int descH = Scale(18);
 	if(stRoomListTitle)
-		stRoomListTitle->setRelativePosition(irr::core::recti(padX, padY, W - padX, padY + titleH));
+		stRoomListTitle->setRelativePosition(irr::core::recti(padX, titleY, W - padX, titleY + titleH));
+	if(stRoomListDesc)
+		stRoomListDesc->setRelativePosition(irr::core::recti(padX, titleY + titleH, W - padX, titleY + titleH + descH));
 
-	const int topY = padY + titleH + Scale(6);
+	const int panelsY = titleY + titleH + descH + Scale(6);
 	const int rowH = Scale(24);
 	const int rowGap = Scale(6);
 	const int topH = innerPad + 3 * rowH + 2 * rowGap + innerPad;
 
-	// Boton Crear Sala a la derecha
-	const int hostW = Scale(125);
-	const int hostH = Scale(38);
-	const int hostX = W - padX - hostW;
-	const int hostY = topY + (topH - hostH) / 2;
-	if(btnCreateHost2)
-		btnCreateHost2->setRelativePosition(irr::core::recti(hostX, hostY, hostX + hostW, hostY + hostH));
-
-	const int blocksAvailW = (hostX - gap) - padX;
-	const int b1W = std::max(Scale(230), (int)(blocksAvailW * 0.31f));
+	// Ancho disponible para Bloque 1 y Bloque 2 a pantalla completa
+	const int blocksAvailW = W - 2 * padX - gap;
+	const int b1W = std::max(Scale(230), (int)(blocksAvailW * 0.30f));
 	const int b1X = padX;
 	const int b2X = b1X + b1W + gap;
-	const int b2W = std::max(Scale(380), (hostX - gap) - b2X);
+	const int b2W = (W - padX) - b2X;
 
 	// Bloque 1 (Izquierda): Servidor + Usuario
 	if(pnlRoomBlock1)
-		pnlRoomBlock1->setRelativePosition(irr::core::recti(b1X, topY, b1X + b1W, topY + topH));
+		pnlRoomBlock1->setRelativePosition(irr::core::recti(b1X, panelsY, b1X + b1W, panelsY + topH));
 	const int b1InnerX = b1X + innerPad;
 	const int b1LblW = Scale(66);
 	const int b1InputX = b1InnerX + b1LblW + Scale(6);
 	const int b1InputEnd = b1X + b1W - innerPad;
-	const int b1Row1Y = topY + innerPad + Scale(10);
-	const int b1Row2Y = b1Row1Y + Scale(36);
+	const int b1Row1Y = panelsY + innerPad + Scale(6);
+	const int b1Row2Y = b1Row1Y + Scale(34);
 	if(stRoomServerLbl)
 		stRoomServerLbl->setRelativePosition(irr::core::recti(b1InnerX, b1Row1Y + Scale(3), b1InnerX + b1LblW, b1Row1Y + Scale(25)));
 	if(serverChoice)
@@ -11568,17 +11606,18 @@ void Game::ResizeRoomListScreen() {
 	if(ebNickNameOnline)
 		ebNickNameOnline->setRelativePosition(irr::core::recti(b1InputX, b1Row2Y, b1InputEnd, b1Row2Y + Scale(26)));
 
-	// Bloque 2 (Centro): Selects anchos alineados + 0 vs 0 Mejor de 0 Relay + Filtro + Checkboxes
+	// Bloque 2 (Centro-Derecha): Selects más cortos + Equipos + Filtro + Checkboxes
 	if(pnlRoomBlock2)
-		pnlRoomBlock2->setRelativePosition(irr::core::recti(b2X, topY, b2X + b2W, topY + topH));
+		pnlRoomBlock2->setRelativePosition(irr::core::recti(b2X, panelsY, b2X + b2W, panelsY + topH));
 	const int bx = b2X + innerPad;
 	const int bw = b2W - 2 * innerPad;
-	const int by = topY + innerPad;
+	const int by = panelsY + innerPad;
 	const int yRow1 = by;
 	const int yRow2 = by + rowH + rowGap;
 	const int yRow3 = by + 2 * (rowH + rowGap);
 
-	const int left2W = std::max(Scale(240), (int)(bw * 0.52f));
+	// Selects más cortos (40% del ancho del bloque en vez de 52%)
+	const int left2W = std::max(Scale(210), (int)(bw * 0.40f));
 	if(cbFilterRule)
 		cbFilterRule->setRelativePosition(irr::core::recti(bx, yRow1, bx + left2W, yRow1 + rowH));
 	if(cbFilterBanlist)
@@ -11586,9 +11625,9 @@ void Game::ResizeRoomListScreen() {
 
 	// Fila 2 alineada exactamente al mismo ancho left2W: [0] vs. [0] Mejor de [0] [Relay]
 	const int sp = Scale(4);
-	const int numW = Scale(30);
-	const int vsW = Scale(26);
-	const int bestW = Scale(62);
+	const int numW = Scale(28);
+	const int vsW = Scale(24);
+	const int bestW = Scale(58);
 	int cx = bx;
 	if(ebOnlineTeam1)
 		ebOnlineTeam1->setRelativePosition(irr::core::recti(cx, yRow2, cx + numW, yRow2 + rowH));
@@ -11609,7 +11648,7 @@ void Game::ResizeRoomListScreen() {
 		btnFilterRelayMode->setRelativePosition(irr::core::recti(cx, yRow2, bx + left2W, yRow2 + rowH));
 
 	// Columna derecha dentro del Bloque 2: Filtro + Checkboxes
-	const int right2X = bx + left2W + Scale(14);
+	const int right2X = bx + left2W + Scale(16);
 	const int right2End = bx + bw;
 	const int filterLblW = Scale(48);
 	if(ebRoomNameText)
@@ -11621,11 +11660,43 @@ void Game::ResizeRoomListScreen() {
 	if(chkShowActiveRooms)
 		chkShowActiveRooms->setRelativePosition(irr::core::recti(right2X, yRow3, right2End, yRow3 + rowH));
 
-	// Tabla de salas debajo de los bloques
-	const int tableTop = topY + topH + Scale(8);
-	const int tableBottom = H - Scale(72);
+	// Botones de acción inferiores en orden: Actualizar, Crear Sala, Unirse, Volver al Menú
+	const int bottomBtnH = Scale(38);
+	const int bottomBtnY = H - padY - bottomBtnH;
+	const int btnGap = Scale(12);
+	const int totalBtnsW = W - 2 * padX;
+	const int btnW = (totalBtnsW - 3 * btnGap) / 4;
+
+	auto setupActionBtn = [&](irr::gui::IGUIButton* b, int idx, const wchar_t* label) {
+		if(!b) return;
+		int x0 = padX + idx * (btnW + btnGap);
+		b->setRelativePosition(irr::core::recti(x0, bottomBtnY, x0 + btnW, bottomBtnY + bottomBtnH));
+		b->setAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_UPPERLEFT);
+		if(label) b->setText(label);
+		if(tFlatBtnDark) {
+			b->setImage(tFlatBtnDark);
+			b->setPressedImage(tFlatBtnDark);
+			b->setScaleImage(true);
+			b->setUseAlphaChannel(true);
+		}
+		b->setDrawBorder(false);
+		if(loginUiFont) b->setOverrideFont(loginUiFont);
+	};
+
+	setupActionBtn(btnLanRefresh2, 0, L"Actualizar");
+	setupActionBtn(btnCreateHost2, 1, L"Crear Sala");
+	setupActionBtn(btnJoinHost2, 2, L"Unirse");
+	setupActionBtn(btnJoinCancel2, 3, L"Volver al Men\u00FA");
+
+	// Tabla de salas debajo de los bloques y sobre los botones inferiores
+	const int tableTop = panelsY + topH + Scale(8);
+	const int tableBottom = bottomBtnY - Scale(8);
 	if(roomListTable)
 		roomListTable->setRelativePosition(irr::core::recti(padX, tableTop, W - padX, tableBottom));
+
+	ApplyRoomSelectFont(serverChoice);
+	ApplyRoomSelectFont(cbFilterRule);
+	ApplyRoomSelectFont(cbFilterBanlist);
 }
 void Game::LayoutHostPrepareChildren() {
 	if(!wHostPrepare) return;
