@@ -10141,6 +10141,34 @@ bool Game::MainLoop() {
 	bool last_resize = false;
 	irr::core::dimension2d<irr::u32> prev_window_size;
 #endif
+	const irr::ITimer* timer = device->getTimer();
+	uint32_t cur_time = 0;
+	uint32_t prev_time = timer->getRealTime();
+	float frame_counter = 0.0f;
+	int fps = 0;
+	bool was_connected = false;
+	bool update_prompted = false;
+	bool update_checked = false;
+	if(!driver->queryFeature(irr::video::EVDF_TEXTURE_NPOT)) {
+		auto SetClamp = [](irr::video::SMaterialLayer layer[irr::video::MATERIAL_MAX_TEXTURES]) {
+			layer[0].TextureWrapU = irr::video::ETC_CLAMP_TO_EDGE;
+			layer[0].TextureWrapV = irr::video::ETC_CLAMP_TO_EDGE;
+		};
+		SetClamp(matManager.mCard.TextureLayer);
+		SetClamp(matManager.mTexture.TextureLayer);
+		SetClamp(matManager.mBackLine.TextureLayer);
+		SetClamp(matManager.mSelField.TextureLayer);
+		SetClamp(matManager.mLinkedField.TextureLayer);
+		SetClamp(matManager.mMutualLinkedField.TextureLayer);
+		SetClamp(matManager.mOutLine.TextureLayer);
+		SetClamp(matManager.mTRTexture.TextureLayer);
+		SetClamp(matManager.mATK.TextureLayer);
+		SetClamp(matManager.mCard.TextureLayer);
+	}
+	if (gGameConfig->fullscreen) {
+		bool currentlyFullscreen = false;
+		GUIUtils::ToggleFullscreen(device, currentlyFullscreen);
+	}
 	while(!restart && device->run()) {
 		DispatchQueue();
 		if(should_reload_skin) {
