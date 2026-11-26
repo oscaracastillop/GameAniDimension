@@ -6632,9 +6632,9 @@ void Game::ResizeEconomyScreens() {
 		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stProfileAvaBanner->setVisible(false);
 
-		const irr::s32 gridTop = topY + Scale(44);
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(150), (gridBot - gridTop - gap) / 2);
