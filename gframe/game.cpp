@@ -7759,7 +7759,14 @@ void Game::OpenStoreVip() {
 				if(auto vt = driver->getTexture(("textures/vip/" + v.imagen).c_str()))
 					imgVipCardIcons[i]->setImage(vt);
 			}
-			if(stVipCardTitles[i]) stVipCardTitles[i]->setText(epro::format(L"{} ({} d\u00EDas)", v.nombre, v.dias).c_str());
+			if(stVipCardTitles[i]) {
+				std::wstring dispName = v.nombre;
+				if(dispName.find(L"Cazador") != std::wstring::npos) {
+					auto p = dispName.find(L"VIP ");
+					if(p != std::wstring::npos) dispName.erase(p, 4);
+				}
+				stVipCardTitles[i]->setText(epro::format(L"{} ({} d\u00EDas)", dispName, v.dias).c_str());
+			}
 			if(stVipCardDescs[i]) stVipCardDescs[i]->setText(v.descripcion.c_str());
 			if(stVipCardPrices[i]) {
 				stVipCardPrices[i]->setText(epro::format(L"{} CD", v.precioCD).c_str());
