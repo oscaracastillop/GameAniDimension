@@ -454,8 +454,8 @@ void Game::Initialize() {
 	btnLobbyReplays = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_REPLAYS, L"Repeticiones");
 	applyBtnStyle(btnLobbyReplays, L"Repeticiones");
 
-	btnLobbyTutorials = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_TUTORIALES, L"Tutoriales");
-	applyBtnStyle(btnLobbyTutorials, L"Tutoriales");
+	btnLobbyTutorials = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_TUTORIALES, L"Ranking");
+	applyBtnStyle(btnLobbyTutorials, L"Ranking");
 
 	// Left: Avatar Base Pedestal (Created BEFORE Avatar so Avatar renders ON TOP of it!)
 	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 450, 34), false, false, wMainMenu);
@@ -4988,6 +4988,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wClansMenu) wClansMenu->setVisible(false);
 	if(wClanDetail) wClanDetail->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
+	if(wRankingMenu) wRankingMenu->setVisible(false);
 	if(wAdventureMode) wAdventureMode->setVisible(false);
 	if(wRoomListPlaceholder) wRoomListPlaceholder->setVisible(false);
 	if(wLanWindow) wLanWindow->setVisible(false);
@@ -6320,6 +6321,79 @@ void Game::PopulateEconomyScreens() {
 	styleDarkBtn(btnMbNext);
 	if(loginCardDescFont) btnMbNext->setOverrideFont(loginCardDescFont);
 
+	// 6. Ranking Menu (2-column: PvP Season + Level Ranking, 10 rows per page each)
+	makeCanvas(wRankingMenu);
+	stRankingTitle = env->addStaticText(L"RANKING ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wRankingMenu);
+	stRankingTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont) stRankingTitle->setOverrideFont(loginTitleFont);
+	btnRankingBack = env->addButton(irr::core::recti(0, 0, 10, 10), wRankingMenu, BUTTON_RANKING_BACK, L"Volver a Lobby");
+	styleDarkBtn(btnRankingBack);
+	if(loginCardDescFont) btnRankingBack->setOverrideFont(loginCardDescFont);
+
+	pnlRankPvp = makePanel(wRankingMenu);
+	stRankPvpTitle = env->addStaticText(L"RANKING PVP (TEMPORADA)", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+	stRankPvpTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginCardTitleFont) stRankPvpTitle->setOverrideFont(loginCardTitleFont);
+	thRankPvpPos = env->addStaticText(L"#", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+	thRankPvpUser = env->addStaticText(L"JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+	thRankPvpRank = env->addStaticText(L"RANGO", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+	for(auto* th : { thRankPvpPos, thRankPvpUser, thRankPvpRank }) {
+		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
+	}
+	for(int r = 0; r < 10; ++r) {
+		stRankPvpPos[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+		stRankPvpPos[r]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		stRankPvpUser[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+		stRankPvpUser[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		stRankPvpRank[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankPvp);
+		stRankPvpRank[r]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) {
+			stRankPvpPos[r]->setOverrideFont(loginCardDescFont);
+			stRankPvpUser[r]->setOverrideFont(loginCardDescFont);
+			stRankPvpRank[r]->setOverrideFont(loginCardDescFont);
+		}
+	}
+	btnRankPvpPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wRankingMenu, BUTTON_RANK_PVP_PREV, L"Anterior");
+	stRankPvpPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wRankingMenu);
+	stRankPvpPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stRankPvpPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	btnRankPvpNext = env->addButton(irr::core::recti(0, 0, 10, 10), wRankingMenu, BUTTON_RANK_PVP_NEXT, L"Siguiente");
+	styleDarkBtn(btnRankPvpPrev); styleDarkBtn(btnRankPvpNext);
+	if(loginCardDescFont) { btnRankPvpPrev->setOverrideFont(loginCardDescFont); stRankPvpPage->setOverrideFont(loginCardDescFont); btnRankPvpNext->setOverrideFont(loginCardDescFont); }
+
+	pnlRankLvl = makePanel(wRankingMenu);
+	stRankLvlTitle = env->addStaticText(L"RANKING POR NIVEL", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+	stRankLvlTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginCardTitleFont) stRankLvlTitle->setOverrideFont(loginCardTitleFont);
+	thRankLvlPos = env->addStaticText(L"#", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+	thRankLvlUser = env->addStaticText(L"JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+	thRankLvlLevel = env->addStaticText(L"NIVEL", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+	for(auto* th : { thRankLvlPos, thRankLvlUser, thRankLvlLevel }) {
+		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
+	}
+	for(int r = 0; r < 10; ++r) {
+		stRankLvlPos[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+		stRankLvlPos[r]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		stRankLvlUser[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+		stRankLvlUser[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		stRankLvlLevel[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlRankLvl);
+		stRankLvlLevel[r]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		if(loginCardDescFont) {
+			stRankLvlPos[r]->setOverrideFont(loginCardDescFont);
+			stRankLvlUser[r]->setOverrideFont(loginCardDescFont);
+			stRankLvlLevel[r]->setOverrideFont(loginCardDescFont);
+		}
+	}
+	btnRankLvlPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wRankingMenu, BUTTON_RANK_LVL_PREV, L"Anterior");
+	stRankLvlPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wRankingMenu);
+	stRankLvlPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stRankLvlPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	btnRankLvlNext = env->addButton(irr::core::recti(0, 0, 10, 10), wRankingMenu, BUTTON_RANK_LVL_NEXT, L"Siguiente");
+	styleDarkBtn(btnRankLvlPrev); styleDarkBtn(btnRankLvlNext);
+	if(loginCardDescFont) { btnRankLvlPrev->setOverrideFont(loginCardDescFont); stRankLvlPage->setOverrideFont(loginCardDescFont); btnRankLvlNext->setOverrideFont(loginCardDescFont); }
+
 	// Non-window dark-glass neon confirmation overlay (100% opaque so text is always crisp)
 	wConfirmPurchase = env->addStaticText(L"", irr::core::recti(0, 0, 500, 210), false, false, 0, -1, true);
 	wConfirmPurchase->setBackgroundColor(irr::video::SColor(255, 10, 16, 32));
@@ -6875,33 +6949,33 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 lW = (totalW * 40) / 100;
 		const irr::s32 rX = pad + lW + gap;
 		const irr::s32 rW = totalW - lW - gap;
-		const irr::s32 availH = std::max<irr::s32>(Scale(360), botY - gridTop);
+		const irr::s32 availH = std::max<irr::s32>(Scale(380), botY - gridTop);
 
 		pnlProfInfoLeft->setRelativePosition(irr::core::recti(pad, gridTop, pad + lW, gridTop + availH));
 		{
-			irr::s32 avH = Scale(138);
-			fitImage(imgProfInfoAvatar, lW / 2, Scale(12), lW - Scale(24), avH);
-			irr::s32 txtY = Scale(20) + avH;
-			irr::s32 progH = Scale(116);
-			stProfInfoLeftText->setRelativePosition(irr::core::recti(Scale(14), txtY, lW - Scale(14), availH - progH - Scale(12)));
+			irr::s32 avH = Scale(110);
+			fitImage(imgProfInfoAvatar, lW / 2, Scale(10), lW - Scale(24), avH);
+			irr::s32 txtY = Scale(16) + avH;
+			irr::s32 progH = Scale(124);
+			stProfInfoLeftText->setRelativePosition(irr::core::recti(Scale(14), txtY, lW - Scale(14), availH - progH - Scale(8)));
 			irr::s32 pY = availH - progH;
 			irr::s32 barW = lW - Scale(28);
-			stProfLvlText->setRelativePosition(irr::core::recti(Scale(14), pY, lW - Scale(14), pY + Scale(34)));
-			stProfLvlTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(36), Scale(14) + barW, pY + Scale(44)));
+			stProfLvlText->setRelativePosition(irr::core::recti(Scale(14), pY, lW - Scale(14), pY + Scale(38)));
+			stProfLvlTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(42), Scale(14) + barW, pY + Scale(50)));
 			irr::s32 fw1 = (irr::s32)(barW * std::min(100.0, std::max(0.0, profLvlPct)) / 100.0);
 			stProfLvlFill->setRelativePosition(irr::core::recti(0, 0, fw1, Scale(8)));
 
-			stProfCardsText->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(54), lW - Scale(14), pY + Scale(88)));
-			stProfCardsTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(90), Scale(14) + barW, pY + Scale(98)));
+			stProfCardsText->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(58), lW - Scale(14), pY + Scale(96)));
+			stProfCardsTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(100), Scale(14) + barW, pY + Scale(108)));
 			irr::s32 fw2 = (irr::s32)(barW * std::min(100.0, std::max(0.0, profCardsPct)) / 100.0);
 			stProfCardsFill->setRelativePosition(irr::core::recti(0, 0, fw2, Scale(8)));
 		}
 
-		// Right column: 4 stacked rows
+		// Right column: 4 stacked rows with generous breathing room
 		const irr::s32 hBonus = Scale(78);
-		const irr::s32 hAva = Scale(96);
-		const irr::s32 hMedClan = Scale(90);
-		const irr::s32 hBot = std::max<irr::s32>(Scale(100), availH - hBonus - hAva - hMedClan - 3 * gap);
+		const irr::s32 hAva = Scale(112);
+		const irr::s32 hMedClan = Scale(108);
+		const irr::s32 hBot = std::max<irr::s32>(Scale(116), availH - hBonus - hAva - hMedClan - 3 * gap);
 		irr::s32 ry = gridTop;
 
 		pnlProfBonus->setRelativePosition(irr::core::recti(rX, ry, rX + rW, ry + hBonus));
@@ -6909,32 +6983,32 @@ void Game::ResizeEconomyScreens() {
 		{
 			irr::s32 colW = (rW - Scale(24)) / 3;
 			for(int bi = 0; bi < 3; ++bi)
-				stProfBonusVals[bi]->setRelativePosition(irr::core::recti(Scale(12) + bi * colW, Scale(32), Scale(12) + (bi + 1) * colW - Scale(6), hBonus - Scale(8)));
+				stProfBonusVals[bi]->setRelativePosition(irr::core::recti(Scale(12) + bi * colW, Scale(32), Scale(12) + (bi + 1) * colW - Scale(6), hBonus - Scale(6)));
 		}
 		ry += hBonus + gap;
 
 		pnlProfAvaBox->setRelativePosition(irr::core::recti(rX, ry, rX + rW, ry + hAva));
 		stProfAvaTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), rW - Scale(12), Scale(28)));
-		stProfAvaBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), rW - Scale(12), hAva - Scale(8)));
+		stProfAvaBody->setRelativePosition(irr::core::recti(Scale(12), Scale(32), rW - Scale(12), hAva - Scale(6)));
 		ry += hAva + gap;
 
 		irr::s32 halfW = (rW - gap) / 2;
 		pnlProfMedBox->setRelativePosition(irr::core::recti(rX, ry, rX + halfW, ry + hMedClan));
 		stProfMedTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), halfW - Scale(12), Scale(28)));
-		stProfMedBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), halfW - Scale(12), hMedClan - Scale(8)));
+		stProfMedBody->setRelativePosition(irr::core::recti(Scale(12), Scale(32), halfW - Scale(12), hMedClan - Scale(6)));
 
 		pnlProfClanBox->setRelativePosition(irr::core::recti(rX + halfW + gap, ry, rX + rW, ry + hMedClan));
 		stProfClanTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), (rW - halfW - gap) - Scale(12), Scale(28)));
-		stProfClanBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), (rW - halfW - gap) - Scale(12), hMedClan - Scale(8)));
+		stProfClanBody->setRelativePosition(irr::core::recti(Scale(12), Scale(32), (rW - halfW - gap) - Scale(12), hMedClan - Scale(6)));
 		ry += hMedClan + gap;
 
 		pnlProfVipBox->setRelativePosition(irr::core::recti(rX, ry, rX + halfW, ry + hBot));
 		stProfVipTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), halfW - Scale(12), Scale(28)));
-		stProfVipBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), halfW - Scale(12), hBot - Scale(8)));
+		stProfVipBody->setRelativePosition(irr::core::recti(Scale(12), Scale(32), halfW - Scale(12), hBot - Scale(6)));
 
 		pnlProfDuelsBox->setRelativePosition(irr::core::recti(rX + halfW + gap, ry, rX + rW, ry + hBot));
 		stProfDuelsTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), (rW - halfW - gap) - Scale(12), Scale(28)));
-		stProfDuelsBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), (rW - halfW - gap) - Scale(12), hBot - Scale(8)));
+		stProfDuelsBody->setRelativePosition(irr::core::recti(Scale(12), Scale(32), (rW - halfW - gap) - Scale(12), hBot - Scale(6)));
 	}
 
 	// 4b. Profile Medals (5x2 grid)
@@ -7486,6 +7560,55 @@ void Game::ResizeEconomyScreens() {
 		irr::s32 halfW = (cw - Scale(54)) / 2;
 		if(btnConfirmYes) btnConfirmYes->setRelativePosition(irr::core::recti(Scale(18), ch - Scale(48), Scale(18) + halfW, ch - Scale(12)));
 		if(btnConfirmNo) btnConfirmNo->setRelativePosition(irr::core::recti(Scale(36) + halfW, ch - Scale(48), cw - Scale(18), ch - Scale(12)));
+	}
+	// 6. Ranking Menu (2-column: PvP Season + Level Ranking)
+	if(wRankingMenu) {
+		wRankingMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
+		placeHeaderHelp(stRankingTitle, Scale(340), nullptr, nullptr);
+		btnRankingBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+
+		const irr::s32 gridTop = topY + Scale(58);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 panelH = std::max<irr::s32>(Scale(280), botY - gridTop - pageBarH - Scale(10));
+		const irr::s32 gap = Scale(16);
+		const irr::s32 colW = (W - 2 * pad - gap) / 2;
+
+		auto layoutRankCol = [&](irr::gui::IGUIStaticText* pnl, irr::s32 px,
+			irr::gui::IGUIStaticText* ttl, irr::gui::IGUIStaticText* h0, irr::gui::IGUIStaticText* h1, irr::gui::IGUIStaticText* h2,
+			irr::gui::IGUIStaticText* r0[10], irr::gui::IGUIStaticText* r1[10], irr::gui::IGUIStaticText* r2[10],
+			irr::gui::IGUIButton* bPrev, irr::gui::IGUIStaticText* stPg, irr::gui::IGUIButton* bNext) {
+			if(pnl) {
+				pnl->setRelativePosition(irr::core::recti(px, gridTop, px + colW, gridTop + panelH));
+				if(ttl) ttl->setRelativePosition(irr::core::recti(Scale(14), Scale(10), colW - Scale(14), Scale(32)));
+				irr::s32 posW = Scale(46);
+				irr::s32 valW = Scale(150);
+				irr::s32 usrW = std::max<irr::s32>(Scale(100), colW - posW - valW - Scale(28));
+				irr::s32 x0 = Scale(14), x1 = x0 + posW, x2 = x1 + usrW;
+				irr::s32 thY = Scale(38), thH = Scale(22);
+				if(h0) h0->setRelativePosition(irr::core::recti(x0, thY, x1 - 4, thY + thH));
+				if(h1) h1->setRelativePosition(irr::core::recti(x1, thY, x2 - 4, thY + thH));
+				if(h2) h2->setRelativePosition(irr::core::recti(x2, thY, colW - Scale(14), thY + thH));
+				irr::s32 startY = thY + thH + Scale(6);
+				irr::s32 rowH = std::max<irr::s32>(Scale(24), (panelH - startY - Scale(10)) / 10);
+				for(int r = 0; r < 10; ++r) {
+					irr::s32 ry = startY + r * rowH;
+					if(r0[r]) r0[r]->setRelativePosition(irr::core::recti(x0, ry, x1 - 4, ry + rowH - 2));
+					if(r1[r]) r1[r]->setRelativePosition(irr::core::recti(x1, ry, x2 - 4, ry + rowH - 2));
+					if(r2[r]) r2[r]->setRelativePosition(irr::core::recti(x2, ry, colW - Scale(14), ry + rowH - 2));
+				}
+			}
+			irr::s32 py = botY - pageBarH;
+			irr::s32 cx = px + colW / 2;
+			irr::s32 pgW = Scale(110), bw = Scale(96);
+			if(stPg) stPg->setRelativePosition(irr::core::recti(cx - pgW / 2, py, cx + pgW / 2, botY));
+			if(bPrev) bPrev->setRelativePosition(irr::core::recti(cx - pgW / 2 - bw - Scale(8), py, cx - pgW / 2 - Scale(8), botY));
+			if(bNext) bNext->setRelativePosition(irr::core::recti(cx + pgW / 2 + Scale(8), py, cx + pgW / 2 + bw + Scale(8), botY));
+		};
+
+		layoutRankCol(pnlRankPvp, pad, stRankPvpTitle, thRankPvpPos, thRankPvpUser, thRankPvpRank,
+			stRankPvpPos, stRankPvpUser, stRankPvpRank, btnRankPvpPrev, stRankPvpPage, btnRankPvpNext);
+		layoutRankCol(pnlRankLvl, pad + colW + gap, stRankLvlTitle, thRankLvlPos, thRankLvlUser, thRankLvlLevel,
+			stRankLvlPos, stRankLvlUser, stRankLvlLevel, btnRankLvlPrev, stRankLvlPage, btnRankLvlNext);
 	}
 	(void)btnH;
 	ResizeDuelRewardScreen();
@@ -9158,6 +9281,97 @@ void Game::RequestExchangeEventPieces() {
 	env->getRootGUIElement()->bringToFront(wConfirmPurchase);
 }
 
+void Game::OpenRankingMenu() {
+	if(mTopMenu) mTopMenu->setVisible(false);
+	if(wBtnSettings) wBtnSettings->setVisible(false);
+	HideAllEcosystemScreens();
+
+	rankPvpItems.clear();
+	auto pvpResp = CallSessionApi("/api/ranking/pvp", sessionToken);
+	if(pvpResp.value("success", false)) {
+		if(stRankPvpTitle) {
+			std::wstring sName = (pvpResp.contains("temporada") && pvpResp["temporada"].is_object())
+				? BufferIO::DecodeUTF8(SafeJsonStr(pvpResp["temporada"], "nombre", ""))
+				: L"";
+			stRankPvpTitle->setText(sName.empty() ? L"RANKING PVP (TEMPORADA)" : epro::format(L"RANKING PVP - {}", sName).c_str());
+		}
+		if(pvpResp.contains("players") && pvpResp["players"].is_array()) {
+			for(const auto& p : pvpResp["players"]) {
+				RankPvpItem it;
+				it.pos = SafeJsonInt(p, "posicion", (int)rankPvpItems.size() + 1);
+				it.user = BufferIO::DecodeUTF8(SafeJsonStr(p, "usuario", ""));
+				it.rango = BufferIO::DecodeUTF8(SafeJsonStr(p, "rangoPvP", "Bronce"));
+				it.pts = SafeJsonInt(p, "puntosPvP", 0);
+				rankPvpItems.push_back(it);
+			}
+		}
+	}
+
+	rankLvlItems.clear();
+	auto lvlResp = CallSessionApi("/api/ranking", sessionToken);
+	if(lvlResp.value("success", false) && lvlResp.contains("players") && lvlResp["players"].is_array()) {
+		for(const auto& p : lvlResp["players"]) {
+			RankLvlItem it;
+			it.pos = SafeJsonInt(p, "posicion", (int)rankLvlItems.size() + 1);
+			it.user = BufferIO::DecodeUTF8(SafeJsonStr(p, "usuario", ""));
+			it.nivel = SafeJsonInt(p, "nivel", 1);
+			it.exp = SafeJsonInt64(p, "exp", 0);
+			rankLvlItems.push_back(it);
+		}
+	}
+
+	rankPvpPage = 0;
+	rankLvlPage = 0;
+	RefreshRankingPvpPage();
+	RefreshRankingLvlPage();
+	ResizeEconomyScreens();
+	if(wRankingMenu) wRankingMenu->setVisible(true);
+}
+
+void Game::RefreshRankingPvpPage() {
+	int totalPages = std::max(1, ((int)rankPvpItems.size() + 9) / 10);
+	if(rankPvpPage >= totalPages) rankPvpPage = totalPages - 1;
+	if(rankPvpPage < 0) rankPvpPage = 0;
+	for(int r = 0; r < 10; ++r) {
+		int idx = rankPvpPage * 10 + r;
+		if(idx < (int)rankPvpItems.size()) {
+			const auto& it = rankPvpItems[idx];
+			if(stRankPvpPos[r]) { stRankPvpPos[r]->setText(epro::format(L"#{}", it.pos).c_str()); stRankPvpPos[r]->setVisible(true); }
+			if(stRankPvpUser[r]) { stRankPvpUser[r]->setText(it.user.c_str()); stRankPvpUser[r]->setVisible(true); }
+			if(stRankPvpRank[r]) { stRankPvpRank[r]->setText(epro::format(L"{} ({} pts)", it.rango, it.pts).c_str()); stRankPvpRank[r]->setVisible(true); }
+		} else {
+			if(stRankPvpPos[r]) stRankPvpPos[r]->setVisible(false);
+			if(stRankPvpUser[r]) stRankPvpUser[r]->setVisible(false);
+			if(stRankPvpRank[r]) stRankPvpRank[r]->setVisible(false);
+		}
+	}
+	if(stRankPvpPage) stRankPvpPage->setText(epro::format(L"P\u00E1gina {} / {}", rankPvpPage + 1, totalPages).c_str());
+	if(btnRankPvpPrev) btnRankPvpPrev->setEnabled(rankPvpPage > 0);
+	if(btnRankPvpNext) btnRankPvpNext->setEnabled(rankPvpPage + 1 < totalPages);
+}
+
+void Game::RefreshRankingLvlPage() {
+	int totalPages = std::max(1, ((int)rankLvlItems.size() + 9) / 10);
+	if(rankLvlPage >= totalPages) rankLvlPage = totalPages - 1;
+	if(rankLvlPage < 0) rankLvlPage = 0;
+	for(int r = 0; r < 10; ++r) {
+		int idx = rankLvlPage * 10 + r;
+		if(idx < (int)rankLvlItems.size()) {
+			const auto& it = rankLvlItems[idx];
+			if(stRankLvlPos[r]) { stRankLvlPos[r]->setText(epro::format(L"#{}", it.pos).c_str()); stRankLvlPos[r]->setVisible(true); }
+			if(stRankLvlUser[r]) { stRankLvlUser[r]->setText(it.user.c_str()); stRankLvlUser[r]->setVisible(true); }
+			if(stRankLvlLevel[r]) { stRankLvlLevel[r]->setText(epro::format(L"Nv. {}", it.nivel).c_str()); stRankLvlLevel[r]->setVisible(true); }
+		} else {
+			if(stRankLvlPos[r]) stRankLvlPos[r]->setVisible(false);
+			if(stRankLvlUser[r]) stRankLvlUser[r]->setVisible(false);
+			if(stRankLvlLevel[r]) stRankLvlLevel[r]->setVisible(false);
+		}
+	}
+	if(stRankLvlPage) stRankLvlPage->setText(epro::format(L"P\u00E1gina {} / {}", rankLvlPage + 1, totalPages).c_str());
+	if(btnRankLvlPrev) btnRankLvlPrev->setEnabled(rankLvlPage > 0);
+	if(btnRankLvlNext) btnRankLvlNext->setEnabled(rankLvlPage + 1 < totalPages);
+}
+
 void Game::OpenClansMenu(const std::wstring& search) {
 	if(mTopMenu) mTopMenu->setVisible(false);
 	if(wBtnSettings) wBtnSettings->setVisible(false);
@@ -10305,6 +10519,7 @@ bool Game::MainLoop() {
 				(wEventsMenu && wEventsMenu->isVisible()) || (wOrbsEvent && wOrbsEvent->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
 				(wClanDetail && wClanDetail->isVisible()) ||
 				(wMailbox && wMailbox->isVisible()) ||
+				(wRankingMenu && wRankingMenu->isVisible()) ||
 				(wAdventureMode && wAdventureMode->isVisible()) ||
 				(wRoomListPlaceholder && wRoomListPlaceholder->isVisible());
 		};
@@ -10381,6 +10596,7 @@ bool Game::MainLoop() {
 						(wStorePacks && wStorePacks->isVisible()) ||
 						(wProfileInfo && wProfileInfo->isVisible()) ||
 						(wMailbox && wMailbox->isVisible()) ||
+				(wRankingMenu && wRankingMenu->isVisible()) ||
 						(wProfileMedals && wProfileMedals->isVisible()) ||
 						(wProfileAvatars && wProfileAvatars->isVisible()) ||
 						(wEventsHub && wEventsHub->isVisible()) ||
@@ -10755,6 +10971,15 @@ bool Game::MainLoop() {
 						if(btnMbRowDiscard[r] && btnMbRowDiscard[r]->isVisible()) drawNeon(btnMbRowDiscard[r], irr::video::SColor(180, 248, 113, 113));
 					}
 				}
+			}
+			if(wRankingMenu && wRankingMenu->isVisible()) {
+				drawNeon(pnlRankPvp, cGold);
+				drawNeon(pnlRankLvl, cCyan);
+				drawNeon(btnRankingBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnRankPvpPrev, cCyan);
+				drawNeon(btnRankPvpNext, cCyan);
+				drawNeon(btnRankLvlPrev, cCyan);
+				drawNeon(btnRankLvlNext, cCyan);
 			}
 			}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
