@@ -5200,6 +5200,7 @@ void Game::PopulateEconomyScreens() {
 		for(int fi = 0; fi < 4; ++fi) {
 			btnStoreBstFilt[fi] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_FILT_ALL + fi, fLbls[fi]);
 			styleDarkBtn(btnStoreBstFilt[fi]);
+			if(loginCardDescFont) btnStoreBstFilt[fi]->setOverrideFont(loginCardDescFont);
 		}
 	}
 	btnStoreBstBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_BACK, L"Volver a Tienda");
@@ -5211,7 +5212,7 @@ void Game::PopulateEconomyScreens() {
 		imgBstCardIcons[i]->setUseAlphaChannel(true);
 		stBstCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wBstCards[i]);
 		stBstCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginDescFont) stBstCardTitles[i]->setOverrideFont(loginDescFont);
+		if(loginCardTitleFont) stBstCardTitles[i]->setOverrideFont(loginCardTitleFont);
 		else if(loginUiFont) stBstCardTitles[i]->setOverrideFont(loginUiFont);
 		stBstCardStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wBstCards[i]);
 		stBstCardStats[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
@@ -5222,9 +5223,9 @@ void Game::PopulateEconomyScreens() {
 		btnBstCardBuySS[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnBstCardBuyCD[i]);
 		btnBstCardBuyCD[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-		if(loginDescFont) {
-			btnBstCardBuySS[i]->setOverrideFont(loginDescFont);
-			btnBstCardBuyCD[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) {
+			btnBstCardBuySS[i]->setOverrideFont(loginCardDescFont);
+			btnBstCardBuyCD[i]->setOverrideFont(loginCardDescFont);
 		}
 	}
 	btnStoreBstPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_PREV, L"Anterior");
@@ -5234,6 +5235,11 @@ void Game::PopulateEconomyScreens() {
 	btnStoreBstNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreBoosters, BUTTON_STORE_BST_NEXT, L"Siguiente");
 	styleDarkBtn(btnStoreBstPrev);
 	styleDarkBtn(btnStoreBstNext);
+	if(loginCardDescFont) {
+		btnStoreBstPrev->setOverrideFont(loginCardDescFont);
+		stStoreBstPage->setOverrideFont(loginCardDescFont);
+		btnStoreBstNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 3b. Store VIP (4-column card grid, Imagen 9)
 	makeCanvas(wStoreVip);
@@ -5249,6 +5255,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreVipActive = env->addStaticText(L"Sin VIP activo", irr::core::recti(0, 0, 10, 10), false, true, wStoreVip);
 	stStoreVipActive->setWordWrap(true);
 	stStoreVipActive->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginCardDescFont) stStoreVipActive->setOverrideFont(loginCardDescFont);
 	btnStoreVipBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreVip, BUTTON_STORE_VIP_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStoreVipBack);
 	for(int i = 0; i < 6; ++i) {
@@ -5258,17 +5265,20 @@ void Game::PopulateEconomyScreens() {
 		imgVipCardIcons[i]->setUseAlphaChannel(true);
 		stVipCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wVipCards[i]);
 		stVipCardTitles[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-		if(loginUiFont) stVipCardTitles[i]->setOverrideFont(loginUiFont);
+		if(loginCardTitleFont) stVipCardTitles[i]->setOverrideFont(loginCardTitleFont);
+		else if(loginUiFont) stVipCardTitles[i]->setOverrideFont(loginUiFont);
 		stVipCardDescs[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wVipCards[i]);
 		stVipCardDescs[i]->setWordWrap(true);
 		stVipCardDescs[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) stVipCardDescs[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stVipCardDescs[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stVipCardDescs[i]->setOverrideFont(loginDescFont);
 		stVipCardPrices[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wVipCards[i]);
 		stVipCardPrices[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 		stVipCardPrices[i]->setVisible(false);
 		btnVipCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wVipCards[i], BUTTON_STORE_VIP_BUY_0 + i, L"Comprar CD");
 		styleDarkBtn(btnVipCardBuy[i]);
 		btnVipCardBuy[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) btnVipCardBuy[i]->setOverrideFont(loginCardDescFont);
 	}
 
 	// 3c. Store Cards (5x2 card grid + search + currency filter + pagination)
@@ -6450,21 +6460,21 @@ void Game::ResizeEconomyScreens() {
 		const int vipCnt = std::max(1, std::min(6, (int)storeVips.size()));
 		const irr::s32 cardW = (W - 2 * pad - (vipCnt - 1) * gap) / vipCnt;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(380), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(520), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int i = 0; i < 6; ++i) {
 			irr::s32 cx = pad + i * (cardW + gap);
 			if(wVipCards[i]) {
 				wVipCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 btnH = Scale(32);
-				irr::s32 by = cardH - btnH - Scale(10);
-				if(btnVipCardBuy[i]) btnVipCardBuy[i]->setRelativePosition(irr::core::recti(Scale(12), by, cardW - Scale(12), by + btnH));
+				irr::s32 btnH = Scale(34);
+				irr::s32 by = cardH - btnH - Scale(12);
+				if(btnVipCardBuy[i]) btnVipCardBuy[i]->setRelativePosition(irr::core::recti(Scale(10), by, cardW - Scale(10), by + btnH));
 				if(stVipCardPrices[i]) stVipCardPrices[i]->setVisible(false);
-				irr::s32 dy = by - Scale(46);
-				if(stVipCardDescs[i]) stVipCardDescs[i]->setRelativePosition(irr::core::recti(Scale(12), dy, cardW - Scale(12), by - Scale(4)));
-				irr::s32 ty = dy - Scale(22);
-				if(stVipCardTitles[i]) stVipCardTitles[i]->setRelativePosition(irr::core::recti(Scale(12), ty, cardW - Scale(12), dy - Scale(2)));
-				irr::s32 icH = ty - Scale(10);
+				irr::s32 dy = by - Scale(102);
+				if(stVipCardDescs[i]) stVipCardDescs[i]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), by - Scale(6)));
+				irr::s32 ty = dy - Scale(28);
+				if(stVipCardTitles[i]) stVipCardTitles[i]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), dy - Scale(6)));
+				irr::s32 icH = ty - Scale(18);
 				fitImage(imgVipCardIcons[i], cardW / 2, Scale(8), cardW - Scale(16), icH);
 			}
 		}
