@@ -6248,7 +6248,7 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), gridBot - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(380), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(520), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int si = 0; si < 6; ++si) {
 			bool isVisibleOnPage = (storeHubPage == 0 && si < 5) || (storeHubPage == 1 && si == 5);
@@ -6259,17 +6259,17 @@ void Game::ResizeEconomyScreens() {
 					int col = (storeHubPage == 0) ? si : 0;
 					irr::s32 cx = pad + col * (cardW + gap);
 					wStoreHubCards[si]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-					irr::s32 btnH = Scale(32);
-					irr::s32 by = cardH - btnH - Scale(10);
+					irr::s32 btnH = Scale(34);
+					irr::s32 by = cardH - btnH - Scale(12);
 					if(btnStoreHubActions[si])
 						btnStoreHubActions[si]->setRelativePosition(irr::core::recti(Scale(10), by, cardW - Scale(10), by + btnH));
-					irr::s32 dy = by - Scale(74);
+					irr::s32 dy = by - Scale(102);
 					if(stStoreHubDescs[si])
 						stStoreHubDescs[si]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), by - Scale(6)));
-					irr::s32 ty = dy - Scale(24);
+					irr::s32 ty = dy - Scale(28);
 					if(stStoreHubTitles[si])
-						stStoreHubTitles[si]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), dy - Scale(2)));
-					irr::s32 icH = ty - Scale(14);
+						stStoreHubTitles[si]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), dy - Scale(6)));
+					irr::s32 icH = ty - Scale(18);
 					fitImage(imgStoreHubIcons[si], cardW / 2, Scale(8), cardW - Scale(16), icH);
 				}
 			}
