@@ -376,7 +376,30 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_NAV_TUTORIALES: {
-				mainGame->PopupMessage(L"Tutoriales y Reglas", L"Consulta las gu\u00EDas Master Rule 2020 y modos de juego en:\nhttps://anidimension.online/tutoriales");
+				mainGame->OpenRankingMenu();
+				break;
+			}
+			case BUTTON_RANKING_BACK: {
+				if(mainGame->wRankingMenu) mainGame->wRankingMenu->setVisible(false);
+				mainGame->mTopMenu->setVisible(false);
+				mainGame->wBtnSettings->setVisible(true);
+				mainGame->wMainMenu->setVisible(true);
+				break;
+			}
+			case BUTTON_RANK_PVP_PREV: {
+				if(mainGame->rankPvpPage > 0) { mainGame->rankPvpPage--; mainGame->RefreshRankingPvpPage(); }
+				break;
+			}
+			case BUTTON_RANK_PVP_NEXT: {
+				mainGame->rankPvpPage++; mainGame->RefreshRankingPvpPage();
+				break;
+			}
+			case BUTTON_RANK_LVL_PREV: {
+				if(mainGame->rankLvlPage > 0) { mainGame->rankLvlPage--; mainGame->RefreshRankingLvlPage(); }
+				break;
+			}
+			case BUTTON_RANK_LVL_NEXT: {
+				mainGame->rankLvlPage++; mainGame->RefreshRankingLvlPage();
 				break;
 			}
 			case BUTTON_NAV_SALIR: {
