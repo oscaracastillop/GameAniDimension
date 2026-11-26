@@ -8559,7 +8559,7 @@ void Game::ExchangeSelectedOrbs() {
 	static const char* rarKeys[5] = { "Comun", "Rara", "Super Rara", "Ultra Rara", "Secreta" };
 	if(selectedOrbAttr < 0 || selectedOrbAttr >= 9 || selectedOrbRar < 0 || selectedOrbRar >= 5) return;
 	nlohmann::json body = { {"atributo", attrKeys[selectedOrbAttr]}, {"rareza", rarKeys[selectedOrbRar]} };
-	auto resp = PostSessionApi("/api/events/orbs/exchange", sessionToken, body);
+	auto resp = CallSessionApi("/api/events/orbs/exchange", sessionToken, body.dump());
 	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
 		int rem = SafeJsonInt(resp, "orbesRestantes", 0);
 		orbCounts[selectedOrbAttr] = rem;
