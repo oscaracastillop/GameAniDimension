@@ -5102,9 +5102,6 @@ void Game::PopulateEconomyScreens() {
 		};
 		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
-		auto shdFontCfg = textfont;
-		shdFontCfg.size = Scale(15);
-		irr::gui::IGUIFont* storeHubDescFont = irr::gui::CGUITTFont::createTTFont(env, shdFontCfg, fallbackFonts);
 		for(int si = 0; si < 6; ++si) {
 			wStoreHubCards[si] = makePanel(wStoreMenu);
 			imgStoreHubIcons[si] = env->addImage(irr::core::recti(0, 0, 64, 64), wStoreHubCards[si], -1, 0, true);
@@ -5119,7 +5116,7 @@ void Game::PopulateEconomyScreens() {
 			stStoreHubDescs[si] = env->addStaticText(stDescs[si], irr::core::recti(0, 0, 10, 10), false, true, wStoreHubCards[si]);
 			stStoreHubDescs[si]->setWordWrap(true);
 			stStoreHubDescs[si]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-			if(storeHubDescFont) stStoreHubDescs[si]->setOverrideFont(storeHubDescFont);
+			if(loginCardTitleFont) stStoreHubDescs[si]->setOverrideFont(loginCardTitleFont);
 			else if(loginDescFont) stStoreHubDescs[si]->setOverrideFont(loginDescFont);
 			btnStoreHubActions[si] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreHubCards[si], stIds[si], stBtns[si]);
 			styleDarkBtn(btnStoreHubActions[si]);
