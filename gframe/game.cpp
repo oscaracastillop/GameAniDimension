@@ -5298,11 +5298,13 @@ void Game::PopulateEconomyScreens() {
 	ebStoreCardSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wStoreCards);
 	btnStoreCardSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_SEARCH, L"Buscar");
 	styleDarkBtn(btnStoreCardSearch);
+	if(loginCardDescFont) btnStoreCardSearch->setOverrideFont(loginCardDescFont);
 	{
 		const wchar_t* cLbls[3] = { L"Todas", L"StarShips (SS)", L"Cristales (CD)" };
 		for(int fi = 0; fi < 3; ++fi) {
 			btnStoreCardFilt[fi] = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_FILT_ALL + fi, cLbls[fi]);
 			styleDarkBtn(btnStoreCardFilt[fi]);
+			if(loginCardDescFont) btnStoreCardFilt[fi]->setOverrideFont(loginCardDescFont);
 		}
 	}
 	btnStoreCardBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_BACK, L"Volver a Tienda");
@@ -5313,18 +5315,23 @@ void Game::PopulateEconomyScreens() {
 		imgCardCardArts[i]->setScaleImage(true);
 		stCardCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wCardCards[i]);
 		stCardCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginDescFont) stCardCardTitles[i]->setOverrideFont(loginDescFont);
+		if(loginCardTitleFont) stCardCardTitles[i]->setOverrideFont(loginCardTitleFont);
 		else if(loginUiFont) stCardCardTitles[i]->setOverrideFont(loginUiFont);
 		stCardCardMeta[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wCardCards[i]);
 		stCardCardMeta[i]->setWordWrap(true);
 		stCardCardMeta[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) stCardCardMeta[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stCardCardMeta[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stCardCardMeta[i]->setOverrideFont(loginDescFont);
 		btnCardCardBuySS[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_SS_0 + i, L"Comprar SS");
 		btnCardCardBuyCD[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wCardCards[i], BUTTON_STORE_CARD_CD_0 + i, L"Comprar CD");
 		styleDarkBtn(btnCardCardBuySS[i]);
 		btnCardCardBuySS[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnCardCardBuyCD[i]);
 		btnCardCardBuyCD[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) {
+			btnCardCardBuySS[i]->setOverrideFont(loginCardDescFont);
+			btnCardCardBuyCD[i]->setOverrideFont(loginCardDescFont);
+		}
 	}
 	btnStoreCardPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_PREV, L"Anterior");
 	stStoreCardPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStoreCards);
@@ -5333,6 +5340,11 @@ void Game::PopulateEconomyScreens() {
 	btnStoreCardNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreCards, BUTTON_STORE_CARD_NEXT, L"Siguiente");
 	styleDarkBtn(btnStoreCardPrev);
 	styleDarkBtn(btnStoreCardNext);
+	if(loginCardDescFont) {
+		btnStoreCardPrev->setOverrideFont(loginCardDescFont);
+		stStoreCardPage->setOverrideFont(loginCardDescFont);
+		btnStoreCardNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 3d. Store Packs (4x2 card grid + search + pagination + visual pool overlay)
 	makeCanvas(wStorePacks);
@@ -5352,6 +5364,7 @@ void Game::PopulateEconomyScreens() {
 	btnStorePackSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_SEARCH, L"Buscar");
 	btnStorePackBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStorePackSearch);
+	if(loginCardDescFont) btnStorePackSearch->setOverrideFont(loginCardDescFont);
 	styleDarkBtn(btnStorePackBack);
 	for(int i = 0; i < 12; ++i) {
 		wPackCards[i] = makePanel(wStorePacks);
@@ -5360,17 +5373,22 @@ void Game::PopulateEconomyScreens() {
 		stPackCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardTitles[i]->setWordWrap(true);
 		stPackCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginDescFont) stPackCardTitles[i]->setOverrideFont(loginDescFont);
+		if(loginCardTitleFont) stPackCardTitles[i]->setOverrideFont(loginCardTitleFont);
+		else if(loginDescFont) stPackCardTitles[i]->setOverrideFont(loginDescFont);
 		stPackCardDescs[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardDescs[i]->setWordWrap(true);
 		stPackCardDescs[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginLogTimeFont) stPackCardDescs[i]->setOverrideFont(loginLogTimeFont);
-		else if(loginDescFont) stPackCardDescs[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stPackCardDescs[i]->setOverrideFont(loginCardDescFont);
+		else if(loginLogTimeFont) stPackCardDescs[i]->setOverrideFont(loginLogTimeFont);
 		btnPackCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_BUY_0 + i, L"Comprar");
 		btnPackCardView[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_VIEW_0 + i, L"Ver Cartas");
 		styleDarkBtn(btnPackCardBuy[i]);
 		btnPackCardBuy[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnPackCardView[i]);
+		if(loginCardDescFont) {
+			btnPackCardBuy[i]->setOverrideFont(loginCardDescFont);
+			btnPackCardView[i]->setOverrideFont(loginCardDescFont);
+		}
 	}
 	wPackPoolOverlay = makePanel(wStorePacks);
 	wPackPoolOverlay->setBackgroundColor(irr::video::SColor(245, 9, 15, 32));
@@ -5380,6 +5398,7 @@ void Game::PopulateEconomyScreens() {
 	if(loginTitleFont) stPackPoolTitle->setOverrideFont(loginTitleFont);
 	btnPackPoolClose = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_CLOSE, L"Cerrar");
 	styleDarkBtn(btnPackPoolClose);
+	if(loginCardDescFont) btnPackPoolClose->setOverrideFont(loginCardDescFont);
 	for(int i = 0; i < 12; ++i) {
 		wPackPoolCards[i] = makePanel(wPackPoolOverlay);
 		imgPackPoolArts[i] = env->addImage(irr::core::recti(0, 0, 64, 92), wPackPoolCards[i], -1, 0, true);
@@ -5387,6 +5406,7 @@ void Game::PopulateEconomyScreens() {
 		stPackPoolNames[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackPoolCards[i]);
 		stPackPoolNames[i]->setWordWrap(true);
 		stPackPoolNames[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		if(loginCardDescFont) stPackPoolNames[i]->setOverrideFont(loginCardDescFont);
 	}
 	btnPackPoolPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_PREV, L"Anterior");
 	stPackPoolPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wPackPoolOverlay);
@@ -5395,14 +5415,21 @@ void Game::PopulateEconomyScreens() {
 	btnPackPoolNext = env->addButton(irr::core::recti(0, 0, 10, 10), wPackPoolOverlay, BUTTON_PACK_POOL_NEXT, L"Siguiente");
 	styleDarkBtn(btnPackPoolPrev);
 	styleDarkBtn(btnPackPoolNext);
+	if(loginCardDescFont) {
+		btnPackPoolPrev->setOverrideFont(loginCardDescFont);
+		stPackPoolPage->setOverrideFont(loginCardDescFont);
+		btnPackPoolNext->setOverrideFont(loginCardDescFont);
+	}
 
 	wPackRevealOverlay = makePanel(wStorePacks);
 	wPackRevealOverlay->setBackgroundColor(irr::video::SColor(255, 10, 16, 32));
 	wPackRevealOverlay->setVisible(false);
-	stPackRevealTitle = env->addStaticText(L"\u00A1SOBRE ABIERTO!", irr::core::recti(0, 0, 10, 10), false, false, wPackRevealOverlay);
+	stPackRevealTitle = env->addStaticText(L"\u00A1SOBRE ABIERTO!", irr::core::recti(0, 0, 10, 10), false, true, wPackRevealOverlay);
+	stPackRevealTitle->setWordWrap(true);
 	stPackRevealTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stPackRevealTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginTitleFont) stPackRevealTitle->setOverrideFont(loginTitleFont);
+	if(loginCardTitleFont) stPackRevealTitle->setOverrideFont(loginCardTitleFont);
+	else if(loginTitleFont) stPackRevealTitle->setOverrideFont(loginTitleFont);
 	for(int i = 0; i < 3; ++i) {
 		imgPackRevealArts[i] = env->addImage(irr::core::recti(0, 0, 120, 172), wPackRevealOverlay, -1, 0, true);
 		imgPackRevealArts[i]->setScaleImage(true);
@@ -5410,9 +5437,11 @@ void Game::PopulateEconomyScreens() {
 		stPackRevealNames[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_UPPERLEFT);
 		stPackRevealNames[i]->setWordWrap(true);
 		stPackRevealNames[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginCardDescFont) stPackRevealNames[i]->setOverrideFont(loginCardDescFont);
 	}
 	btnPackRevealAccept = env->addButton(irr::core::recti(0, 0, 10, 10), wPackRevealOverlay, BUTTON_PACK_REVEAL_CLOSE, L"Aceptar");
 	styleCyanBtn(btnPackRevealAccept);
+	if(loginCardDescFont) btnPackRevealAccept->setOverrideFont(loginCardDescFont);
 	btnStorePackPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_PREV, L"Anterior");
 	stStorePackPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStorePacks);
 	stStorePackPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -6592,7 +6621,7 @@ void Game::ResizeEconomyScreens() {
 				irr::s32 ppy = pTop + r * (pRowH + pGap);
 				if(wPackPoolCards[i]) {
 					wPackPoolCards[i]->setRelativePosition(irr::core::recti(px, ppy, px + pColW, ppy + pRowH));
-					irr::s32 aH = std::max<irr::s32>(Scale(56), pRowH - Scale(46));
+					irr::s32 aH = std::max<irr::s32>(Scale(56), pRowH - Scale(56));
 					irr::s32 aW = (aH * 177) / 254;
 					if(aW > pColW - Scale(12)) { aW = pColW - Scale(12); aH = (aW * 254) / 177; }
 					if(imgPackPoolArts[i]) imgPackPoolArts[i]->setRelativePosition(irr::core::recti((pColW - aW) / 2, Scale(6), (pColW + aW) / 2, Scale(6) + aH));
