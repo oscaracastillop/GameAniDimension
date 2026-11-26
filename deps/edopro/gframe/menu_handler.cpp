@@ -253,6 +253,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 						mainGame->RequestBuyBoosterIdx(mainGame->storeBstFiltered[pos], true);
 				} else if(id >= BUTTON_STORE_VIP_BUY_0 && id <= BUTTON_STORE_VIP_BUY_MAX) {
 					mainGame->RequestBuyVipIdx(id - BUTTON_STORE_VIP_BUY_0);
+				} else if(id >= BUTTON_ORBS_ATTR_0 && id <= BUTTON_ORBS_ATTR_MAX) {
+					mainGame->selectedOrbAttr = id - BUTTON_ORBS_ATTR_0;
+					mainGame->RefreshOrbsSelection();
+				} else if(id >= BUTTON_ORBS_RAR_0 && id <= BUTTON_ORBS_RAR_MAX) {
+					mainGame->selectedOrbRar = id - BUTTON_ORBS_RAR_0;
+					mainGame->RefreshOrbsSelection();
 				} else if(id >= BUTTON_STORE_PACK_BUY_0 && id <= BUTTON_STORE_PACK_BUY_MAX) {
 					int slot = id - BUTTON_STORE_PACK_BUY_0;
 					int pos = mainGame->storePackPage * 12 + slot;
@@ -613,7 +619,15 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_EVENTS_HUB_ORBS: {
-				mainGame->PopupMessage(L"Pr\u00F3ximamente", L"El evento de Orbes de Esencia estar\u00E1 disponible en una pr\u00F3xima actualizaci\u00F3n.");
+				mainGame->OpenOrbsEvent();
+				break;
+			}
+			case BUTTON_ORBS_BACK: {
+				mainGame->OpenEventsHub();
+				break;
+			}
+			case BUTTON_ORBS_EXCHANGE: {
+				mainGame->ExchangeSelectedOrbs();
 				break;
 			}
 			case BUTTON_EVENTS_BACK: {

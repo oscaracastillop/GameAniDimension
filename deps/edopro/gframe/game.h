@@ -598,6 +598,13 @@ struct adventure_mode_panel_elements {
 		uint32_t cardCode{ 0 };
 		std::string cardName;
 		std::string cardRareza;
+		std::vector<std::string> extraCardsLines;
+		bool orbDropped{ false };
+		std::string orbAtributo;
+		int orbCantidad{ 0 };
+		int pvpDelta{ 0 };
+		int pvpTotal{ 1000 };
+		std::string pvpRango;
 		bool puzzleActive{ false };
 		bool puzzleDropped{ false };
 		int puzzlePiece{ 0 };
@@ -1380,12 +1387,12 @@ public:
 	irr::gui::IGUIStaticText* stStoreVipBalanceCD{ nullptr };
 	irr::gui::IGUIStaticText* stStoreVipActive{ nullptr };
 	irr::gui::IGUIButton* btnStoreVipBack{ nullptr };
-	irr::gui::IGUIStaticText* wVipCards[4]{ nullptr };
-	irr::gui::IGUIImage* imgVipCardIcons[4]{ nullptr };
-	irr::gui::IGUIStaticText* stVipCardTitles[4]{ nullptr };
-	irr::gui::IGUIStaticText* stVipCardDescs[4]{ nullptr };
-	irr::gui::IGUIStaticText* stVipCardPrices[4]{ nullptr };
-	irr::gui::IGUIButton* btnVipCardBuy[4]{ nullptr };
+	irr::gui::IGUIStaticText* wVipCards[6]{ nullptr };
+	irr::gui::IGUIImage* imgVipCardIcons[6]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardTitles[6]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardDescs[6]{ nullptr };
+	irr::gui::IGUIStaticText* stVipCardPrices[6]{ nullptr };
+	irr::gui::IGUIButton* btnVipCardBuy[6]{ nullptr };
 
 	// 3c. Store Cards (7x2 card grid + search + currency filter + pagination)
 	irr::gui::IGUIStaticText* wStoreCards{ nullptr };
@@ -1515,6 +1522,31 @@ public:
 	irr::gui::IGUIStaticText* stEventsHubCardTitle[2]{ nullptr };
 	irr::gui::IGUIStaticText* stEventsHubCardDesc[2]{ nullptr };
 	irr::gui::IGUIButton* btnEventsHubCardAction[2]{ nullptr };
+
+	// 4e. Orbes de Esencia Screen
+	irr::gui::IGUIStaticText* wOrbsEvent{ nullptr };
+	irr::gui::IGUIStaticText* stOrbsTitle{ nullptr };
+	irr::gui::IGUIStaticText* stOrbsDesc{ nullptr };
+	irr::gui::IGUIStaticText* stOrbsStatus{ nullptr };
+	irr::gui::IGUIButton* btnOrbsBack{ nullptr };
+	irr::gui::IGUIStaticText* wOrbCards[9]{ nullptr };
+	irr::gui::IGUIImage* imgOrbIcons[9]{ nullptr };
+	irr::gui::IGUIStaticText* stOrbNames[9]{ nullptr };
+	irr::gui::IGUIStaticText* stOrbCounts[9]{ nullptr };
+	irr::gui::IGUIButton* btnOrbSelect[9]{ nullptr };
+	irr::gui::IGUIStaticText* pnlOrbsRight{ nullptr };
+	irr::gui::IGUIStaticText* stOrbsSelInfo{ nullptr };
+	irr::gui::IGUIButton* btnOrbRarities[5]{ nullptr };
+	irr::gui::IGUIButton* btnOrbsExchange{ nullptr };
+	irr::gui::IGUIImage* imgOrbRewardCard{ nullptr };
+	irr::gui::IGUIStaticText* stOrbRewardInfo{ nullptr };
+	int orbCounts[9]{ 0 };
+	int selectedOrbAttr{ 0 };
+	int selectedOrbRar{ 0 };
+	uint32_t orbRewardCardCode{ 0 };
+	void OpenOrbsEvent();
+	void RefreshOrbsSelection();
+	void ExchangeSelectedOrbs();
 
 	// 4d. Events / Puzzles (Dedicated Rompecabezas Screen)
 	irr::gui::IGUIStaticText* wEventsMenu{ nullptr };
