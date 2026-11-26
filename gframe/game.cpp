@@ -5135,16 +5135,20 @@ void Game::PopulateEconomyScreens() {
 		btnAvaCardPreview[i]->setDrawBorder(false);
 		stAvaCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAvaCards[i]);
 		stAvaCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginUiFont) stAvaCardTitles[i]->setOverrideFont(loginUiFont);
+		if(loginCardTitleFont) stAvaCardTitles[i]->setOverrideFont(loginCardTitleFont);
+		else if(loginUiFont) stAvaCardTitles[i]->setOverrideFont(loginUiFont);
 		stAvaCardStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAvaCards[i]);
 		stAvaCardStats[i]->setWordWrap(true);
 		stAvaCardStats[i]->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+		if(loginCardDescFont) stAvaCardStats[i]->setOverrideFont(loginCardDescFont);
 		btnAvaCardBuySS[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAvaCards[i], BUTTON_STORE_AVA_SS_0 + i, L"Comprar SS");
 		btnAvaCardBuyCD[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAvaCards[i], BUTTON_STORE_AVA_CD_0 + i, L"Comprar CD");
 		styleDarkBtn(btnAvaCardBuySS[i]);
 		btnAvaCardBuySS[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		if(loginCardDescFont) btnAvaCardBuySS[i]->setOverrideFont(loginCardDescFont);
 		styleDarkBtn(btnAvaCardBuyCD[i]);
 		btnAvaCardBuyCD[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) btnAvaCardBuyCD[i]->setOverrideFont(loginCardDescFont);
 	}
 	wAvatarPreviewOverlay = makePanel(wStoreAvatars);
 	wAvatarPreviewOverlay->setBackgroundColor(irr::video::SColor(255, 10, 16, 32));
@@ -5155,12 +5159,15 @@ void Game::PopulateEconomyScreens() {
 	stAvatarPreviewName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAvatarPreviewOverlay);
 	stAvatarPreviewName->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stAvatarPreviewName->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginTitleFont) stAvatarPreviewName->setOverrideFont(loginTitleFont);
+	if(loginCardTitleFont) stAvatarPreviewName->setOverrideFont(loginCardTitleFont);
+	else if(loginTitleFont) stAvatarPreviewName->setOverrideFont(loginTitleFont);
 	stAvatarPreviewStats = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAvatarPreviewOverlay);
 	stAvatarPreviewStats->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stAvatarPreviewStats->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+	if(loginCardDescFont) stAvatarPreviewStats->setOverrideFont(loginCardDescFont);
 	btnAvatarPreviewClose = env->addButton(irr::core::recti(0, 0, 10, 10), wAvatarPreviewOverlay, BUTTON_AVA_PREVIEW_CLOSE, L"Cerrar");
 	styleCyanBtn(btnAvatarPreviewClose);
+	if(loginCardDescFont) btnAvatarPreviewClose->setOverrideFont(loginCardDescFont);
 	btnStoreAvaPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_PREV, L"Anterior");
 	stStoreAvaPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wStoreAvatars);
 	stStoreAvaPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
@@ -5168,6 +5175,11 @@ void Game::PopulateEconomyScreens() {
 	btnStoreAvaNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreAvatars, BUTTON_STORE_AVA_NEXT, L"Siguiente");
 	styleDarkBtn(btnStoreAvaPrev);
 	styleDarkBtn(btnStoreAvaNext);
+	if(loginCardDescFont) {
+		btnStoreAvaPrev->setOverrideFont(loginCardDescFont);
+		stStoreAvaPage->setOverrideFont(loginCardDescFont);
+		btnStoreAvaNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 3. Store Boosters (5x2 card grid + filter tabs + pagination, Imagen 8)
 	makeCanvas(wStoreBoosters);
@@ -6108,15 +6120,23 @@ void Game::PopulateEconomyScreens() {
 	wConfirmPurchase->setBackgroundColor(irr::video::SColor(255, 10, 16, 32));
 	wConfirmPurchase->setVisible(false);
 	stConfirmPurchaseTitle = env->addStaticText(L"CONFIRMAR ACCI\u00D3N", irr::core::recti(20, 14, 480, 44), false, false, wConfirmPurchase);
+	stConfirmPurchaseTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stConfirmPurchaseTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stConfirmPurchaseTitle->setOverrideFont(loginUiFont);
+	if(loginCardTitleFont) stConfirmPurchaseTitle->setOverrideFont(loginCardTitleFont);
+	else if(loginUiFont) stConfirmPurchaseTitle->setOverrideFont(loginUiFont);
 	stConfirmPurchaseMsg = env->addStaticText(L"", irr::core::recti(20, 52, 480, 144), false, true, wConfirmPurchase);
 	stConfirmPurchaseMsg->setWordWrap(true);
+	stConfirmPurchaseMsg->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stConfirmPurchaseMsg->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	if(loginCardDescFont) stConfirmPurchaseMsg->setOverrideFont(loginCardDescFont);
 	btnConfirmYes = env->addButton(irr::core::recti(20, 154, 240, 194), wConfirmPurchase, BUTTON_CONFIRM_YES, L"S\u00ED, Confirmar");
 	btnConfirmNo = env->addButton(irr::core::recti(260, 154, 480, 194), wConfirmPurchase, BUTTON_CONFIRM_NO, L"Cancelar");
 	styleCyanBtn(btnConfirmYes);
 	styleDarkBtn(btnConfirmNo);
+	if(loginCardDescFont) {
+		btnConfirmYes->setOverrideFont(loginCardDescFont);
+		btnConfirmNo->setOverrideFont(loginCardDescFont);
+	}
 
 	// Unified Post-Duel Reward Window (uses bg_reward.jpg)
 	wDuelReward = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, 0, -1, false);
