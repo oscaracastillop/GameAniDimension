@@ -78,7 +78,7 @@ void DeckBuilder::Initialize(bool refresh) {
 	} else if(results.size()) {
 		auto oldscrpos = scroll_pos;
 		auto oldscrbpos = mainGame->scrFilter->getPos();
-		StartFilter();
+		StartFilter(true);
 		scroll_pos = oldscrpos;
 		mainGame->scrFilter->setPos(oldscrbpos);
 	}
@@ -432,7 +432,9 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_START_FILTER: {
-				StartFilter();
+				if(mainGame->isLoggedIn)
+					mainGame->FetchUserInventoryAndDecks();
+				StartFilter(true);
 				break;
 			}
 			case BUTTON_CLEAR_FILTER: {
@@ -571,7 +573,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			case EDITBOX_STAR:
 			case EDITBOX_SCALE:
 			case EDITBOX_KEYWORD: {
-				StartFilter();
+				StartFilter(true);
 				break;
 			}
 			}
@@ -582,7 +584,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			auto StartFilterIfLongerThan = [&](size_t length) {
 				std::wstring filter = caller->getText();
 				if (filter.size() > length)
-					StartFilter();
+					StartFilter(true);
 			};
 			switch (id) {
 			case EDITBOX_ATTACK:
@@ -593,7 +595,7 @@ bool DeckBuilder::OnEvent(const irr::SEvent& event) {
 			}
 			case EDITBOX_STAR:
 			case EDITBOX_SCALE: {
-				StartFilter();
+				StartFilter(true);
 				break;
 			}
 			case EDITBOX_DECK_NAME: {
@@ -1479,6 +1481,18 @@ void DeckBuilder::SortList() {
 	case 3:
 		sort(DataManager::deck_sort_name);
 		break;
+	case 4: {
+		std::lock_guard<epro::mutex> lk(mainGame->inventoryMutex);
+		std::sort(results.begin(), results.end(), [&](const CardDataC* a, const CardDataC* b) {
+			auto ia = mainGame->cardInventoryOrder.find(a->code);
+			auto ib = mainGame->cardInventoryOrder.find(b->code);
+			int ra = (ia != mainGame->cardInventoryOrder.end()) ? ia->second : INT_MAX;
+			int rb = (ib != mainGame->cardInventoryOrder.end()) ? ib->second : INT_MAX;
+			if(ra != rb) return ra < rb;
+			return a->code > b->code;
+		});
+		break;
+	}
 	}
 	for(auto it = results.begin(), left = it; it != results.end(); ++it) {
 		if(searched_terms.find(gDataManager->GetUppercaseName((*it)->code)) != searched_terms.end()) {
