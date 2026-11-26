@@ -7043,9 +7043,11 @@ void Game::ResizeEconomyScreens() {
 
 		irr::s32 botBarY = botY - pageBarH;
 		if(stClansTotal) stClansTotal->setRelativePosition(irr::core::recti(pad, botBarY + Scale(4), pad + Scale(200), botBarY + pageBarH));
-		if(btnClansPrev) btnClansPrev->setRelativePosition(irr::core::recti(W - pad - Scale(250), botBarY, W - pad - Scale(160), botBarY + pageBarH));
-		if(stClansPage) stClansPage->setRelativePosition(irr::core::recti(W - pad - Scale(155), botBarY, W - pad - Scale(95), botBarY + pageBarH));
-		if(btnClansNext) btnClansNext->setRelativePosition(irr::core::recti(W - pad - Scale(90), botBarY, W - pad, botBarY + pageBarH));
+		const irr::s32 pageW = Scale(130);
+		const irr::s32 btnPW = Scale(110);
+		if(btnClansPrev) btnClansPrev->setRelativePosition(irr::core::recti((W - pageW) / 2 - btnPW - Scale(8), botBarY, (W - pageW) / 2 - Scale(8), botY));
+		if(stClansPage) stClansPage->setRelativePosition(irr::core::recti((W - pageW) / 2, botBarY, (W + pageW) / 2, botY));
+		if(btnClansNext) btnClansNext->setRelativePosition(irr::core::recti((W + pageW) / 2 + Scale(8), botBarY, (W + pageW) / 2 + btnPW + Scale(8), botY));
 
 		if(pnlClanCreate) {
 			irr::s32 cw = Scale(440), ch = Scale(292);
@@ -7153,9 +7155,11 @@ void Game::ResizeEconomyScreens() {
 
 		irr::s32 botBarY = botY - pageBarH;
 		if(stClanMemTotal) stClanMemTotal->setRelativePosition(irr::core::recti(pad, botBarY + Scale(4), pad + Scale(200), botBarY + pageBarH));
-		if(btnClanMemPrev) btnClanMemPrev->setRelativePosition(irr::core::recti(W - pad - Scale(250), botBarY, W - pad - Scale(160), botBarY + pageBarH));
-		if(stClanMemPage) stClanMemPage->setRelativePosition(irr::core::recti(W - pad - Scale(155), botBarY, W - pad - Scale(95), botBarY + pageBarH));
-		if(btnClanMemNext) btnClanMemNext->setRelativePosition(irr::core::recti(W - pad - Scale(90), botBarY, W - pad, botBarY + pageBarH));
+		const irr::s32 pageW = Scale(130);
+		const irr::s32 btnPW = Scale(110);
+		if(btnClanMemPrev) btnClanMemPrev->setRelativePosition(irr::core::recti((W - pageW) / 2 - btnPW - Scale(8), botBarY, (W - pageW) / 2 - Scale(8), botY));
+		if(stClanMemPage) stClanMemPage->setRelativePosition(irr::core::recti((W - pageW) / 2, botBarY, (W + pageW) / 2, botY));
+		if(btnClanMemNext) btnClanMemNext->setRelativePosition(irr::core::recti((W + pageW) / 2 + Scale(8), botBarY, (W + pageW) / 2 + btnPW + Scale(8), botY));
 	}
 
 	// 5. Mailbox (Full-screen table canvas with pagination)
@@ -10340,13 +10344,33 @@ bool Game::MainLoop() {
 				drawNeon(pnlClansTable, cCyan);
 				drawNeon(pnlClanCreate, cGold);
 				drawNeon(btnClansHelp, cCyan);
+				drawNeon(btnClanMyClan, cPurp);
+				drawNeon(btnClanCreateOpen, cCyan);
+				drawNeon(btnClansBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnClanSearch, cCyan);
+				drawNeon(btnClansPrev, cCyan);
+				drawNeon(btnClansNext, cCyan);
+				for(int r = 0; r < 6; ++r) {
+					drawNeon(btnClanRowView[r], cPurp);
+					drawNeon(btnClanRowReq[r], cCyan);
+				}
 			}
 			if(wClanDetail && wClanDetail->isVisible()) {
 				drawNeon(pnlClanSummary, cCyan);
 				if(pnlClanRequestsTable && pnlClanRequestsTable->isVisible()) {
 					drawNeon(pnlClanRequestsTable, cGold);
+					for(int r = 0; r < 4; ++r) {
+						drawNeon(btnClanReqAccept[r], cEmer);
+						drawNeon(btnClanReqReject[r], irr::video::SColor(160, 148, 163, 184));
+					}
 				}
 				drawNeon(pnlClanMembersTable, cPurp);
+				for(int r = 0; r < 6; ++r) drawNeon(btnClanMemKick[r], cGold);
+				drawNeon(btnClanDetailBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnClanDetailLeave, cGold);
+				drawNeon(btnClanDetailRequest, cCyan);
+				drawNeon(btnClanMemPrev, cCyan);
+				drawNeon(btnClanMemNext, cCyan);
 			}
 			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); drawNeon(btnMailboxHelp, cCyan); }
 			}
