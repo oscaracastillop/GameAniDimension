@@ -10182,7 +10182,7 @@ bool Game::MainLoop() {
 					drawNeon(btnProfileHubActions[hi], hubBorder[hi]);
 				}
 				drawNeon(btnProfileBack, irr::video::SColor(160, 148, 163, 184));
-				drawNeon(btnProfileHubHelp, cCyan);
+				drawNeon(btnProfileHubHelp, irr::video::SColor(150, 56, 189, 248));
 			}
 			// Neon borders for dedicated Store, Profile sub-screens, Events, Clans, Mailbox & Confirm
 			const irr::video::SColor cCyan(150, 56, 189, 248);
