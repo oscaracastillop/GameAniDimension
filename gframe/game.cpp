@@ -10141,6 +10141,10 @@ bool Game::MainLoop() {
 	bool last_resize = false;
 	irr::core::dimension2d<irr::u32> prev_window_size;
 #endif
+	while(!restart && device->run()) {
+		DispatchQueue();
+		if(should_reload_skin) {
+			should_reload_skin = false;
 			if(Utils::ToPathString(gSettings.cbCurrentSkin->getItem(gSettings.cbCurrentSkin->getSelected())) != gGameConfig->skin) {
 				gGameConfig->skin = Utils::ToPathString(gSettings.cbCurrentSkin->getItem(gSettings.cbCurrentSkin->getSelected()));
 				ApplySkin(gGameConfig->skin);
