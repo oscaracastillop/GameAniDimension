@@ -6003,16 +6003,22 @@ void Game::PopulateEconomyScreens() {
 	if(loginDescFont) stClansDesc->setOverrideFont(loginDescFont);
 
 	btnClanMyClan = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_MY_CLAN, L"Mi Clan");
-	btnClanCreateOpen = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_CREATE_OPEN, L"+ Crear Clan");
-	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"\u2190 Volver a Perfil");
+	btnClanCreateOpen = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_CREATE_OPEN, L"Crear Clan");
+	btnClansBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_BACK, L"Volver a Perfil");
 	stylePurpBtn(btnClanMyClan);
 	styleCyanBtn(btnClanCreateOpen);
 	styleDarkBtn(btnClansBack);
+	if(loginCardDescFont) {
+		btnClanMyClan->setOverrideFont(loginCardDescFont);
+		btnClanCreateOpen->setOverrideFont(loginCardDescFont);
+		btnClansBack->setOverrideFont(loginCardDescFont);
+	}
 
 	ebClanSearch = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wClansMenu);
 	ebClanSearch->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	btnClanSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wClansMenu, BUTTON_CLAN_SEARCH, L"Buscar");
 	styleDarkBtn(btnClanSearch);
+	if(loginCardDescFont) btnClanSearch->setOverrideFont(loginCardDescFont);
 
 	pnlClansTable = makePanel(wClansMenu);
 
@@ -6086,71 +6092,79 @@ void Game::PopulateEconomyScreens() {
 
 	// 4e-bis. Clan Detail (Dedicated screen matching Image 2 web reference)
 	makeCanvas(wClanDetail);
-	stClanDetailTitle = env->addStaticText(L"Clan: AniDimension", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
-	stClanDetailTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+	stClanDetailTitle = env->addStaticText(L"CLAN: ANIDIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
+	stClanDetailTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont) stClanDetailTitle->setOverrideFont(loginTitleFont);
 
 	stClanDetailDesc = env->addStaticText(L"Gestiona tu clan, miembros, solicitudes y bonificaciones.", irr::core::recti(0, 0, 10, 10), false, false, wClanDetail);
 	stClanDetailDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginDescFont) stClanDetailDesc->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stClanDetailDesc->setOverrideFont(loginCardDescFont);
 
 	btnClanDetailLeave = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_LEAVE, L"Abandonar Clan");
 	btnClanDetailRequest = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_REQUEST, L"Solicitar Unirse");
-	btnClanDetailBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_BACK, L"\u2190 Lista de Clanes");
+	btnClanDetailBack = env->addButton(irr::core::recti(0, 0, 10, 10), wClanDetail, BUTTON_CLAN_DETAIL_BACK, L"Lista de Clanes");
 	styleDarkBtn(btnClanDetailLeave);
 	styleCyanBtn(btnClanDetailRequest);
 	styleDarkBtn(btnClanDetailBack);
+	if(loginCardDescFont) {
+		btnClanDetailLeave->setOverrideFont(loginCardDescFont);
+		btnClanDetailRequest->setOverrideFont(loginCardDescFont);
+		btnClanDetailBack->setOverrideFont(loginCardDescFont);
+	}
 
 	// Summary Card
 	pnlClanSummary = makePanel(wClanDetail);
 	stClanDetailName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
 	stClanDetailName->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginTitleFont) stClanDetailName->setOverrideFont(loginTitleFont);
+	if(loginCardTitleFont) stClanDetailName->setOverrideFont(loginCardTitleFont);
 
 	stClanDetailBadges = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
+	stClanDetailBadges->setTextAlignment(irr::gui::EGUIA_LOWERRIGHT, irr::gui::EGUIA_CENTER);
 	stClanDetailBadges->setOverrideColor(irr::video::SColor(255, 110, 231, 183));
-	if(loginUiFont) stClanDetailBadges->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) stClanDetailBadges->setOverrideFont(loginCardDescFont);
 
 	stClanDetailSummary = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlClanSummary);
 	stClanDetailSummary->setWordWrap(true);
 	stClanDetailSummary->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
-	if(loginDescFont) stClanDetailSummary->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stClanDetailSummary->setOverrideFont(loginCardDescFont);
 
 	stClanDetailBonuses = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
 	stClanDetailBonuses->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stClanDetailBonuses->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) stClanDetailBonuses->setOverrideFont(loginCardDescFont);
 
 	stClanDetailExpInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanSummary);
 	stClanDetailExpInfo->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginDescFont) stClanDetailExpInfo->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stClanDetailExpInfo->setOverrideFont(loginCardDescFont);
 
 	// Requests Card
 	pnlClanRequestsTable = makePanel(wClanDetail);
 	stClanRequestsTitle = env->addStaticText(L"Solicitudes de Ingreso Pendientes", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
 	stClanRequestsTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginUiFont) stClanRequestsTitle->setOverrideFont(loginUiFont);
+	if(loginCardTitleFont) stClanRequestsTitle->setOverrideFont(loginCardTitleFont);
 
 	stClanNoRequests = env->addStaticText(L"No hay solicitudes pendientes.", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
 	stClanNoRequests->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginDescFont) stClanNoRequests->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stClanNoRequests->setOverrideFont(loginCardDescFont);
 
 	for(int i = 0; i < 4; ++i) {
 		stClanReqUser[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlClanRequestsTable);
 		stClanReqUser[i]->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-		if(loginDescFont) stClanReqUser[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stClanReqUser[i]->setOverrideFont(loginCardDescFont);
 
 		btnClanReqAccept[i] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClanRequestsTable, BUTTON_CLAN_REQ_ACCEPT_0 + i, L"Aceptar");
 		styleEmerBtn(btnClanReqAccept[i]);
+		if(loginCardDescFont) btnClanReqAccept[i]->setOverrideFont(loginCardDescFont);
 
 		btnClanReqReject[i] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlClanRequestsTable, BUTTON_CLAN_REQ_REJECT_0 + i, L"Rechazar");
 		styleDarkBtn(btnClanReqReject[i]);
+		if(loginCardDescFont) btnClanReqReject[i]->setOverrideFont(loginCardDescFont);
 	}
 
 	// Members Card
 	pnlClanMembersTable = makePanel(wClanDetail);
 	stClanMembersTitle = env->addStaticText(L"Miembros del Clan", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
 	stClanMembersTitle->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-	if(loginUiFont) stClanMembersTitle->setOverrideFont(loginUiFont);
+	if(loginCardTitleFont) stClanMembersTitle->setOverrideFont(loginCardTitleFont);
 
 	thClanMemUser = env->addStaticText(L"DUELISTA", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
 	thClanMemRole = env->addStaticText(L"ROL", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
@@ -6160,7 +6174,7 @@ void Game::PopulateEconomyScreens() {
 	thClanMemAction = env->addStaticText(L"GESTI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlClanMembersTable);
 	for(auto* th : { thClanMemUser, thClanMemRole, thClanMemLevel, thClanMemExp, thClanMemDate, thClanMemAction }) {
 		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) th->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
 	}
 
 	for(int i = 0; i < 6; ++i) {
@@ -7188,16 +7202,25 @@ void Game::ResizeEconomyScreens() {
 
 		irr::s32 btnGap = Scale(8);
 		irr::s32 rxRight = W - pad;
+		auto fitBtnW = [&](irr::gui::IGUIButton* b, irr::s32 minW) -> irr::s32 {
+			if(!b) return minW;
+			auto* f = loginCardDescFont ? loginCardDescFont : guiFont;
+			irr::s32 tw = f ? (irr::s32)f->getDimension(b->getText()).Width + Scale(28) : minW;
+			return std::max(minW, tw);
+		};
 		if(btnClansBack) {
-			btnClansBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(2), rxRight, topY + Scale(36)));
-			rxRight -= Scale(140) + btnGap;
+			irr::s32 bw = fitBtnW(btnClansBack, Scale(120));
+			btnClansBack->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
+			rxRight -= bw + btnGap;
 		}
 		if(btnClanCreateOpen) {
-			btnClanCreateOpen->setRelativePosition(irr::core::recti(rxRight - Scale(120), topY + Scale(2), rxRight, topY + Scale(36)));
-			rxRight -= Scale(120) + btnGap;
+			irr::s32 bw = fitBtnW(btnClanCreateOpen, Scale(105));
+			btnClanCreateOpen->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
+			rxRight -= bw + btnGap;
 		}
 		if(btnClanMyClan) {
-			btnClanMyClan->setRelativePosition(irr::core::recti(rxRight - Scale(100), topY + Scale(2), rxRight, topY + Scale(36)));
+			irr::s32 bw = fitBtnW(btnClanMyClan, Scale(90));
+			btnClanMyClan->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
 		}
 
 		irr::s32 searchTop = topY + Scale(64);
@@ -7274,31 +7297,39 @@ void Game::ResizeEconomyScreens() {
 	// 4e-bis. Clan Detail (Dedicated screen matching web reference)
 	if(wClanDetail) {
 		wClanDetail->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stClanDetailTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(320), topY + Scale(30)));
-		if(stClanDetailDesc) stClanDetailDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(320), topY + Scale(54)));
+		placeHeaderHelp(stClanDetailTitle, Scale(340), nullptr, stClanDetailDesc);
 
+		auto fitBtnW2 = [&](irr::gui::IGUIButton* b, irr::s32 minW) -> irr::s32 {
+			if(!b) return minW;
+			auto* f = loginCardDescFont ? loginCardDescFont : guiFont;
+			irr::s32 tw = f ? (irr::s32)f->getDimension(b->getText()).Width + Scale(28) : minW;
+			return std::max(minW, tw);
+		};
 		irr::s32 rxRight = W - pad;
 		if(btnClanDetailBack) {
-			btnClanDetailBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
-			rxRight -= Scale(140) + Scale(8);
+			irr::s32 bw = fitBtnW2(btnClanDetailBack, Scale(120));
+			btnClanDetailBack->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
+			rxRight -= bw + Scale(8);
 		}
 		if(btnClanDetailLeave) {
-			btnClanDetailLeave->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
-			rxRight -= Scale(140) + Scale(8);
+			irr::s32 bw = fitBtnW2(btnClanDetailLeave, Scale(120));
+			btnClanDetailLeave->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
+			rxRight -= bw + Scale(8);
 		}
 		if(btnClanDetailRequest) {
-			btnClanDetailRequest->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+			irr::s32 bw = fitBtnW2(btnClanDetailRequest, Scale(120));
+			btnClanDetailRequest->setRelativePosition(irr::core::recti(rxRight - bw, topY + Scale(2), rxRight, topY + Scale(36)));
 		}
 
-		irr::s32 curY = topY + Scale(60);
+		irr::s32 curY = topY + Scale(58);
 		irr::s32 sumH = Scale(96);
 		if(pnlClanSummary) {
 			pnlClanSummary->setRelativePosition(irr::core::recti(pad, curY, W - pad, curY + sumH));
-			stClanDetailName->setRelativePosition(irr::core::recti(Scale(14), Scale(10), W - 2 * pad - Scale(250), Scale(36)));
-			stClanDetailBadges->setRelativePosition(irr::core::recti(W - 2 * pad - Scale(240), Scale(10), W - 2 * pad - Scale(14), Scale(36)));
-			stClanDetailSummary->setRelativePosition(irr::core::recti(Scale(14), Scale(38), W - 2 * pad - Scale(14), Scale(58)));
-			stClanDetailBonuses->setRelativePosition(irr::core::recti(Scale(14), Scale(58), (W - 2 * pad) * 55 / 100, Scale(78)));
-			stClanDetailExpInfo->setRelativePosition(irr::core::recti((W - 2 * pad) * 55 / 100, Scale(58), W - 2 * pad - Scale(14), Scale(78)));
+			stClanDetailName->setRelativePosition(irr::core::recti(Scale(14), Scale(10), W - 2 * pad - Scale(290), Scale(34)));
+			stClanDetailBadges->setRelativePosition(irr::core::recti(W - 2 * pad - Scale(280), Scale(10), W - 2 * pad - Scale(14), Scale(34)));
+			stClanDetailSummary->setRelativePosition(irr::core::recti(Scale(14), Scale(36), W - 2 * pad - Scale(14), Scale(58)));
+			stClanDetailBonuses->setRelativePosition(irr::core::recti(Scale(14), Scale(60), (W - 2 * pad) * 55 / 100, Scale(82)));
+			stClanDetailExpInfo->setRelativePosition(irr::core::recti((W - 2 * pad) * 55 / 100, Scale(60), W - 2 * pad - Scale(14), Scale(82)));
 		}
 		curY += sumH + Scale(10);
 
@@ -8352,6 +8383,11 @@ void Game::ExecuteConfirmedPurchase() {
 	pendingConfirmType = 0;
 	pendingConfirmId = 0;
 	if(cType == 0) return;
+	if(cType == -1) {
+		if(btnConfirmYes) btnConfirmYes->setText(L"Confirmar");
+		if(btnConfirmNo) btnConfirmNo->setVisible(true);
+		return;
+	}
 
 	if(cType == 9) {
 		nlohmann::json body;
@@ -9080,8 +9116,8 @@ void Game::OpenEventsMenu(int eventoId) {
 		bool isActive = (estadoActual == "ACTIVO");
 		bool isFinished = (estadoActual == "FINALIZADO" || estadoActual == "INACTIVO");
 
-		if(btnEventsClaimTop) btnEventsClaimTop->setEnabled(isActive && uniqueCount >= 20 && !myClaim && hasOpenSlot);
-		if(btnEventsExchange) btnEventsExchange->setEnabled(isFinished && totalCount > 0);
+		if(btnEventsClaimTop) btnEventsClaimTop->setEnabled(true);
+		if(btnEventsExchange) btnEventsExchange->setEnabled(true);
 
 		if(stEventsHint) {
 			if(myClaim) {
@@ -9114,6 +9150,8 @@ void Game::RequestExchangeEventPieces() {
 	if(selectedEventId <= 0) return;
 	pendingConfirmType = 9;
 	pendingConfirmId = selectedEventId;
+	if(btnConfirmYes) btnConfirmYes->setText(L"Confirmar");
+	if(btnConfirmNo) btnConfirmNo->setVisible(true);
 	stConfirmPurchaseTitle->setText(L"CANJEAR FICHAS");
 	stConfirmPurchaseMsg->setText(L"\u00BFCambiar tus fichas sobrantes de este evento por 100 StarShips cada una?");
 	wConfirmPurchase->setVisible(true);
@@ -10931,7 +10969,18 @@ bool Game::MainLoop() {
 		{
 			std::lock_guard<epro::mutex> lk(popupCheck);
 			if(queued_msg.size()) {
-				env->addMessageBox(queued_caption.data(), queued_msg.data());
+				if(!dInfo.isInDuel && !is_building && isEcosystemVisible() && wConfirmPurchase && stConfirmPurchaseTitle && stConfirmPurchaseMsg) {
+					pendingConfirmType = -1;
+					pendingConfirmId = 0;
+					stConfirmPurchaseTitle->setText(queued_caption.empty() ? L"AVISO" : queued_caption.data());
+					stConfirmPurchaseMsg->setText(queued_msg.data());
+					if(btnConfirmYes) btnConfirmYes->setText(L"Entendido");
+					if(btnConfirmNo) btnConfirmNo->setVisible(false);
+					wConfirmPurchase->setVisible(true);
+					env->getRootGUIElement()->bringToFront(wConfirmPurchase);
+				} else {
+					env->addMessageBox(queued_caption.data(), queued_msg.data());
+				}
 				queued_msg.clear();
 				queued_caption.clear();
 			}
