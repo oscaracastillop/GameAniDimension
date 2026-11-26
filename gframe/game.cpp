@@ -5080,18 +5080,25 @@ void Game::PopulateEconomyScreens() {
 			if(auto dt = driver->getTexture(donImgs[di])) imgDonIcons[di]->setImage(dt);
 			stDonTitles[di] = env->addStaticText(donNames[di], irr::core::recti(0, 0, 10, 10), false, false, wDonCards[di]);
 			stDonTitles[di]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-			if(loginUiFont) stDonTitles[di]->setOverrideFont(loginUiFont);
+			if(loginCardTitleFont) stDonTitles[di]->setOverrideFont(loginCardTitleFont);
+			else if(loginUiFont) stDonTitles[di]->setOverrideFont(loginUiFont);
 			stDonAmounts[di] = env->addStaticText(donAmts[di], irr::core::recti(0, 0, 10, 10), false, false, wDonCards[di]);
 			stDonAmounts[di]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			if(loginCardDescFont) stDonAmounts[di]->setOverrideFont(loginCardDescFont);
+			else if(loginDescFont) stDonAmounts[di]->setOverrideFont(loginDescFont);
 			stDonDescs[di] = env->addStaticText(donDescs[di], irr::core::recti(0, 0, 10, 10), false, true, wDonCards[di]);
 			stDonDescs[di]->setWordWrap(true);
 			stDonDescs[di]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			if(loginCardDescFont) stDonDescs[di]->setOverrideFont(loginCardDescFont);
+			else if(loginDescFont) stDonDescs[di]->setOverrideFont(loginDescFont);
 			stDonPrices[di] = env->addStaticText(donPrices[di], irr::core::recti(0, 0, 10, 10), false, false, wDonCards[di]);
 			stDonPrices[di]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-			if(loginUiFont) stDonPrices[di]->setOverrideFont(loginUiFont);
+			if(loginCardTitleFont) stDonPrices[di]->setOverrideFont(loginCardTitleFont);
+			else if(loginUiFont) stDonPrices[di]->setOverrideFont(loginUiFont);
 			btnDonSolicitar[di] = env->addButton(irr::core::recti(0, 0, 10, 10), wDonCards[di], BUTTON_STORE_DON_0 + di, L"Solicitar");
 			styleDarkBtn(btnDonSolicitar[di]);
 			btnDonSolicitar[di]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			if(loginCardDescFont) btnDonSolicitar[di]->setOverrideFont(loginCardDescFont);
 		}
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
@@ -6289,20 +6296,25 @@ void Game::ResizeEconomyScreens() {
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
-		const irr::s32 cardH = std::min<irr::s32>(Scale(380), availH);
+		const irr::s32 cardH = std::min<irr::s32>(Scale(520), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
 		for(int di = 0; di < 5; ++di) {
 			irr::s32 cx = pad + di * (cardW + gap);
 			if(wDonCards[di]) {
 				wDonCards[di]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
-				irr::s32 icH = std::max<irr::s32>(Scale(96), (cardH * 38) / 100);
-				fitImage(imgDonIcons[di], cardW / 2, Scale(10), cardW - Scale(16), icH);
-				irr::s32 ty = Scale(14) + icH;
-				if(stDonTitles[di]) stDonTitles[di]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ty + Scale(22)));
-				if(stDonAmounts[di]) stDonAmounts[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(22), cardW - Scale(10), ty + Scale(42)));
-				if(stDonDescs[di]) stDonDescs[di]->setRelativePosition(irr::core::recti(Scale(10), ty + Scale(44), cardW - Scale(10), cardH - Scale(74)));
-				if(stDonPrices[di]) stDonPrices[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(70), cardW - Scale(10), cardH - Scale(46)));
-				if(btnDonSolicitar[di]) btnDonSolicitar[di]->setRelativePosition(irr::core::recti(Scale(10), cardH - Scale(40), cardW - Scale(10), cardH - Scale(10)));
+				irr::s32 btnH = Scale(34);
+				irr::s32 by = cardH - btnH - Scale(12);
+				if(btnDonSolicitar[di]) btnDonSolicitar[di]->setRelativePosition(irr::core::recti(Scale(10), by, cardW - Scale(10), by + btnH));
+				irr::s32 py = by - Scale(26);
+				if(stDonPrices[di]) stDonPrices[di]->setRelativePosition(irr::core::recti(Scale(10), py, cardW - Scale(10), by - Scale(4)));
+				irr::s32 dy = py - Scale(80);
+				if(stDonDescs[di]) stDonDescs[di]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), py - Scale(4)));
+				irr::s32 ay = dy - Scale(22);
+				if(stDonAmounts[di]) stDonAmounts[di]->setRelativePosition(irr::core::recti(Scale(10), ay, cardW - Scale(10), dy - Scale(2)));
+				irr::s32 ty = ay - Scale(24);
+				if(stDonTitles[di]) stDonTitles[di]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), ay - Scale(2)));
+				irr::s32 icH = ty - Scale(18);
+				fitImage(imgDonIcons[di], cardW / 2, Scale(8), cardW - Scale(16), icH);
 			}
 		}
 	}
