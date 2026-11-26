@@ -1141,6 +1141,7 @@ public:
 	int loginPendingPlayerLevel{ 1 };
 	int loginPendingPlayerExp{ 1 };
 	std::unordered_map<uint32_t, int> loginPendingCardInventory;
+	std::unordered_map<uint32_t, int> loginPendingCardInventoryOrder;
 	std::unordered_map<uint32_t, long long> loginPendingCardSellPrices;
 	std::vector<UserDeckSlot> loginPendingUserDeckSlots;
 	void SubmitLogin();
@@ -1149,6 +1150,7 @@ public:
 	int playerExp{ 1 };
 	long long playerStarShips{ 10000 };
 	std::unordered_map<uint32_t, int> cardInventory;
+	std::unordered_map<uint32_t, int> cardInventoryOrder;
 	std::unordered_map<uint32_t, long long> cardSellPrices;
 	std::vector<UserDeckSlot> userDeckSlots;
 	epro::mutex inventoryMutex;
@@ -1478,8 +1480,34 @@ public:
 	irr::gui::IGUIStaticText* stProfInfoLeftText{ nullptr };
 	irr::gui::IGUIStaticText* stProfInfoRightText{ nullptr };
 	irr::gui::IGUIButton* btnProfInfoBack{ nullptr };
+	irr::gui::IGUIStaticText* stProfLvlTrack{ nullptr };
+	irr::gui::IGUIStaticText* stProfLvlFill{ nullptr };
+	irr::gui::IGUIStaticText* stProfLvlText{ nullptr };
+	irr::gui::IGUIStaticText* stProfCardsTrack{ nullptr };
+	irr::gui::IGUIStaticText* stProfCardsFill{ nullptr };
+	irr::gui::IGUIStaticText* stProfCardsText{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfBonus{ nullptr };
+	irr::gui::IGUIStaticText* stProfBonusTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfBonusVals[3]{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfAvaBox{ nullptr };
+	irr::gui::IGUIStaticText* stProfAvaTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfAvaBody{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfMedBox{ nullptr };
+	irr::gui::IGUIStaticText* stProfMedTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfMedBody{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfClanBox{ nullptr };
+	irr::gui::IGUIStaticText* stProfClanTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfClanBody{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfVipBox{ nullptr };
+	irr::gui::IGUIStaticText* stProfVipTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfVipBody{ nullptr };
+	irr::gui::IGUIStaticText* pnlProfDuelsBox{ nullptr };
+	irr::gui::IGUIStaticText* stProfDuelsTitle{ nullptr };
+	irr::gui::IGUIStaticText* stProfDuelsBody{ nullptr };
+	double profLvlPct{ 0.0 };
+	double profCardsPct{ 0.0 };
 
-	// 4b. Profile Medals (Full-screen canvas)
+	// 4b. Profile Medals (Full-screen 5x2 card grid with pagination)
 	irr::gui::IGUIStaticText* wProfileMedals{ nullptr };
 	irr::gui::IGUIStaticText* pnlProfMedalsLeft{ nullptr };
 	irr::gui::IGUIStaticText* pnlProfMedalsRight{ nullptr };
@@ -1489,6 +1517,17 @@ public:
 	irr::gui::IGUIStaticText* stProfMedalInfo{ nullptr };
 	irr::gui::IGUIButton* btnProfMedalHighlight{ nullptr };
 	irr::gui::IGUIButton* btnProfMedalsBack{ nullptr };
+	irr::gui::IGUIStaticText* wMedalCards[10]{ nullptr };
+	irr::gui::IGUIImage* imgMedalIcons[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMedalTitles[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMedalStats[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMedalOrigin[10]{ nullptr };
+	irr::gui::IGUIStaticText* stMedalActiveBadge[10]{ nullptr };
+	irr::gui::IGUIButton* btnMedalHighlight[10]{ nullptr };
+	irr::gui::IGUIButton* btnMedalsPrev{ nullptr };
+	irr::gui::IGUIStaticText* stMedalsPage{ nullptr };
+	irr::gui::IGUIButton* btnMedalsNext{ nullptr };
+	int medalsPage{ 0 };
 
 	// 4c. Profile Avatars (Full-screen 5x2 card grid with pagination & stat rules banner)
 	irr::gui::IGUIStaticText* wProfileAvatars{ nullptr };
@@ -1770,6 +1809,8 @@ public:
 	void ResolveMailboxRow(int rowIdx, bool claim);
 	void RefreshProfileAvatarsPage();
 	void ActivateAvatarIdx(int slotIdx);
+	void RefreshProfileMedalsPage();
+	void HighlightMedalIdx(int slotIdx);
 	void SelectProfileMedal(int idx);
 	void SelectClanItem(int idx);
 	void RequestBuyAvatarIdx(int storeIdx, bool useCD);

@@ -4123,6 +4123,7 @@ void Game::SubmitLogin() {
 
 		// Preload inventory and decks in this background thread so main GUI thread NEVER blocks
 		std::unordered_map<uint32_t, int> stagingCards;
+		std::unordered_map<uint32_t, int> stagingOrder;
 		std::unordered_map<uint32_t, long long> stagingPrices;
 		std::vector<UserDeckSlot> stagingDecks;
 		bool hasInv = false;
@@ -4139,6 +4140,7 @@ void Game::SubmitLogin() {
 						stagingSS = prof["starShips"].get<long long>();
 				}
 				if(invJson.contains("cards") && invJson["cards"].is_array()) {
+					int stIdx = 0;
 					for(const auto& c : invJson["cards"]) {
 						uint32_t code = static_cast<uint32_t>(SafeJsonInt(c, "passcode", 0));
 						int qty = SafeJsonInt(c, "cantidad", 0);
@@ -4147,6 +4149,7 @@ void Game::SubmitLogin() {
 							sellPrice = c["precioRecompra"].get<long long>();
 						if(code > 0 && qty > 0) {
 							stagingCards[code] = qty;
+							stagingOrder[code] = stIdx++;
 							stagingPrices[code] = sellPrice;
 						}
 					}
@@ -4193,6 +4196,7 @@ void Game::SubmitLogin() {
 			loginPendingPlayerLevel = stagingLvl;
 			loginPendingPlayerExp = stagingExp;
 			loginPendingCardInventory = std::move(stagingCards);
+			loginPendingCardInventoryOrder = std::move(stagingOrder);
 			loginPendingCardSellPrices = std::move(stagingPrices);
 			loginPendingUserDeckSlots = std::move(stagingDecks);
 		}
@@ -4212,6 +4216,7 @@ void Game::ProcessPendingLoginResult() {
 	long long cdVal = 0;
 	int lvl = 1, exp = 1;
 	std::unordered_map<uint32_t, int> cInv;
+	std::unordered_map<uint32_t, int> cOrder;
 	std::unordered_map<uint32_t, long long> cPrices;
 	std::vector<UserDeckSlot> dSlots;
 	{
@@ -4226,6 +4231,7 @@ void Game::ProcessPendingLoginResult() {
 		lvl = loginPendingPlayerLevel;
 		exp = loginPendingPlayerExp;
 		cInv = std::move(loginPendingCardInventory);
+		cOrder = std::move(loginPendingCardInventoryOrder);
 		cPrices = std::move(loginPendingCardSellPrices);
 		dSlots = std::move(loginPendingUserDeckSlots);
 	}
@@ -4243,6 +4249,7 @@ void Game::ProcessPendingLoginResult() {
 			playerExp = exp;
 			if(hasInv) {
 				cardInventory = std::move(cInv);
+				cardInventoryOrder = std::move(cOrder);
 				cardSellPrices = std::move(cPrices);
 				userDeckSlots = std::move(dSlots);
 			}
@@ -4352,8 +4359,10 @@ void Game::FetchUserInventoryAndDecks() {
 				playerStarShips = prof["starShips"].get<long long>();
 		}
 		cardInventory.clear();
+		cardInventoryOrder.clear();
 		cardSellPrices.clear();
 		if(invJson.contains("cards") && invJson["cards"].is_array()) {
+			int invIdx = 0;
 			for(const auto& c : invJson["cards"]) {
 				uint32_t code = static_cast<uint32_t>(SafeJsonInt(c, "passcode", 0));
 				int qty = SafeJsonInt(c, "cantidad", 0);
@@ -4362,6 +4371,7 @@ void Game::FetchUserInventoryAndDecks() {
 					sellPrice = c["precioRecompra"].get<long long>();
 				if(code > 0 && qty > 0) {
 					cardInventory[code] = qty;
+					cardInventoryOrder[code] = invIdx++;
 					cardSellPrices[code] = sellPrice;
 				}
 			}
@@ -5537,44 +5547,163 @@ void Game::PopulateEconomyScreens() {
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
 	}
 
-	// 4a. Profile Info Sheet
+	// 4a. Profile Info Sheet (Web-style 6-section layout)
 	makeCanvas(wProfileInfo);
-	pnlProfInfoLeft = makePanel(wProfileInfo);
-	pnlProfInfoRight = makePanel(wProfileInfo);
 	stProfInfoTitle = env->addStaticText(L"INFORMACI\u00D3N DEL JUGADOR", irr::core::recti(0, 0, 10, 10), false, false, wProfileInfo);
-	stProfInfoTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) stProfInfoTitle->setOverrideFont(loginUiFont);
-	imgProfInfoAvatar = env->addImage(irr::core::recti(0, 0, 10, 10), wProfileInfo);
-	imgProfInfoAvatar->setScaleImage(true);
-	imgProfInfoAvatar->setUseAlphaChannel(true);
-	stProfInfoLeftText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileInfo);
-	stProfInfoLeftText->setWordWrap(true);
-	stProfInfoLeftText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	stProfInfoRightText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileInfo);
-	stProfInfoRightText->setWordWrap(true);
-	stProfInfoRightText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	stProfInfoTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont) stProfInfoTitle->setOverrideFont(loginTitleFont);
 	btnProfInfoBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileInfo, BUTTON_PROF_INFO_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnProfInfoBack);
+	if(loginCardDescFont) btnProfInfoBack->setOverrideFont(loginCardDescFont);
 
-	// 4b. Profile Medals
+	pnlProfInfoLeft = makePanel(wProfileInfo);
+	imgProfInfoAvatar = env->addImage(irr::core::recti(0, 0, 10, 10), pnlProfInfoLeft);
+	imgProfInfoAvatar->setScaleImage(true);
+	imgProfInfoAvatar->setUseAlphaChannel(true);
+	stProfInfoLeftText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfInfoLeft);
+	stProfInfoLeftText->setWordWrap(true);
+	stProfInfoLeftText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfInfoLeftText->setOverrideFont(loginCardDescFont);
+
+	stProfLvlText = env->addStaticText(L"Nivel de Duelista: Nv. 1 / 300 (0%)", irr::core::recti(0, 0, 10, 10), false, true, pnlProfInfoLeft);
+	stProfLvlText->setWordWrap(true);
+	stProfLvlText->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+	if(loginCardDescFont) stProfLvlText->setOverrideFont(loginCardDescFont);
+	stProfLvlTrack = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlProfInfoLeft, -1, true);
+	stProfLvlTrack->setBackgroundColor(irr::video::SColor(220, 15, 23, 42));
+	stProfLvlFill = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, stProfLvlTrack, -1, true);
+	stProfLvlFill->setBackgroundColor(irr::video::SColor(255, 56, 189, 248));
+
+	stProfCardsText = env->addStaticText(L"Colecci\u00F3n de Cartas: 0 / 0 (0%)", irr::core::recti(0, 0, 10, 10), false, true, pnlProfInfoLeft);
+	stProfCardsText->setWordWrap(true);
+	stProfCardsText->setOverrideColor(irr::video::SColor(255, 110, 231, 183));
+	if(loginCardDescFont) stProfCardsText->setOverrideFont(loginCardDescFont);
+	stProfCardsTrack = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlProfInfoLeft, -1, true);
+	stProfCardsTrack->setBackgroundColor(irr::video::SColor(220, 15, 23, 42));
+	stProfCardsFill = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, stProfCardsTrack, -1, true);
+	stProfCardsFill->setBackgroundColor(irr::video::SColor(255, 52, 211, 153));
+
+	pnlProfBonus = makePanel(wProfileInfo);
+	stProfBonusTitle = env->addStaticText(L"TOTAL BONIFICACIONES ACTIVAS", irr::core::recti(0, 0, 10, 10), false, false, pnlProfBonus);
+	stProfBonusTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginCardTitleFont) stProfBonusTitle->setOverrideFont(loginCardTitleFont);
+	{
+		const irr::video::SColor bCols[3] = {
+			irr::video::SColor(255, 147, 197, 253),
+			irr::video::SColor(255, 110, 231, 183),
+			irr::video::SColor(255, 252, 211, 77)
+		};
+		for(int bi = 0; bi < 3; ++bi) {
+			stProfBonusVals[bi] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfBonus);
+			stProfBonusVals[bi]->setWordWrap(true);
+			stProfBonusVals[bi]->setOverrideColor(bCols[bi]);
+			if(loginCardDescFont) stProfBonusVals[bi]->setOverrideFont(loginCardDescFont);
+		}
+	}
+
+	pnlProfAvaBox = makePanel(wProfileInfo);
+	stProfAvaTitle = env->addStaticText(L"DESGLOSE: AVATAR ACTIVO", irr::core::recti(0, 0, 10, 10), false, false, pnlProfAvaBox);
+	stProfAvaTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+	if(loginCardTitleFont) stProfAvaTitle->setOverrideFont(loginCardTitleFont);
+	stProfAvaBody = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfAvaBox);
+	stProfAvaBody->setWordWrap(true);
+	stProfAvaBody->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfAvaBody->setOverrideFont(loginCardDescFont);
+
+	pnlProfMedBox = makePanel(wProfileInfo);
+	stProfMedTitle = env->addStaticText(L"MEDALLAS", irr::core::recti(0, 0, 10, 10), false, false, pnlProfMedBox);
+	stProfMedTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+	if(loginCardTitleFont) stProfMedTitle->setOverrideFont(loginCardTitleFont);
+	stProfMedBody = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfMedBox);
+	stProfMedBody->setWordWrap(true);
+	stProfMedBody->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfMedBody->setOverrideFont(loginCardDescFont);
+
+	pnlProfClanBox = makePanel(wProfileInfo);
+	stProfClanTitle = env->addStaticText(L"CLAN", irr::core::recti(0, 0, 10, 10), false, false, pnlProfClanBox);
+	stProfClanTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+	if(loginCardTitleFont) stProfClanTitle->setOverrideFont(loginCardTitleFont);
+	stProfClanBody = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfClanBox);
+	stProfClanBody->setWordWrap(true);
+	stProfClanBody->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfClanBody->setOverrideFont(loginCardDescFont);
+
+	pnlProfVipBox = makePanel(wProfileInfo);
+	stProfVipTitle = env->addStaticText(L"MEMBRES\u00CDA VIP", irr::core::recti(0, 0, 10, 10), false, false, pnlProfVipBox);
+	stProfVipTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+	if(loginCardTitleFont) stProfVipTitle->setOverrideFont(loginCardTitleFont);
+	stProfVipBody = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfVipBox);
+	stProfVipBody->setWordWrap(true);
+	stProfVipBody->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfVipBody->setOverrideFont(loginCardDescFont);
+
+	pnlProfDuelsBox = makePanel(wProfileInfo);
+	stProfDuelsTitle = env->addStaticText(L"ESTAD\u00CDSTICAS DE DUELOS", irr::core::recti(0, 0, 10, 10), false, false, pnlProfDuelsBox);
+	stProfDuelsTitle->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginCardTitleFont) stProfDuelsTitle->setOverrideFont(loginCardTitleFont);
+	stProfDuelsBody = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlProfDuelsBox);
+	stProfDuelsBody->setWordWrap(true);
+	stProfDuelsBody->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	if(loginCardDescFont) stProfDuelsBody->setOverrideFont(loginCardDescFont);
+
+	// 4b. Profile Medals (5x2 grid + pagination matching Mis Avatares)
 	makeCanvas(wProfileMedals);
-	pnlProfMedalsLeft = makePanel(wProfileMedals);
-	pnlProfMedalsRight = makePanel(wProfileMedals);
 	stProfMedalsTitle = env->addStaticText(L"MEDALLAS LEGENDARIAS", irr::core::recti(0, 0, 10, 10), false, false, wProfileMedals);
-	stProfMedalsTitle->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) stProfMedalsTitle->setOverrideFont(loginUiFont);
-	lstProfMedals = env->addListBox(irr::core::recti(0, 0, 10, 10), wProfileMedals, LISTBOX_PROF_MEDALS, true);
-	lstProfMedals->setItemHeight(Scale(26));
-	imgProfMedalPreview = env->addImage(irr::core::recti(0, 0, 10, 10), wProfileMedals);
-	imgProfMedalPreview->setScaleImage(true);
-	imgProfMedalPreview->setUseAlphaChannel(true);
-	stProfMedalInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wProfileMedals);
-	stProfMedalInfo->setWordWrap(true);
-	stProfMedalInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	btnProfMedalHighlight = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_PROF_MEDAL_HIGHLIGHT, L"Mostrar en Perfil");
+	stProfMedalsTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont) stProfMedalsTitle->setOverrideFont(loginTitleFont);
 	btnProfMedalsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_PROF_MEDALS_BACK, L"Volver a Perfil");
-	styleCyanBtn(btnProfMedalHighlight);
 	styleDarkBtn(btnProfMedalsBack);
+	if(loginCardDescFont) btnProfMedalsBack->setOverrideFont(loginCardDescFont);
+
+	for(int i = 0; i < 10; ++i) {
+		wMedalCards[i] = makePanel(wProfileMedals);
+		imgMedalIcons[i] = env->addImage(irr::core::recti(0, 0, 64, 64), wMedalCards[i], -1, 0, true);
+		imgMedalIcons[i]->setScaleImage(true);
+		imgMedalIcons[i]->setUseAlphaChannel(true);
+
+		stMedalTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMedalCards[i]);
+		stMedalTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		if(loginCardTitleFont) stMedalTitles[i]->setOverrideFont(loginCardTitleFont);
+		else if(loginUiFont) stMedalTitles[i]->setOverrideFont(loginUiFont);
+
+		stMedalStats[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wMedalCards[i]);
+		stMedalStats[i]->setWordWrap(true);
+		stMedalStats[i]->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
+		if(loginCardDescFont) stMedalStats[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMedalStats[i]->setOverrideFont(loginDescFont);
+
+		stMedalOrigin[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wMedalCards[i]);
+		stMedalOrigin[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		if(loginCardDescFont) stMedalOrigin[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMedalOrigin[i]->setOverrideFont(loginDescFont);
+
+		stMedalActiveBadge[i] = env->addStaticText(L"[DESTACADA]", irr::core::recti(0, 0, 10, 10), false, false, wMedalCards[i]);
+		stMedalActiveBadge[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stMedalActiveBadge[i]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		stMedalActiveBadge[i]->setBackgroundColor(irr::video::SColor(60, 52, 211, 153));
+		stMedalActiveBadge[i]->setDrawBackground(true);
+		if(loginCardDescFont) stMedalActiveBadge[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stMedalActiveBadge[i]->setOverrideFont(loginDescFont);
+
+		btnMedalHighlight[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wMedalCards[i], BUTTON_MEDAL_HIGHLIGHT_0 + i, L"Destacar");
+		styleDarkBtn(btnMedalHighlight[i]);
+		btnMedalHighlight[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) btnMedalHighlight[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) btnMedalHighlight[i]->setOverrideFont(loginDescFont);
+	}
+
+	btnMedalsPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_MEDALS_PREV, L"Anterior");
+	stMedalsPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wProfileMedals);
+	stMedalsPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stMedalsPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	btnMedalsNext = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileMedals, BUTTON_MEDALS_NEXT, L"Siguiente");
+	styleDarkBtn(btnMedalsPrev);
+	styleDarkBtn(btnMedalsNext);
+	if(loginCardDescFont) {
+		btnMedalsPrev->setOverrideFont(loginCardDescFont);
+		stMedalsPage->setOverrideFont(loginCardDescFont);
+		btnMedalsNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 4c. Profile Avatars (5x2 grid + pagination)
 	makeCanvas(wProfileAvatars);
@@ -6081,9 +6210,11 @@ void Game::PopulateEconomyScreens() {
 	stMailboxDesc = env->addStaticText(L"Reclama tus avatares o aplica tus potenciadores directamente a tu avatar activo.", irr::core::recti(0, 0, 10, 10), false, true, wMailbox);
 	stMailboxDesc->setWordWrap(true);
 	stMailboxDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginCardDescFont) stMailboxDesc->setOverrideFont(loginCardDescFont);
 
 	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnMailboxBack);
+	if(loginCardDescFont) btnMailboxBack->setOverrideFont(loginCardDescFont);
 
 	auto makeHelpBtn = [&](irr::gui::IGUIElement* parent, irr::s32 id) -> irr::gui::IGUIButton* {
 		auto* b = env->addButton(irr::core::recti(0, 0, 10, 10), parent, id, L"?");
@@ -6115,7 +6246,7 @@ void Game::PopulateEconomyScreens() {
 	thMbActions = env->addStaticText(L"ACCIONES", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
 	for(auto* th : { thMbStatus, thMbItem, thMbDetail, thMbOrigin, thMbDate, thMbActions }) {
 		th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) th->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
 	}
 
 	for(int r = 0; r < 8; ++r) {
@@ -6124,54 +6255,56 @@ void Game::PopulateEconomyScreens() {
 
 		stMbRowStatus[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
 		stMbRowStatus[r]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-		if(loginDescFont) stMbRowStatus[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowStatus[r]->setOverrideFont(loginCardDescFont);
 
 		stMbRowItem[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
 		stMbRowItem[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginDescFont) stMbRowItem[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowItem[r]->setOverrideFont(loginCardDescFont);
 
 		stMbRowDetail[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlMbRow[r]);
 		stMbRowDetail[r]->setWordWrap(true);
 		stMbRowDetail[r]->setOverrideColor(irr::video::SColor(255, 203, 213, 225));
-		if(loginLogTimeFont) stMbRowDetail[r]->setOverrideFont(loginLogTimeFont);
-		else if(loginDescFont) stMbRowDetail[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowDetail[r]->setOverrideFont(loginCardDescFont);
 
 		stMbRowOrigin[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
 		stMbRowOrigin[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) stMbRowOrigin[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowOrigin[r]->setOverrideFont(loginCardDescFont);
 
 		stMbRowDate[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
 		stMbRowDate[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginDescFont) stMbRowDate[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowDate[r]->setOverrideFont(loginCardDescFont);
 
 		btnMbRowClaim[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlMbRow[r], BUTTON_MAILBOX_ROW_CLAIM_0 + r, L"Reclamar");
-		styleCyanBtn(btnMbRowClaim[r]);
-		if(loginDescFont) btnMbRowClaim[r]->setOverrideFont(loginDescFont);
+		styleDarkBtn(btnMbRowClaim[r]);
+		btnMbRowClaim[r]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		if(loginCardDescFont) btnMbRowClaim[r]->setOverrideFont(loginCardDescFont);
 
 		btnMbRowDiscard[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlMbRow[r], BUTTON_MAILBOX_ROW_DISC_0 + r, L"Descartar");
 		styleDarkBtn(btnMbRowDiscard[r]);
 		btnMbRowDiscard[r]->setOverrideColor(irr::video::SColor(255, 252, 165, 165));
-		if(loginDescFont) btnMbRowDiscard[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) btnMbRowDiscard[r]->setOverrideFont(loginCardDescFont);
 
 		stMbRowProcessed[r] = env->addStaticText(L"Procesado", irr::core::recti(0, 0, 10, 10), false, false, pnlMbRow[r]);
 		stMbRowProcessed[r]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
-		if(loginDescFont) stMbRowProcessed[r]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stMbRowProcessed[r]->setOverrideFont(loginCardDescFont);
 	}
 
 	stMbInfo = env->addStaticText(L"Total: 0 registro(s)", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
 	stMbInfo->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	if(loginDescFont) stMbInfo->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stMbInfo->setOverrideFont(loginCardDescFont);
 
 	btnMbPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_PREV, L"Anterior");
 	styleDarkBtn(btnMbPrev);
+	if(loginCardDescFont) btnMbPrev->setOverrideFont(loginCardDescFont);
 
 	stMbPage = env->addStaticText(L"P\u00E1gina 1 de 1", irr::core::recti(0, 0, 10, 10), false, false, wMailbox);
 	stMbPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stMbPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginDescFont) stMbPage->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stMbPage->setOverrideFont(loginCardDescFont);
 
 	btnMbNext = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_NEXT, L"Siguiente");
 	styleDarkBtn(btnMbNext);
+	if(loginCardDescFont) btnMbNext->setOverrideFont(loginCardDescFont);
 
 	// Non-window dark-glass neon confirmation overlay (100% opaque so text is always crisp)
 	wConfirmPurchase = env->addStaticText(L"", irr::core::recti(0, 0, 500, 210), false, false, 0, -1, true);
@@ -6716,32 +6849,115 @@ void Game::ResizeEconomyScreens() {
 		}
 	}
 
-	// 4a. Profile Info Sheet
+	// 4a. Profile Info Sheet (Web-style 6-section layout)
 	if(wProfileInfo) {
 		wProfileInfo->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlProfInfoLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlProfInfoRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stProfInfoTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		irr::s32 imgH = std::max<irr::s32>(Scale(140), (botY - topY) * 38 / 100);
-		fitImage(imgProfInfoAvatar, lx + lw / 2, topY + Scale(44), lw, imgH);
-		stProfInfoLeftText->setRelativePosition(irr::core::recti(lx, topY + Scale(52) + imgH, lx + lw, botY - Scale(56)));
-		btnProfInfoBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
-		stProfInfoRightText->setRelativePosition(irr::core::recti(rx, topY + Scale(16), rx + rw, botY - Scale(16)));
+		placeHeaderHelp(stProfInfoTitle, Scale(340), nullptr, nullptr);
+		btnProfInfoBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+
+		const irr::s32 gridTop = topY + Scale(54);
+		const irr::s32 gap = Scale(10);
+		const irr::s32 totalW = W - 2 * pad;
+		const irr::s32 lW = (totalW * 40) / 100;
+		const irr::s32 rX = pad + lW + gap;
+		const irr::s32 rW = totalW - lW - gap;
+		const irr::s32 availH = std::max<irr::s32>(Scale(360), botY - gridTop);
+
+		pnlProfInfoLeft->setRelativePosition(irr::core::recti(pad, gridTop, pad + lW, gridTop + availH));
+		{
+			irr::s32 avH = Scale(138);
+			fitImage(imgProfInfoAvatar, lW / 2, Scale(12), lW - Scale(24), avH);
+			irr::s32 txtY = Scale(20) + avH;
+			irr::s32 progH = Scale(116);
+			stProfInfoLeftText->setRelativePosition(irr::core::recti(Scale(14), txtY, lW - Scale(14), availH - progH - Scale(12)));
+			irr::s32 pY = availH - progH;
+			irr::s32 barW = lW - Scale(28);
+			stProfLvlText->setRelativePosition(irr::core::recti(Scale(14), pY, lW - Scale(14), pY + Scale(34)));
+			stProfLvlTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(36), Scale(14) + barW, pY + Scale(44)));
+			irr::s32 fw1 = (irr::s32)(barW * std::min(100.0, std::max(0.0, profLvlPct)) / 100.0);
+			stProfLvlFill->setRelativePosition(irr::core::recti(0, 0, fw1, Scale(8)));
+
+			stProfCardsText->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(54), lW - Scale(14), pY + Scale(88)));
+			stProfCardsTrack->setRelativePosition(irr::core::recti(Scale(14), pY + Scale(90), Scale(14) + barW, pY + Scale(98)));
+			irr::s32 fw2 = (irr::s32)(barW * std::min(100.0, std::max(0.0, profCardsPct)) / 100.0);
+			stProfCardsFill->setRelativePosition(irr::core::recti(0, 0, fw2, Scale(8)));
+		}
+
+		// Right column: 4 stacked rows
+		const irr::s32 hBonus = Scale(78);
+		const irr::s32 hAva = Scale(96);
+		const irr::s32 hMedClan = Scale(90);
+		const irr::s32 hBot = std::max<irr::s32>(Scale(100), availH - hBonus - hAva - hMedClan - 3 * gap);
+		irr::s32 ry = gridTop;
+
+		pnlProfBonus->setRelativePosition(irr::core::recti(rX, ry, rX + rW, ry + hBonus));
+		stProfBonusTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), rW - Scale(12), Scale(28)));
+		{
+			irr::s32 colW = (rW - Scale(24)) / 3;
+			for(int bi = 0; bi < 3; ++bi)
+				stProfBonusVals[bi]->setRelativePosition(irr::core::recti(Scale(12) + bi * colW, Scale(32), Scale(12) + (bi + 1) * colW - Scale(6), hBonus - Scale(8)));
+		}
+		ry += hBonus + gap;
+
+		pnlProfAvaBox->setRelativePosition(irr::core::recti(rX, ry, rX + rW, ry + hAva));
+		stProfAvaTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), rW - Scale(12), Scale(28)));
+		stProfAvaBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), rW - Scale(12), hAva - Scale(8)));
+		ry += hAva + gap;
+
+		irr::s32 halfW = (rW - gap) / 2;
+		pnlProfMedBox->setRelativePosition(irr::core::recti(rX, ry, rX + halfW, ry + hMedClan));
+		stProfMedTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), halfW - Scale(12), Scale(28)));
+		stProfMedBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), halfW - Scale(12), hMedClan - Scale(8)));
+
+		pnlProfClanBox->setRelativePosition(irr::core::recti(rX + halfW + gap, ry, rX + rW, ry + hMedClan));
+		stProfClanTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), (rW - halfW - gap) - Scale(12), Scale(28)));
+		stProfClanBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), (rW - halfW - gap) - Scale(12), hMedClan - Scale(8)));
+		ry += hMedClan + gap;
+
+		pnlProfVipBox->setRelativePosition(irr::core::recti(rX, ry, rX + halfW, ry + hBot));
+		stProfVipTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), halfW - Scale(12), Scale(28)));
+		stProfVipBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), halfW - Scale(12), hBot - Scale(8)));
+
+		pnlProfDuelsBox->setRelativePosition(irr::core::recti(rX + halfW + gap, ry, rX + rW, ry + hBot));
+		stProfDuelsTitle->setRelativePosition(irr::core::recti(Scale(12), Scale(8), (rW - halfW - gap) - Scale(12), Scale(28)));
+		stProfDuelsBody->setRelativePosition(irr::core::recti(Scale(12), Scale(30), (rW - halfW - gap) - Scale(12), hBot - Scale(8)));
 	}
 
-	// 4b. Profile Medals
+	// 4b. Profile Medals (5x2 grid)
 	if(wProfileMedals) {
 		wProfileMedals->setRelativePosition(irr::core::recti(0, 0, W, H));
-		pnlProfMedalsLeft->setRelativePosition(irr::core::recti(leftL, topY, leftR, botY));
-		pnlProfMedalsRight->setRelativePosition(irr::core::recti(rightL, topY, rightR, botY));
-		stProfMedalsTitle->setRelativePosition(irr::core::recti(lx, topY + Scale(12), lx + lw, topY + Scale(38)));
-		lstProfMedals->setRelativePosition(irr::core::recti(lx, topY + Scale(44), lx + lw, botY - Scale(56)));
-		btnProfMedalsBack->setRelativePosition(irr::core::recti(lx, botY - Scale(46), lx + lw, botY - Scale(10)));
+		placeHeaderHelp(stProfMedalsTitle, Scale(340), nullptr, nullptr);
+		btnProfMedalsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 
-		irr::s32 imgH = Scale(120);
-		fitImage(imgProfMedalPreview, rx + rw / 2, topY + Scale(20), Scale(160), imgH);
-		stProfMedalInfo->setRelativePosition(irr::core::recti(rx, topY + Scale(32) + imgH, rx + rw, botY - Scale(58)));
-		btnProfMedalHighlight->setRelativePosition(irr::core::recti(rx, botY - Scale(46), rx + rw, botY - Scale(10)));
+		const irr::s32 gridTop = topY + Scale(64);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
+		const irr::s32 gap = Scale(10);
+		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
+		const irr::s32 cardH = std::max<irr::s32>(Scale(150), (gridBot - gridTop - gap) / 2);
+		for(int i = 0; i < 10; ++i) {
+			int row = i / 5;
+			int col = i % 5;
+			irr::s32 cx = pad + col * (cardW + gap);
+			irr::s32 cy = gridTop + row * (cardH + gap);
+			if(wMedalCards[i]) {
+				wMedalCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
+				irr::s32 icH = cardH - Scale(84);
+				fitImage(imgMedalIcons[i], cardW / 2, Scale(6), cardW - Scale(16), icH);
+				if(stMedalTitles[i]) stMedalTitles[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(76), cardW - Scale(8), cardH - Scale(54)));
+				if(stMedalStats[i]) stMedalStats[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(54), cardW - Scale(8), cardH - Scale(36)));
+				irr::s32 halfB = (cardW - Scale(22)) / 2;
+				if(stMedalOrigin[i]) stMedalOrigin[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), Scale(8) + halfB, cardH - Scale(8)));
+				if(stMedalActiveBadge[i]) stMedalActiveBadge[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+				if(btnMedalHighlight[i]) btnMedalHighlight[i]->setRelativePosition(irr::core::recti(Scale(14) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
+			}
+		}
+		const irr::s32 pageW = Scale(240);
+		const irr::s32 btnW = Scale(110);
+		irr::s32 py = botY - pageBarH;
+		if(stMedalsPage) stMedalsPage->setRelativePosition(irr::core::recti((W - pageW) / 2, py, (W + pageW) / 2, botY));
+		if(btnMedalsPrev) btnMedalsPrev->setRelativePosition(irr::core::recti((W - pageW) / 2 - btnW - Scale(10), py, (W - pageW) / 2 - Scale(10), botY));
+		if(btnMedalsNext) btnMedalsNext->setRelativePosition(irr::core::recti((W + pageW) / 2 + Scale(10), py, (W + pageW) / 2 + btnW + Scale(10), botY));
 	}
 
 	// 4c. Profile Avatars
@@ -8265,60 +8481,114 @@ void Game::OpenProfileInfo() {
 		int lvl = SafeJsonInt(u, "Nivel", 1);
 		long long expIn = SafeJsonInt64(u, "ExpEnNivel", 0);
 		long long expUp = SafeJsonInt64(u, "ExpParaSubir", 100);
+		long long expTot = SafeJsonInt64(u, "Exp", 0);
 		double pctLvl = u.value("PorcentajeNivel", 0.0);
+		profLvlPct = pctLvl;
 		long long ss = SafeJsonInt64(u, "StarShips", 0);
 		int cond = SafeJsonInt(u, "PuntosConducta", 100);
 		int decks = SafeJsonInt(u, "TotalDecks", 0);
 		int avas = SafeJsonInt(u, "TotalAvatares", 0);
 		int cUniq = SafeJsonInt(u, "CartasUnicasUsuario", 0);
 		int cTot = SafeJsonInt(u, "TotalCartasServidor", 0);
+		long long cCopias = SafeJsonInt64(u, "TotalCopiasUsuario", 0);
 		double cPct = u.value("PorcentajeCartas", 0.0);
+		profCardsPct = cPct;
+
+		std::wstring fCreacion = BufferIO::DecodeUTF8(SafeJsonStr(u, "FechaCreacion", "-"));
+		if(fCreacion.size() >= 10) fCreacion = fCreacion.substr(0, 10);
 
 		if(stProfInfoLeftText) {
 			stProfInfoLeftText->setText(epro::format(
-				L"Usuario: {} ({})\nNombre: {}\nPa\u00EDs: {}\nNivel: {} / 300 ({:.1f}%)\nEXP en Nivel: {} / {}\nStarShips: {} SS\nCristales (CD): {} CD\nConducta: {} / 100\nDecks: {}  |  Avatares: {}\nColecci\u00F3n: {} / {} ({:.1f}%)",
+				L"Usuario: {} ({})  [{}]\nNombre: {}\nPa\u00EDs: {}\nCorreo: {}\nRegistro: {}\nStarShips: {} SS  |  Cristales: {} CD\nConducta: {} / 100  |  Decks: {}  |  Avatares: {}",
 				BufferIO::DecodeUTF8(SafeJsonStr(u, "Usuario", "")),
 				BufferIO::DecodeUTF8(SafeJsonStr(u, "RolNombre", "Jugador")),
+				BufferIO::DecodeUTF8(SafeJsonStr(u, "EstadoCuenta", "ACTIVO")),
 				BufferIO::DecodeUTF8(SafeJsonStr(u, "Nombre", "-")),
 				BufferIO::DecodeUTF8(SafeJsonStr(u, "PaisNombre", "Global")),
-				lvl, pctLvl, expIn, expUp, ss, cd, cond, decks, avas, cUniq, cTot, cPct
+				BufferIO::DecodeUTF8(SafeJsonStr(u, "Correo", "-")),
+				fCreacion, ss, cd, cond, decks, avas
+			).c_str());
+		}
+		if(stProfLvlText) {
+			stProfLvlText->setText(epro::format(
+				L"Nivel de Duelista: Nv. {} / 300 ({:.1f}%)\nEXP: {} / {}  \u2022  Acumulada: {} EXP",
+				lvl, pctLvl, expIn, expUp, expTot
+			).c_str());
+		}
+		if(stProfCardsText) {
+			stProfCardsText->setText(epro::format(
+				L"Colecci\u00F3n de Cartas: {} / {} ({:.1f}%)\nTotal de copias en inventario: {} cartas",
+				cUniq, cTot, cPct, cCopias
+			).c_str());
+		}
+
+		if(stProfBonusVals[0]) stProfBonusVals[0]->setText(epro::format(L"Bono Total EXP\n+{:.2f}%", u.value("TotalBonusExp", 0.0)).c_str());
+		if(stProfBonusVals[1]) stProfBonusVals[1]->setText(epro::format(L"Bono Total StarShips\n+{:.2f}%", u.value("TotalBonusStarShips", 0.0)).c_str());
+		if(stProfBonusVals[2]) stProfBonusVals[2]->setText(epro::format(L"Bono Total Luck\n+{:.2f}%", u.value("TotalBonusLuck", 0.0)).c_str());
+
+		if(stProfAvaTitle) {
+			stProfAvaTitle->setText(epro::format(L"DESGLOSE: AVATAR ACTIVO ({} - {})",
+				BufferIO::DecodeUTF8(SafeJsonStr(u, "AvaNombre", "")),
+				BufferIO::DecodeUTF8(SafeJsonStr(u, "AvaCodigo", ""))).c_str());
+		}
+		if(stProfAvaBody) {
+			stProfAvaBody->setText(epro::format(
+				L"EXP (Base + Pot.): {:.1f}% + {:.1f}% = {:.1f}% / 300%\n"
+				L"StarShips (Base + Pot.): {:.1f}% + {:.1f}% = {:.1f}% / 300%\n"
+				L"Luck (Base + Pot.): {:.1f}% + {:.1f}% = {:.1f}% / 100%",
+				u.value("AvaBaseExp", 0.0), u.value("AvaPotExp", 0.0), u.value("AvaTotalExp", 0.0),
+				u.value("AvaBaseSS", 0.0), u.value("AvaPotSS", 0.0), u.value("AvaTotalSS", 0.0),
+				u.value("AvaBaseLuck", 0.0), u.value("AvaPotLuck", 0.0), u.value("AvaTotalLuck", 0.0)
+			).c_str());
+		}
+
+		if(stProfMedTitle) {
+			stProfMedTitle->setText(epro::format(L"MEDALLAS ({} / {})",
+				SafeJsonInt(u, "MedallasObtenidas", 0), SafeJsonInt(u, "MedallasTotales", 81)).c_str());
+		}
+		if(stProfMedBody) {
+			stProfMedBody->setText(epro::format(
+				L"EXP: +{:.2f}%\nStarShips: +{:.2f}%\nLuck: +{:.2f}%",
+				u.value("MedExp", 0.0), u.value("MedSS", 0.0), u.value("MedLuck", 0.0)
 			).c_str());
 		}
 
 		std::wstring clanTxt = SafeJsonInt(u, "ClanId", 0) > 0
-			? epro::format(L"{} (Nv. {})", BufferIO::DecodeUTF8(SafeJsonStr(u, "ClanNombre", "")), SafeJsonInt(u, "ClanNivel", 1))
+			? epro::format(L"{} \u2022 Nv.{}", BufferIO::DecodeUTF8(SafeJsonStr(u, "ClanNombre", "")), SafeJsonInt(u, "ClanNivel", 1))
 			: L"Sin Clan";
-		std::wstring vipTxt = u.value("VipActivo", false)
-			? BufferIO::DecodeUTF8(SafeJsonStr(u, "VipNombre", "Activo"))
-			: L"Sin membres\u00EDa VIP activa";
+		if(stProfClanTitle) stProfClanTitle->setText(epro::format(L"CLAN ({})", clanTxt).c_str());
+		if(stProfClanBody) {
+			stProfClanBody->setText(epro::format(
+				L"EXP: +{:.2f}%\nStarShips: +{:.2f}%\nLuck: +{:.2f}%",
+				u.value("ClanExp", 0.0), u.value("ClanSS", 0.0), u.value("ClanLuck", 0.0)
+			).c_str());
+		}
 
-		if(stProfInfoRightText) {
-			stProfInfoRightText->setText(epro::format(
-				L"=== TOTAL BONIFICACIONES ACTIVAS ===\n"
-				L"EXP: +{:.2f}%   |   StarShips: +{:.2f}%   |   Luck: +{:.2f}%\n\n"
-				L"=== AVATAR ACTIVO ===\n"
-				L"{} ({})\n"
-				L"EXP: {:.1f}% + {:.1f}% = {:.1f}% / 300%\n"
-				L"SS: {:.1f}% + {:.1f}% = {:.1f}% / 300%\n"
-				L"Luck: {:.1f}% + {:.1f}% = {:.1f}% / 100%\n\n"
-				L"=== MEDALLAS Y CLAN ===\n"
-				L"Medallas: {} / {} (+{:.1f}% EXP, +{:.1f}% SS, +{:.1f}% Luck)\n"
-				L"Clan: {} (+{:.1f}% EXP, +{:.1f}% SS, +{:.1f}% Luck)\n\n"
-				L"=== MEMBRES\u00CDA VIP ===\n"
-				L"{} (+{:.1f}% EXP, +{:.1f}% SS, +{:.1f}% Luck)\n\n"
-				L"=== ESTAD\u00CDSTICAS DE DUELOS ===\n"
-				L"General: {} duelos ({:.1f}% WR)  [{}V / {}D]\n"
-				L"PvP: {} duelos ({:.1f}% WR)  [{}V / {}D]\n"
-				L"NPC Aventura: {} duelos ({:.1f}% WR)  [{}V / {}D]",
-				u.value("TotalBonusExp", 0.0), u.value("TotalBonusStarShips", 0.0), u.value("TotalBonusLuck", 0.0),
-				BufferIO::DecodeUTF8(SafeJsonStr(u, "AvaNombre", "")), BufferIO::DecodeUTF8(SafeJsonStr(u, "AvaCodigo", "")),
-				u.value("AvaBaseExp", 0.0), u.value("AvaPotExp", 0.0), u.value("AvaTotalExp", 0.0),
-				u.value("AvaBaseSS", 0.0), u.value("AvaPotSS", 0.0), u.value("AvaTotalSS", 0.0),
-				u.value("AvaBaseLuck", 0.0), u.value("AvaPotLuck", 0.0), u.value("AvaTotalLuck", 0.0),
-				SafeJsonInt(u, "MedallasObtenidas", 0), SafeJsonInt(u, "MedallasTotales", 81),
-				u.value("MedExp", 0.0), u.value("MedSS", 0.0), u.value("MedLuck", 0.0),
-				clanTxt, u.value("ClanExp", 0.0), u.value("ClanSS", 0.0), u.value("ClanLuck", 0.0),
-				vipTxt, u.value("VipExp", 0.0), u.value("VipSS", 0.0), u.value("VipLuck", 0.0),
+		bool vipAct = u.value("VipActivo", false);
+		std::wstring vipTxt = vipAct ? BufferIO::DecodeUTF8(SafeJsonStr(u, "VipNombre", "Activo")) : L"Sin VIP activo";
+		if(stProfVipTitle) stProfVipTitle->setText(epro::format(L"VIP ({})", vipTxt).c_str());
+		long long sec = SafeJsonInt64(u, "VipSegundosRestantes", 0);
+		std::wstring remStr = L"Sin VIP activo";
+		if(vipAct && sec > 0) {
+			long long d = sec / 86400;
+			long long h = (sec % 86400) / 3600;
+			long long m = (sec % 3600) / 60;
+			if(d > 0) remStr = epro::format(L"{} d\u00EDa(s), {} h", d, h);
+			else if(h > 0) remStr = epro::format(L"{} h, {} min", h, m);
+			else remStr = epro::format(L"{} min", std::max<long long>(1, m));
+		}
+		if(stProfVipBody) {
+			stProfVipBody->setText(epro::format(
+				L"EXP: +{:.2f}%  |  SS: +{:.2f}%  |  Luck: +{:.2f}%\nRestante: {}",
+				u.value("VipExp", 0.0), u.value("VipSS", 0.0), u.value("VipLuck", 0.0), remStr
+			).c_str());
+		}
+
+		if(stProfDuelsBody) {
+			stProfDuelsBody->setText(epro::format(
+				L"General: {} duelos ({:.1f}% WR) [{}V / {}D]\n"
+				L"PvP: {} duelos ({:.1f}% WR) [{}V / {}D]\n"
+				L"Aventura: {} duelos ({:.1f}% WR) [{}V / {}D]",
 				SafeJsonInt(u, "DuelosTotales", 0), u.value("WinrateTotal", 0.0), SafeJsonInt(u, "VictoriasTotales", 0), SafeJsonInt(u, "DerrotasTotales", 0),
 				SafeJsonInt(u, "DuelosPvp", 0), u.value("WinratePvp", 0.0), SafeJsonInt(u, "VictoriasPvp", 0), SafeJsonInt(u, "DerrotasPvp", 0),
 				SafeJsonInt(u, "DuelosNpc", 0), u.value("WinrateNpc", 0.0), SafeJsonInt(u, "VictoriasNpc", 0), SafeJsonInt(u, "DerrotasNpc", 0)
@@ -8374,7 +8644,6 @@ void Game::OpenProfileMedals() {
 	HideAllEcosystemScreens();
 	auto resp = CallSessionApi("/api/medallas", sessionToken);
 	profileMedals.clear();
-	lstProfMedals->clear();
 	if(resp.contains("medallas") && resp["medallas"].is_array()) {
 		for(const auto& m : resp["medallas"]) {
 			UserMedalItem it;
@@ -8388,50 +8657,95 @@ void Game::OpenProfileMedals() {
 			it.obtenida = m.value("Obtenida", false);
 			it.esDestacada = m.value("EsDestacada", false);
 			profileMedals.push_back(it);
-			std::wstring tag = it.esDestacada ? L"[DESTACADA] " : (it.obtenida ? L"[OBTENIDA] " : L"[BLOQUEADA] ");
-			lstProfMedals->addItem((tag + it.titulo).c_str());
 		}
 	}
-	if(!profileMedals.empty()) {
-		lstProfMedals->setSelected(0);
-		SelectProfileMedal(0);
-	} else {
-		imgProfMedalPreview->setImage(nullptr);
-		stProfMedalInfo->setText(L"No hay medallas registradas.");
-		if(btnProfMedalHighlight) btnProfMedalHighlight->setEnabled(false);
-	}
+	medalsPage = 0;
+	RefreshProfileMedalsPage();
 	ResizeEconomyScreens();
 	wProfileMedals->setVisible(true);
 }
 
-void Game::SelectProfileMedal(int idx) {
-	if(idx < 0 || idx >= (int)profileMedals.size()) return;
-	const auto& m = profileMedals[idx];
-	imgProfMedalPreview->setImage(LoadMedalTexture(m.archivo));
-	stProfMedalInfo->setText(epro::format(
-		L"{}\nNPC: {}\nEstado: {}\n\nBonificaciones:\n- EXP: +{:.2f}%\n- StarShips: +{:.2f}%\n- Luck: +{:.2f}%",
-		m.titulo, m.npcNombre,
-		m.esDestacada ? L"DESTACADA EN PERFIL" : (m.obtenida ? L"Obtenida" : L"Bloqueada (Vence en Modo Leyenda)"),
-		m.expPct, m.ssPct, m.luckPct
-	).c_str());
-	if(btnProfMedalHighlight) {
-		btnProfMedalHighlight->setEnabled(m.obtenida && !m.esDestacada);
-		btnProfMedalHighlight->setText(m.esDestacada ? L"Mostrada en Perfil" : L"Mostrar en Perfil");
+void Game::RefreshProfileMedalsPage() {
+	int totalPages = std::max(1, ((int)profileMedals.size() + 9) / 10);
+	if(medalsPage >= totalPages) medalsPage = totalPages - 1;
+	if(medalsPage < 0) medalsPage = 0;
+	for(int slot = 0; slot < 10; ++slot) {
+		int pos = medalsPage * 10 + slot;
+		if(pos < (int)profileMedals.size()) {
+			const auto& m = profileMedals[pos];
+			if(wMedalCards[slot]) wMedalCards[slot]->setVisible(true);
+			if(imgMedalIcons[slot]) {
+				imgMedalIcons[slot]->setImage(LoadMedalTexture(m.archivo));
+				imgMedalIcons[slot]->setColor(m.obtenida ? irr::video::SColor(255, 255, 255, 255) : irr::video::SColor(255, 65, 70, 85));
+				imgMedalIcons[slot]->setVisible(true);
+			}
+			if(stMedalTitles[slot]) {
+				std::wstring title = m.esDestacada ? (L"[DESTACADA] " + m.titulo) : m.titulo;
+				stMedalTitles[slot]->setText(title.c_str());
+				stMedalTitles[slot]->setOverrideColor(
+					m.esDestacada ? irr::video::SColor(255, 52, 211, 153)
+					: (m.obtenida ? irr::video::SColor(255, 248, 250, 252) : irr::video::SColor(255, 100, 116, 139)));
+			}
+			if(stMedalStats[slot]) {
+				stMedalStats[slot]->setText(epro::format(
+					L"EXP +{:.2f}%  \u2022  SS +{:.2f}%  \u2022  Luck +{:.2f}%",
+					m.expPct, m.ssPct, m.luckPct
+				).c_str());
+				stMedalStats[slot]->setOverrideColor(m.obtenida ? irr::video::SColor(255, 147, 197, 253) : irr::video::SColor(255, 90, 102, 122));
+			}
+			if(stMedalOrigin[slot]) {
+				stMedalOrigin[slot]->setText(m.npcNombre.empty() ? L"Modo Leyenda" : m.npcNombre.c_str());
+				stMedalOrigin[slot]->setOverrideColor(m.obtenida ? irr::video::SColor(255, 148, 163, 184) : irr::video::SColor(255, 80, 92, 110));
+			}
+			if(stMedalActiveBadge[slot]) {
+				if(m.esDestacada) {
+					stMedalActiveBadge[slot]->setText(L"[DESTACADA]");
+					stMedalActiveBadge[slot]->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+					stMedalActiveBadge[slot]->setBackgroundColor(irr::video::SColor(60, 52, 211, 153));
+					stMedalActiveBadge[slot]->setVisible(true);
+				} else if(!m.obtenida) {
+					stMedalActiveBadge[slot]->setText(L"[BLOQUEADA]");
+					stMedalActiveBadge[slot]->setOverrideColor(irr::video::SColor(255, 100, 116, 139));
+					stMedalActiveBadge[slot]->setBackgroundColor(irr::video::SColor(60, 51, 65, 85));
+					stMedalActiveBadge[slot]->setVisible(true);
+				} else {
+					stMedalActiveBadge[slot]->setVisible(false);
+				}
+			}
+			if(btnMedalHighlight[slot]) {
+				btnMedalHighlight[slot]->setVisible(m.obtenida && !m.esDestacada);
+			}
+		} else {
+			if(wMedalCards[slot]) wMedalCards[slot]->setVisible(false);
+		}
 	}
+	if(stMedalsPage) {
+		stMedalsPage->setText(epro::format(L"P\u00E1gina {} / {}  ({} medallas)", medalsPage + 1, totalPages, (int)profileMedals.size()).c_str());
+	}
+	if(btnMedalsPrev) btnMedalsPrev->setEnabled(medalsPage > 0);
+	if(btnMedalsNext) btnMedalsNext->setEnabled(medalsPage + 1 < totalPages);
 	ResizeEconomyScreens();
 }
 
-void Game::HighlightSelectedMedal() {
-	int idx = lstProfMedals ? lstProfMedals->getSelected() : -1;
-	if(idx < 0 || idx >= (int)profileMedals.size()) return;
+void Game::HighlightMedalIdx(int slotIdx) {
+	int pos = medalsPage * 10 + slotIdx;
+	if(pos < 0 || pos >= (int)profileMedals.size()) return;
+	if(!profileMedals[pos].obtenida || profileMedals[pos].esDestacada) return;
 	nlohmann::json body;
-	body["medallaId"] = profileMedals[idx].id;
+	body["medallaId"] = profileMedals[pos].id;
 	auto resp = CallSessionApi("/api/profile/medal/highlight", sessionToken, body.dump());
 	if(resp.value("success", false)) {
-		OpenProfileMedals();
+		for(auto& m : profileMedals) m.esDestacada = (m.id == profileMedals[pos].id);
+		RefreshProfileMedalsPage();
 	} else {
 		PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo destacar la medalla.")));
 	}
+}
+
+void Game::SelectProfileMedal(int idx) { (void)idx; }
+
+void Game::HighlightSelectedMedal() {
+	HighlightMedalIdx(0);
 }
 
 void Game::OpenProfileAvatars() {
@@ -10095,9 +10409,6 @@ bool Game::MainLoop() {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wFTSelect->getAbsolutePosition());
 			}
 			if(wPosSelect && wPosSelect->isVisible()) {
-				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wPosSelect->getAbsolutePosition());
-			}
-			if(wQuery && wQuery->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wQuery->getAbsolutePosition());
 			}
 			if(wOptions && wOptions->isVisible()) {
@@ -10299,8 +10610,30 @@ bool Game::MainLoop() {
 					drawNeon(btnStorePackHelp, cCyan);
 				}
 			}
-			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
-			if(wProfileMedals && wProfileMedals->isVisible()) { drawNeon(pnlProfMedalsLeft, cGold); drawNeon(pnlProfMedalsRight, cCyan); }
+			if(wProfileInfo && wProfileInfo->isVisible()) {
+				drawNeon(pnlProfInfoLeft, cCyan);
+				drawNeon(pnlProfBonus, cGold);
+				drawNeon(pnlProfAvaBox, cPurp);
+				drawNeon(pnlProfMedBox, cGold);
+				drawNeon(pnlProfClanBox, cCyan);
+				drawNeon(pnlProfVipBox, cPurp);
+				drawNeon(pnlProfDuelsBox, cEmer);
+				drawNeon(btnProfInfoBack, irr::video::SColor(160, 148, 163, 184));
+			}
+			if(wProfileMedals && wProfileMedals->isVisible()) {
+				for(int i = 0; i < 10; ++i) {
+					int pos = medalsPage * 10 + i;
+					if(pos < (int)profileMedals.size()) {
+						const auto& m = profileMedals[pos];
+						drawNeon(wMedalCards[i], m.esDestacada ? cEmer : (m.obtenida ? cGold : irr::video::SColor(110, 71, 85, 105)));
+						if(btnMedalHighlight[i] && btnMedalHighlight[i]->isVisible())
+							drawNeon(btnMedalHighlight[i], cCyan);
+					}
+				}
+				drawNeon(btnProfMedalsBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnMedalsPrev, cCyan);
+				drawNeon(btnMedalsNext, cCyan);
+			}
 			if(wProfileAvatars && wProfileAvatars->isVisible()) {
 				for(int i = 0; i < 10; ++i) {
 					int pos = myAvaPage * 10 + i;
@@ -10372,7 +10705,19 @@ bool Game::MainLoop() {
 				drawNeon(btnClanMemPrev, cCyan);
 				drawNeon(btnClanMemNext, cCyan);
 			}
-			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); drawNeon(btnMailboxHelp, cCyan); }
+			if(wMailbox && wMailbox->isVisible()) {
+				drawNeon(pnlMailboxTable, cCyan);
+				drawNeon(btnMailboxBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnMailboxHelp, cCyan);
+				drawNeon(btnMbPrev, cCyan);
+				drawNeon(btnMbNext, cCyan);
+				for(int r = 0; r < 8; ++r) {
+					if(pnlMbRow[r] && pnlMbRow[r]->isVisible()) {
+						if(btnMbRowClaim[r] && btnMbRowClaim[r]->isVisible()) drawNeon(btnMbRowClaim[r], cEmer);
+						if(btnMbRowDiscard[r] && btnMbRowDiscard[r]->isVisible()) drawNeon(btnMbRowDiscard[r], irr::video::SColor(180, 248, 113, 113));
+					}
+				}
+			}
 			}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
 				drawNeon(wMyAvaHelpModal, cCyan);
@@ -11806,6 +12151,7 @@ void Game::ReloadCBSortType() {
 	cbSortType->clear();
 	for (int i = 1370; i <= 1373; i++)
 		cbSortType->addItem(gDataManager->GetSysString(i).data());
+	cbSortType->addItem(L"M\u00E1s reciente");
 }
 void Game::ReloadCBCardType() {
 	cbCardType->clear();

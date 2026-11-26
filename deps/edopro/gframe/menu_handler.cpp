@@ -285,6 +285,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->ResolveMailboxRow(id - BUTTON_MAILBOX_ROW_DISC_0, false);
 				} else if(id >= BUTTON_MY_AVA_ACTIVATE_0 && id <= BUTTON_MY_AVA_ACTIVATE_MAX) {
 					mainGame->ActivateAvatarIdx(id - BUTTON_MY_AVA_ACTIVATE_0);
+				} else if(id >= BUTTON_MEDAL_HIGHLIGHT_0 && id <= BUTTON_MEDAL_HIGHLIGHT_MAX) {
+					mainGame->HighlightMedalIdx(id - BUTTON_MEDAL_HIGHLIGHT_0);
 				}
 				break;
 			}
@@ -909,6 +911,18 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_MY_AVA_NEXT: {
 				mainGame->myAvaPage++;
 				mainGame->RefreshProfileAvatarsPage();
+				break;
+			}
+			case BUTTON_MEDALS_PREV: {
+				if(mainGame->medalsPage > 0) {
+					mainGame->medalsPage--;
+					mainGame->RefreshProfileMedalsPage();
+				}
+				break;
+			}
+			case BUTTON_MEDALS_NEXT: {
+				mainGame->medalsPage++;
+				mainGame->RefreshProfileMedalsPage();
 				break;
 			}
 			case BUTTON_PROFILE_MAILBOX: {
