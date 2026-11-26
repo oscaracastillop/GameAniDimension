@@ -6220,9 +6220,18 @@ void Game::ResizeEconomyScreens() {
 		img->setRelativePosition(irr::core::recti(cx - iw / 2, iy, cx + iw / 2, iy + ih));
 	};
 
-	auto placeHeaderHelp = [&](irr::gui::IGUIStaticText* title, irr::s32 titleW, irr::gui::IGUIButton* helpBtn, irr::gui::IGUIStaticText* descToHide) {
-		if(title) title->setRelativePosition(irr::core::recti(pad, topY, pad + titleW, topY + Scale(32)));
-		if(helpBtn) helpBtn->setRelativePosition(irr::core::recti(pad + titleW + Scale(8), topY + Scale(2), pad + titleW + Scale(42), topY + Scale(32)));
+	auto placeHeaderHelp = [&](irr::gui::IGUIStaticText* title, irr::s32 fallbackW, irr::gui::IGUIButton* helpBtn, irr::gui::IGUIStaticText* descToHide) {
+		irr::s32 titleW = fallbackW;
+		if(title) {
+			irr::gui::IGUIFont* f = title->getOverrideFont() ? title->getOverrideFont() : (env->getSkin() ? env->getSkin()->getFont() : nullptr);
+			if(f && title->getText()) {
+				titleW = (irr::s32)f->getDimension(title->getText()).Width + Scale(12);
+			}
+			irr::s32 maxW = std::max<irr::s32>(Scale(160), W - 2 * pad - Scale(220));
+			if(titleW > maxW) titleW = maxW;
+			title->setRelativePosition(irr::core::recti(pad, topY, pad + titleW, topY + Scale(32)));
+		}
+		if(helpBtn) helpBtn->setRelativePosition(irr::core::recti(pad + titleW + Scale(12), topY + Scale(2), pad + titleW + Scale(46), topY + Scale(32)));
 		if(descToHide) descToHide->setVisible(false);
 	};
 
@@ -6254,13 +6263,13 @@ void Game::ResizeEconomyScreens() {
 					irr::s32 by = cardH - btnH - Scale(10);
 					if(btnStoreHubActions[si])
 						btnStoreHubActions[si]->setRelativePosition(irr::core::recti(Scale(10), by, cardW - Scale(10), by + btnH));
-					irr::s32 dy = by - Scale(52);
+					irr::s32 dy = by - Scale(74);
 					if(stStoreHubDescs[si])
-						stStoreHubDescs[si]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), by - Scale(4)));
-					irr::s32 ty = dy - Scale(22);
+						stStoreHubDescs[si]->setRelativePosition(irr::core::recti(Scale(10), dy, cardW - Scale(10), by - Scale(6)));
+					irr::s32 ty = dy - Scale(24);
 					if(stStoreHubTitles[si])
 						stStoreHubTitles[si]->setRelativePosition(irr::core::recti(Scale(10), ty, cardW - Scale(10), dy - Scale(2)));
-					irr::s32 icH = ty - Scale(12);
+					irr::s32 icH = ty - Scale(14);
 					fitImage(imgStoreHubIcons[si], cardW / 2, Scale(8), cardW - Scale(16), icH);
 				}
 			}
@@ -6654,10 +6663,8 @@ void Game::ResizeEconomyScreens() {
 	// 4c. Profile Avatars (5x2 grid)
 	if(wProfileAvatars) {
 		wProfileAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stProfileAvaTitle->setRelativePosition(irr::core::recti(pad, topY, pad + Scale(210), topY + Scale(32)));
-		if(btnMyAvaHelp) btnMyAvaHelp->setRelativePosition(irr::core::recti(pad + Scale(218), topY + Scale(2), pad + Scale(252), topY + Scale(32)));
+		placeHeaderHelp(stProfileAvaTitle, Scale(210), btnMyAvaHelp, stProfileAvaBanner);
 		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stProfileAvaBanner->setVisible(false);
 
 		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 pageBarH = Scale(34);
@@ -10034,6 +10041,15 @@ bool Game::MainLoop() {
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
 				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wMyAvaHelpModal->getAbsolutePosition());
 			}
+			if(wConfirmPurchase && wConfirmPurchase->isVisible()) {
+				driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wConfirmPurchase->getAbsolutePosition());
+			}
+		}
+		if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
+			driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wMyAvaHelpModal->getAbsolutePosition());
+		}
+		if(wConfirmPurchase && wConfirmPurchase->isVisible()) {
+			driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wConfirmPurchase->getAbsolutePosition());
 		}
 		DrawGUI();
 		DrawSpec();
@@ -10189,6 +10205,8 @@ bool Game::MainLoop() {
 			const irr::video::SColor cGold(150, 251, 191, 36);
 			const irr::video::SColor cPurp(150, 192, 132, 252);
 			const irr::video::SColor cEmer(150, 52, 211, 153);
+			const bool modalBlockingNeon = (wConfirmPurchase && wConfirmPurchase->isVisible()) || (wMyAvaHelpModal && wMyAvaHelpModal->isVisible());
+			if(!modalBlockingNeon) {
 			if(wStoreMenu && wStoreMenu->isVisible()) {
 				const irr::video::SColor stBorder[6] = {
 					cCyan, cPurp, cGold, cGold, cPurp, cEmer
@@ -10318,11 +10336,16 @@ bool Game::MainLoop() {
 				drawNeon(btnMbPrev, cCyan);
 				drawNeon(btnMbNext, cCyan);
 			}
+			}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
 				drawNeon(wMyAvaHelpModal, cCyan);
 				drawNeon(btnMyAvaHelpClose, cGold);
 			}
-			drawNeon(wConfirmPurchase, cCyan);
+			if(wConfirmPurchase && wConfirmPurchase->isVisible()) {
+				drawNeon(wConfirmPurchase, cCyan);
+				drawNeon(btnConfirmYes, cCyan);
+				drawNeon(btnConfirmNo, cGold);
+			}
 			if(wAdventureMode && wAdventureMode->isVisible() && (!wDuelReward || !wDuelReward->isVisible())) {
 				drawNeon(pnlAdventureLeft, cCyan);
 				drawNeon(pnlAdventureCenter, cPurp);
