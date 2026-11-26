@@ -5600,7 +5600,7 @@ void Game::PopulateEconomyScreens() {
 		irr::core::recti(0, 0, 10, 10), false, true, wMyAvaHelpModal
 	);
 	stMyAvaHelpText->setWordWrap(true);
-	stMyAvaHelpText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+	stMyAvaHelpText->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginDescFont) stMyAvaHelpText->setOverrideFont(loginDescFont);
 
 	btnMyAvaHelpClose = env->addButton(irr::core::recti(0, 0, 10, 10), wMyAvaHelpModal, BUTTON_MY_AVA_HELP_CLOSE, L"Entendido");
@@ -6084,6 +6084,26 @@ void Game::PopulateEconomyScreens() {
 	btnMailboxBack = env->addButton(irr::core::recti(0, 0, 10, 10), wMailbox, BUTTON_MAILBOX_BACK, L"Volver a Perfil");
 	styleDarkBtn(btnMailboxBack);
 
+	auto makeHelpBtn = [&](irr::gui::IGUIElement* parent, irr::s32 id) -> irr::gui::IGUIButton* {
+		auto* b = env->addButton(irr::core::recti(0, 0, 10, 10), parent, id, L"?");
+		styleDarkBtn(b);
+		if(loginCardTitleFont) b->setOverrideFont(loginCardTitleFont);
+		return b;
+	};
+	btnStoreHubHelp = makeHelpBtn(wStoreMenu, BUTTON_STORE_HUB_HELP);
+	btnStoreDonHelp = makeHelpBtn(wStoreDonations, BUTTON_STORE_DON_HELP);
+	btnStoreAvaHelp = makeHelpBtn(wStoreAvatars, BUTTON_STORE_AVA_HELP);
+	btnStoreBstHelp = makeHelpBtn(wStoreBoosters, BUTTON_STORE_BST_HELP);
+	btnStoreVipHelp = makeHelpBtn(wStoreVip, BUTTON_STORE_VIP_HELP);
+	btnStoreCardHelp = makeHelpBtn(wStoreCards, BUTTON_STORE_CARD_HELP);
+	btnStorePackHelp = makeHelpBtn(wStorePacks, BUTTON_STORE_PACK_HELP);
+	btnProfileHubHelp = makeHelpBtn(wPlayerProfile, BUTTON_PROFILE_HUB_HELP);
+	btnEventsHubHelp = makeHelpBtn(wEventsHub, BUTTON_EVENTS_HUB_HELP);
+	btnOrbsHelp = makeHelpBtn(wOrbsEvent, BUTTON_ORBS_HELP);
+	btnEventsMenuHelp = makeHelpBtn(wEventsMenu, BUTTON_EVENTS_MENU_HELP);
+	btnClansHelp = makeHelpBtn(wClansMenu, BUTTON_CLANS_HELP);
+	btnMailboxHelp = makeHelpBtn(wMailbox, BUTTON_MAILBOX_HELP);
+
 	pnlMailboxTable = makePanel(wMailbox);
 
 	thMbStatus = env->addStaticText(L"ESTADO", irr::core::recti(0, 0, 10, 10), false, false, pnlMailboxTable);
@@ -6243,6 +6263,14 @@ void Game::PopulateEconomyScreens() {
 	ResizeEconomyScreens();
 }
 
+void Game::ShowScreenHelpModal(const wchar_t* title, const wchar_t* body) {
+	if(!wMyAvaHelpModal) return;
+	if(title) wMyAvaHelpModal->setText(title);
+	if(stMyAvaHelpText && body) stMyAvaHelpText->setText(body);
+	wMyAvaHelpModal->setVisible(true);
+	env->getRootGUIElement()->bringToFront(wMyAvaHelpModal);
+}
+
 void Game::ResizeEconomyScreens() {
 	const irr::s32 W = window_size.Width;
 	const irr::s32 H = window_size.Height;
@@ -6276,17 +6304,22 @@ void Game::ResizeEconomyScreens() {
 		img->setRelativePosition(irr::core::recti(cx - iw / 2, iy, cx + iw / 2, iy + ih));
 	};
 
+	auto placeHeaderHelp = [&](irr::gui::IGUIStaticText* title, irr::s32 titleW, irr::gui::IGUIButton* helpBtn, irr::gui::IGUIStaticText* descToHide) {
+		if(title) title->setRelativePosition(irr::core::recti(pad, topY, pad + titleW, topY + Scale(32)));
+		if(helpBtn) helpBtn->setRelativePosition(irr::core::recti(pad + titleW + Scale(8), topY + Scale(2), pad + titleW + Scale(42), topY + Scale(32)));
+		if(descToHide) descToHide->setVisible(false);
+	};
+
 	// 1. Store Menu (5 cards per row paginated, matching Img 3 reference)
 	if(wStoreMenu) {
 		wStoreMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
-		if(stStoreDesc) stStoreDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(190), topY + Scale(54)));
+		placeHeaderHelp(stStoreTitle, Scale(285), btnStoreHubHelp, stStoreDesc);
 		if(stStoreBalance) stStoreBalance->setVisible(false);
 		if(stStoreBalanceCD) stStoreBalanceCD->setVisible(false);
-		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
-		const irr::s32 gridTop = topY + Scale(60);
+		btnStoreBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), gridBot - gridTop);
@@ -6325,10 +6358,9 @@ void Game::ResizeEconomyScreens() {
 	// 1b. Store Donations & Cristales (CD) (5-column card grid)
 	if(wStoreDonations) {
 		wStoreDonations->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreDonTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(32)));
-		stStoreDonDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad - Scale(190), topY + Scale(60)));
-		btnStoreDonBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(4), W - pad, topY + Scale(40)));
-		const irr::s32 gridTop = topY + Scale(70);
+		placeHeaderHelp(stStoreDonTitle, Scale(520), btnStoreDonHelp, stStoreDonDesc);
+		btnStoreDonBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 gap = Scale(12);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
@@ -6353,17 +6385,16 @@ void Game::ResizeEconomyScreens() {
 	// 2. Store Avatars (5x2 card grid + search + pagination)
 	if(wStoreAvatars) {
 		wStoreAvatars->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreAvaTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		placeHeaderHelp(stStoreAvaTitle, Scale(150), btnStoreAvaHelp, stStoreAvaBanner);
 		if(stStoreAvaBalance) stStoreAvaBalance->setVisible(false);
 		if(stStoreAvaBalanceCD) stStoreAvaBalanceCD->setVisible(false);
 		btnStoreAvaBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreAvaBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
-		ebStoreAvaSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(280), topY + Scale(90)));
-		btnStoreAvaSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(62), pad + Scale(378), topY + Scale(90)));
+		ebStoreAvaSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(64), pad + Scale(280), topY + Scale(92)));
+		btnStoreAvaSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(64), pad + Scale(378), topY + Scale(92)));
 
-		const irr::s32 gridTop = topY + Scale(98);
+		const irr::s32 gridTop = topY + Scale(102);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
@@ -6412,18 +6443,17 @@ void Game::ResizeEconomyScreens() {
 	// 3. Store Boosters (5x2 card grid + filter tabs + pagination)
 	if(wStoreBoosters) {
 		wStoreBoosters->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreBstTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		placeHeaderHelp(stStoreBstTitle, Scale(340), btnStoreBstHelp, stStoreBstBanner);
 		if(stStoreBstBalance) stStoreBstBalance->setVisible(false);
 		if(stStoreBstBalanceCD) stStoreBstBalanceCD->setVisible(false);
 		btnStoreBstBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreBstBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
 		for(int fi = 0; fi < 4; ++fi) {
 			irr::s32 fx = pad + fi * Scale(104);
-			if(btnStoreBstFilt[fi]) btnStoreBstFilt[fi]->setRelativePosition(irr::core::recti(fx, topY + Scale(62), fx + Scale(96), topY + Scale(90)));
+			if(btnStoreBstFilt[fi]) btnStoreBstFilt[fi]->setRelativePosition(irr::core::recti(fx, topY + Scale(64), fx + Scale(96), topY + Scale(92)));
 		}
-		const irr::s32 gridTop = topY + Scale(98);
+		const irr::s32 gridTop = topY + Scale(102);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
@@ -6452,13 +6482,13 @@ void Game::ResizeEconomyScreens() {
 	// 3b. Store VIP (4-column card grid, matching Img 3 style)
 	if(wStoreVip) {
 		wStoreVip->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreVipTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		placeHeaderHelp(stStoreVipTitle, Scale(290), btnStoreVipHelp, nullptr);
 		if(stStoreVipBalance) stStoreVipBalance->setVisible(false);
 		if(stStoreVipBalanceCD) stStoreVipBalanceCD->setVisible(false);
 		btnStoreVipBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreVipActive->setRelativePosition(irr::core::recti(pad, topY + Scale(36), W - pad, topY + Scale(62)));
+		stStoreVipActive->setRelativePosition(irr::core::recti(pad + Scale(345), topY + Scale(4), W - pad - Scale(178), topY + Scale(34)));
 
-		const irr::s32 gridTop = topY + Scale(70);
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 gap = Scale(12);
 		const int vipCnt = std::max(1, std::min(6, (int)storeVips.size()));
 		const irr::s32 cardW = (W - 2 * pad - (vipCnt - 1) * gap) / vipCnt;
@@ -6486,21 +6516,20 @@ void Game::ResizeEconomyScreens() {
 	// 3c. Store Cards (7x2 card grid + search + currency filter + pagination)
 	if(wStoreCards) {
 		wStoreCards->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStoreCardsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		placeHeaderHelp(stStoreCardsTitle, Scale(240), btnStoreCardHelp, stStoreCardsBanner);
 		if(stStoreCardsBalance) stStoreCardsBalance->setVisible(false);
 		if(stStoreCardsBalanceCD) stStoreCardsBalanceCD->setVisible(false);
 		btnStoreCardBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStoreCardsBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
-		ebStoreCardSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(260), topY + Scale(90)));
-		btnStoreCardSearch->setRelativePosition(irr::core::recti(pad + Scale(268), topY + Scale(62), pad + Scale(350), topY + Scale(90)));
+		ebStoreCardSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(64), pad + Scale(260), topY + Scale(92)));
+		btnStoreCardSearch->setRelativePosition(irr::core::recti(pad + Scale(268), topY + Scale(64), pad + Scale(350), topY + Scale(92)));
 		for(int fi = 0; fi < 3; ++fi) {
 			irr::s32 fx = W - pad - (3 - fi) * Scale(124);
-			if(btnStoreCardFilt[fi]) btnStoreCardFilt[fi]->setRelativePosition(irr::core::recti(fx, topY + Scale(62), fx + Scale(116), topY + Scale(90)));
+			if(btnStoreCardFilt[fi]) btnStoreCardFilt[fi]->setRelativePosition(irr::core::recti(fx, topY + Scale(64), fx + Scale(116), topY + Scale(92)));
 		}
 
-		const irr::s32 gridTop = topY + Scale(98);
+		const irr::s32 gridTop = topY + Scale(102);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(8);
 		const irr::s32 cardW = (W - 2 * pad - 6 * gap) / 7;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
@@ -6541,17 +6570,16 @@ void Game::ResizeEconomyScreens() {
 	// 3d. Store Packs (6x2 card grid + search + pagination + visual pool overlay)
 	if(wStorePacks) {
 		wStorePacks->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stStorePacksTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
+		placeHeaderHelp(stStorePacksTitle, Scale(280), btnStorePackHelp, stStorePacksBanner);
 		if(stStorePacksBalance) stStorePacksBalance->setVisible(false);
 		if(stStorePacksBalanceCD) stStorePacksBalanceCD->setVisible(false);
 		btnStorePackBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
-		stStorePacksBanner->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad, topY + Scale(58)));
-		ebStorePackSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(62), pad + Scale(280), topY + Scale(90)));
-		btnStorePackSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(62), pad + Scale(378), topY + Scale(90)));
+		ebStorePackSearch->setRelativePosition(irr::core::recti(pad, topY + Scale(64), pad + Scale(280), topY + Scale(92)));
+		btnStorePackSearch->setRelativePosition(irr::core::recti(pad + Scale(288), topY + Scale(64), pad + Scale(378), topY + Scale(92)));
 
-		const irr::s32 gridTop = topY + Scale(98);
+		const irr::s32 gridTop = topY + Scale(102);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 5 * gap) / 6;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(140), (gridBot - gridTop - gap) / 2);
@@ -6631,10 +6659,9 @@ void Game::ResizeEconomyScreens() {
 	// 4. Player Profile Hub (4x2 neon cards)
 	if(wPlayerProfile) {
 		wPlayerProfile->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stProfileTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(32)));
-		stProfileSubtitle->setRelativePosition(irr::core::recti(pad, topY + Scale(34), W - pad - Scale(190), topY + Scale(54)));
-		btnProfileBack->setRelativePosition(irr::core::recti(W - pad - Scale(175), topY + Scale(4), W - pad, topY + Scale(40)));
-		const irr::s32 gridTop = topY + Scale(66);
+		placeHeaderHelp(stProfileTitle, Scale(265), btnProfileHubHelp, stProfileSubtitle);
+		btnProfileBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 gap = Scale(14);
 		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(130), (botY - gridTop - gap) / 2);
@@ -6716,9 +6743,9 @@ void Game::ResizeEconomyScreens() {
 		btnProfileAvatarsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 		stProfileAvaBanner->setVisible(false);
 
-		const irr::s32 gridTop = topY + Scale(44);
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 gridBot = botY - pageBarH - Scale(8);
+		const irr::s32 gridBot = botY - pageBarH - Scale(12);
 		const irr::s32 gap = Scale(10);
 		const irr::s32 cardW = (W - 2 * pad - 4 * gap) / 5;
 		const irr::s32 cardH = std::max<irr::s32>(Scale(150), (gridBot - gridTop - gap) / 2);
@@ -6745,24 +6772,23 @@ void Game::ResizeEconomyScreens() {
 		if(stMyAvaPage) stMyAvaPage->setRelativePosition(irr::core::recti((W - pageW) / 2, py, (W + pageW) / 2, botY));
 		if(btnMyAvaPrev) btnMyAvaPrev->setRelativePosition(irr::core::recti((W - pageW) / 2 - btnW - Scale(10), py, (W - pageW) / 2 - Scale(10), botY));
 		if(btnMyAvaNext) btnMyAvaNext->setRelativePosition(irr::core::recti((W + pageW) / 2 + Scale(10), py, (W + pageW) / 2 + btnW + Scale(10), botY));
+	}
 
-		if(wMyAvaHelpModal) {
-			irr::s32 mw = std::min<irr::s32>(Scale(650), W - Scale(40));
-			irr::s32 mh = Scale(320);
-			irr::s32 mx = (W - mw) / 2;
-			irr::s32 my = (H - mh) / 2;
-			wMyAvaHelpModal->setRelativePosition(irr::core::recti(mx, my, mx + mw, my + mh));
-			if(stMyAvaHelpText) stMyAvaHelpText->setRelativePosition(irr::core::recti(Scale(20), Scale(36), mw - Scale(20), mh - Scale(50)));
-			if(btnMyAvaHelpClose) btnMyAvaHelpClose->setRelativePosition(irr::core::recti(mw / 2 - Scale(70), mh - Scale(44), mw / 2 + Scale(70), mh - Scale(12)));
-		}
+	if(wMyAvaHelpModal) {
+		irr::s32 mw = std::min<irr::s32>(Scale(650), W - Scale(40));
+		irr::s32 mh = Scale(320);
+		irr::s32 mx = (W - mw) / 2;
+		irr::s32 my = (H - mh) / 2;
+		wMyAvaHelpModal->setRelativePosition(irr::core::recti(mx, my, mx + mw, my + mh));
+		if(stMyAvaHelpText) stMyAvaHelpText->setRelativePosition(irr::core::recti(Scale(20), Scale(36), mw - Scale(20), mh - Scale(50)));
+		if(btnMyAvaHelpClose) btnMyAvaHelpClose->setRelativePosition(irr::core::recti(mw / 2 - Scale(70), mh - Scale(44), mw / 2 + Scale(70), mh - Scale(12)));
 	}
 
 	// 4c. Events Hub (2-card layout)
 	if(wEventsHub) {
 		wEventsHub->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stEventsHubTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
-		stEventsHubDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(190), topY + Scale(54)));
-		btnEventsHubBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
+		placeHeaderHelp(stEventsHubTitle, Scale(340), btnEventsHubHelp, stEventsHubDesc);
+		btnEventsHubBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 
 		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop - Scale(16));
@@ -6794,10 +6820,9 @@ void Game::ResizeEconomyScreens() {
 
 	if(wOrbsEvent) {
 		wOrbsEvent->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stOrbsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(200), topY + Scale(30)));
-		btnOrbsBack->setRelativePosition(irr::core::recti(W - pad - Scale(185), topY + Scale(2), W - pad, topY + Scale(36)));
-		stOrbsDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(220), topY + Scale(54)));
-		stOrbsStatus->setRelativePosition(irr::core::recti(W - pad - Scale(215), topY + Scale(38), W - pad, topY + Scale(58)));
+		placeHeaderHelp(stOrbsTitle, Scale(370), btnOrbsHelp, stOrbsDesc);
+		btnOrbsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+		stOrbsStatus->setRelativePosition(irr::core::recti(W - pad - Scale(395), topY + Scale(6), W - pad - Scale(178), topY + Scale(32)));
 
 		const irr::s32 contentTop = topY + Scale(64);
 		const irr::s32 contentH = std::max<irr::s32>(Scale(320), botY - contentTop);
@@ -6843,11 +6868,10 @@ void Game::ResizeEconomyScreens() {
 	if(wEventsMenu) {
 		wEventsMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-		if(stEventsMenuTitle) stEventsMenuTitle->setRelativePosition(irr::core::recti(pad, topY, pad + Scale(500), topY + Scale(24)));
-		if(stEventsMenuDesc) stEventsMenuDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(24), pad + Scale(600), topY + Scale(42)));
-		btnEventsBack->setRelativePosition(irr::core::recti(W - pad - Scale(160), topY + Scale(2), W - pad, topY + Scale(38)));
+		placeHeaderHelp(stEventsMenuTitle, Scale(450), btnEventsMenuHelp, stEventsMenuDesc);
+		btnEventsBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 
-		const irr::s32 barY = topY + Scale(46);
+		const irr::s32 barY = topY + Scale(64);
 		// Top Event Selector Bar
 		stEventsSelectLabel->setRelativePosition(irr::core::recti(pad, barY + Scale(4), pad + Scale(58), barY + Scale(34)));
 		cbEventsSelect->setRelativePosition(irr::core::recti(pad + Scale(60), barY + Scale(2), pad + Scale(340), barY + Scale(34)));
@@ -6936,24 +6960,23 @@ void Game::ResizeEconomyScreens() {
 	// 4e. Clans (Full-screen table canvas with pagination matching web reference)
 	if(wClansMenu) {
 		wClansMenu->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stClansTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(460), topY + Scale(30)));
-		if(stClansDesc) stClansDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(460), topY + Scale(54)));
+		placeHeaderHelp(stClansTitle, Scale(340), btnClansHelp, stClansDesc);
 
 		irr::s32 btnGap = Scale(8);
 		irr::s32 rxRight = W - pad;
 		if(btnClansBack) {
-			btnClansBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(6), rxRight, topY + Scale(42)));
+			btnClansBack->setRelativePosition(irr::core::recti(rxRight - Scale(140), topY + Scale(2), rxRight, topY + Scale(36)));
 			rxRight -= Scale(140) + btnGap;
 		}
 		if(btnClanCreateOpen) {
-			btnClanCreateOpen->setRelativePosition(irr::core::recti(rxRight - Scale(120), topY + Scale(6), rxRight, topY + Scale(42)));
+			btnClanCreateOpen->setRelativePosition(irr::core::recti(rxRight - Scale(120), topY + Scale(2), rxRight, topY + Scale(36)));
 			rxRight -= Scale(120) + btnGap;
 		}
 		if(btnClanMyClan) {
-			btnClanMyClan->setRelativePosition(irr::core::recti(rxRight - Scale(100), topY + Scale(6), rxRight, topY + Scale(42)));
+			btnClanMyClan->setRelativePosition(irr::core::recti(rxRight - Scale(100), topY + Scale(2), rxRight, topY + Scale(36)));
 		}
 
-		irr::s32 searchTop = topY + Scale(60);
+		irr::s32 searchTop = topY + Scale(64);
 		if(ebClanSearch && btnClanSearch) {
 			irr::s32 sw = std::min(Scale(340), W - 2 * pad - Scale(90));
 			ebClanSearch->setRelativePosition(irr::core::recti(pad, searchTop, pad + sw, searchTop + Scale(32)));
@@ -7130,13 +7153,12 @@ void Game::ResizeEconomyScreens() {
 	// 5. Mailbox (Full-screen table canvas with pagination)
 	if(wMailbox) {
 		wMailbox->setRelativePosition(irr::core::recti(0, 0, W, H));
-		stMailboxTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(190), topY + Scale(30)));
-		if(stMailboxDesc) stMailboxDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(190), topY + Scale(54)));
-		btnMailboxBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(38)));
+		placeHeaderHelp(stMailboxTitle, Scale(455), btnMailboxHelp, stMailboxDesc);
+		btnMailboxBack->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 
-		const irr::s32 gridTop = topY + Scale(60);
+		const irr::s32 gridTop = topY + Scale(64);
 		const irr::s32 pageBarH = Scale(34);
-		const irr::s32 tableH = botY - gridTop - pageBarH - Scale(8);
+		const irr::s32 tableH = botY - gridTop - pageBarH - Scale(12);
 		if(pnlMailboxTable) {
 			pnlMailboxTable->setRelativePosition(irr::core::recti(pad, gridTop, W - pad, gridTop + tableH));
 
@@ -10205,10 +10227,12 @@ bool Game::MainLoop() {
 					}
 				}
 				drawNeon(btnStoreBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreHubHelp, cCyan);
 			}
 			if(wStoreDonations && wStoreDonations->isVisible()) {
 				for(int di = 0; di < 5; ++di) drawNeon(wDonCards[di], di == 4 ? cGold : cPurp);
 				drawNeon(btnStoreDonBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreDonHelp, cCyan);
 			}
 			if(wStoreAvatars && wStoreAvatars->isVisible()) {
 				if(wAvatarPreviewOverlay && wAvatarPreviewOverlay->isVisible()) {
@@ -10218,6 +10242,7 @@ bool Game::MainLoop() {
 					for(int i = 0; i < 10; ++i) drawNeon(wAvaCards[i], cPurp);
 					drawNeon(btnStoreAvaSearch, cCyan); drawNeon(btnStoreAvaPrev, cCyan); drawNeon(btnStoreAvaNext, cCyan);
 					drawNeon(btnStoreAvaBack, irr::video::SColor(160, 148, 163, 184));
+					drawNeon(btnStoreAvaHelp, cCyan);
 				}
 			}
 			if(wStoreBoosters && wStoreBoosters->isVisible()) {
@@ -10225,6 +10250,7 @@ bool Game::MainLoop() {
 				for(int fi = 0; fi < 4; ++fi) drawNeon(btnStoreBstFilt[fi], storeBstFilter == fi ? cGold : cPurp);
 				drawNeon(btnStoreBstPrev, cCyan); drawNeon(btnStoreBstNext, cCyan);
 				drawNeon(btnStoreBstBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreBstHelp, cCyan);
 			}
 			if(wStoreVip && wStoreVip->isVisible()) {
 				for(int i = 0; i < 6; ++i) {
@@ -10232,12 +10258,14 @@ bool Game::MainLoop() {
 						drawNeon(wVipCards[i], i == 4 ? cEmer : (i == 3 ? cCyan : cGold));
 				}
 				drawNeon(btnStoreVipBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreVipHelp, cCyan);
 			}
 			if(wStoreCards && wStoreCards->isVisible()) {
 				for(int i = 0; i < 14; ++i) drawNeon(wCardCards[i], cPurp);
 				for(int fi = 0; fi < 3; ++fi) drawNeon(btnStoreCardFilt[fi], storeCardFilter == fi ? cGold : cCyan);
 				drawNeon(btnStoreCardSearch, cCyan); drawNeon(btnStoreCardPrev, cCyan); drawNeon(btnStoreCardNext, cCyan);
 				drawNeon(btnStoreCardBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnStoreCardHelp, cCyan);
 			}
 			if(wStorePacks && wStorePacks->isVisible()) {
 				if(wPackRevealOverlay && wPackRevealOverlay->isVisible()) {
@@ -10251,6 +10279,7 @@ bool Game::MainLoop() {
 					for(int i = 0; i < 12; ++i) drawNeon(wPackCards[i], cPurp);
 					drawNeon(btnStorePackSearch, cCyan); drawNeon(btnStorePackPrev, cCyan); drawNeon(btnStorePackNext, cCyan);
 					drawNeon(btnStorePackBack, irr::video::SColor(160, 148, 163, 184));
+					drawNeon(btnStorePackHelp, cCyan);
 				}
 			}
 			if(wProfileInfo && wProfileInfo->isVisible()) { drawNeon(pnlProfInfoLeft, cCyan); drawNeon(pnlProfInfoRight, cPurp); }
@@ -10270,15 +10299,12 @@ bool Game::MainLoop() {
 				drawNeon(btnMyAvaHelp, cCyan);
 				drawNeon(btnMyAvaPrev, cCyan);
 				drawNeon(btnMyAvaNext, cCyan);
-				if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
-					drawNeon(wMyAvaHelpModal, cCyan);
-					drawNeon(btnMyAvaHelpClose, cGold);
-				}
 			}
 			if(wEventsHub && wEventsHub->isVisible()) {
 				drawNeon(wEventsHubCard[0], cEmer);
 				drawNeon(wEventsHubCard[1], cPurp);
 				drawNeon(btnEventsHubBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnEventsHubHelp, cCyan);
 			}
 			if(wOrbsEvent && wOrbsEvent->isVisible()) {
 				for(int i = 0; i < 9; ++i) drawNeon(wOrbCards[i], i == selectedOrbAttr ? cCyan : cPurp);
@@ -10286,18 +10312,21 @@ bool Game::MainLoop() {
 				for(int r = 0; r < 5; ++r) drawNeon(btnOrbRarities[r], r == selectedOrbRar ? cGold : cCyan);
 				drawNeon(btnOrbsExchange, cEmer);
 				drawNeon(btnOrbsBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnOrbsHelp, cCyan);
 			}
 			if(wEventsMenu && wEventsMenu->isVisible()) {
 				drawNeon(pnlEventsLeft, cEmer);
 				drawNeon(pnlEventsRight, cGold);
 				drawNeon(cbEventsSelect, cPurp);
 				drawNeon(btnEventsBack, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnEventsMenuHelp, cCyan);
 				drawNeon(btnEventsClaimTop, cEmer);
 				drawNeon(btnEventsExchange, cCyan);
 			}
 			if(wClansMenu && wClansMenu->isVisible()) {
 				drawNeon(pnlClansTable, cCyan);
 				drawNeon(pnlClanCreate, cGold);
+				drawNeon(btnClansHelp, cCyan);
 			}
 			if(wClanDetail && wClanDetail->isVisible()) {
 				drawNeon(pnlClanSummary, cCyan);
@@ -10306,7 +10335,11 @@ bool Game::MainLoop() {
 				}
 				drawNeon(pnlClanMembersTable, cPurp);
 			}
-			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); }
+			if(wMailbox && wMailbox->isVisible()) { drawNeon(pnlMailboxTable, cCyan); drawNeon(btnMailboxHelp, cCyan); }
+			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
+				drawNeon(wMyAvaHelpModal, cCyan);
+				drawNeon(btnMyAvaHelpClose, cGold);
+			}
 			drawNeon(wConfirmPurchase, cCyan);
 			if(wAdventureMode && wAdventureMode->isVisible() && (!wDuelReward || !wDuelReward->isVisible())) {
 				drawNeon(pnlAdventureLeft, cCyan);

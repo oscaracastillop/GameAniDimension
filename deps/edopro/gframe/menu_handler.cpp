@@ -595,10 +595,139 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_MY_AVA_HELP: {
-				if(mainGame->wMyAvaHelpModal) {
-					mainGame->wMyAvaHelpModal->setVisible(true);
-					mainGame->env->getRootGUIElement()->bringToFront(mainGame->wMyAvaHelpModal);
-				}
+				mainGame->ShowScreenHelpModal(
+					L"REGLAS DE ESCALAMIENTO PROGRESIVO",
+					L"Escalamiento Progresivo de Estad\u00EDsticas:\n\n"
+					L"Para mantener un crecimiento equilibrado en tu avatar activo, las mejoras dependen entre s\u00ED:\n\n"
+					L"\u2022 Equilibrio EXP \u2194 StarShips:\n"
+					L"  La diferencia entre tu total de EXP y StarShips no puede superar el 30% (m\u00E1ximo 300% en cada una).\n\n"
+					L"\u2022 Desbloqueo de Luck (Santo Grial):\n"
+					L"  Cada 3% conjunto en ambas estad\u00EDsticas (EXP y StarShips) desbloquea 1% m\u00E1ximo de Luck (hasta 100% Luck).\n\n"
+					L"Activa tu mejor avatar estrat\u00E9gicamente seg\u00FAn el modo de juego y aprovecha las bonificaciones en duelos y recompensas."
+				);
+				break;
+			}
+			case BUTTON_STORE_HUB_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"TIENDA ANI DIMENSION",
+					L"Bienvenido a la Tienda oficial de Ani Dimension.\n\n"
+					L"\u2022 Donaciones & Cristales (CD): Adquiere Cristales Dimensionales para apoyar el servidor.\n"
+					L"\u2022 Avatares y Potenciadores: Mejora tus bonificaciones de EXP, StarShips y Luck.\n"
+					L"\u2022 Pases VIP: Membres\u00EDas de 7 d\u00EDas con bonos extra y drops adicionales.\n"
+					L"\u2022 Sobres y Cartas: Expande tu colecci\u00F3n directamente en tu inventario."
+				);
+				break;
+			}
+			case BUTTON_STORE_DON_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"CRISTALES DIMENSIONALES (CD)",
+					L"Adquiere paquetes oficiales de Cristales Dimensionales (CD) para sustentar el servidor.\n\n"
+					L"\u2022 Los CD te permiten comprar Pases VIP, Avatares especiales, Potenciadores y Sobres exclusivos.\n"
+					L"\u2022 Selecciona el paquete deseado y sigue las instrucciones de solicitud para acreditar tu saldo."
+				);
+				break;
+			}
+			case BUTTON_STORE_AVA_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"TIENDA DE AVATARES",
+					L"Colecciona avatares exclusivos con bonificaciones base de EXP, StarShips y Luck.\n\n"
+					L"\u2022 Cada avatar comprado llega a tu Buz\u00F3n como personaje \u00FAnico.\n"
+					L"\u2022 Toca la imagen de cualquier avatar para verlo en vista previa ampliada.\n"
+					L"\u2022 L\u00EDmites m\u00E1ximos por avatar: 300% EXP \u2022 300% StarShips \u2022 100% Luck."
+				);
+				break;
+			}
+			case BUTTON_STORE_BST_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"POTENCIADORES DE AVATAR",
+					L"Mejora las estad\u00EDsticas de tu avatar activo hasta los l\u00EDmites m\u00E1ximos.\n\n"
+					L"\u2022 Los potenciadores llegan primero a tu Buz\u00F3n de Recompensas.\n"
+					L"\u2022 Al reclamarlos desde el Buz\u00F3n, se aplican directamente al avatar que tengas activo.\n"
+					L"\u2022 Usa los filtros superiores para ver potenciadores de EXP, StarShips o Luck."
+				);
+				break;
+			}
+			case BUTTON_STORE_VIP_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"PASES VIP SEMANALES (7 D\u00CDAS)",
+					L"Membres\u00EDas de 7 d\u00EDas adquiribles con Cristales CD:\n\n"
+					L"\u2022 Bronce, Plata, Oro y Platino: Aumentan tus bonificaciones de EXP, StarShips y Luck en duelos.\n"
+					L"\u2022 Pase VIP Cazador: Si obtienes una carta tras ganar un duelo PvP o NPC, activa 70% de probabilidad de ganar una 2da carta y 50% de una 3ra carta."
+				);
+				break;
+			}
+			case BUTTON_STORE_CARD_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"TIENDA DE CARTAS INDIVIDUALES",
+					L"Adquiere cartas espec\u00EDficas para completar tus estrategias y mazos.\n\n"
+					L"\u2022 Cada carta comprada llega directamente a tu inventario (l\u00EDmite 1 copia por usuario en tienda).\n"
+					L"\u2022 Puedes buscar por nombre o filtrar por moneda (StarShips / Cristales CD)."
+				);
+				break;
+			}
+			case BUTTON_STORE_PACK_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"SOBRES EXCLUSIVOS",
+					L"Abre paquetes tem\u00E1ticos para expandir tu colecci\u00F3n de cartas.\n\n"
+					L"\u2022 Cada sobre entrega 3 cartas aleatorias de su serie directamente a tu inventario.\n"
+					L"\u2022 Puedes consultar el contenido posible de cada sobre antes de comprarlo."
+				);
+				break;
+			}
+			case BUTTON_PROFILE_HUB_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"PERFIL DEL DUELISTA",
+					L"Desde aqu\u00ED gestionas toda tu informaci\u00F3n, recompensas y progreso en Ani Dimension:\n\n"
+					L"\u2022 Informaci\u00F3n del Jugador, Medallas y Mis Avatares.\n"
+					L"\u2022 Buz\u00F3n de Recompensas para reclamar compras y regalos.\n"
+					L"\u2022 Eventos Especiales (Rompecabezas y Orbes de Esencia) y Clanes."
+				);
+				break;
+			}
+			case BUTTON_EVENTS_HUB_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"EVENTOS DE ANI DIMENSION",
+					L"Participa en los eventos especiales del servidor y consigue recompensas exclusivas:\n\n"
+					L"\u2022 Rompecabezas Mensual: Gana duelos PvP o NPC para reunir las 20 piezas, reclamar el Top 10 o canjear fichas por StarShips.\n"
+					L"\u2022 Orbes de Esencia: Consigue orbes elementales al ganar duelos e interc\u00E1mbialos por cartas aleatorias de su mismo atributo y rareza."
+				);
+				break;
+			}
+			case BUTTON_ORBS_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"ORBES DE ESENCIA ELEMENTAL",
+					L"Consigue Orbes Elementales al ganar duelos PvP o NPC mientras el evento est\u00E9 activo.\n\n"
+					L"\u2022 Selecciona un atributo de orbe (Oscuridad, Luz, Tierra, Agua, Fuego, Viento, Divino, Magia o Trampa).\n"
+					L"\u2022 Elige la rareza deseada (Com\u00FAn: 5, Rara: 12, Super Rara: 25, Ultra Rara: 50, Secreta: 100 Orbes) y presiona Intercambiar.\n"
+					L"\u2022 La carta ganada llega al instante a tu inventario."
+				);
+				break;
+			}
+			case BUTTON_EVENTS_MENU_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"EVENTO ROMPECABEZAS MENSUAL",
+					L"Completa el tablero de 20 piezas ganando duelos PvP o contra NPC.\n\n"
+					L"\u2022 Los primeros 10 duelistas en completarlo pueden reclamar los premios del Top 10.\n"
+					L"\u2022 Al finalizar el evento, puedes canjear tus piezas sobrantes por 100 StarShips cada una."
+				);
+				break;
+			}
+			case BUTTON_CLANS_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"CLANES DE ANI DIMENSION",
+					L"\u00DAnete a un clan o crea el tuyo para competir junto a otros duelistas.\n\n"
+					L"\u2022 Capacidad m\u00E1xima de 30 miembros por clan.\n"
+					L"\u2022 Gana EXP de clan derrotando a otros jugadores en duelos PvP para subir el nivel y las bonificaciones del clan."
+				);
+				break;
+			}
+			case BUTTON_MAILBOX_HELP: {
+				mainGame->ShowScreenHelpModal(
+					L"BUZ\u00D3N DE RECOMPENSAS Y COMPRAS",
+					L"Aqu\u00ED llegan tus avatares comprados, potenciadores, regalos de eventos y premios del Staff.\n\n"
+					L"\u2022 Reclama tus avatares para agregarlos a Mis Avatares.\n"
+					L"\u2022 Reclama tus potenciadores para aplicarlos directamente sobre tu avatar activo."
+				);
 				break;
 			}
 			case BUTTON_MY_AVA_HELP_CLOSE: {
