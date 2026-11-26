@@ -5639,6 +5639,11 @@ void Game::PopulateEconomyScreens() {
 	btnMyAvaNext = env->addButton(irr::core::recti(0, 0, 10, 10), wProfileAvatars, BUTTON_MY_AVA_NEXT, L"Siguiente");
 	styleDarkBtn(btnMyAvaPrev);
 	styleDarkBtn(btnMyAvaNext);
+	if(loginCardDescFont) {
+		btnMyAvaPrev->setOverrideFont(loginCardDescFont);
+		stMyAvaPage->setOverrideFont(loginCardDescFont);
+		btnMyAvaNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 4c. Events Hub (2-card menu: Rompecabezas & Orbes de Esencia)
 	makeCanvas(wEventsHub);
