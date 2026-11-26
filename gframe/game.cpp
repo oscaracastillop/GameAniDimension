@@ -4489,6 +4489,22 @@ void Game::NotifyDuelResultToServer(bool isAdventure, int npcId, const std::stri
 			pendingDuelReward.cardCode = cardCode;
 			pendingDuelReward.cardName = cardName;
 			pendingDuelReward.cardRareza = cardRareza;
+			pendingDuelReward.extraCardsLines.clear();
+			if(resp.contains("extraCards") && resp["extraCards"].is_array()) {
+				for(const auto& ec : resp["extraCards"]) {
+					std::string enom = SafeJsonStr(ec, "nombre", "");
+					std::string erar = SafeJsonStr(ec, "rareza", "Comun");
+					if(!enom.empty()) {
+						pendingDuelReward.extraCardsLines.push_back("[" + erar + "] " + enom);
+					}
+				}
+			}
+			pendingDuelReward.orbDropped = resp.contains("orbDropped") && resp["orbDropped"].is_boolean() && resp["orbDropped"].get<bool>();
+			pendingDuelReward.orbAtributo = SafeJsonStr(resp, "orbAtributo", "");
+			pendingDuelReward.orbCantidad = SafeJsonInt(resp, "orbCantidad", 0);
+			pendingDuelReward.pvpDelta = SafeJsonInt(resp, "puntosPvPDelta", 0);
+			pendingDuelReward.pvpTotal = SafeJsonInt(resp, "puntosPvPTotales", 1000);
+			pendingDuelReward.pvpRango = SafeJsonStr(resp, "rangoPvP", "Bronce");
 			pendingDuelReward.puzzleActive = resp.contains("puzzleEventActive") && resp["puzzleEventActive"].is_boolean() && resp["puzzleEventActive"].get<bool>();
 			pendingDuelReward.puzzleDropped = resp.contains("puzzleDropped") && resp["puzzleDropped"].is_boolean() && resp["puzzleDropped"].get<bool>();
 			pendingDuelReward.puzzlePiece = SafeJsonInt(resp, "puzzlePieceNumber", 0);
@@ -4864,6 +4880,7 @@ void Game::HideAllEcosystemScreens() {
 	if(wMyAvaHelpModal) wMyAvaHelpModal->setVisible(false);
 	if(wEventsHub) wEventsHub->setVisible(false);
 	if(wEventsMenu) wEventsMenu->setVisible(false);
+	if(wOrbsEvent) wOrbsEvent->setVisible(false);
 	if(wClansMenu) wClansMenu->setVisible(false);
 	if(wClanDetail) wClanDetail->setVisible(false);
 	if(wMailbox) wMailbox->setVisible(false);
@@ -5215,7 +5232,7 @@ void Game::PopulateEconomyScreens() {
 	stStoreVipActive->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	btnStoreVipBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStoreVip, BUTTON_STORE_VIP_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStoreVipBack);
-	for(int i = 0; i < 4; ++i) {
+	for(int i = 0; i < 6; ++i) {
 		wVipCards[i] = makePanel(wStoreVip);
 		imgVipCardIcons[i] = env->addImage(irr::core::recti(0, 0, 64, 64), wVipCards[i], -1, 0, true);
 		imgVipCardIcons[i]->setScaleImage(true);
@@ -5576,13 +5593,13 @@ void Game::PopulateEconomyScreens() {
 	btnEventsHubBack = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsHub, BUTTON_EVENTS_HUB_BACK, L"Volver a Lobby");
 	styleDarkBtn(btnEventsHubBack);
 	{
-		const char* evIcons[2] = { "textures/events.png", "textures/starships.png" };
+		const char* evIcons[2] = { "textures/events.png", "textures/orbs/orb_luz.png" };
 		const wchar_t* evTitles[2] = { L"Rompecabezas", L"Orbes de Esencia" };
 		const wchar_t* evDescs[2] = {
 			L"Gana duelos NPC o PvP del 5 al 26 de cada mes para desbloquear las 20 piezas, reclama el Top 10 o canjea fichas al cierre.",
-			L"Pr\u00F3ximamente: evento mensual de recolecci\u00F3n de esencias m\u00E1gicas y recompensas dimensionales."
+			L"Consigue Orbes Elementales al ganar duelos PvP o NPC e interc\u00E1mbialos por cartas al azar de su mismo atributo y rareza."
 		};
-		const wchar_t* evBtns[2] = { L"Abrir Rompecabezas", L"Pr\u00F3ximamente" };
+		const wchar_t* evBtns[2] = { L"Abrir Rompecabezas", L"Abrir Orbes de Esencia" };
 		const int evIds[2] = { BUTTON_EVENTS_HUB_PUZZLE, BUTTON_EVENTS_HUB_ORBS };
 		const irr::video::SColor evColors[2] = { irr::video::SColor(255, 52, 211, 153), irr::video::SColor(255, 192, 132, 252) };
 		bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
@@ -5604,13 +5621,65 @@ void Game::PopulateEconomyScreens() {
 			if(loginDescFont) stEventsHubCardDesc[i]->setOverrideFont(loginDescFont);
 
 			btnEventsHubCardAction[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wEventsHubCard[i], evIds[i], evBtns[i]);
-			if(i == 0) styleCyanBtn(btnEventsHubCardAction[i]);
-			else {
-				styleDarkBtn(btnEventsHubCardAction[i]);
-				btnEventsHubCardAction[i]->setEnabled(false);
-			}
+			styleCyanBtn(btnEventsHubCardAction[i]);
 		}
 		driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, oldMip);
+	}
+
+	// 4e. Orbes de Esencia Screen
+	makeCanvas(wOrbsEvent);
+	stOrbsTitle = env->addStaticText(L"ORBES DE ESENCIA ELEMENTAL", irr::core::recti(0, 0, 10, 10), false, false, wOrbsEvent);
+	stOrbsTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+	if(loginTitleFont) stOrbsTitle->setOverrideFont(loginTitleFont);
+	stOrbsDesc = env->addStaticText(L"Gana duelos PvP o NPC para conseguir orbes e intercambiarlos por cartas de su atributo y rareza.", irr::core::recti(0, 0, 10, 10), false, true, wOrbsEvent);
+	stOrbsDesc->setWordWrap(true);
+	stOrbsDesc->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+	if(loginDescFont) stOrbsDesc->setOverrideFont(loginDescFont);
+	stOrbsStatus = env->addStaticText(L"Estado: ...", irr::core::recti(0, 0, 10, 10), false, false, wOrbsEvent);
+	stOrbsStatus->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	btnOrbsBack = env->addButton(irr::core::recti(0, 0, 10, 10), wOrbsEvent, BUTTON_ORBS_BACK, L"Volver a Eventos");
+	styleDarkBtn(btnOrbsBack);
+	{
+		const char* orbFiles[9] = {
+			"textures/orbs/orb_oscuridad.png", "textures/orbs/orb_luz.png", "textures/orbs/orb_tierra.png",
+			"textures/orbs/orb_agua.png", "textures/orbs/orb_fuego.png", "textures/orbs/orb_viento.png",
+			"textures/orbs/orb_divino.png", "textures/orbs/orb_magia.png", "textures/orbs/orb_trampa.png"
+		};
+		const wchar_t* orbNames[9] = {
+			L"OSCURIDAD", L"LUZ", L"TIERRA", L"AGUA", L"FUEGO", L"VIENTO", L"DIVINO", L"MAGIA", L"TRAMPA"
+		};
+		for(int i = 0; i < 9; ++i) {
+			wOrbCards[i] = makePanel(wOrbsEvent);
+			imgOrbIcons[i] = env->addImage(irr::core::recti(0, 0, 48, 48), wOrbCards[i], -1, 0, true);
+			imgOrbIcons[i]->setScaleImage(true);
+			imgOrbIcons[i]->setUseAlphaChannel(true);
+			if(auto ot = driver->getTexture(orbFiles[i])) imgOrbIcons[i]->setImage(ot);
+			stOrbNames[i] = env->addStaticText(orbNames[i], irr::core::recti(0, 0, 10, 10), false, false, wOrbCards[i]);
+			stOrbNames[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+			stOrbNames[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+			stOrbCounts[i] = env->addStaticText(L"0 Orbes", irr::core::recti(0, 0, 10, 10), false, false, wOrbCards[i]);
+			stOrbCounts[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+			stOrbCounts[i]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			btnOrbSelect[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wOrbCards[i], BUTTON_ORBS_ATTR_0 + i, L"Elegir");
+			styleDarkBtn(btnOrbSelect[i]);
+		}
+		pnlOrbsRight = makePanel(wOrbsEvent);
+		stOrbsSelInfo = env->addStaticText(L"Atributo: OSCURIDAD\nRareza: Com\u00FAn (5 Orbes)", irr::core::recti(0, 0, 10, 10), false, true, pnlOrbsRight);
+		stOrbsSelInfo->setWordWrap(true);
+		stOrbsSelInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		const wchar_t* rarLabels[5] = { L"Com\u00FAn (5)", L"Rara (12)", L"Super Rara (25)", L"Ultra Rara (50)", L"Secreta (100)" };
+		for(int r = 0; r < 5; ++r) {
+			btnOrbRarities[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlOrbsRight, BUTTON_ORBS_RAR_0 + r, rarLabels[r]);
+			styleDarkBtn(btnOrbRarities[r]);
+		}
+		btnOrbsExchange = env->addButton(irr::core::recti(0, 0, 10, 10), pnlOrbsRight, BUTTON_ORBS_EXCHANGE, L"Intercambiar Orbes");
+		styleCyanBtn(btnOrbsExchange);
+		imgOrbRewardCard = env->addImage(irr::core::recti(0, 0, 64, 92), pnlOrbsRight, -1, 0, true);
+		imgOrbRewardCard->setScaleImage(true);
+		imgOrbRewardCard->setVisible(false);
+		stOrbRewardInfo = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlOrbsRight);
+		stOrbRewardInfo->setWordWrap(true);
+		stOrbRewardInfo->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 	}
 
 	// 4d. Events / Dedicated Rompecabezas
@@ -6306,12 +6375,13 @@ void Game::ResizeEconomyScreens() {
 		stStoreVipActive->setRelativePosition(irr::core::recti(pad, topY + Scale(36), W - pad, topY + Scale(62)));
 
 		const irr::s32 gridTop = topY + Scale(70);
-		const irr::s32 gap = Scale(14);
-		const irr::s32 cardW = (W - 2 * pad - 3 * gap) / 4;
+		const irr::s32 gap = Scale(12);
+		const int vipCnt = std::max(1, std::min(6, (int)storeVips.size()));
+		const irr::s32 cardW = (W - 2 * pad - (vipCnt - 1) * gap) / vipCnt;
 		const irr::s32 availH = std::max<irr::s32>(Scale(250), botY - gridTop);
 		const irr::s32 cardH = std::min<irr::s32>(Scale(380), availH);
 		const irr::s32 cy = gridTop + (availH - cardH) / 2;
-		for(int i = 0; i < 4; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			irr::s32 cx = pad + i * (cardW + gap);
 			if(wVipCards[i]) {
 				wVipCards[i]->setRelativePosition(irr::core::recti(cx, cy, cx + cardW, cy + cardH));
@@ -6635,6 +6705,53 @@ void Game::ResizeEconomyScreens() {
 				irr::s32 icH = ty - Scale(16);
 				fitImage(imgEventsHubIcon[i], cardW / 2, Scale(12), cardW - Scale(28), icH);
 			}
+		}
+	}
+
+	if(wOrbsEvent) {
+		wOrbsEvent->setRelativePosition(irr::core::recti(0, 0, W, H));
+		stOrbsTitle->setRelativePosition(irr::core::recti(pad, topY, W - pad - Scale(200), topY + Scale(30)));
+		btnOrbsBack->setRelativePosition(irr::core::recti(W - pad - Scale(185), topY + Scale(2), W - pad, topY + Scale(36)));
+		stOrbsDesc->setRelativePosition(irr::core::recti(pad, topY + Scale(32), W - pad - Scale(220), topY + Scale(54)));
+		stOrbsStatus->setRelativePosition(irr::core::recti(W - pad - Scale(215), topY + Scale(38), W - pad, topY + Scale(58)));
+
+		const irr::s32 contentTop = topY + Scale(64);
+		const irr::s32 contentH = std::max<irr::s32>(Scale(320), botY - contentTop);
+		const irr::s32 leftW = ((W - 2 * pad - Scale(16)) * 60) / 100;
+		const irr::s32 rightX = pad + leftW + Scale(16);
+		const irr::s32 rightW = W - pad - rightX;
+
+		const irr::s32 oGap = Scale(10);
+		const irr::s32 ocW = (leftW - 2 * oGap) / 3;
+		const irr::s32 ocH = (contentH - 2 * oGap) / 3;
+		for(int i = 0; i < 9; ++i) {
+			int r = i / 3, c = i % 3;
+			irr::s32 x = pad + c * (ocW + oGap);
+			irr::s32 y = contentTop + r * (ocH + oGap);
+			if(wOrbCards[i]) {
+				wOrbCards[i]->setRelativePosition(irr::core::recti(x, y, x + ocW, y + ocH));
+				irr::s32 icSz = std::max<irr::s32>(Scale(32), std::min<irr::s32>(ocW / 2, ocH - Scale(56)));
+				if(imgOrbIcons[i]) imgOrbIcons[i]->setRelativePosition(irr::core::recti((ocW - icSz) / 2, Scale(6), (ocW + icSz) / 2, Scale(6) + icSz));
+				if(stOrbNames[i]) stOrbNames[i]->setRelativePosition(irr::core::recti(Scale(4), Scale(8) + icSz, ocW - Scale(4), Scale(24) + icSz));
+				if(stOrbCounts[i]) stOrbCounts[i]->setRelativePosition(irr::core::recti(Scale(4), Scale(24) + icSz, ocW - Scale(4), Scale(40) + icSz));
+				if(btnOrbSelect[i]) btnOrbSelect[i]->setRelativePosition(irr::core::recti(Scale(10), ocH - Scale(28), ocW - Scale(10), ocH - Scale(6)));
+			}
+		}
+
+		if(pnlOrbsRight) {
+			pnlOrbsRight->setRelativePosition(irr::core::recti(rightX, contentTop, rightX + rightW, contentTop + contentH));
+			if(stOrbsSelInfo) stOrbsSelInfo->setRelativePosition(irr::core::recti(Scale(14), Scale(12), rightW - Scale(14), Scale(58)));
+			irr::s32 ry = Scale(64);
+			for(int r = 0; r < 5; ++r) {
+				if(btnOrbRarities[r]) btnOrbRarities[r]->setRelativePosition(irr::core::recti(Scale(14), ry, rightW - Scale(14), ry + Scale(28)));
+				ry += Scale(33);
+			}
+			if(btnOrbsExchange) btnOrbsExchange->setRelativePosition(irr::core::recti(Scale(14), ry + Scale(6), rightW - Scale(14), ry + Scale(40)));
+			irr::s32 prevY = ry + Scale(50);
+			irr::s32 cardH = std::max<irr::s32>(Scale(60), contentH - prevY - Scale(12));
+			irr::s32 cardW = (cardH * 177) / 254;
+			if(imgOrbRewardCard) imgOrbRewardCard->setRelativePosition(irr::core::recti(Scale(14), prevY, Scale(14) + cardW, prevY + cardH));
+			if(stOrbRewardInfo) stOrbRewardInfo->setRelativePosition(irr::core::recti(Scale(22) + cardW, prevY, rightW - Scale(14), prevY + cardH));
 		}
 	}
 
@@ -7241,7 +7358,11 @@ void Game::ShowDuelRewardWindow() {
 	}
 	if(stDuelRewardCardInfo) {
 		if(d.cardCode > 0 && !d.cardName.empty()) {
-			stDuelRewardCardInfo->setText(epro::format(L"[{}]\n{}", BufferIO::DecodeUTF8(d.cardRareza), BufferIO::DecodeUTF8(d.cardName)).c_str());
+			std::wstring cTxt = epro::format(L"[{}]\n{}", BufferIO::DecodeUTF8(d.cardRareza), BufferIO::DecodeUTF8(d.cardName));
+			for(const auto& line : d.extraCardsLines) {
+				cTxt += L"\n+ VIP: " + BufferIO::DecodeUTF8(line);
+			}
+			stDuelRewardCardInfo->setText(cTxt.c_str());
 		} else {
 			stDuelRewardCardInfo->setText(L"Sin carta obtenida");
 		}
@@ -7265,6 +7386,12 @@ void Game::ShowDuelRewardWindow() {
 		}
 	} else {
 		evTxt += L"\u2022 Sin eventos de rompecabezas activos.";
+	}
+	if(d.orbDropped && !d.orbAtributo.empty()) {
+		evTxt += epro::format(L"\n\u2605 \u00A1ORBE DE ESENCIA OBTENIDO!: 1x Orbe de {} (Total: {})", BufferIO::DecodeUTF8(d.orbAtributo), d.orbCantidad);
+	}
+	if(d.pvpDelta != 0) {
+		evTxt += epro::format(L"\n\u2605 Rank PvP: {}{} pts | Total: {} pts ({})", d.pvpDelta > 0 ? L"+" : L"", d.pvpDelta, d.pvpTotal, BufferIO::DecodeUTF8(d.pvpRango));
 	}
 	if(!d.medalTitle.empty()) {
 		evTxt += epro::format(L"\n\u2605 \u00A1MEDALLA DESBLOQUEADA!: {} \u2605", BufferIO::DecodeUTF8(d.medalTitle));
@@ -7553,7 +7680,7 @@ void Game::OpenStoreVip() {
 		stStoreVipBalanceCD->setText(epro::format(L"Cristales: {} CD", playerCristales).c_str());
 	bool oldMip = driver->getTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS);
 	driver->setTextureCreationFlag(irr::video::ETCF_CREATE_MIP_MAPS, false);
-	for(int i = 0; i < 4; ++i) {
+	for(int i = 0; i < 6; ++i) {
 		if(i < (int)storeVips.size()) {
 			const auto& v = storeVips[i];
 			if(wVipCards[i]) wVipCards[i]->setVisible(true);
@@ -8303,6 +8430,84 @@ void Game::OpenEventsHub() {
 	HideAllEcosystemScreens();
 	ResizeEconomyScreens();
 	wEventsHub->setVisible(true);
+}
+
+void Game::OpenOrbsEvent() {
+	HideAllEcosystemScreens();
+	auto resp = CallSessionApi("/api/events/orbs", sessionToken);
+	for(int i = 0; i < 9; ++i) orbCounts[i] = 0;
+	static const char* attrKeys[9] = { "OSCURIDAD", "LUZ", "TIERRA", "AGUA", "FUEGO", "VIENTO", "DIVINO", "MAGIA", "TRAMPA" };
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		if(resp.contains("evento") && resp["evento"].is_object()) {
+			if(stOrbsStatus) {
+				stOrbsStatus->setText(L"ACTIVO");
+				stOrbsStatus->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+			}
+		} else if(stOrbsStatus) {
+			stOrbsStatus->setText(L"Pausado (Canje abierto)");
+			stOrbsStatus->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		}
+		if(resp.contains("orbs") && resp["orbs"].is_array()) {
+			for(const auto& o : resp["orbs"]) {
+				std::string at = SafeJsonStr(o, "atributo", "");
+				int cnt = SafeJsonInt(o, "cantidad", 0);
+				for(int i = 0; i < 9; ++i) {
+					if(at == attrKeys[i]) { orbCounts[i] = cnt; break; }
+				}
+			}
+		}
+	}
+	for(int i = 0; i < 9; ++i) {
+		if(stOrbCounts[i]) stOrbCounts[i]->setText(epro::format(L"{} Orbes", orbCounts[i]).c_str());
+	}
+	if(imgOrbRewardCard) imgOrbRewardCard->setVisible(false);
+	if(stOrbRewardInfo) stOrbRewardInfo->setText(L"Selecciona un atributo y rareza para canjear.");
+	RefreshOrbsSelection();
+	ResizeEconomyScreens();
+	wOrbsEvent->setVisible(true);
+}
+
+void Game::RefreshOrbsSelection() {
+	static const wchar_t* attrNames[9] = { L"OSCURIDAD", L"LUZ", L"TIERRA", L"AGUA", L"FUEGO", L"VIENTO", L"DIVINO", L"MAGIA", L"TRAMPA" };
+	static const wchar_t* rarNames[5] = { L"Com\u00FAn", L"Rara", L"Super Rara", L"Ultra Rara", L"Secreta" };
+	static const int rarCosts[5] = { 5, 12, 25, 50, 100 };
+	if(selectedOrbAttr < 0 || selectedOrbAttr >= 9) selectedOrbAttr = 0;
+	if(selectedOrbRar < 0 || selectedOrbRar >= 5) selectedOrbRar = 0;
+	for(int i = 0; i < 9; ++i) {
+		if(btnOrbSelect[i]) btnOrbSelect[i]->setText(i == selectedOrbAttr ? L"Seleccionado" : L"Elegir");
+	}
+	if(stOrbsSelInfo) {
+		stOrbsSelInfo->setText(epro::format(L"Atributo: {} ({} disp.)\nRareza: {} | Costo: {} Orbes",
+			attrNames[selectedOrbAttr], orbCounts[selectedOrbAttr], rarNames[selectedOrbRar], rarCosts[selectedOrbRar]).c_str());
+	}
+}
+
+void Game::ExchangeSelectedOrbs() {
+	static const char* attrKeys[9] = { "OSCURIDAD", "LUZ", "TIERRA", "AGUA", "FUEGO", "VIENTO", "DIVINO", "MAGIA", "TRAMPA" };
+	static const char* rarKeys[5] = { "Comun", "Rara", "Super Rara", "Ultra Rara", "Secreta" };
+	if(selectedOrbAttr < 0 || selectedOrbAttr >= 9 || selectedOrbRar < 0 || selectedOrbRar >= 5) return;
+	nlohmann::json body = { {"atributo", attrKeys[selectedOrbAttr]}, {"rareza", rarKeys[selectedOrbRar]} };
+	auto resp = PostSessionApi("/api/events/orbs/exchange", sessionToken, body);
+	if(resp.contains("success") && resp["success"].is_boolean() && resp["success"].get<bool>()) {
+		int rem = SafeJsonInt(resp, "orbesRestantes", 0);
+		orbCounts[selectedOrbAttr] = rem;
+		if(stOrbCounts[selectedOrbAttr]) stOrbCounts[selectedOrbAttr]->setText(epro::format(L"{} Orbes", rem).c_str());
+		uint32_t code = (uint32_t)SafeJsonInt(resp, "passcode", 0);
+		std::wstring cName = BufferIO::DecodeUTF8(SafeJsonStr(resp, "nombre", ""));
+		std::wstring cRar = BufferIO::DecodeUTF8(SafeJsonStr(resp, "rareza", ""));
+		orbRewardCardCode = code;
+		if(imgOrbRewardCard) {
+			auto tex = code > 0 ? imageManager.GetTextureCard(code, ART, false, true) : imageManager.tCover[0];
+			imgOrbRewardCard->setImage(tex ? tex : imageManager.tCover[0]);
+			imgOrbRewardCard->setVisible(true);
+		}
+		if(stOrbRewardInfo) {
+			stOrbRewardInfo->setText(epro::format(L"\u00A1Canje exitoso!\n{}\n[{}]\nEnviada a tu inventario.", cName, cRar).c_str());
+		}
+		RefreshOrbsSelection();
+	} else {
+		PopupMessage(L"Orbes de Esencia", BufferIO::DecodeUTF8(SafeJsonStr(resp, "error", "No se pudo realizar el canje.")));
+	}
 }
 
 void Game::OpenEventsMenu(int eventoId) {
@@ -9645,7 +9850,7 @@ bool Game::MainLoop() {
 				(wStorePacks && wStorePacks->isVisible()) || (wPlayerProfile && wPlayerProfile->isVisible()) ||
 				(wProfileInfo && wProfileInfo->isVisible()) || (wProfileMedals && wProfileMedals->isVisible()) ||
 				(wProfileAvatars && wProfileAvatars->isVisible()) || (wEventsHub && wEventsHub->isVisible()) ||
-				(wEventsMenu && wEventsMenu->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
+				(wEventsMenu && wEventsMenu->isVisible()) || (wOrbsEvent && wOrbsEvent->isVisible()) || (wClansMenu && wClansMenu->isVisible()) ||
 				(wClanDetail && wClanDetail->isVisible()) ||
 				(wMailbox && wMailbox->isVisible()) ||
 				(wAdventureMode && wAdventureMode->isVisible()) ||
@@ -9728,6 +9933,7 @@ bool Game::MainLoop() {
 						(wProfileAvatars && wProfileAvatars->isVisible()) ||
 						(wEventsHub && wEventsHub->isVisible()) ||
 						(wEventsMenu && wEventsMenu->isVisible()) ||
+						(wOrbsEvent && wOrbsEvent->isVisible()) ||
 						(wClansMenu && wClansMenu->isVisible()) ||
 						(wClanDetail && wClanDetail->isVisible());
 				};
@@ -9996,7 +10202,10 @@ bool Game::MainLoop() {
 				drawNeon(btnStoreBstBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wStoreVip && wStoreVip->isVisible()) {
-				for(int i = 0; i < 4; ++i) drawNeon(wVipCards[i], i == 3 ? cCyan : cGold);
+				for(int i = 0; i < 6; ++i) {
+					if(wVipCards[i] && wVipCards[i]->isVisible())
+						drawNeon(wVipCards[i], i == 4 ? cEmer : (i == 3 ? cCyan : cGold));
+				}
 				drawNeon(btnStoreVipBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wStoreCards && wStoreCards->isVisible()) {
@@ -10045,6 +10254,13 @@ bool Game::MainLoop() {
 				drawNeon(wEventsHubCard[0], cEmer);
 				drawNeon(wEventsHubCard[1], cPurp);
 				drawNeon(btnEventsHubBack, irr::video::SColor(160, 148, 163, 184));
+			}
+			if(wOrbsEvent && wOrbsEvent->isVisible()) {
+				for(int i = 0; i < 9; ++i) drawNeon(wOrbCards[i], i == selectedOrbAttr ? cCyan : cPurp);
+				drawNeon(pnlOrbsRight, cGold);
+				for(int r = 0; r < 5; ++r) drawNeon(btnOrbRarities[r], r == selectedOrbRar ? cGold : cCyan);
+				drawNeon(btnOrbsExchange, cEmer);
+				drawNeon(btnOrbsBack, irr::video::SColor(160, 148, 163, 184));
 			}
 			if(wEventsMenu && wEventsMenu->isVisible()) {
 				drawNeon(pnlEventsLeft, cEmer);
