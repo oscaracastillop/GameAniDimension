@@ -1233,11 +1233,14 @@ void Game::Initialize() {
 	wReplay = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1202).data());
 	defaultStrings.emplace_back(wReplay, 1202);
 	wReplay->getCloseButton()->setVisible(false);
+	wReplay->setDrawTitlebar(false);
+	wReplay->setDrawBackground(false);
+	wReplay->setDraggable(false);
 	wReplay->setVisible(false);
 	lstReplayList = AlignElementWithParent(irr::gui::CGUIFileSelectListBox::addFileSelectListBox(env, wReplay, LISTBOX_REPLAY_LIST, Scale(10, 30, 350, 400), true, true, false));
 	lstReplayList->setWorkingPath(L"./replay", true);
 	lstReplayList->addFilteredExtensions({L"yrp", L"yrpx"});
-	lstReplayList->setItemHeight(Scale(18));
+	lstReplayList->setItemHeight(Scale(22));
 	btnLoadReplay = AlignElementWithParent(env->addButton(Scale(470, 355, 570, 380), wReplay, BUTTON_LOAD_REPLAY, gDataManager->GetSysString(1348).data()));
 	defaultStrings.emplace_back(btnLoadReplay, 1348);
 	btnLoadReplay->setEnabled(false);
@@ -1247,27 +1250,28 @@ void Game::Initialize() {
 	btnRenameReplay = AlignElementWithParent(env->addButton(Scale(360, 385, 460, 410), wReplay, BUTTON_RENAME_REPLAY, gDataManager->GetSysString(1362).data()));
 	defaultStrings.emplace_back(btnRenameReplay, 1362);
 	btnRenameReplay->setEnabled(false);
-	btnReplayCancel = AlignElementWithParent(env->addButton(Scale(470, 385, 570, 410), wReplay, BUTTON_CANCEL_REPLAY, gDataManager->GetSysString(1347).data()));
-	defaultStrings.emplace_back(btnReplayCancel, 1347);
- 	tmpptr = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1349).data(), Scale(360, 30, 570, 50), false, true, wReplay));
-	defaultStrings.emplace_back(tmpptr, 1349);
+	btnReplayCancel = AlignElementWithParent(env->addButton(Scale(470, 385, 570, 410), wReplay, BUTTON_CANCEL_REPLAY, L"Volver al Lobby"));
+	btnReplayCancel->setEnabled(true);
+	stReplayInfoTitle = AlignElementWithParent(env->addStaticText(L"DETALLES DE REPETICI\u00D3N", Scale(360, 30, 570, 50), false, true, wReplay));
 	stReplayInfo = AlignElementWithParent(irr::gui::CGUICustomText::addCustomText(L"", false, env, wReplay, -1, Scale(360, 60, 570, 350)));
 	stReplayInfo->setWordWrap(true);
 	btnExportDeck = AlignElementWithParent(env->addButton(Scale(470, 325, 570, 350), wReplay, BUTTON_EXPORT_DECK, gDataManager->GetSysString(1358).data()));
 	defaultStrings.emplace_back(btnExportDeck, 1358);
 	btnExportDeck->setEnabled(false);
+	btnExportDeck->setVisible(false);
 	btnShareReplay = AlignElementWithParent(env->addButton(Scale(360, 325, 460, 350), wReplay, BUTTON_SHARE_REPLAY, gDataManager->GetSysString(1378).data()));
 	defaultStrings.emplace_back(btnShareReplay, 1378);
 	btnShareReplay->setEnabled(false);
-#if !EDOPRO_ANDROID
 	btnShareReplay->setVisible(false);
-#endif
 	chkYrp = AlignElementWithParent(env->addCheckBox(false, Scale(360, 250, 560, 270), wReplay, -1, gDataManager->GetSysString(1356).data()));
 	defaultStrings.emplace_back(chkYrp, 1356);
- 	tmpptr = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1353).data(), Scale(360, 275, 570, 295), false, true, wReplay));
-	defaultStrings.emplace_back(tmpptr, 1353);
+	chkYrp->setVisible(false);
+	stReplayStartTurnLbl = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1353).data(), Scale(360, 275, 570, 295), false, true, wReplay));
+	defaultStrings.emplace_back(stReplayStartTurnLbl, 1353);
+	stReplayStartTurnLbl->setVisible(false);
 	ebRepStartTurn = AlignElementWithParent(env->addEditBox(L"", Scale(360, 300, 460, 320), true, wReplay, -1));
 	ebRepStartTurn->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	ebRepStartTurn->setVisible(false);
 	//single play window
 	wSinglePlay = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1201).data());
 	defaultStrings.emplace_back(wSinglePlay, 1201);
@@ -5417,7 +5421,9 @@ void Game::PopulateEconomyScreens() {
 	btnStorePackSearch = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_SEARCH, L"Buscar");
 	btnStorePackBack = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_BACK, L"Volver a Tienda");
 	styleDarkBtn(btnStorePackSearch);
+	if(loginCardDescFont) btnStorePackSearch->setOverrideFont(loginCardDescFont);
 	styleDarkBtn(btnStorePackBack);
+	if(loginCardDescFont) btnStorePackBack->setOverrideFont(loginCardDescFont);
 	for(int i = 0; i < 12; ++i) {
 		wPackCards[i] = makePanel(wStorePacks);
 		imgPackCardArts[i] = env->addImage(irr::core::recti(0, 0, 64, 92), wPackCards[i], -1, 0, true);
@@ -5425,17 +5431,22 @@ void Game::PopulateEconomyScreens() {
 		stPackCardTitles[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardTitles[i]->setWordWrap(true);
 		stPackCardTitles[i]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
-		if(loginDescFont) stPackCardTitles[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stPackCardTitles[i]->setOverrideFont(loginCardDescFont);
+		else if(loginDescFont) stPackCardTitles[i]->setOverrideFont(loginDescFont);
 		stPackCardDescs[i] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wPackCards[i]);
 		stPackCardDescs[i]->setWordWrap(true);
 		stPackCardDescs[i]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-		if(loginLogTimeFont) stPackCardDescs[i]->setOverrideFont(loginLogTimeFont);
-		else if(loginDescFont) stPackCardDescs[i]->setOverrideFont(loginDescFont);
+		if(loginCardDescFont) stPackCardDescs[i]->setOverrideFont(loginCardDescFont);
+		else if(loginLogTimeFont) stPackCardDescs[i]->setOverrideFont(loginLogTimeFont);
 		btnPackCardBuy[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_BUY_0 + i, L"Comprar");
 		btnPackCardView[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wPackCards[i], BUTTON_STORE_PACK_VIEW_0 + i, L"Ver Cartas");
 		styleDarkBtn(btnPackCardBuy[i]);
 		btnPackCardBuy[i]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
 		styleDarkBtn(btnPackCardView[i]);
+		if(loginCardDescFont) {
+			btnPackCardBuy[i]->setOverrideFont(loginCardDescFont);
+			btnPackCardView[i]->setOverrideFont(loginCardDescFont);
+		}
 	}
 	wPackPoolOverlay = makePanel(wStorePacks);
 	wPackPoolOverlay->setBackgroundColor(irr::video::SColor(245, 9, 15, 32));
@@ -5485,6 +5496,11 @@ void Game::PopulateEconomyScreens() {
 	btnStorePackNext = env->addButton(irr::core::recti(0, 0, 10, 10), wStorePacks, BUTTON_STORE_PACK_NEXT, L"Siguiente");
 	styleDarkBtn(btnStorePackPrev);
 	styleDarkBtn(btnStorePackNext);
+	if(loginCardDescFont) {
+		btnStorePackPrev->setOverrideFont(loginCardDescFont);
+		stStorePackPage->setOverrideFont(loginCardDescFont);
+		btnStorePackNext->setOverrideFont(loginCardDescFont);
+	}
 
 	// 4. Player Profile Hub (8 neon cards matching web profile hub)
 	makeCanvas(wPlayerProfile);
@@ -6394,6 +6410,55 @@ void Game::PopulateEconomyScreens() {
 	styleDarkBtn(btnRankLvlPrev); styleDarkBtn(btnRankLvlNext);
 	if(loginCardDescFont) { btnRankLvlPrev->setOverrideFont(loginCardDescFont); stRankLvlPage->setOverrideFont(loginCardDescFont); btnRankLvlNext->setOverrideFont(loginCardDescFont); }
 
+	// 7. Replays Screen (2-panel neon layout matching ecosystem screens)
+	if(wReplay) {
+		stReplayTitle = env->addStaticText(L"REPETICIONES", irr::core::recti(0, 0, 10, 10), false, false, wReplay);
+		stReplayTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
+		if(loginTitleFont) stReplayTitle->setOverrideFont(loginTitleFont);
+
+		pnlReplayLeft = makePanel(wReplay);
+		stReplayListTitle = env->addStaticText(L"ARCHIVOS DE REPETICI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		stReplayListTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		if(loginCardDescFont) stReplayListTitle->setOverrideFont(loginCardDescFont);
+		if(lstReplayList) {
+			pnlReplayLeft->addChild(lstReplayList);
+		}
+
+		pnlReplayRight = makePanel(wReplay);
+		if(stReplayInfoTitle) {
+			pnlReplayRight->addChild(stReplayInfoTitle);
+			stReplayInfoTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+			if(loginCardDescFont) stReplayInfoTitle->setOverrideFont(loginCardDescFont);
+		}
+		if(stReplayInfo) {
+			pnlReplayRight->addChild(stReplayInfo);
+			stReplayInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+			if(loginCardDescFont) stReplayInfo->setOverrideFont(loginCardDescFont);
+		}
+		if(btnReplayCancel) {
+			styleDarkBtn(btnReplayCancel);
+			if(loginCardDescFont) btnReplayCancel->setOverrideFont(loginCardDescFont);
+		}
+		if(btnLoadReplay) {
+			pnlReplayRight->addChild(btnLoadReplay);
+			styleDarkBtn(btnLoadReplay);
+			btnLoadReplay->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+			if(loginCardDescFont) btnLoadReplay->setOverrideFont(loginCardDescFont);
+		}
+		if(btnRenameReplay) {
+			pnlReplayRight->addChild(btnRenameReplay);
+			styleDarkBtn(btnRenameReplay);
+			btnRenameReplay->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+			if(loginCardDescFont) btnRenameReplay->setOverrideFont(loginCardDescFont);
+		}
+		if(btnDeleteReplay) {
+			pnlReplayRight->addChild(btnDeleteReplay);
+			styleDarkBtn(btnDeleteReplay);
+			btnDeleteReplay->setOverrideColor(irr::video::SColor(255, 248, 113, 113));
+			if(loginCardDescFont) btnDeleteReplay->setOverrideFont(loginCardDescFont);
+		}
+	}
+
 	// Non-window dark-glass neon confirmation overlay (100% opaque so text is always crisp)
 	wConfirmPurchase = env->addStaticText(L"", irr::core::recti(0, 0, 500, 210), false, false, 0, -1, true);
 	wConfirmPurchase->setBackgroundColor(irr::video::SColor(255, 10, 16, 32));
@@ -6825,8 +6890,8 @@ void Game::ResizeEconomyScreens() {
 				if(btnPackCardBuy[i]) btnPackCardBuy[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(34), Scale(8) + halfB, cardH - Scale(8)));
 				if(btnPackCardView[i]) btnPackCardView[i]->setRelativePosition(irr::core::recti(Scale(12) + halfB, cardH - Scale(34), cardW - Scale(8), cardH - Scale(8)));
 				if(stPackCardDescs[i]) stPackCardDescs[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(52), cardW - Scale(8), cardH - Scale(36)));
-				if(stPackCardTitles[i]) stPackCardTitles[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(84), cardW - Scale(8), cardH - Scale(54)));
-				irr::s32 maxArtH = cardH - Scale(88);
+				if(stPackCardTitles[i]) stPackCardTitles[i]->setRelativePosition(irr::core::recti(Scale(8), cardH - Scale(90), cardW - Scale(8), cardH - Scale(54)));
+				irr::s32 maxArtH = cardH - Scale(94);
 				irr::s32 artH = std::max<irr::s32>(Scale(60), maxArtH);
 				irr::s32 artW = (artH * 177) / 254;
 				if(artW > cardW - Scale(14)) { artW = cardW - Scale(14); artH = (artW * 254) / 177; }
@@ -7609,6 +7674,39 @@ void Game::ResizeEconomyScreens() {
 			stRankPvpPos, stRankPvpUser, stRankPvpRank, btnRankPvpPrev, stRankPvpPage, btnRankPvpNext);
 		layoutRankCol(pnlRankLvl, pad + colW + gap, stRankLvlTitle, thRankLvlPos, thRankLvlUser, thRankLvlLevel,
 			stRankLvlPos, stRankLvlUser, stRankLvlLevel, btnRankLvlPrev, stRankLvlPage, btnRankLvlNext);
+	}
+	// 7. Replays Screen
+	if(wReplay) {
+		wReplay->setRelativePosition(irr::core::recti(0, 0, W, H));
+		placeHeaderHelp(stReplayTitle, Scale(340), nullptr, nullptr);
+		if(btnReplayCancel) btnReplayCancel->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
+
+		const irr::s32 gridTop = topY + Scale(58);
+		const irr::s32 panelH = std::max<irr::s32>(Scale(280), botY - gridTop);
+		const irr::s32 gap = Scale(16);
+		const irr::s32 leftW = ((W - 2 * pad - gap) * 58) / 100;
+		const irr::s32 rightW = (W - 2 * pad - gap) - leftW;
+
+		if(pnlReplayLeft) {
+			pnlReplayLeft->setRelativePosition(irr::core::recti(pad, gridTop, pad + leftW, gridTop + panelH));
+			if(stReplayListTitle) stReplayListTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(12), leftW - Scale(16), Scale(36)));
+			if(lstReplayList) {
+				lstReplayList->setRelativePosition(irr::core::recti(Scale(14), Scale(42), leftW - Scale(14), panelH - Scale(14)));
+				lstReplayList->setItemHeight(Scale(24));
+			}
+		}
+		if(pnlReplayRight) {
+			pnlReplayRight->setRelativePosition(irr::core::recti(pad + leftW + gap, gridTop, W - pad, gridTop + panelH));
+			if(stReplayInfoTitle) stReplayInfoTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(12), rightW - Scale(16), Scale(36)));
+			if(stReplayInfo) stReplayInfo->setRelativePosition(irr::core::recti(Scale(16), Scale(44), rightW - Scale(16), panelH - Scale(74)));
+			const irr::s32 btnGap = Scale(10);
+			const irr::s32 bw = (rightW - Scale(32) - 2 * btnGap) / 3;
+			const irr::s32 by1 = panelH - Scale(56);
+			const irr::s32 by2 = panelH - Scale(16);
+			if(btnLoadReplay) btnLoadReplay->setRelativePosition(irr::core::recti(Scale(16), by1, Scale(16) + bw, by2));
+			if(btnRenameReplay) btnRenameReplay->setRelativePosition(irr::core::recti(Scale(16) + bw + btnGap, by1, Scale(16) + 2 * bw + btnGap, by2));
+			if(btnDeleteReplay) btnDeleteReplay->setRelativePosition(irr::core::recti(Scale(16) + 2 * (bw + btnGap), by1, rightW - Scale(16), by2));
+		}
 	}
 	(void)btnH;
 	ResizeDuelRewardScreen();
@@ -10036,8 +10134,6 @@ void Game::PopulateSettingsWindow() {
 		gSettings.chkUpdates = env->addCheckBox(gGameConfig->noClientUpdates, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1466).data());
 		defaultStrings.emplace_back(gSettings.chkUpdates, 1466);
 #endif
-		gSettings.chkHideHandsInReplays = env->addCheckBox(gGameConfig->hideHandsInReplays, GetNextRect(), sPanel, CHECKBOX_HIDE_HANDS_REPLAY, gDataManager->GetSysString(2080).data());
-		defaultStrings.emplace_back(gSettings.chkHideHandsInReplays, 2080);
 		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, GetNextRect(), sPanel, -1, gDataManager->GetSysString(2072).data());
 		defaultStrings.emplace_back(gSettings.chkShowConsole, 2072);
 #if !EDOPRO_WINDOWS
@@ -10327,6 +10423,7 @@ bool Game::MainLoop() {
 				(wClanDetail && wClanDetail->isVisible()) ||
 				(wMailbox && wMailbox->isVisible()) ||
 				(wRankingMenu && wRankingMenu->isVisible()) ||
+				(wReplay && wReplay->isVisible()) ||
 				(wAdventureMode && wAdventureMode->isVisible()) ||
 				(wRoomListPlaceholder && wRoomListPlaceholder->isVisible());
 		};
@@ -10410,7 +10507,8 @@ bool Game::MainLoop() {
 						(wEventsMenu && wEventsMenu->isVisible()) ||
 						(wOrbsEvent && wOrbsEvent->isVisible()) ||
 						(wClansMenu && wClansMenu->isVisible()) ||
-						(wClanDetail && wClanDetail->isVisible());
+						(wClanDetail && wClanDetail->isVisible()) ||
+						(wReplay && wReplay->isVisible());
 				};
 				if(isProfileSectionVisible() && tBgInterfaces) {
 					DrawBackImage(tBgInterfaces, resized);
@@ -10787,6 +10885,14 @@ bool Game::MainLoop() {
 				drawNeon(btnRankPvpNext, cCyan);
 				drawNeon(btnRankLvlPrev, cCyan);
 				drawNeon(btnRankLvlNext, cCyan);
+			}
+			if(wReplay && wReplay->isVisible()) {
+				drawNeon(pnlReplayLeft, cCyan);
+				drawNeon(pnlReplayRight, cPurp);
+				drawNeon(btnReplayCancel, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnLoadReplay, cEmer);
+				drawNeon(btnRenameReplay, cPurp);
+				drawNeon(btnDeleteReplay, irr::video::SColor(180, 248, 113, 113));
 			}
 			}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
@@ -12744,7 +12850,6 @@ void Game::OnResize() {
 	if(wHostPrepareR) wHostPrepareR->setVisible(false);
 	if(wHostPrepareL) wHostPrepareL->setVisible(false);
 	wRules->setRelativePosition(ResizeWin(630, 100, 1000, 310));
-	wReplay->setRelativePosition(Resize(40, 56, 984, 600));
 	wSinglePlay->setRelativePosition(ResizeWin(220, 100, 800, 520));
 	gBot.window->setRelativePosition(irr::core::vector2di(wHostPrepare->getAbsolutePosition().LowerRightCorner.X, wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 
@@ -13001,7 +13106,8 @@ void Game::MessageHandler(void* payload, const char* string, int type) {
 		auto pos = str.find('\r');
 		if(str.size() && pos != std::string::npos)
 			str.erase(pos);
-		game->AddDebugMsg(str);
+		if(!game->dInfo.isReplay)
+			game->AddDebugMsg(str);
 		if(type > 1)
 			epro::print("{}\n", str);
 	}

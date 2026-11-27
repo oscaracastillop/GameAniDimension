@@ -350,7 +350,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_NAV_REPLAYS: {
 				mainGame->HideAllEcosystemScreens();
-				mainGame->ShowTopNavBar(false);
+				mainGame->ShowTopNavBar(true);
 				mainGame->HideElement(mainGame->wMainMenu);
 				mainGame->stReplayInfo->setText(L"");
 				mainGame->btnLoadReplay->setEnabled(false);
@@ -361,6 +361,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ebRepStartTurn->setText(L"1");
 				mainGame->chkYrp->setChecked(false);
 				mainGame->chkYrp->setEnabled(false);
+				mainGame->ResizeEconomyScreens();
 				mainGame->ShowElement(mainGame->wReplay);
 				mainGame->RefreshReplay();
 				break;
@@ -1189,6 +1190,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			}
 			case BUTTON_REPLAY_MODE: {
 				mainGame->HideElement(mainGame->wMainMenu);
+				mainGame->ShowTopNavBar(true);
 				mainGame->stReplayInfo->setText(L"");
 				mainGame->btnLoadReplay->setEnabled(false);
 				mainGame->btnDeleteReplay->setEnabled(false);
@@ -1198,6 +1200,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ebRepStartTurn->setText(L"1");
 				mainGame->chkYrp->setChecked(false);
 				mainGame->chkYrp->setEnabled(false);
+				mainGame->ResizeEconomyScreens();
 				mainGame->ShowElement(mainGame->wReplay);
 				mainGame->RefreshReplay();
 				break;

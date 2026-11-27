@@ -367,6 +367,12 @@ struct replay_panel_elements {
 	irr::gui::IGUIButton* btnExportDeck;
 	irr::gui::IGUIButton* btnShareReplay;
 	irr::gui::IGUIEditBox* ebRepStartTurn;
+	irr::gui::IGUIStaticText* stReplayTitle;
+	irr::gui::IGUIStaticText* pnlReplayLeft;
+	irr::gui::IGUIStaticText* stReplayListTitle;
+	irr::gui::IGUIStaticText* pnlReplayRight;
+	irr::gui::IGUIStaticText* stReplayInfoTitle;
+	irr::gui::IGUIStaticText* stReplayStartTurnLbl;
 };
 
 struct puzzle_panel_elements {
