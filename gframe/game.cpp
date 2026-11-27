@@ -9728,6 +9728,157 @@ void Game::OpenClanDetail(int clanId) {
 				ClanRequestItem rq;
 				rq.id = SafeJsonInt(s, "Id", 0);
 				rq.usuarioId = SafeJsonInt(s, "UsuarioId", 0);
+				rq.usuario = BufferIO::DecodeUTF8(SafeJsonStr(s, "Usuario", ""));
+				rq.nivel = SafeJsonInt(s, "Nivel", 1);
+				rq.fechaSolicitud = BufferIO::DecodeUTF8(SafeJsonStr(s, "FechaSolicitud", ""));
+				clanRequests.push_back(rq);
+			}
+		}
+
+		if(pnlClanRequestsTable) {
+			pnlClanRequestsTable->setVisible(myClanIsLeader);
+			if(stClanNoRequests) stClanNoRequests->setVisible(clanRequests.empty());
+			for(int i = 0; i < 4; ++i) {
+				if(i < (int)clanRequests.size()) {
+					const auto& rq = clanRequests[i];
+					if(stClanReqUser[i]) {
+						stClanReqUser[i]->setText(epro::format(L"{} (Nv. {})", rq.usuario, rq.nivel).c_str());
+						stClanReqUser[i]->setVisible(true);
+					}
+					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(true);
+					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(true);
+				} else {
+					if(stClanReqUser[i]) stClanReqUser[i]->setVisible(false);
+					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(false);
+					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(false);
+				}
+			}
+		}
+
+		if(resp.contains("miembros") && resp["miembros"].is_array()) {
+			for(const auto& m : resp["miembros"]) {
+				ClanMemberItem mb;
+				mb.usuarioId = SafeJsonInt(m, "UsuarioId", 0);
+				mb.usuario = BufferIO::DecodeUTF8(SafeJsonStr(m, "Usuario", ""));
+				mb.rol = BufferIO::DecodeUTF8(SafeJsonStr(m, "RolClan", "Miembro"));
+				mb.nivel = SafeJsonInt(m, "Nivel", 1);
+				mb.expAportada = m.value("ExperienciaAportada", 0LL);
+				mb.fechaIngreso = BufferIO::DecodeUTF8(SafeJsonStr(m, "FechaIngreso", ""));
+				clanMembers.push_back(mb);
+			}
+		}
+	}
+
+	clanMemberPage = 0;
+	RefreshClanMembersPage();
+	ResizeEconomyScreens();
+	wClanDetail->setVisible(true);
+}
+
+void Game::RefreshClanMembersPage() {
+	int total = (int)clanMembers.size();
+	int totalPages = std::max(1, (total + 5) / 6);
+	if(clanMemberPage >= totalPages) clanMemberPage = totalPages - 1;
+	if(clanMemberPage < 0) clanMemberPage = 0;
+
+	if(stClanMemTotal) stClanMemTotal->setText(epro::format(L"Total: {} miembro(s)", total).c_str());
+	if(stClanMemPage) stClanMemPage->setText(epro::format(L"P\u00E1gina {} de {}", clanMemberPage + 1, totalPages).c_str());
+	if(btnClanMemPrev) btnClanMemPrev->setEnabled(clanMemberPage > 0);
+	if(btnClanMemNext) btnClanMemNext->setEnabled(clanMemberPage + 1 < totalPages);
+
+	int startIdx = clanMemberPage * 6;
+	for(int r = 0; r < 6; ++r) {
+		int idx = startIdx + r;
+		if(idx < total) {
+			const auto& mb = clanMembers[idx];
+			if(stClanMemUser[r]) {
+				stClanMemUser[r]->setText(mb.usuario.c_str());
+				stClanMemUser[r]->setVisible(true);
+			}
+			if(stClanMemRole[r]) {
+				stClanMemRole[r]->setText(mb.rol.c_str());
+				stClanMemRole[r]->setVisible(true);
+			}
+			if(stClanMemLevel[r]) {
+				stClanMemLevel[r]->setText(epro::format(L"Nv. {}", mb.nivel).c_str());
+				stClanMemLevel[r]->setVisible(true);
+			}
+			if(stClanMemExp[r]) {
+				stClanMemExp[r]->setText(epro::format(L"{} EXP", mb.expAportada).c_str());
+				stClanMemExp[r]->setVisible(true);
+			}
+			if(stClanMemDate[r]) {
+				stClanMemDate[r]->setText(mb.fechaIngreso.substr(0, 10).c_str());
+				stClanMemDate[r]->setVisible(true);
+			}
+			if(btnClanMemKick[r]) {
+				bool canKick = myClanIsLeader && (myClanId == currentViewingClanId) && (mb.rol != L"LIDER" && mb.rol != L"L\u00CDDER");
+				btnClanMemKick[r]->setVisible(canKick);
+				btnClanMemKick[r]->setEnabled(canKick);
+			}
+		} else {
+			if(stClanMemUser[r]) stClanMemUser[r]->setVisible(false);
+			if(stClanMemRole[r]) stClanMemRole[r]->setVisible(false);
+			if(stClanMemLevel[r]) stClanMemLevel[r]->setVisible(false);
+			if(stClanMemExp[r]) stClanMemExp[r]->setVisible(false);
+			if(stClanMemDate[r]) stClanMemDate[r]->setVisible(false);
+			if(btnClanMemKick[r]) btnClanMemKick[r]->setVisible(false);
+		}
+	}
+}
+
+void Game::RequestJoinClanId(int clanId) {
+	if(clanId <= 0) return;
+	nlohmann::json body;
+	body["clanId"] = clanId;
+	auto resp = CallSessionApi("/api/clans/request", sessionToken, body.dump());
+	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
+	OpenClansMenu(ebClanSearch ? ebClanSearch->getText() : L"");
+}
+
+void Game::RespondClanRequestId(int reqId, bool accept) {
+	if(reqId <= 0) return;
+	nlohmann::json body;
+	body["solicitudId"] = reqId;
+	body["aceptar"] = accept;
+	auto resp = CallSessionApi("/api/clans/respond", sessionToken, body.dump());
+	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
+	if(currentViewingClanId > 0) OpenClanDetail(currentViewingClanId);
+}
+
+void Game::KickClanMember(int targetUserId) {
+	if(targetUserId <= 0 || currentViewingClanId <= 0) return;
+	nlohmann::json body;
+	body["clanId"] = currentViewingClanId;
+	body["miembroId"] = targetUserId;
+	auto resp = CallSessionApi("/api/clans/kick", sessionToken, body.dump());
+	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
+	OpenClanDetail(currentViewingClanId);
+}
+
+void Game::RequestLeaveMyClan() {
+	if(myClanId <= 0) return;
+	pendingConfirmType = 10;
+	pendingConfirmId = myClanId;
+	stConfirmPurchaseTitle->setText(L"SALIR DEL CLAN");
+	stConfirmPurchaseMsg->setText(L"\u00BFEst\u00E1s seguro de salir de tu clan actual?");
+	wConfirmPurchase->setVisible(true);
+	env->getRootGUIElement()->bringToFront(wConfirmPurchase);
+}
+
+void Game::SubmitCreateClan() {
+	std::string nom = ebClanCreateName ? BufferIO::EncodeUTF8(ebClanCreateName->getText()) : "";
+	std::string desc = ebClanCreateDesc ? BufferIO::EncodeUTF8(ebClanCreateDesc->getText()) : "";
+	int minLvl = 1;
+	if(ebClanCreateMinLvl) {
+		try { minLvl = std::stoi(BufferIO::EncodeUTF8(ebClanCreateMinLvl->getText())); } catch(...) { minLvl = 1; }
+	}
+	nlohmann::json body;
+	body["nombre"] = nom;
+	body["descripcion"] = desc;
+	body["nivelMinimo"] = std::max(1, std::min(300, minLvl));
+	auto resp = CallSessionApi("/api/clans/create", sessionToken, body.dump());
+	if(pnlClanCreate) pnlClanCreate->setVisible(false);
 	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
 	OpenClansMenu();
 }
