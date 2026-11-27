@@ -555,7 +555,7 @@ void Game::Initialize() {
 		L"Equipa personajes con bonos de EXP, StarShips y Luck tras cada victoria.",
 		L"Lleva tu avatar activo hasta 300% EXP, 300% SS y 100% Luck.",
 		L"Consigue cartas y sobres en la web; todo llega al Buz\u00F3n de tu cuenta.",
-		L"Rompecabezas mensuales del 5 al 26 y medallas de 81 NPCs en Leyenda."
+		L"Rompecabezas mensuales del 1 al 28 y medallas de 81 NPCs en Leyenda."
 	};
 	const irr::video::SColor featAccent[4] = {
 		irr::video::SColor(255, 56, 189, 248),
@@ -733,7 +733,6 @@ void Game::Initialize() {
 	PopulateGameHostWindows();
 	PopulateAIBotWindow();
 	PopulateAdventureModeWindow();
-	PopulateEconomyScreens();
 
 	//img
 	wCardImg = env->addStaticText(L"", Scale(1, 1, 1 + CARD_IMG_WRAPPER_WIDTH, 1 + CARD_IMG_WRAPPER_HEIGHT), false, false, 0, -1, true);
@@ -1285,6 +1284,7 @@ void Game::Initialize() {
 	ebRepStartTurn = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wReplay, -1);
 	ebRepStartTurn->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	ebRepStartTurn->setVisible(false);
+	PopulateEconomyScreens();
 	//single play window
 	wSinglePlay = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1201).data());
 	defaultStrings.emplace_back(wSinglePlay, 1201);
@@ -3722,16 +3722,30 @@ void Game::FetchLobbyStatsAsync() {
 	const std::string tok = sessionToken;
 	std::thread([this, curUser, tok]() {
 		auto t0 = std::chrono::steady_clock::now();
-		auto resp = FetchAdventureApi("/api/public/stats");
-		auto t1 = std::chrono::steady_clock::now();
-		int pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
-
-		auto rankResp = FetchAdventureApi("/api/ranking");
-		nlohmann::json fullResp, profResp, puzResp, cardResp;
+		nlohmann::json resp, rankResp, fullResp, profResp, puzResp, cardResp;
+		int pingMs = 1;
 		if(!tok.empty()) {
-			fullResp = CallSessionApi("/api/profile/full", tok, "");
-			profResp = CallSessionApi("/api/profile", tok, "");
-			puzResp = CallSessionApi("/api/events/puzzles", tok, "");
+			auto boot = CallSessionApi("/api/lobby/bootstrap", tok, "");
+			auto t1 = std::chrono::steady_clock::now();
+			pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+			if(boot.contains("success") && boot["success"].is_boolean() && boot["success"].get<bool>()) {
+				if(boot.contains("stats")) resp = boot["stats"];
+				if(boot.contains("ranking")) rankResp = boot["ranking"];
+				if(boot.contains("profileFull")) fullResp = boot["profileFull"];
+				if(boot.contains("profile")) profResp = boot["profile"];
+				if(boot.contains("puzzles")) puzResp = boot["puzzles"];
+			} else {
+				resp = FetchAdventureApi("/api/public/stats");
+				rankResp = FetchAdventureApi("/api/ranking");
+				fullResp = CallSessionApi("/api/profile/full", tok, "");
+				profResp = CallSessionApi("/api/profile", tok, "");
+				puzResp = CallSessionApi("/api/events/puzzles", tok, "");
+			}
+		} else {
+			resp = FetchAdventureApi("/api/public/stats");
+			auto t1 = std::chrono::steady_clock::now();
+			pingMs = (int)std::chrono::duration_cast<std::chrono::milliseconds>(t1 - t0).count();
+			rankResp = FetchAdventureApi("/api/ranking");
 		}
 		if(!curUser.empty() && (!fullResp.contains("success") || !fullResp["success"].get<bool>())) {
 			std::string utf8Name = BufferIO::EncodeUTF8(curUser);
@@ -3875,7 +3889,7 @@ void Game::FetchLobbyStatsAsync() {
 			}
 			lobbyPuzzleText = epro::format(L"Rompecabezas: {} ({}) \u2014 {}/20 fichas", tit, est, gotPieces);
 		} else {
-			lobbyPuzzleText = L"Rompecabezas: Sin evento activo (del 5 al 26)";
+			lobbyPuzzleText = L"Rompecabezas: Sin evento activo (del 1 al 28)";
 		}
 		lobbyStatsReady = true;
 	}).detach();
@@ -4096,12 +4110,9 @@ void Game::SubmitLogin() {
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
 			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
-			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
-				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
-			} else {
-				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-				curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-			}
+			curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+			curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 			CURLcode res = curl_easy_perform(curl);
 			long httpCode = 0;
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &httpCode);
@@ -4310,7 +4321,7 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 
 void Game::FetchUserInventoryAndDecks() {
 	if(!isLoggedIn || sessionToken.empty()) return;
-	auto invJson = CallSessionApi("/api/user/inventory", sessionToken);
+	auto invJson = CallSessionApi("/api/user/inventory?compact=1", sessionToken);
 	if(invJson.contains("success") && invJson["success"].is_boolean() && invJson["success"].get<bool>()) {
 		std::lock_guard<epro::mutex> lk(inventoryMutex);
 		if(invJson.contains("profile") && invJson["profile"].is_object()) {
@@ -5791,7 +5802,7 @@ void Game::PopulateEconomyScreens() {
 		const char* evIcons[2] = { "textures/events.png", "textures/orbs/orb_luz.png" };
 		const wchar_t* evTitles[2] = { L"Rompecabezas", L"Orbes de Esencia" };
 		const wchar_t* evDescs[2] = {
-			L"Gana duelos NPC o PvP del 5 al 26 de cada mes para desbloquear las 20 piezas, reclama el Top 10 o canjea fichas al cierre.",
+			L"Gana duelos NPC o PvP del 1 al 28 de cada mes para desbloquear las 20 piezas, reclama el Top 10 o canjea fichas al cierre.",
 			L"Consigue Orbes Elementales al ganar duelos PvP o NPC e interc\u00E1mbialos por cartas al azar de su mismo atributo y rareza."
 		};
 		const wchar_t* evBtns[2] = { L"Abrir Rompecabezas", L"Abrir Orbes de Esencia" };

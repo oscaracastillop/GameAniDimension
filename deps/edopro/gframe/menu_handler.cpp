@@ -179,6 +179,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
+				mainGame->ResizeMainMenuScreen();
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
@@ -214,6 +216,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
 				mainGame->ResizeMainMenuScreen();
 				mainGame->FetchLobbyStatsAsync();
 				break;
@@ -312,6 +316,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
 				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
+				mainGame->ResizeMainMenuScreen();
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
@@ -368,6 +374,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ResizeEconomyScreens();
 				mainGame->RefreshReplay();
 				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wReplay);
+				mainGame->ShowTopNavBar(true);
 				break;
 			}
 			case BUTTON_NAV_EVENTOS:
@@ -389,6 +396,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->mTopMenu->setVisible(false);
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
 				break;
 			}
 			case BUTTON_RANK_PVP_PREV: {
@@ -770,6 +779,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->HideAllEcosystemScreens();
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
@@ -961,6 +972,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->HideAllEcosystemScreens();
 				mainGame->wBtnSettings->setVisible(true);
 				mainGame->wMainMenu->setVisible(true);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->ShowTopNavBar(true);
 				mainGame->FetchLobbyStatsAsync();
 				break;
 			}
@@ -1209,6 +1222,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ResizeEconomyScreens();
 				mainGame->RefreshReplay();
 				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wReplay);
+				mainGame->ShowTopNavBar(true);
 				break;
 			}
 			case BUTTON_SINGLE_MODE: {
@@ -1281,6 +1295,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ResizeMainMenuScreen();
 				mainGame->wMainMenu->setVisible(true);
 				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wMainMenu);
+				mainGame->ShowTopNavBar(true);
 				break;
 			}
 			case BUTTON_HP_AI_TOGGLE: {
