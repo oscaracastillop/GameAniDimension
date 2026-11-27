@@ -5037,6 +5037,7 @@ void Game::PopulateEconomyScreens() {
 	};
 	if(btnLoginSubmit) { styleEmerBtn(btnLoginSubmit); }
 	if(btnLoginExit) { styleDarkBtn(btnLoginExit); btnLoginExit->setOverrideColor(irr::video::SColor(255, 248, 113, 113)); }
+	if(!tBgInterfaces) {
 		tBgInterfaces = driver->getTexture("textures/bg_interfaces.png");
 	}
 
@@ -10026,20 +10027,6 @@ void Game::PopulateTabSettingsWindow() {
 		auto GetCurrentRectWithXOffset = [&cur_y, this](irr::s32 x1, irr::s32 x2, bool is_scrollbar = false) {
 			return Scale<irr::s32>(x1, cur_y + (is_scrollbar * 5), x2, cur_y + 25 - (is_scrollbar * 5));
 		};
-		irr::gui::IGUITab* _tabSystem = wInfos->addTab(gDataManager->GetSysString(1273).data());
-		defaultStrings.emplace_back(_tabSystem, 1273);
-		tabSystem = irr::gui::Panel::addPanel(env, _tabSystem, -1, { {}, _tabSystem->getAbsolutePosition().getSize() }, true, false);
-		auto tabPanel = tabSystem->getSubpanel();
-		tabSettings.chkIgnoreOpponents = env->addCheckBox(gGameConfig->chkIgnore1, GetNextRect(), tabPanel, CHECKBOX_IGNORE_OPPONENTS, gDataManager->GetSysString(1290).data());
-		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreOpponents);
-		defaultStrings.emplace_back(tabSettings.chkIgnoreOpponents, 1290);
-		tabSettings.chkIgnoreSpectators = env->addCheckBox(gGameConfig->chkIgnore2, GetNextRect(), tabPanel, CHECKBOX_IGNORE_SPECTATORS, gDataManager->GetSysString(1291).data());
-		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreSpectators);
-		defaultStrings.emplace_back(tabSettings.chkIgnoreSpectators, 1291);
-		tabSettings.chkQuickAnimation = env->addCheckBox(gGameConfig->quick_animation, GetNextRect(), tabPanel, CHECKBOX_QUICK_ANIMATION, gDataManager->GetSysString(1299).data());
-		menuHandler.MakeElementSynchronized(tabSettings.chkQuickAnimation);
-		defaultStrings.emplace_back(tabSettings.chkQuickAnimation, 1299);
-		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreOpponents);
 		defaultStrings.emplace_back(tabSettings.chkIgnoreOpponents, 1290);
 		tabSettings.chkIgnoreSpectators = env->addCheckBox(gGameConfig->chkIgnore2, GetNextRect(), tabPanel, CHECKBOX_IGNORE_SPECTATORS, gDataManager->GetSysString(1291).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreSpectators);
@@ -10681,7 +10668,7 @@ bool Game::MainLoop() {
 		irr::gui::IGUIElement* activeModals[] = {
 			wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
 			wMyAvaHelpModal, wAvatarPreviewOverlay, wPackRevealOverlay, wPackPoolOverlay,
-			wConfirmPurchase, gSettings.window, wMessage, wACMessage, wASMessage, wFileSave
+			wConfirmPurchase, gSettings.window, wMessage, wACMessage, wFileSave
 		};
 
 		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
@@ -11082,7 +11069,7 @@ bool Game::MainLoop() {
 			irr::gui::IGUIElement* duelModals[] = {
 				wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
 				gSettings.window, wHand, wANNumber, wANCard, wANAttribute, wANRace,
-				wMessage, wACMessage, wASMessage, wFileSave, gBot.window
+				wMessage, wACMessage, wFileSave, gBot.window
 			};
 			auto isDuelDescendant = [](irr::gui::IGUIElement* el, irr::gui::IGUIElement* root) {
 				if(!el || !root) return false;
