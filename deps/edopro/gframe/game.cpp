@@ -10027,6 +10027,12 @@ void Game::PopulateTabSettingsWindow() {
 		auto GetCurrentRectWithXOffset = [&cur_y, this](irr::s32 x1, irr::s32 x2, bool is_scrollbar = false) {
 			return Scale<irr::s32>(x1, cur_y + (is_scrollbar * 5), x2, cur_y + 25 - (is_scrollbar * 5));
 		};
+		irr::gui::IGUITab* _tabSystem = wInfos->addTab(gDataManager->GetSysString(1273).data());
+		defaultStrings.emplace_back(_tabSystem, 1273);
+		tabSystem = irr::gui::Panel::addPanel(env, _tabSystem, -1, { {}, _tabSystem->getAbsolutePosition().getSize() }, true, false);
+		auto tabPanel = tabSystem->getSubpanel();
+		tabSettings.chkIgnoreOpponents = env->addCheckBox(gGameConfig->chkIgnore1, GetNextRect(), tabPanel, CHECKBOX_IGNORE_OPPONENTS, gDataManager->GetSysString(1290).data());
+		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreOpponents);
 		defaultStrings.emplace_back(tabSettings.chkIgnoreOpponents, 1290);
 		tabSettings.chkIgnoreSpectators = env->addCheckBox(gGameConfig->chkIgnore2, GetNextRect(), tabPanel, CHECKBOX_IGNORE_SPECTATORS, gDataManager->GetSysString(1291).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreSpectators);
