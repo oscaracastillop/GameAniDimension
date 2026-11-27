@@ -441,6 +441,8 @@ void Game::Initialize() {
 
 	btnLobbyTutorials = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_NAV_TUTORIALES, L"Ranking");
 	applyBtnStyle(btnLobbyTutorials, L"Ranking");
+	btnLobbySettings = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_SHOW_SETTINGS, L"Ajustes");
+	applyBtnStyle(btnLobbySettings, L"Ajustes");
 
 	// Left: Avatar Base Pedestal (Created BEFORE Avatar so Avatar renders ON TOP of it!)
 	stLobbyWelcomeTitle = env->addStaticText(L"BIENVENIDO AL MULTIVERSO", irr::core::recti(0, 0, 450, 34), false, false, wMainMenu);
@@ -878,6 +880,7 @@ void Game::Initialize() {
 		stCardPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 		btnCardSelect[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(25 + 135 * i, 62, 150 + 135 * i, 262), wCardSelect, BUTTON_CARD_0 + i);
 		btnCardSelect[i]->setImageSize(imgsize);
+		btnCardSelect[i]->setDrawBorder(false);
 	}
 	scrCardList = env->addScrollBar(true, Scale(25, 275, 695, 298), wCardSelect, SCROLL_CARD_SELECT);
 	scrCardList->setLargeStep(scrCardList->getMax());
@@ -893,6 +896,7 @@ void Game::Initialize() {
 		stDisplayPos[i]->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 		btnCardDisplay[i] = irr::gui::CGUIImageButton::addImageButton(env, Scale(25 + 135 * i, 62, 150 + 135 * i, 262), wCardDisplay, BUTTON_DISPLAY_0 + i);
 		btnCardDisplay[i]->setImageSize(imgsize);
+		btnCardDisplay[i]->setDrawBorder(false);
 	}
 	scrDisplayList = env->addScrollBar(true, Scale(25, 275, 695, 298), wCardDisplay, SCROLL_CARD_DISPLAY);
 	btnDisplayOK = env->addButton(Scale(300, 312, 420, 348), wCardDisplay, BUTTON_CARD_DISP_OK, gDataManager->GetSysString(1211).data());
@@ -3519,6 +3523,10 @@ void Game::ResizeMainMenuScreen() {
 	}
 	if(btnLobbyTutorials) {
 		btnLobbyTutorials->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
+		curBtnR -= (normBtnW + normBtnGap);
+	}
+	if(btnLobbySettings) {
+		btnLobbySettings->setRelativePosition(irr::core::recti(curBtnR - normBtnW, btnYNorm, curBtnR, btnYNorm + normBtnH));
 	}
 
 	// Settings gear button at bottom-left corner
@@ -3594,8 +3602,12 @@ void Game::ShowTopNavBar(bool show) {
 }
 
 void Game::LogoutToLogin() {
+	std::string tokToClose = sessionToken;
 	isLoggedIn = false;
 	sessionToken.clear();
+	if(!tokToClose.empty()) {
+		epro::thread([tokToClose]() { CallSessionApi("/api/auth/logout", tokToClose, "{}"); }).detach();
+	}
 	loggedInUser.clear();
 	playerCardCache.clear();
 	ShowTopNavBar(false);
@@ -6427,7 +6439,8 @@ void Game::PopulateEconomyScreens() {
 		thReplayNum = env->addStaticText(L"#", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
 		thReplayName = env->addStaticText(L"DUELO / ARCHIVO", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
 		thReplayDate = env->addStaticText(L"FECHA", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
-		thReplayAct = env->addStaticText(L"ACCI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		thReplayAct = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		thReplayAct->setVisible(false);
 		for(auto* th : { thReplayNum, thReplayName, thReplayDate, thReplayAct }) {
 			th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
 			if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
@@ -6439,9 +6452,12 @@ void Game::PopulateEconomyScreens() {
 			stReplayRowName[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
 			stReplayRowDate[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
 			stReplayRowDate[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-			btnReplayRowSelect[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlReplayLeft, BUTTON_REPLAY_ROW_0 + r, L"Ver");
-			styleDarkBtn(btnReplayRowSelect[r]);
-			btnReplayRowSelect[r]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			btnReplayRowSelect[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlReplayLeft, BUTTON_REPLAY_ROW_0 + r, L"");
+			btnReplayRowSelect[r]->setImage(tFlatBtnTrans);
+			btnReplayRowSelect[r]->setPressedImage(tFlatBtnTrans);
+			btnReplayRowSelect[r]->setScaleImage(true);
+			btnReplayRowSelect[r]->setUseAlphaChannel(true);
+			btnReplayRowSelect[r]->setDrawBorder(false);
 			if(loginCardDescFont) {
 				stReplayRowNum[r]->setOverrideFont(loginCardDescFont);
 				stReplayRowName[r]->setOverrideFont(loginCardDescFont);
@@ -7752,24 +7768,23 @@ void Game::ResizeEconomyScreens() {
 		if(pnlReplayLeft) {
 			pnlReplayLeft->setRelativePosition(irr::core::recti(pad, gridTop, pad + leftW, gridTop + panelH));
 			if(stReplayListTitle) stReplayListTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), leftW - Scale(14), Scale(32)));
-			irr::s32 numW = Scale(34);
-			irr::s32 actW = Scale(68);
-			irr::s32 dateW = Scale(142);
-			irr::s32 nameW = std::max<irr::s32>(Scale(100), leftW - numW - dateW - actW - Scale(34));
-			irr::s32 x0 = Scale(14), x1 = x0 + numW, x2 = x1 + nameW, x3 = x2 + dateW;
+			irr::s32 numW = Scale(44);
+			irr::s32 usableW = std::max<irr::s32>(Scale(240), leftW - numW - Scale(36));
+			irr::s32 nameW = (usableW * 64) / 100;
+			irr::s32 x0 = Scale(14), x1 = x0 + numW, x2 = x1 + nameW;
 			irr::s32 thY = Scale(38), thH = Scale(22);
 			if(thReplayNum) thReplayNum->setRelativePosition(irr::core::recti(x0, thY, x1 - 4, thY + thH));
-			if(thReplayName) thReplayName->setRelativePosition(irr::core::recti(x1, thY, x2 - 4, thY + thH));
-			if(thReplayDate) thReplayDate->setRelativePosition(irr::core::recti(x2, thY, x3 - 4, thY + thH));
-			if(thReplayAct) thReplayAct->setRelativePosition(irr::core::recti(x3, thY, leftW - Scale(14), thY + thH));
+			if(thReplayName) thReplayName->setRelativePosition(irr::core::recti(x1, thY, x2 - 12, thY + thH));
+			if(thReplayDate) thReplayDate->setRelativePosition(irr::core::recti(x2, thY, leftW - Scale(14), thY + thH));
+			if(thReplayAct) thReplayAct->setVisible(false);
 			irr::s32 startY = thY + thH + Scale(6);
 			irr::s32 rowH = std::max<irr::s32>(Scale(24), (panelH - startY - Scale(10)) / 10);
 			for(int r = 0; r < 10; ++r) {
 				irr::s32 ry = startY + r * rowH;
 				if(stReplayRowNum[r]) stReplayRowNum[r]->setRelativePosition(irr::core::recti(x0, ry, x1 - 4, ry + rowH - 2));
-				if(stReplayRowName[r]) stReplayRowName[r]->setRelativePosition(irr::core::recti(x1, ry, x2 - 4, ry + rowH - 2));
-				if(stReplayRowDate[r]) stReplayRowDate[r]->setRelativePosition(irr::core::recti(x2, ry, x3 - 4, ry + rowH - 2));
-				if(btnReplayRowSelect[r]) btnReplayRowSelect[r]->setRelativePosition(irr::core::recti(x3, ry + 1, leftW - Scale(14), ry + rowH - 3));
+				if(stReplayRowName[r]) stReplayRowName[r]->setRelativePosition(irr::core::recti(x1, ry, x2 - 12, ry + rowH - 2));
+				if(stReplayRowDate[r]) stReplayRowDate[r]->setRelativePosition(irr::core::recti(x2, ry, leftW - Scale(14), ry + rowH - 2));
+				if(btnReplayRowSelect[r]) btnReplayRowSelect[r]->setRelativePosition(irr::core::recti(x0, ry, leftW - Scale(14), ry + rowH - 2));
 			}
 		}
 		{
@@ -10216,22 +10231,24 @@ void Game::PopulateSettingsWindow() {
 		defaultStrings.emplace_back(gSettings.client.tab, 2088);
 
 		auto* sPanel = gSettings.client.panel->getSubpanel();
-		gSettings.chkShowScopeLabel = env->addCheckBox(gGameConfig->showScopeLabel, GetNextRect(), sPanel, CHECKBOX_SHOW_SCOPE_LABEL, gDataManager->GetSysString(2076).data());
+		gSettings.chkShowScopeLabel = env->addCheckBox(gGameConfig->showScopeLabel, Scale(0, 0, 10, 10), sPanel, CHECKBOX_SHOW_SCOPE_LABEL, gDataManager->GetSysString(2076).data());
+		gSettings.chkShowScopeLabel->setVisible(false);
 		defaultStrings.emplace_back(gSettings.chkShowScopeLabel, 2076);
 		gSettings.chkShowFPS = env->addCheckBox(gGameConfig->showFPS, GetNextRect(), sPanel, CHECKBOX_SHOW_FPS, gDataManager->GetSysString(1445).data());
 		defaultStrings.emplace_back(gSettings.chkShowFPS, 1445);
-		gSettings.chkHideSetname = env->addCheckBox(gGameConfig->chkHideSetname, GetNextRect(), sPanel, CHECKBOX_HIDE_ARCHETYPES, gDataManager->GetSysString(1354).data());
+		gSettings.chkHideSetname = env->addCheckBox(gGameConfig->chkHideSetname, Scale(0, 0, 10, 10), sPanel, CHECKBOX_HIDE_ARCHETYPES, gDataManager->GetSysString(1354).data());
 		defaultStrings.emplace_back(gSettings.chkHideSetname, 1354);
-		gSettings.chkHidePasscodeScope = env->addCheckBox(gGameConfig->hidePasscodeScope, GetNextRect(), sPanel, CHECKBOX_HIDE_PASSCODE_SCOPE, gDataManager->GetSysString(2063).data());
+		gSettings.chkHidePasscodeScope = env->addCheckBox(gGameConfig->hidePasscodeScope, Scale(0, 0, 10, 10), sPanel, CHECKBOX_HIDE_PASSCODE_SCOPE, gDataManager->GetSysString(2063).data());
 		defaultStrings.emplace_back(gSettings.chkHidePasscodeScope, 2063);
-		gSettings.chkFilterBot = env->addCheckBox(gGameConfig->filterBot, GetNextRect(), sPanel, CHECKBOX_FILTER_BOT, gDataManager->GetSysString(2069).data());
+		gSettings.chkFilterBot = env->addCheckBox(gGameConfig->filterBot, Scale(0, 0, 10, 10), sPanel, CHECKBOX_FILTER_BOT, gDataManager->GetSysString(2069).data());
 		defaultStrings.emplace_back(gSettings.chkFilterBot, 2069);
 		{
-			gSettings.stCurrentSkin = env->addStaticText(gDataManager->GetSysString(2064).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
+			gSettings.stCurrentSkin = env->addStaticText(gDataManager->GetSysString(2064).data(), Scale(0, 0, 10, 10), false, true, sPanel);
 			defaultStrings.emplace_back(gSettings.stCurrentSkin, 2064);
-			gSettings.cbCurrentSkin = AddComboBox(env, GetCurrentRectWithXOffset(95, 320), sPanel, COMBOBOX_CURRENT_SKIN);
+			gSettings.cbCurrentSkin = AddComboBox(env, Scale(0, 0, 10, 10), sPanel, COMBOBOX_CURRENT_SKIN);
 			ReloadCBCurrentSkin();
-			IncrementXorY();
+			gSettings.stCurrentSkin->setVisible(false);
+			gSettings.cbCurrentSkin->setVisible(false);
 		}
 		{
 			gSettings.stCurrentLocale = env->addStaticText(gDataManager->GetSysString(2067).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
@@ -10249,7 +10266,7 @@ void Game::PopulateSettingsWindow() {
 			gSettings.cbCurrentLocale->setSelected(selectedLocale);
 			IncrementXorY();
 		}
-		gSettings.btnReloadSkin = env->addButton(GetNextRect(), sPanel, BUTTON_RELOAD_SKIN, gDataManager->GetSysString(2066).data());
+		gSettings.btnReloadSkin = env->addButton(Scale(0, 0, 10, 10), sPanel, BUTTON_RELOAD_SKIN, gDataManager->GetSysString(2066).data());
 		defaultStrings.emplace_back(gSettings.btnReloadSkin, 2066);
 		{
 			gSettings.stDpiScale = env->addStaticText(gDataManager->GetSysString(2070).data(), GetCurrentRectWithXOffset(15, 90), false, false, sPanel);
@@ -10262,17 +10279,18 @@ void Game::PopulateSettingsWindow() {
 			IncrementXorY();
 		}
 #ifdef UPDATE_URL
-		gSettings.chkUpdates = env->addCheckBox(gGameConfig->noClientUpdates, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1466).data());
+		gSettings.chkUpdates = env->addCheckBox(gGameConfig->noClientUpdates, Scale(0, 0, 10, 10), sPanel, -1, gDataManager->GetSysString(1466).data());
 		defaultStrings.emplace_back(gSettings.chkUpdates, 1466);
+		if(gSettings.chkUpdates) gSettings.chkUpdates->setVisible(false);
 #endif
-		gSettings.chkHideHandsInReplays = env->addCheckBox(gGameConfig->hideHandsInReplays, GetNextRect(), sPanel, CHECKBOX_HIDE_HANDS_REPLAY, gDataManager->GetSysString(2080).data());
+		gSettings.chkHideHandsInReplays = env->addCheckBox(gGameConfig->hideHandsInReplays, Scale(0, 0, 10, 10), sPanel, CHECKBOX_HIDE_HANDS_REPLAY, gDataManager->GetSysString(2080).data());
 		defaultStrings.emplace_back(gSettings.chkHideHandsInReplays, 2080);
-		gSettings.chkConfirmDeckClear = env->addCheckBox(gGameConfig->confirm_clear_deck, GetNextRect(), sPanel, CHECKBOX_CONFIRM_DECK_CLEAR, gDataManager->GetSysString(12104).data());
+		gSettings.chkConfirmDeckClear = env->addCheckBox(gGameConfig->confirm_clear_deck, Scale(0, 0, 10, 10), sPanel, CHECKBOX_CONFIRM_DECK_CLEAR, gDataManager->GetSysString(12104).data());
 		defaultStrings.emplace_back(gSettings.chkConfirmDeckClear, 12104);
-		gSettings.chkIgnoreDeckContents = env->addCheckBox(gGameConfig->ignoreDeckContents, GetNextRect(), sPanel, CHECKBOX_IGNORE_DECK_CONTENTS, gDataManager->GetSysString(12119).data());
+		gSettings.chkIgnoreDeckContents = env->addCheckBox(gGameConfig->ignoreDeckContents, Scale(0, 0, 10, 10), sPanel, CHECKBOX_IGNORE_DECK_CONTENTS, gDataManager->GetSysString(12119).data());
 		menuHandler.MakeElementSynchronized(gSettings.chkIgnoreDeckContents);
 		defaultStrings.emplace_back(gSettings.chkIgnoreDeckContents, 12119);
-		gSettings.chkAddCardNamesInDeckList = env->addCheckBox(gGameConfig->addCardNamesToDeckList, GetNextRect(), sPanel, CHECKBOX_ADD_CARD_NAME_TO_DECK_LIST, gDataManager->GetSysString(12123).data());
+		gSettings.chkAddCardNamesInDeckList = env->addCheckBox(gGameConfig->addCardNamesToDeckList, Scale(0, 0, 10, 10), sPanel, CHECKBOX_ADD_CARD_NAME_TO_DECK_LIST, gDataManager->GetSysString(12123).data());
 		defaultStrings.emplace_back(gSettings.chkAddCardNamesInDeckList, 12123);
 	}
 
@@ -10452,7 +10470,7 @@ void Game::PopulateSettingsWindow() {
 
 		ResetXandY();
 		auto* sPanel = gSettings.system.panel->getSubpanel();
-		gSettings.chkFullscreen = env->addCheckBox(gGameConfig->fullscreen, GetNextRect(), sPanel, CHECKBOX_FULLSCREEN, gDataManager->GetSysString(2060).data());
+		gSettings.chkFullscreen = env->addCheckBox(gGameConfig->fullscreen, Scale(0, 0, 10, 10), sPanel, CHECKBOX_FULLSCREEN, gDataManager->GetSysString(2060).data());
 		defaultStrings.emplace_back(gSettings.chkFullscreen, 2060);
 #if EDOPRO_ANDROID || EDOPRO_IOS
 		gSettings.chkFullscreen->setChecked(true);
@@ -10460,18 +10478,19 @@ void Game::PopulateSettingsWindow() {
 #elif EDOPRO_MACOS
 		gSettings.chkFullscreen->setEnabled(false);
 #endif
-		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, GetNextRect(), sPanel, -1, gDataManager->GetSysString(2072).data());
+		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, Scale(0, 0, 10, 10), sPanel, -1, gDataManager->GetSysString(2072).data());
 		defaultStrings.emplace_back(gSettings.chkShowConsole, 2072);
 #if !EDOPRO_WINDOWS
 		gSettings.chkShowConsole->setChecked(false);
 		gSettings.chkShowConsole->setEnabled(false);
 #endif
 		{
-			gSettings.stCoreLogOutput = env->addStaticText(gDataManager->GetSysString(1998).data(), GetCurrentRectWithXOffset(15, 105), false, true, sPanel);
+			gSettings.stCoreLogOutput = env->addStaticText(gDataManager->GetSysString(1998).data(), Scale(0, 0, 10, 10), false, true, sPanel);
 			defaultStrings.emplace_back(gSettings.stCoreLogOutput, 1998);
-			gSettings.cbCoreLogOutput = AddComboBox(env, GetCurrentRectWithXOffset(110, 320), sPanel, COMBOBOX_CORE_LOG_OUTPUT);
+			gSettings.cbCoreLogOutput = AddComboBox(env, Scale(0, 0, 10, 10), sPanel, COMBOBOX_CORE_LOG_OUTPUT);
 			ReloadCBCoreLogOutput();
-			IncrementXorY();
+			gSettings.stCoreLogOutput->setVisible(false);
+			gSettings.cbCoreLogOutput->setVisible(false);
 		}
 		{
 			gSettings.stMaxImagesPerFrame = env->addStaticText(gDataManager->GetSysString(2097).data(), GetCurrentRectWithXOffset(15, 270), false, true, sPanel);
@@ -10480,10 +10499,11 @@ void Game::PopulateSettingsWindow() {
 			IncrementXorY();
 		}
 		{
-			gSettings.stImageLoadThreads = env->addStaticText(gDataManager->GetSysString(2098).data(), GetCurrentRectWithXOffset(15, 270), false, true, sPanel);
+			gSettings.stImageLoadThreads = env->addStaticText(gDataManager->GetSysString(2098).data(), Scale(0, 0, 10, 10), false, true, sPanel);
 			defaultStrings.emplace_back(gSettings.stImageLoadThreads, 2098);
-			gSettings.ebImageLoadThreads = env->addEditBox(WStr(gGameConfig->imageLoadThreads), GetCurrentRectWithXOffset(275, 320), true, sPanel, EDITBOX_NUMERIC);
-			IncrementXorY();
+			gSettings.ebImageLoadThreads = env->addEditBox(WStr(gGameConfig->imageLoadThreads), Scale(0, 0, 10, 10), true, sPanel, EDITBOX_NUMERIC);
+			gSettings.stImageLoadThreads->setVisible(false);
+			gSettings.ebImageLoadThreads->setVisible(false);
 		}
 		{
 			gSettings.stImageDownloadThreads = env->addStaticText(gDataManager->GetSysString(2099).data(), GetCurrentRectWithXOffset(15, 270), false, true, sPanel);
@@ -10492,12 +10512,24 @@ void Game::PopulateSettingsWindow() {
 			IncrementXorY();
 		}
 #ifdef DISCORD_APP_ID
-		gSettings.chkDiscordIntegration = env->addCheckBox(gGameConfig->discordIntegration, GetNextRect(), sPanel, CHECKBOX_DISCORD_INTEGRATION, gDataManager->GetSysString(2078).data());
+		gSettings.chkDiscordIntegration = env->addCheckBox(gGameConfig->discordIntegration, Scale(0, 0, 10, 10), sPanel, CHECKBOX_DISCORD_INTEGRATION, gDataManager->GetSysString(2078).data());
 		defaultStrings.emplace_back(gSettings.chkDiscordIntegration, 2078);
 		gSettings.chkDiscordIntegration->setEnabled(discord.IsInitialized());
+		if(gSettings.chkDiscordIntegration) gSettings.chkDiscordIntegration->setVisible(false);
 #endif
-		gSettings.chkLogDownloadErrors = env->addCheckBox(gGameConfig->logDownloadErrors, GetNextRect(), sPanel, CHECKBOX_LOG_DOWNLOAD_ERRORS, gDataManager->GetSysString(12100).data());
+		gSettings.chkLogDownloadErrors = env->addCheckBox(gGameConfig->logDownloadErrors, Scale(0, 0, 10, 10), sPanel, CHECKBOX_LOG_DOWNLOAD_ERRORS, gDataManager->GetSysString(12100).data());
 		defaultStrings.emplace_back(gSettings.chkLogDownloadErrors, 12100);
+		if(gSettings.chkHideSetname) gSettings.chkHideSetname->setVisible(false);
+		if(gSettings.chkHidePasscodeScope) gSettings.chkHidePasscodeScope->setVisible(false);
+		if(gSettings.chkFilterBot) gSettings.chkFilterBot->setVisible(false);
+		if(gSettings.btnReloadSkin) gSettings.btnReloadSkin->setVisible(false);
+		if(gSettings.chkHideHandsInReplays) gSettings.chkHideHandsInReplays->setVisible(false);
+		if(gSettings.chkConfirmDeckClear) gSettings.chkConfirmDeckClear->setVisible(false);
+		if(gSettings.chkIgnoreDeckContents) gSettings.chkIgnoreDeckContents->setVisible(false);
+		if(gSettings.chkAddCardNamesInDeckList) gSettings.chkAddCardNamesInDeckList->setVisible(false);
+		if(gSettings.chkFullscreen) gSettings.chkFullscreen->setVisible(false);
+		if(gSettings.chkShowConsole) gSettings.chkShowConsole->setVisible(false);
+		if(gSettings.chkLogDownloadErrors) gSettings.chkLogDownloadErrors->setVisible(false);
 #if EDOPRO_MACOS && (IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9)
 		gSettings.chkIntegratedGPU = env->addCheckBox(gGameConfig->useIntegratedGpu, GetNextRect(), sPanel, -1, gDataManager->GetSysString(12101).data());
 		defaultStrings.emplace_back(gSettings.chkIntegratedGPU, 12101);
@@ -10637,6 +10669,12 @@ bool Game::MainLoop() {
 			std::thread([this]() { FetchUserInventoryAndDecks(); }).detach();
 			}
 			wasMainMenuVisible = menuVis;
+			static auto lastHeartbeat = std::chrono::steady_clock::now();
+			if(isLoggedIn && !sessionToken.empty() && std::chrono::duration_cast<std::chrono::seconds>(now - lastHeartbeat).count() >= 15) {
+				lastHeartbeat = now;
+				std::string hbTok = sessionToken;
+				epro::thread([hbTok]() { CallSessionApi("/api/auth/heartbeat", hbTok, "{}"); }).detach();
+			}
 		}
 		if(!dInfo.isInDuel && pendingDuelReward.valid) {
 			ShowDuelRewardWindow();
@@ -11045,6 +11083,7 @@ bool Game::MainLoop() {
 				drawNeon(wLobbyActivityCard, irr::video::SColor(180, 52, 211, 153));
 
 				drawNeon(btnLobbyTutorials, irr::video::SColor(200, 192, 132, 252));
+				drawNeon(btnLobbySettings, irr::video::SColor(200, 56, 189, 248));
 				drawNeon(btnLobbyReplays, irr::video::SColor(200, 56, 189, 248));
 				drawNeon(btnLobbyStore, irr::video::SColor(200, 52, 211, 153));
 				drawNeon(btnLobbyEvents, irr::video::SColor(200, 251, 191, 36));
@@ -11280,8 +11319,9 @@ bool Game::MainLoop() {
 				drawNeon(btnReplayPrev, cCyan);
 				drawNeon(btnReplayNext, cCyan);
 				for(int r = 0; r < 10; ++r) {
-					if(btnReplayRowSelect[r] && btnReplayRowSelect[r]->isVisible())
-						drawNeon(btnReplayRowSelect[r], (replayPage * 10 + r == selectedReplayIdx) ? cGold : cCyan);
+					if(btnReplayRowSelect[r] && btnReplayRowSelect[r]->isVisible() && (replayPage * 10 + r == selectedReplayIdx)) {
+						driver->draw2DRectangle(irr::video::SColor(42, 56, 189, 248), btnReplayRowSelect[r]->getAbsolutePosition());
+					}
 				}
 				drawNeon(btnLoadReplay, cEmer);
 				drawNeon(btnRenameReplay, cPurp);
@@ -11662,6 +11702,9 @@ bool Game::MainLoop() {
 	SingleMode::StopPlay(true);
 	ReplayMode::StopReplay(true);
 	ClearTextures();
+	if(isLoggedIn && !sessionToken.empty()) {
+		CallSessionApi("/api/auth/logout", sessionToken, "{}");
+	}
 	SaveConfig();
 #ifdef YGOPRO_BUILD_DLL
 	UnloadCore(ocgcore);
@@ -11985,8 +12028,7 @@ void Game::UpdateReplayPageUI() {
 			}
 			if(stReplayRowDate[r]) { stReplayRowDate[r]->setText(row.dateStr.c_str()); stReplayRowDate[r]->setVisible(true); }
 			if(btnReplayRowSelect[r]) {
-				btnReplayRowSelect[r]->setText(idx == selectedReplayIdx ? L"Activo" : L"Ver");
-				btnReplayRowSelect[r]->setOverrideColor(idx == selectedReplayIdx ? irr::video::SColor(255, 251, 191, 36) : irr::video::SColor(255, 56, 189, 248));
+				btnReplayRowSelect[r]->setText(L"");
 				btnReplayRowSelect[r]->setVisible(true);
 			}
 		} else {
