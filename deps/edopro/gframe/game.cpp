@@ -1234,39 +1234,39 @@ void Game::Initialize() {
 	defaultStrings.emplace_back(wReplay, 1202);
 	wReplay->getCloseButton()->setVisible(false);
 	wReplay->setVisible(false);
-	lstReplayList = irr::gui::CGUIFileSelectListBox::addFileSelectListBox(env, wReplay, LISTBOX_REPLAY_LIST, Scale(10, 30, 350, 400), true, true, false);
+	lstReplayList = AlignElementWithParent(irr::gui::CGUIFileSelectListBox::addFileSelectListBox(env, wReplay, LISTBOX_REPLAY_LIST, Scale(10, 30, 350, 400), true, true, false));
 	lstReplayList->setWorkingPath(L"./replay", true);
 	lstReplayList->addFilteredExtensions({L"yrp", L"yrpx"});
 	lstReplayList->setItemHeight(Scale(18));
-	btnLoadReplay = env->addButton(Scale(470, 355, 570, 380), wReplay, BUTTON_LOAD_REPLAY, gDataManager->GetSysString(1348).data());
+	btnLoadReplay = AlignElementWithParent(env->addButton(Scale(470, 355, 570, 380), wReplay, BUTTON_LOAD_REPLAY, gDataManager->GetSysString(1348).data()));
 	defaultStrings.emplace_back(btnLoadReplay, 1348);
 	btnLoadReplay->setEnabled(false);
-	btnDeleteReplay = env->addButton(Scale(360, 355, 460, 380), wReplay, BUTTON_DELETE_REPLAY, gDataManager->GetSysString(1361).data());
+	btnDeleteReplay = AlignElementWithParent(env->addButton(Scale(360, 355, 460, 380), wReplay, BUTTON_DELETE_REPLAY, gDataManager->GetSysString(1361).data()));
 	defaultStrings.emplace_back(btnDeleteReplay, 1361);
 	btnDeleteReplay->setEnabled(false);
-	btnRenameReplay = env->addButton(Scale(360, 385, 460, 410), wReplay, BUTTON_RENAME_REPLAY, gDataManager->GetSysString(1362).data());
+	btnRenameReplay = AlignElementWithParent(env->addButton(Scale(360, 385, 460, 410), wReplay, BUTTON_RENAME_REPLAY, gDataManager->GetSysString(1362).data()));
 	defaultStrings.emplace_back(btnRenameReplay, 1362);
 	btnRenameReplay->setEnabled(false);
-	btnReplayCancel = env->addButton(Scale(470, 385, 570, 410), wReplay, BUTTON_CANCEL_REPLAY, gDataManager->GetSysString(1347).data());
+	btnReplayCancel = AlignElementWithParent(env->addButton(Scale(470, 385, 570, 410), wReplay, BUTTON_CANCEL_REPLAY, gDataManager->GetSysString(1347).data()));
 	defaultStrings.emplace_back(btnReplayCancel, 1347);
- 	tmpptr = env->addStaticText(gDataManager->GetSysString(1349).data(), Scale(360, 30, 570, 50), false, true, wReplay);
+ 	tmpptr = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1349).data(), Scale(360, 30, 570, 50), false, true, wReplay));
 	defaultStrings.emplace_back(tmpptr, 1349);
-	stReplayInfo = irr::gui::CGUICustomText::addCustomText(L"", false, env, wReplay, -1, Scale(360, 60, 570, 350));
+	stReplayInfo = AlignElementWithParent(irr::gui::CGUICustomText::addCustomText(L"", false, env, wReplay, -1, Scale(360, 60, 570, 350)));
 	stReplayInfo->setWordWrap(true);
-	btnExportDeck = env->addButton(Scale(470, 325, 570, 350), wReplay, BUTTON_EXPORT_DECK, gDataManager->GetSysString(1358).data());
+	btnExportDeck = AlignElementWithParent(env->addButton(Scale(470, 325, 570, 350), wReplay, BUTTON_EXPORT_DECK, gDataManager->GetSysString(1358).data()));
 	defaultStrings.emplace_back(btnExportDeck, 1358);
 	btnExportDeck->setEnabled(false);
-	btnShareReplay = env->addButton(Scale(360, 325, 460, 350), wReplay, BUTTON_SHARE_REPLAY, gDataManager->GetSysString(1378).data());
+	btnShareReplay = AlignElementWithParent(env->addButton(Scale(360, 325, 460, 350), wReplay, BUTTON_SHARE_REPLAY, gDataManager->GetSysString(1378).data()));
 	defaultStrings.emplace_back(btnShareReplay, 1378);
 	btnShareReplay->setEnabled(false);
 #if !EDOPRO_ANDROID
 	btnShareReplay->setVisible(false);
 #endif
-	chkYrp = env->addCheckBox(false, Scale(360, 250, 560, 270), wReplay, -1, gDataManager->GetSysString(1356).data());
+	chkYrp = AlignElementWithParent(env->addCheckBox(false, Scale(360, 250, 560, 270), wReplay, -1, gDataManager->GetSysString(1356).data()));
 	defaultStrings.emplace_back(chkYrp, 1356);
- 	tmpptr = env->addStaticText(gDataManager->GetSysString(1353).data(), Scale(360, 275, 570, 295), false, true, wReplay);
+ 	tmpptr = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1353).data(), Scale(360, 275, 570, 295), false, true, wReplay));
 	defaultStrings.emplace_back(tmpptr, 1353);
-	ebRepStartTurn = env->addEditBox(L"", Scale(360, 300, 460, 320), true, wReplay, -1);
+	ebRepStartTurn = AlignElementWithParent(env->addEditBox(L"", Scale(360, 300, 460, 320), true, wReplay, -1));
 	ebRepStartTurn->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	//single play window
 	wSinglePlay = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1201).data());
@@ -10038,199 +10038,6 @@ void Game::PopulateSettingsWindow() {
 #endif
 		gSettings.chkHideHandsInReplays = env->addCheckBox(gGameConfig->hideHandsInReplays, GetNextRect(), sPanel, CHECKBOX_HIDE_HANDS_REPLAY, gDataManager->GetSysString(2080).data());
 		defaultStrings.emplace_back(gSettings.chkHideHandsInReplays, 2080);
-		gSettings.chkConfirmDeckClear = env->addCheckBox(gGameConfig->confirm_clear_deck, GetNextRect(), sPanel, CHECKBOX_CONFIRM_DECK_CLEAR, gDataManager->GetSysString(12104).data());
-		defaultStrings.emplace_back(gSettings.chkConfirmDeckClear, 12104);
-		gSettings.chkIgnoreDeckContents = env->addCheckBox(gGameConfig->ignoreDeckContents, GetNextRect(), sPanel, CHECKBOX_IGNORE_DECK_CONTENTS, gDataManager->GetSysString(12119).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkIgnoreDeckContents);
-		defaultStrings.emplace_back(gSettings.chkIgnoreDeckContents, 12119);
-		gSettings.chkAddCardNamesInDeckList = env->addCheckBox(gGameConfig->addCardNamesToDeckList, GetNextRect(), sPanel, CHECKBOX_ADD_CARD_NAME_TO_DECK_LIST, gDataManager->GetSysString(12123).data());
-		defaultStrings.emplace_back(gSettings.chkAddCardNamesInDeckList, 12123);
-	}
-
-	{
-		gSettings.system.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2089).data());
-		defaultStrings.emplace_back(gSettings.system.tab, 2089);
-
-		ResetXandY();
-		auto* sPanel = gSettings.system.panel->getSubpanel();
-		gSettings.chkIgnoreOpponents = env->addCheckBox(gGameConfig->chkIgnore1, GetNextRect(), sPanel, CHECKBOX_IGNORE_OPPONENTS, gDataManager->GetSysString(1290).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkIgnoreOpponents);
-		defaultStrings.emplace_back(gSettings.chkIgnoreOpponents, 1290);
-		gSettings.chkIgnoreSpectators = env->addCheckBox(gGameConfig->chkIgnore2, GetNextRect(), sPanel, CHECKBOX_IGNORE_SPECTATORS, gDataManager->GetSysString(1291).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkIgnoreSpectators);
-		defaultStrings.emplace_back(gSettings.chkIgnoreSpectators, 1291);
-		gSettings.chkQuickAnimation = env->addCheckBox(gGameConfig->quick_animation, GetNextRect(), sPanel, CHECKBOX_QUICK_ANIMATION, gDataManager->GetSysString(1299).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkQuickAnimation);
-		defaultStrings.emplace_back(gSettings.chkQuickAnimation, 1299);
-
-		gSettings.chkTopdown = env->addCheckBox(gGameConfig->topdown_view, GetNextRect(), sPanel, CHECKBOX_TOPDOWN, gDataManager->GetSysString(2093).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkTopdown);
-		defaultStrings.emplace_back(gSettings.chkTopdown, 2093);
-		gSettings.chkKeepFieldRatio = env->addCheckBox(gGameConfig->keep_aspect_ratio, GetNextRect(), sPanel, CHECKBOX_KEEP_FIELD_ASPECT_RATIO, gDataManager->GetSysString(2094).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkKeepFieldRatio);
-		defaultStrings.emplace_back(gSettings.chkKeepFieldRatio, 2094);
-		gSettings.chkKeepCardRatio = env->addCheckBox(gGameConfig->keep_cardinfo_aspect_ratio, GetNextRect(), sPanel, CHECKBOX_KEEP_CARD_ASPECT_RATIO, gDataManager->GetSysString(2095).data());
-		defaultStrings.emplace_back(gSettings.chkKeepCardRatio, 2095);
-
-		gSettings.chkAlternativePhaseLayout = env->addCheckBox(gGameConfig->alternative_phase_layout, GetNextRect(), sPanel, CHECKBOX_ALTERNATIVE_PHASE_LAYOUT, gDataManager->GetSysString(1298).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkAlternativePhaseLayout);
-		defaultStrings.emplace_back(gSettings.chkAlternativePhaseLayout, 1298);
-		gSettings.chkHideChainButtons = env->addCheckBox(gGameConfig->chkHideHintButton, GetNextRect(), sPanel, CHECKBOX_CHAIN_BUTTONS, gDataManager->GetSysString(1355).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkHideChainButtons);
-		defaultStrings.emplace_back(gSettings.chkHideChainButtons, 1355);
-		gSettings.chkAutoChainOrder = env->addCheckBox(gGameConfig->chkAutoChain, GetNextRect(), sPanel, CHECKBOX_AUTO_CHAIN_ORDER, gDataManager->GetSysString(1276).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkAutoChainOrder);
-		defaultStrings.emplace_back(gSettings.chkAutoChainOrder, 1276);
-		gSettings.chkDottedLines = env->addCheckBox(gGameConfig->dotted_lines, GetNextRect(), sPanel, CHECKBOX_DOTTED_LINES, gDataManager->GetSysString(1376).data());
-		defaultStrings.emplace_back(gSettings.chkDottedLines, 1376);
-#if (IRRLICHT_VERSION_MAJOR==1 && IRRLICHT_VERSION_MINOR==9)
-		{
-			const auto type = driver->getDriverType();
-			if(type == irr::video::EDT_OGLES1 || type == irr::video::EDT_OGLES2) {
-				gSettings.chkDottedLines->setEnabled(false);
-				gSettings.chkDottedLines->setChecked(false);
-				gGameConfig->dotted_lines = false;
-			}
-		}
-#endif
-		gSettings.chkMAutoPos = env->addCheckBox(gGameConfig->chkMAutoPos, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1274).data());
-		defaultStrings.emplace_back(gSettings.chkMAutoPos, 1274);
-		gSettings.chkSTAutoPos = env->addCheckBox(gGameConfig->chkSTAutoPos, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1278).data());
-		defaultStrings.emplace_back(gSettings.chkSTAutoPos, 1278);
-		{
-			gSettings.chkRandomPos = env->addCheckBox(gGameConfig->chkRandomPos, GetCurrentRectWithXOffset(35, 320), sPanel, -1, gDataManager->GetSysString(1275).data());
-			defaultStrings.emplace_back(gSettings.chkRandomPos, 1275);
-			IncrementXorY();
-		}
-		gSettings.chkNoChainDelay = env->addCheckBox(gGameConfig->chkWaitChain, GetNextRect(), sPanel, CHECKBOX_NO_CHAIN_DELAY, gDataManager->GetSysString(1277).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkNoChainDelay);
-		defaultStrings.emplace_back(gSettings.chkNoChainDelay, 1277);
-
-		gSettings.chkAutoRPS = env->addCheckBox(gGameConfig->chkAutoRPS, GetNextRect(), sPanel, CHECKBOX_AUTO_RPS, gDataManager->GetSysString(12124).data());
-		defaultStrings.emplace_back(gSettings.chkAutoRPS, 12124);
-	}
-
-	{
-		gSettings.sound.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2090).data());
-		defaultStrings.emplace_back(gSettings.sound.tab, 2090);
-
-		ResetXandY();
-		auto* sPanel = gSettings.sound.panel->getSubpanel();
-
-		if constexpr(SoundManager::HasMultipleBackends()) {
-			gSettings.stAudioBackend = env->addStaticText(gDataManager->GetSysString(12125).data(), GetCurrentRectWithXOffset(15, 115), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stAudioBackend, 12125);
-			gSettings.cbAudioBackend = AddComboBox(env, GetCurrentRectWithXOffset(120, 320), sPanel, -1);
-			int selected_backend = 0;
-			for(const auto& backend : SoundManager::GetSupportedBackends()) {
-				if(auto idx = gSettings.cbAudioBackend->addItem(epro::to_wstring(backend).data(), backend); backend == gGameConfig->sound_backend) {
-					selected_backend = idx;
-				}
-			}
-			gSettings.cbAudioBackend->setSelected(selected_backend);
-			cur_y += y_incr;
-		}
-
-		gSettings.chkEnableSound = env->addCheckBox(gGameConfig->enablesound, GetNextRect(), sPanel, CHECKBOX_ENABLE_SOUND, gDataManager->GetSysString(2047).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkEnableSound);
-		defaultStrings.emplace_back(gSettings.chkEnableSound, 2047);
-		{
-			gSettings.stSoundVolume = env->addStaticText(gDataManager->GetSysString(2049).data(), GetCurrentRectWithXOffset(15, 75), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stSoundVolume, 2049);
-			gSettings.scrSoundVolume = env->addScrollBar(true, GetCurrentRectWithXOffset(80, 320, true), sPanel, SCROLL_SOUND_VOLUME);
-			menuHandler.MakeElementSynchronized(gSettings.scrSoundVolume);
-			gSettings.scrSoundVolume->setMax(100);
-			gSettings.scrSoundVolume->setMin(0);
-			gSettings.scrSoundVolume->setPos(gGameConfig->soundVolume);
-			gSettings.scrSoundVolume->setLargeStep(1);
-			gSettings.scrSoundVolume->setSmallStep(1);
-			IncrementXorY();
-		}
-		gSettings.chkEnableMusic = env->addCheckBox(gGameConfig->enablemusic, GetNextRect(), sPanel, CHECKBOX_ENABLE_MUSIC, gDataManager->GetSysString(2046).data());
-		menuHandler.MakeElementSynchronized(gSettings.chkEnableMusic);
-		defaultStrings.emplace_back(gSettings.chkEnableMusic, 2046);
-		{
-			gSettings.stMusicVolume = env->addStaticText(gDataManager->GetSysString(2048).data(), GetCurrentRectWithXOffset(15, 75), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stMusicVolume, 2048);
-			gSettings.scrMusicVolume = env->addScrollBar(true, GetCurrentRectWithXOffset(80, 320, true), sPanel, SCROLL_MUSIC_VOLUME);
-			menuHandler.MakeElementSynchronized(gSettings.scrMusicVolume);
-			gSettings.scrMusicVolume->setMax(100);
-			gSettings.scrMusicVolume->setMin(0);
-			gSettings.scrMusicVolume->setPos(gGameConfig->musicVolume);
-			gSettings.scrMusicVolume->setLargeStep(1);
-			gSettings.scrMusicVolume->setSmallStep(1);
-			IncrementXorY();
-		}
-		gSettings.chkLoopMusic = env->addCheckBox(gGameConfig->loopMusic, GetNextRect(), sPanel, CHECKBOX_LOOP_MUSIC, gDataManager->GetSysString(2079).data());
-		defaultStrings.emplace_back(gSettings.chkLoopMusic, 2079);
-		gSettings.stNoAudioBackend = env->addStaticText(gDataManager->GetSysString(2058).data(), GetCurrentRectWithXOffset(15, 320), false, true, sPanel);
-		defaultStrings.emplace_back(gSettings.stNoAudioBackend, 2058);
-		gSettings.stNoAudioBackend->setVisible(false);
-	}
-
-	{
-		gSettings.graphics.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2091).data());
-		defaultStrings.emplace_back(gSettings.graphics.tab, 2091);
-
-		ResetXandY();
-		auto* sPanel = gSettings.graphics.panel->getSubpanel();
-		gSettings.chkScaleBackground = env->addCheckBox(gGameConfig->scale_background, GetNextRect(), sPanel, CHECKBOX_SCALE_BACKGROUND, gDataManager->GetSysString(2061).data());
-		defaultStrings.emplace_back(gSettings.chkScaleBackground, 2061);
-		gSettings.chkAccurateBackgroundResize = env->addCheckBox(gGameConfig->accurate_bg_resize, GetNextRect(), sPanel, CHECKBOX_ACCURATE_BACKGROUND_RESIZE, gDataManager->GetSysString(2062).data());
-		defaultStrings.emplace_back(gSettings.chkAccurateBackgroundResize, 2062);
-		gSettings.chkDrawFieldSpells = env->addCheckBox(gGameConfig->draw_field_spell, GetNextRect(), sPanel, CHECKBOX_DRAW_FIELD_SPELLS, gDataManager->GetSysString(2068).data());
-		defaultStrings.emplace_back(gSettings.chkDrawFieldSpells, 2068);
-		{
-			gSettings.stAntiAlias = env->addStaticText(gDataManager->GetSysString(2075).data(), GetCurrentRectWithXOffset(15, 220), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stAntiAlias, 2075);
-			gSettings.ebAntiAlias = env->addEditBox(WStr(gGameConfig->antialias), GetCurrentRectWithXOffset(225, 320), true, sPanel, EDITBOX_NUMERIC);
-			IncrementXorY();
-		}
-		{
-			gSettings.stVSync = env->addStaticText(gDataManager->GetSysString(2073).data(), GetCurrentRectWithXOffset(15, 105), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stVSync, 2073);
-			gSettings.cbVSync = AddComboBox(env, GetCurrentRectWithXOffset(110, 320), sPanel, COMBOBOX_VSYNC);
-			ReloadCBVsync();
-			gSettings.cbVSync->setSelected(gGameConfig->vsync);
-			IncrementXorY();
-		}
-		{
-			gSettings.stFPSCap = env->addStaticText(gDataManager->GetSysString(2074).data(), GetCurrentRectWithXOffset(15, 220), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stFPSCap, 2074);
-			gSettings.ebFPSCap = env->addEditBox(WStr(gGameConfig->maxFPS), GetCurrentRectWithXOffset(225, 275), true, sPanel, EDITBOX_FPS_CAP);
-			gSettings.btnFPSCap = env->addButton(GetCurrentRectWithXOffset(280, 320), sPanel, BUTTON_FPS_CAP, gDataManager->GetSysString(1211).data());
-			defaultStrings.emplace_back(gSettings.btnFPSCap, 1211);
-			IncrementXorY();
-		}
-		{
-			gSettings.stVideoDriver = env->addStaticText(gDataManager->GetSysString(2096).data(), GetCurrentRectWithXOffset(15, 105), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stVideoDriver, 2096);
-			gSettings.cbVideoDriver = AddComboBox(env, GetCurrentRectWithXOffset(110, 320), sPanel, -1);
-			int selected_driver = 0;
-			for(const auto& cur_driver : supported_graphic_drivers) {
-				const auto idx = gSettings.cbVideoDriver->addItem(cur_driver.first.data(), cur_driver.second);
-				if(cur_driver.second == gGameConfig->driver_type)
-					selected_driver = idx;
-			}
-			gSettings.cbVideoDriver->setSelected(selected_driver);
-			IncrementXorY();
-		}
-	}
-
-	{
-		gSettings.system.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2092).data());
-		defaultStrings.emplace_back(gSettings.system.tab, 2092);
-
-		ResetXandY();
-		auto* sPanel = gSettings.system.panel->getSubpanel();
-		gSettings.chkFullscreen = env->addCheckBox(gGameConfig->fullscreen, GetNextRect(), sPanel, CHECKBOX_FULLSCREEN, gDataManager->GetSysString(2060).data());
-		defaultStrings.emplace_back(gSettings.chkFullscreen, 2060);
-#if EDOPRO_ANDROID || EDOPRO_IOS
-		gSettings.chkFullscreen->setChecked(true);
-		gSettings.chkFullscreen->setEnabled(false);
-#elif EDOPRO_MACOS
-		gSettings.chkFullscreen->setEnabled(false);
-#endif
 		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, GetNextRect(), sPanel, -1, gDataManager->GetSysString(2072).data());
 		defaultStrings.emplace_back(gSettings.chkShowConsole, 2072);
 #if !EDOPRO_WINDOWS
@@ -12937,7 +12744,7 @@ void Game::OnResize() {
 	if(wHostPrepareR) wHostPrepareR->setVisible(false);
 	if(wHostPrepareL) wHostPrepareL->setVisible(false);
 	wRules->setRelativePosition(ResizeWin(630, 100, 1000, 310));
-	wReplay->setRelativePosition(ResizeWin(220, 100, 800, 520));
+	wReplay->setRelativePosition(Resize(40, 56, 984, 600));
 	wSinglePlay->setRelativePosition(ResizeWin(220, 100, 800, 520));
 	gBot.window->setRelativePosition(irr::core::vector2di(wHostPrepare->getAbsolutePosition().LowerRightCorner.X, wHostPrepare->getAbsolutePosition().UpperLeftCorner.Y));
 
