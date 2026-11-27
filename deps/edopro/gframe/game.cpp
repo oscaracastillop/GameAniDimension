@@ -1237,39 +1237,41 @@ void Game::Initialize() {
 	wReplay->setDrawBackground(false);
 	wReplay->setDraggable(false);
 	wReplay->setVisible(false);
-	lstReplayList = AlignElementWithParent(irr::gui::CGUIFileSelectListBox::addFileSelectListBox(env, wReplay, LISTBOX_REPLAY_LIST, Scale(10, 30, 350, 400), true, true, false));
+	lstReplayList = irr::gui::CGUIFileSelectListBox::addFileSelectListBox(env, wReplay, LISTBOX_REPLAY_LIST, Scale(10, 30, 350, 400), true, true, false);
 	lstReplayList->setWorkingPath(L"./replay", true);
 	lstReplayList->addFilteredExtensions({L"yrp", L"yrpx"});
 	lstReplayList->setItemHeight(Scale(22));
-	btnLoadReplay = AlignElementWithParent(env->addButton(Scale(470, 355, 570, 380), wReplay, BUTTON_LOAD_REPLAY, gDataManager->GetSysString(1348).data()));
+	lstReplayList->setVisible(false);
+	btnLoadReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_LOAD_REPLAY, gDataManager->GetSysString(1348).data());
 	defaultStrings.emplace_back(btnLoadReplay, 1348);
 	btnLoadReplay->setEnabled(false);
-	btnDeleteReplay = AlignElementWithParent(env->addButton(Scale(360, 355, 460, 380), wReplay, BUTTON_DELETE_REPLAY, gDataManager->GetSysString(1361).data()));
+	btnDeleteReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_DELETE_REPLAY, gDataManager->GetSysString(1361).data());
 	defaultStrings.emplace_back(btnDeleteReplay, 1361);
 	btnDeleteReplay->setEnabled(false);
-	btnRenameReplay = AlignElementWithParent(env->addButton(Scale(360, 385, 460, 410), wReplay, BUTTON_RENAME_REPLAY, gDataManager->GetSysString(1362).data()));
+	btnRenameReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_RENAME_REPLAY, gDataManager->GetSysString(1362).data());
 	defaultStrings.emplace_back(btnRenameReplay, 1362);
 	btnRenameReplay->setEnabled(false);
-	btnReplayCancel = AlignElementWithParent(env->addButton(Scale(470, 385, 570, 410), wReplay, BUTTON_CANCEL_REPLAY, L"Volver al Lobby"));
+	btnReplayCancel = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_CANCEL_REPLAY, L"Volver al Lobby");
 	btnReplayCancel->setEnabled(true);
-	stReplayInfoTitle = AlignElementWithParent(env->addStaticText(L"DETALLES DE REPETICI\u00D3N", Scale(360, 30, 570, 50), false, true, wReplay));
-	stReplayInfo = AlignElementWithParent(irr::gui::CGUICustomText::addCustomText(L"", false, env, wReplay, -1, Scale(360, 60, 570, 350)));
+	stReplayInfoTitle = env->addStaticText(L"DETALLES DEL DUELO", irr::core::recti(0, 0, 10, 10), false, false, wReplay);
+	stReplayInfo = irr::gui::CGUICustomText::addCustomText(L"", false, env, wReplay, -1, irr::core::recti(0, 0, 10, 10));
 	stReplayInfo->setWordWrap(true);
-	btnExportDeck = AlignElementWithParent(env->addButton(Scale(470, 325, 570, 350), wReplay, BUTTON_EXPORT_DECK, gDataManager->GetSysString(1358).data()));
+	stReplayInfo->setVisible(false);
+	btnExportDeck = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_EXPORT_DECK, gDataManager->GetSysString(1358).data());
 	defaultStrings.emplace_back(btnExportDeck, 1358);
 	btnExportDeck->setEnabled(false);
 	btnExportDeck->setVisible(false);
-	btnShareReplay = AlignElementWithParent(env->addButton(Scale(360, 325, 460, 350), wReplay, BUTTON_SHARE_REPLAY, gDataManager->GetSysString(1378).data()));
+	btnShareReplay = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_SHARE_REPLAY, gDataManager->GetSysString(1378).data());
 	defaultStrings.emplace_back(btnShareReplay, 1378);
 	btnShareReplay->setEnabled(false);
 	btnShareReplay->setVisible(false);
-	chkYrp = AlignElementWithParent(env->addCheckBox(false, Scale(360, 250, 560, 270), wReplay, -1, gDataManager->GetSysString(1356).data()));
+	chkYrp = env->addCheckBox(false, irr::core::recti(0, 0, 10, 10), wReplay, -1, gDataManager->GetSysString(1356).data());
 	defaultStrings.emplace_back(chkYrp, 1356);
 	chkYrp->setVisible(false);
-	stReplayStartTurnLbl = AlignElementWithParent(env->addStaticText(gDataManager->GetSysString(1353).data(), Scale(360, 275, 570, 295), false, true, wReplay));
+	stReplayStartTurnLbl = env->addStaticText(gDataManager->GetSysString(1353).data(), irr::core::recti(0, 0, 10, 10), false, true, wReplay);
 	defaultStrings.emplace_back(stReplayStartTurnLbl, 1353);
 	stReplayStartTurnLbl->setVisible(false);
-	ebRepStartTurn = AlignElementWithParent(env->addEditBox(L"", Scale(360, 300, 460, 320), true, wReplay, -1));
+	ebRepStartTurn = env->addEditBox(L"", irr::core::recti(0, 0, 10, 10), true, wReplay, -1);
 	ebRepStartTurn->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	ebRepStartTurn->setVisible(false);
 	//single play window
@@ -6410,30 +6412,81 @@ void Game::PopulateEconomyScreens() {
 	styleDarkBtn(btnRankLvlPrev); styleDarkBtn(btnRankLvlNext);
 	if(loginCardDescFont) { btnRankLvlPrev->setOverrideFont(loginCardDescFont); stRankLvlPage->setOverrideFont(loginCardDescFont); btnRankLvlNext->setOverrideFont(loginCardDescFont); }
 
-	// 7. Replays Screen (2-panel neon layout matching ecosystem screens)
+	// 7. Replays Screen (2-panel neon layout: 10-row paginated table + Lobby-style duel details)
 	if(wReplay) {
 		stReplayTitle = env->addStaticText(L"REPETICIONES", irr::core::recti(0, 0, 10, 10), false, false, wReplay);
 		stReplayTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 		if(loginTitleFont) stReplayTitle->setOverrideFont(loginTitleFont);
 
 		pnlReplayLeft = makePanel(wReplay);
-		stReplayListTitle = env->addStaticText(L"ARCHIVOS DE REPETICI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		stReplayListTitle = env->addStaticText(L"HISTORIAL DE REPETICIONES", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
 		stReplayListTitle->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
 		if(loginCardDescFont) stReplayListTitle->setOverrideFont(loginCardDescFont);
-		if(lstReplayList) {
-			pnlReplayLeft->addChild(lstReplayList);
+
+		thReplayNum = env->addStaticText(L"#", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		thReplayName = env->addStaticText(L"DUELO / ARCHIVO", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		thReplayDate = env->addStaticText(L"FECHA", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		thReplayAct = env->addStaticText(L"ACCI\u00D3N", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+		for(auto* th : { thReplayNum, thReplayName, thReplayDate, thReplayAct }) {
+			th->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			if(loginCardDescFont) th->setOverrideFont(loginCardDescFont);
+		}
+		for(int r = 0; r < 10; ++r) {
+			stReplayRowNum[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+			stReplayRowNum[r]->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+			stReplayRowName[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+			stReplayRowName[r]->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+			stReplayRowDate[r] = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayLeft);
+			stReplayRowDate[r]->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+			btnReplayRowSelect[r] = env->addButton(irr::core::recti(0, 0, 10, 10), pnlReplayLeft, BUTTON_REPLAY_ROW_0 + r, L"Ver");
+			styleDarkBtn(btnReplayRowSelect[r]);
+			btnReplayRowSelect[r]->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+			if(loginCardDescFont) {
+				stReplayRowNum[r]->setOverrideFont(loginCardDescFont);
+				stReplayRowName[r]->setOverrideFont(loginCardDescFont);
+				stReplayRowDate[r]->setOverrideFont(loginCardDescFont);
+				btnReplayRowSelect[r]->setOverrideFont(loginCardDescFont);
+			}
+		}
+
+		btnReplayPrev = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_REPLAY_PREV, L"Anterior");
+		stReplayPage = env->addStaticText(L"P\u00E1gina 1 / 1", irr::core::recti(0, 0, 10, 10), false, false, wReplay);
+		stReplayPage->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+		stReplayPage->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
+		btnReplayNext = env->addButton(irr::core::recti(0, 0, 10, 10), wReplay, BUTTON_REPLAY_NEXT, L"Siguiente");
+		styleDarkBtn(btnReplayPrev); styleDarkBtn(btnReplayNext);
+		if(loginCardDescFont) {
+			btnReplayPrev->setOverrideFont(loginCardDescFont);
+			stReplayPage->setOverrideFont(loginCardDescFont);
+			btnReplayNext->setOverrideFont(loginCardDescFont);
 		}
 
 		pnlReplayRight = makePanel(wReplay);
 		if(stReplayInfoTitle) {
 			pnlReplayRight->addChild(stReplayInfoTitle);
+			stReplayInfoTitle->setText(L"DETALLES DEL DUELO");
 			stReplayInfoTitle->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
 			if(loginCardDescFont) stReplayInfoTitle->setOverrideFont(loginCardDescFont);
 		}
-		if(stReplayInfo) {
-			pnlReplayRight->addChild(stReplayInfo);
-			stReplayInfo->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-			if(loginCardDescFont) stReplayInfo->setOverrideFont(loginCardDescFont);
+		stRepDetFile = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayRight);
+		stRepDetDate = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayRight);
+		stRepDetPlayer = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayRight);
+		stRepDetRival = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayRight);
+		stRepDetTurns = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, pnlReplayRight);
+		stRepDetResult = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, pnlReplayRight);
+		stRepDetFile->setOverrideColor(irr::video::SColor(255, 248, 250, 252));
+		stRepDetDate->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
+		stRepDetPlayer->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
+		stRepDetRival->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
+		stRepDetTurns->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
+		stRepDetResult->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+		if(loginCardDescFont) {
+			stRepDetFile->setOverrideFont(loginCardDescFont);
+			stRepDetDate->setOverrideFont(loginCardDescFont);
+			stRepDetPlayer->setOverrideFont(loginCardDescFont);
+			stRepDetRival->setOverrideFont(loginCardDescFont);
+			stRepDetTurns->setOverrideFont(loginCardDescFont);
+			stRepDetResult->setOverrideFont(loginCardDescFont);
 		}
 		if(btnReplayCancel) {
 			styleDarkBtn(btnReplayCancel);
@@ -7682,26 +7735,59 @@ void Game::ResizeEconomyScreens() {
 		if(btnReplayCancel) btnReplayCancel->setRelativePosition(irr::core::recti(W - pad - Scale(165), topY + Scale(2), W - pad, topY + Scale(36)));
 
 		const irr::s32 gridTop = topY + Scale(58);
-		const irr::s32 panelH = std::max<irr::s32>(Scale(280), botY - gridTop);
+		const irr::s32 pageBarH = Scale(34);
+		const irr::s32 panelH = std::max<irr::s32>(Scale(280), botY - gridTop - pageBarH - Scale(10));
 		const irr::s32 gap = Scale(16);
 		const irr::s32 leftW = ((W - 2 * pad - gap) * 58) / 100;
 		const irr::s32 rightW = (W - 2 * pad - gap) - leftW;
 
 		if(pnlReplayLeft) {
 			pnlReplayLeft->setRelativePosition(irr::core::recti(pad, gridTop, pad + leftW, gridTop + panelH));
-			if(stReplayListTitle) stReplayListTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(12), leftW - Scale(16), Scale(36)));
-			if(lstReplayList) {
-				lstReplayList->setRelativePosition(irr::core::recti(Scale(14), Scale(42), leftW - Scale(14), panelH - Scale(14)));
-				lstReplayList->setItemHeight(Scale(24));
+			if(stReplayListTitle) stReplayListTitle->setRelativePosition(irr::core::recti(Scale(14), Scale(10), leftW - Scale(14), Scale(32)));
+			irr::s32 numW = Scale(34);
+			irr::s32 actW = Scale(68);
+			irr::s32 dateW = Scale(142);
+			irr::s32 nameW = std::max<irr::s32>(Scale(100), leftW - numW - dateW - actW - Scale(34));
+			irr::s32 x0 = Scale(14), x1 = x0 + numW, x2 = x1 + nameW, x3 = x2 + dateW;
+			irr::s32 thY = Scale(38), thH = Scale(22);
+			if(thReplayNum) thReplayNum->setRelativePosition(irr::core::recti(x0, thY, x1 - 4, thY + thH));
+			if(thReplayName) thReplayName->setRelativePosition(irr::core::recti(x1, thY, x2 - 4, thY + thH));
+			if(thReplayDate) thReplayDate->setRelativePosition(irr::core::recti(x2, thY, x3 - 4, thY + thH));
+			if(thReplayAct) thReplayAct->setRelativePosition(irr::core::recti(x3, thY, leftW - Scale(14), thY + thH));
+			irr::s32 startY = thY + thH + Scale(6);
+			irr::s32 rowH = std::max<irr::s32>(Scale(24), (panelH - startY - Scale(10)) / 10);
+			for(int r = 0; r < 10; ++r) {
+				irr::s32 ry = startY + r * rowH;
+				if(stReplayRowNum[r]) stReplayRowNum[r]->setRelativePosition(irr::core::recti(x0, ry, x1 - 4, ry + rowH - 2));
+				if(stReplayRowName[r]) stReplayRowName[r]->setRelativePosition(irr::core::recti(x1, ry, x2 - 4, ry + rowH - 2));
+				if(stReplayRowDate[r]) stReplayRowDate[r]->setRelativePosition(irr::core::recti(x2, ry, x3 - 4, ry + rowH - 2));
+				if(btnReplayRowSelect[r]) btnReplayRowSelect[r]->setRelativePosition(irr::core::recti(x3, ry + 1, leftW - Scale(14), ry + rowH - 3));
 			}
+		}
+		{
+			irr::s32 py = botY - pageBarH;
+			irr::s32 cx = pad + leftW / 2;
+			irr::s32 pgW = Scale(110), bw = Scale(96);
+			if(stReplayPage) stReplayPage->setRelativePosition(irr::core::recti(cx - pgW / 2, py, cx + pgW / 2, botY));
+			if(btnReplayPrev) btnReplayPrev->setRelativePosition(irr::core::recti(cx - pgW / 2 - bw - Scale(8), py, cx - pgW / 2 - Scale(8), botY));
+			if(btnReplayNext) btnReplayNext->setRelativePosition(irr::core::recti(cx + pgW / 2 + Scale(8), py, cx + pgW / 2 + bw + Scale(8), botY));
 		}
 		if(pnlReplayRight) {
 			pnlReplayRight->setRelativePosition(irr::core::recti(pad + leftW + gap, gridTop, W - pad, gridTop + panelH));
-			if(stReplayInfoTitle) stReplayInfoTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(12), rightW - Scale(16), Scale(36)));
-			if(stReplayInfo) stReplayInfo->setRelativePosition(irr::core::recti(Scale(16), Scale(44), rightW - Scale(16), panelH - Scale(74)));
+			if(stReplayInfoTitle) stReplayInfoTitle->setRelativePosition(irr::core::recti(Scale(16), Scale(10), rightW - Scale(16), Scale(34)));
+			irr::s32 dy = Scale(48);
+			irr::s32 dh = Scale(26);
+			irr::s32 dstep = Scale(34);
+			if(stRepDetFile) stRepDetFile->setRelativePosition(irr::core::recti(Scale(16), dy, rightW - Scale(16), dy + dh));
+			if(stRepDetDate) stRepDetDate->setRelativePosition(irr::core::recti(Scale(16), dy + dstep, rightW - Scale(16), dy + dstep + dh));
+			if(stRepDetPlayer) stRepDetPlayer->setRelativePosition(irr::core::recti(Scale(16), dy + 2 * dstep, rightW - Scale(16), dy + 2 * dstep + dh));
+			if(stRepDetRival) stRepDetRival->setRelativePosition(irr::core::recti(Scale(16), dy + 3 * dstep, rightW - Scale(16), dy + 3 * dstep + dh));
+			if(stRepDetTurns) stRepDetTurns->setRelativePosition(irr::core::recti(Scale(16), dy + 4 * dstep, rightW - Scale(16), dy + 4 * dstep + dh));
+			if(stRepDetResult) stRepDetResult->setRelativePosition(irr::core::recti(Scale(16), dy + 5 * dstep, rightW - Scale(16), panelH - Scale(64)));
+
 			const irr::s32 btnGap = Scale(10);
 			const irr::s32 bw = (rightW - Scale(32) - 2 * btnGap) / 3;
-			const irr::s32 by1 = panelH - Scale(56);
+			const irr::s32 by1 = panelH - Scale(52);
 			const irr::s32 by2 = panelH - Scale(16);
 			if(btnLoadReplay) btnLoadReplay->setRelativePosition(irr::core::recti(Scale(16), by1, Scale(16) + bw, by2));
 			if(btnRenameReplay) btnRenameReplay->setRelativePosition(irr::core::recti(Scale(16) + bw + btnGap, by1, Scale(16) + 2 * bw + btnGap, by2));
@@ -10044,96 +10130,6 @@ void Game::PopulateTabSettingsWindow() {
 		tabRepositories->setVisible(false);
 		tabRepositories->setEnabled(false);
 		mTabRepositories = irr::gui::CGUICustomContextMenu::addCustomContextMenu(env, tabRepositories, -1, Scale(1, 275, 301, 639));
-		mTabRepositories->setCloseHandling(irr::gui::ECONTEXT_MENU_CLOSE::ECMC_HIDE);
-	}
-}
-
-void Game::PopulateSettingsWindow() {
-	gSettings.tabcontrolwindow = irr::gui::CGUIWindowedTabControl::addCGUIWindowedTabControl(env, Scale(180, 85, 840, 515), gDataManager->GetSysString(1273).data());
-
-	gSettings.window = gSettings.tabcontrolwindow->getWindow();
-	defaultStrings.emplace_back(gSettings.window, 1273);
-	gSettings.window->setVisible(false);
-
-	irr::s32 cur_y = 5;
-	irr::s32 cur_x = 15;
-	constexpr auto y_incr = 30;
-	constexpr auto x_incr = 325;
-	auto ResetXandY = [&cur_y, base_y = cur_y, &cur_x, base_x = cur_x] {
-		cur_y = base_y;
-		cur_x = base_x;
-	};
-	auto IncrementXorY = [&cur_y, y_incr, &cur_x, x_incr] {
-		if(cur_x > x_incr) {
-			cur_x -= x_incr;
-			cur_y += y_incr;
-		} else
-			cur_x += x_incr;
-	};
-	auto GetNextRect = [&cur_y, &cur_x, &IncrementXorY, this] {
-		auto cury = cur_y;
-		auto curx = cur_x;
-		IncrementXorY();
-		return Scale<irr::s32>(curx, cury, curx + 305, cury + 25);
-	};
-	auto GetCurrentRectWithXOffset = [&cur_y, &cur_x, this](irr::s32 x1, irr::s32 x2, bool is_scrollbar_text = false) {
-		const auto x_incr = cur_x - 15;
-		return Scale<irr::s32>(x1 + x_incr, cur_y, x2 + x_incr, cur_y + 25 - (is_scrollbar_text * 5));
-	};
-	{
-		gSettings.client.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2088).data());
-		defaultStrings.emplace_back(gSettings.client.tab, 2088);
-
-		auto* sPanel = gSettings.client.panel->getSubpanel();
-		gSettings.chkShowScopeLabel = env->addCheckBox(gGameConfig->showScopeLabel, GetNextRect(), sPanel, CHECKBOX_SHOW_SCOPE_LABEL, gDataManager->GetSysString(2076).data());
-		defaultStrings.emplace_back(gSettings.chkShowScopeLabel, 2076);
-		gSettings.chkShowFPS = env->addCheckBox(gGameConfig->showFPS, GetNextRect(), sPanel, CHECKBOX_SHOW_FPS, gDataManager->GetSysString(1445).data());
-		defaultStrings.emplace_back(gSettings.chkShowFPS, 1445);
-		gSettings.chkHideSetname = env->addCheckBox(gGameConfig->chkHideSetname, GetNextRect(), sPanel, CHECKBOX_HIDE_ARCHETYPES, gDataManager->GetSysString(1354).data());
-		defaultStrings.emplace_back(gSettings.chkHideSetname, 1354);
-		gSettings.chkHidePasscodeScope = env->addCheckBox(gGameConfig->hidePasscodeScope, GetNextRect(), sPanel, CHECKBOX_HIDE_PASSCODE_SCOPE, gDataManager->GetSysString(2063).data());
-		defaultStrings.emplace_back(gSettings.chkHidePasscodeScope, 2063);
-		gSettings.chkFilterBot = env->addCheckBox(gGameConfig->filterBot, GetNextRect(), sPanel, CHECKBOX_FILTER_BOT, gDataManager->GetSysString(2069).data());
-		defaultStrings.emplace_back(gSettings.chkFilterBot, 2069);
-		{
-			gSettings.stCurrentSkin = env->addStaticText(gDataManager->GetSysString(2064).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stCurrentSkin, 2064);
-			gSettings.cbCurrentSkin = AddComboBox(env, GetCurrentRectWithXOffset(95, 320), sPanel, COMBOBOX_CURRENT_SKIN);
-			ReloadCBCurrentSkin();
-			IncrementXorY();
-		}
-		{
-			gSettings.stCurrentLocale = env->addStaticText(gDataManager->GetSysString(2067).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
-			defaultStrings.emplace_back(gSettings.stCurrentLocale, 2067);
-			PopulateLocales();
-			gSettings.cbCurrentLocale = AddComboBox(env, GetCurrentRectWithXOffset(95, 320), sPanel, COMBOBOX_CURRENT_LOCALE);
-			auto selectedLocale = gSettings.cbCurrentLocale->addItem(L"English");
-			for(const auto& _locale : locales) {
-				auto& locale = _locale.first;
-				auto itemIndex = gSettings.cbCurrentLocale->addItem(Utils::ToUnicodeIfNeeded(locale).data());
-				if(gGameConfig->locale == locale) {
-					selectedLocale = itemIndex;
-				}
-			}
-			gSettings.cbCurrentLocale->setSelected(selectedLocale);
-			IncrementXorY();
-		}
-		gSettings.btnReloadSkin = env->addButton(GetNextRect(), sPanel, BUTTON_RELOAD_SKIN, gDataManager->GetSysString(2066).data());
-		defaultStrings.emplace_back(gSettings.btnReloadSkin, 2066);
-		{
-			gSettings.stDpiScale = env->addStaticText(gDataManager->GetSysString(2070).data(), GetCurrentRectWithXOffset(15, 90), false, false, sPanel);
-			defaultStrings.emplace_back(gSettings.stDpiScale, 2070);
-			gSettings.ebDpiScale = env->addEditBox(WStr(gGameConfig->dpi_scale * 100), GetCurrentRectWithXOffset(95, 150), true, sPanel, EDITBOX_NUMERIC);
-			env->addStaticText(L"%", GetCurrentRectWithXOffset(155, 170), false, false, sPanel);
-			gSettings.ebDpiScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
-			gSettings.btnRestart = env->addButton(GetCurrentRectWithXOffset(175, 320), sPanel, BUTTON_APPLY_RESTART, gDataManager->GetSysString(2071).data());
-			defaultStrings.emplace_back(gSettings.btnRestart, 2071);
-			IncrementXorY();
-		}
-#ifdef UPDATE_URL
-		gSettings.chkUpdates = env->addCheckBox(gGameConfig->noClientUpdates, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1466).data());
-		defaultStrings.emplace_back(gSettings.chkUpdates, 1466);
-#endif
 		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, GetNextRect(), sPanel, -1, gDataManager->GetSysString(2072).data());
 		defaultStrings.emplace_back(gSettings.chkShowConsole, 2072);
 #if !EDOPRO_WINDOWS
@@ -10890,6 +10886,12 @@ bool Game::MainLoop() {
 				drawNeon(pnlReplayLeft, cCyan);
 				drawNeon(pnlReplayRight, cPurp);
 				drawNeon(btnReplayCancel, irr::video::SColor(160, 148, 163, 184));
+				drawNeon(btnReplayPrev, cCyan);
+				drawNeon(btnReplayNext, cCyan);
+				for(int r = 0; r < 10; ++r) {
+					if(btnReplayRowSelect[r] && btnReplayRowSelect[r]->isVisible())
+						drawNeon(btnReplayRowSelect[r], (replayPage * 10 + r == selectedReplayIdx) ? cGold : cCyan);
+				}
 				drawNeon(btnLoadReplay, cEmer);
 				drawNeon(btnRenameReplay, cPurp);
 				drawNeon(btnDeleteReplay, irr::video::SColor(180, 248, 113, 113));
@@ -11468,6 +11470,145 @@ void Game::RefreshAiDecks() {
 }
 void Game::RefreshReplay() {
 	lstReplayList->resetPath();
+	replayEntries.clear();
+	int count = (int)lstReplayList->getItemCount();
+	for(int i = 0; i < count; ++i) {
+		const wchar_t* item = lstReplayList->getListItem(i, false);
+		if(!item) continue;
+		std::wstring fname(item);
+		if(fname == L"..") continue;
+		ReplayRowData row{};
+		row.listIndex = i;
+		row.fileName = fname;
+		row.isDir = lstReplayList->isDirectory(i);
+		if(row.isDir) {
+			row.playable = true;
+			row.dateStr = L"Carpeta";
+			row.playerStr = L"-";
+			row.rivalStr = L"-";
+			row.turnsStr = L"-";
+			row.resultStr = L"Carpeta de repeticiones";
+		} else {
+			Replay rep;
+			const auto path = Utils::ToPathString(lstReplayList->getListItem(i, true));
+			if(rep.OpenReplay(path)) {
+				row.playable = rep.CanBePlayedInStreamedMode() || (rep.CanBePlayedInOldMode() && coreloaded);
+				time_t curtime = rep.pheader.base.timestamp;
+				wchar_t tbuf[32]{};
+				if(std::tm* tm_info = std::localtime(&curtime))
+					std::wcsftime(tbuf, 32, L"%Y/%m/%d %H:%M:%S", tm_info);
+				row.dateStr = tbuf;
+				const auto& names = rep.GetPlayerNames();
+				int p0 = rep.GetPlayersCount(0);
+				int p1 = rep.GetPlayersCount(1);
+				std::wstring team0, team1;
+				for(int k = 0; k < p0 && k < (int)names.size(); ++k) {
+					if(!team0.empty()) team0 += L", ";
+					team0 += names[k];
+				}
+				for(int k = 0; k < p1 && (p0 + k) < (int)names.size(); ++k) {
+					if(!team1.empty()) team1 += L", ";
+					team1 += names[p0 + k];
+				}
+				row.playerStr = team0.empty() ? L"Jugador" : team0;
+				row.rivalStr = team1.empty() ? L"Rival" : team1;
+				int turns = rep.GetTurnsCount();
+				row.turnsStr = turns > 0 ? epro::format(L"{} turnos", turns) : L"No disponible";
+				int winner = -1;
+				for(const auto& pkt : rep.packets_stream) {
+					if(pkt.message == 5 /* MSG_WIN */ && !pkt.buffer.empty()) {
+						winner = (int)pkt.buffer[0];
+					}
+				}
+				if(winner == 0)
+					row.resultStr = epro::format(L"Victoria de {}", row.playerStr);
+				else if(winner == 1)
+					row.resultStr = epro::format(L"Victoria de {}", row.rivalStr);
+				else if(winner == 2)
+					row.resultStr = L"Empate";
+				else
+					row.resultStr = L"Duelo guardado";
+			} else {
+				row.playable = false;
+				row.dateStr = L"-";
+				row.playerStr = L"-";
+				row.rivalStr = L"-";
+				row.turnsStr = L"-";
+				row.resultStr = L"Archivo no legible";
+			}
+		}
+		replayEntries.push_back(std::move(row));
+	}
+	replayPage = 0;
+	selectedReplayIdx = replayEntries.empty() ? -1 : 0;
+	UpdateReplayPageUI();
+	SelectReplayRow(selectedReplayIdx);
+}
+void Game::UpdateReplayPageUI() {
+	int total = (int)replayEntries.size();
+	int totalPages = std::max(1, (total + 9) / 10);
+	if(replayPage < 0) replayPage = 0;
+	if(replayPage >= totalPages) replayPage = totalPages - 1;
+	int start = replayPage * 10;
+	for(int r = 0; r < 10; ++r) {
+		int idx = start + r;
+		if(idx < total) {
+			const auto& row = replayEntries[idx];
+			if(stReplayRowNum[r]) { stReplayRowNum[r]->setText(epro::format(L"#{}", idx + 1).c_str()); stReplayRowNum[r]->setVisible(true); }
+			if(stReplayRowName[r]) {
+				std::wstring disp = row.isDir ? (L"[Carpeta] " + row.fileName) : epro::format(L"{} vs {}", row.playerStr, row.rivalStr);
+				stReplayRowName[r]->setText(disp.c_str());
+				stReplayRowName[r]->setOverrideColor(idx == selectedReplayIdx ? irr::video::SColor(255, 251, 191, 36) : irr::video::SColor(255, 248, 250, 252));
+				stReplayRowName[r]->setVisible(true);
+			}
+			if(stReplayRowDate[r]) { stReplayRowDate[r]->setText(row.dateStr.c_str()); stReplayRowDate[r]->setVisible(true); }
+			if(btnReplayRowSelect[r]) {
+				btnReplayRowSelect[r]->setText(idx == selectedReplayIdx ? L"Activo" : L"Ver");
+				btnReplayRowSelect[r]->setOverrideColor(idx == selectedReplayIdx ? irr::video::SColor(255, 251, 191, 36) : irr::video::SColor(255, 56, 189, 248));
+				btnReplayRowSelect[r]->setVisible(true);
+			}
+		} else {
+			if(stReplayRowNum[r]) stReplayRowNum[r]->setVisible(false);
+			if(stReplayRowName[r]) stReplayRowName[r]->setVisible(false);
+			if(stReplayRowDate[r]) stReplayRowDate[r]->setVisible(false);
+			if(btnReplayRowSelect[r]) btnReplayRowSelect[r]->setVisible(false);
+		}
+	}
+	if(stReplayPage) stReplayPage->setText(epro::format(L"P\u00E1gina {} / {}", replayPage + 1, totalPages).c_str());
+	if(btnReplayPrev) btnReplayPrev->setEnabled(replayPage > 0);
+	if(btnReplayNext) btnReplayNext->setEnabled(replayPage + 1 < totalPages);
+}
+void Game::SelectReplayRow(int absIdx) {
+	if(absIdx < 0 || absIdx >= (int)replayEntries.size()) {
+		selectedReplayIdx = -1;
+		if(stRepDetFile) stRepDetFile->setText(L"Selecciona una repetici\u00F3n de la tabla");
+		if(stRepDetDate) stRepDetDate->setText(L"");
+		if(stRepDetPlayer) stRepDetPlayer->setText(L"");
+		if(stRepDetRival) stRepDetRival->setText(L"");
+		if(stRepDetTurns) stRepDetTurns->setText(L"");
+		if(stRepDetResult) stRepDetResult->setText(L"");
+		if(btnLoadReplay) btnLoadReplay->setEnabled(false);
+		if(btnRenameReplay) btnRenameReplay->setEnabled(false);
+		if(btnDeleteReplay) btnDeleteReplay->setEnabled(false);
+		UpdateReplayPageUI();
+		return;
+	}
+	selectedReplayIdx = absIdx;
+	const auto& row = replayEntries[absIdx];
+	if(lstReplayList) lstReplayList->setSelected(row.listIndex);
+	if(stRepDetFile) stRepDetFile->setText(epro::format(L"Archivo: {}", row.fileName).c_str());
+	if(stRepDetDate) stRepDetDate->setText(epro::format(L"Fecha y hora: {}", row.dateStr).c_str());
+	if(stRepDetPlayer) stRepDetPlayer->setText(epro::format(L"Jugador: {}", row.playerStr).c_str());
+	if(stRepDetRival) stRepDetRival->setText(epro::format(L"Rival: {}", row.rivalStr).c_str());
+	if(stRepDetTurns) stRepDetTurns->setText(epro::format(L"Turnos: {}", row.turnsStr).c_str());
+	if(stRepDetResult) stRepDetResult->setText(epro::format(L"Resultado: {}", row.resultStr).c_str());
+	if(btnLoadReplay) {
+		btnLoadReplay->setText(row.isDir ? gDataManager->GetSysString(1359).data() : gDataManager->GetSysString(1348).data());
+		btnLoadReplay->setEnabled(row.playable);
+	}
+	if(btnRenameReplay) btnRenameReplay->setEnabled(!row.isDir);
+	if(btnDeleteReplay) btnDeleteReplay->setEnabled(!row.isDir);
+	UpdateReplayPageUI();
 }
 void Game::RefreshSingleplay() {
 	lstSinglePlayList->resetPath();

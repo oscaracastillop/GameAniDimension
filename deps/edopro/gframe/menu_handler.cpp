@@ -287,6 +287,8 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					mainGame->ActivateAvatarIdx(id - BUTTON_MY_AVA_ACTIVATE_0);
 				} else if(id >= BUTTON_MEDAL_HIGHLIGHT_0 && id <= BUTTON_MEDAL_HIGHLIGHT_MAX) {
 					mainGame->HighlightMedalIdx(id - BUTTON_MEDAL_HIGHLIGHT_0);
+				} else if(id >= BUTTON_REPLAY_ROW_0 && id <= BUTTON_REPLAY_ROW_MAX) {
+					mainGame->SelectReplayRow(mainGame->replayPage * 10 + (id - BUTTON_REPLAY_ROW_0));
 				}
 				break;
 			}
@@ -1218,10 +1220,13 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_LOAD_REPLAY: {
-				if(mainGame->lstReplayList->isDirectory(mainGame->lstReplayList->getSelected()))
-					mainGame->lstReplayList->enterDirectory(mainGame->lstReplayList->getSelected());
-				else
+				int sel = mainGame->lstReplayList->getSelected();
+				if(sel >= 0 && mainGame->lstReplayList->isDirectory(sel)) {
+					mainGame->lstReplayList->enterDirectory(sel);
+					mainGame->RefreshReplay();
+				} else {
 					LoadReplay();
+				}
 				break;
 			}
 			case BUTTON_DELETE_REPLAY: {
@@ -1243,6 +1248,18 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->PopupSaveWindow(gDataManager->GetSysString(1362), mainGame->lstReplayList->getListItem(sel), gDataManager->GetSysString(1342));
 				prev_operation = id;
 				prev_sel = sel;
+				break;
+			}
+			case BUTTON_REPLAY_PREV: {
+				if(mainGame->replayPage > 0) {
+					mainGame->replayPage--;
+					mainGame->UpdateReplayPageUI();
+				}
+				break;
+			}
+			case BUTTON_REPLAY_NEXT: {
+				mainGame->replayPage++;
+				mainGame->UpdateReplayPageUI();
 				break;
 			}
 			case BUTTON_RENAME_SINGLEPLAY: {
@@ -1405,7 +1422,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				case BUTTON_DELETE_REPLAY: {
 					if(Replay::DeleteReplay(Utils::ToPathString(mainGame->lstReplayList->getListItem(prev_sel, true)))) {
 						mainGame->stReplayInfo->setText(L"");
-						mainGame->lstReplayList->refreshList();
+						mainGame->RefreshReplay();
 					}
 					break;
 				}
@@ -1468,8 +1485,12 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 					auto newname = Utils::ToPathString(mainGame->ebFileSaveName->getText());
 					if(Utils::GetFileExtension(newname, false) != extension)
 						newname.append(1, EPRO_TEXT('.')).append(extension);
-					if(Utils::FileMove(oldname, oldpath + newname))
-						list->refreshList();
+					if(Utils::FileMove(oldname, oldpath + newname)) {
+						if(prev_operation == BUTTON_RENAME_REPLAY)
+							mainGame->RefreshReplay();
+						else
+							list->refreshList();
+					}
 					else
 						mainGame->PopupMessage(gDataManager->GetSysString(1365));
 				}
