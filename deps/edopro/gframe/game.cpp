@@ -436,7 +436,8 @@ void Game::Initialize() {
 		b->setScaleImage(true);
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
-		if(loginUiFont) b->setOverrideFont(loginUiFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
+		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 
 	btnLobbyStore = env->addButton(irr::core::recti(0, 0, 100, 36), wMainMenu, BUTTON_STORE_OPEN, L"Tienda");
@@ -2075,6 +2076,8 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::
 		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
 		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1L);
+		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 		retrieved_data.clear();
 		auto res = curl_easy_perform(curl_handle);
 		if(res == CURLE_OK && !retrieved_data.empty()) {
@@ -2113,31 +2116,21 @@ static int SafeJsonInt(const nlohmann::json& obj, const char* key, int defVal = 
 }
 
 void Game::PopulateAdventureModeWindow() {
-	// Full dedicated native adventure interface canvas
-	wAdventureMode = env->addStaticText(L"", irr::core::recti(0, 0, window_size.Width, window_size.Height), false, false, 0, -1, true);
-	wAdventureMode->setBackgroundColor(irr::video::SColor(255, 10, 12, 18));
+	// Full dedicated native adventure interface canvas (uses unified bg_interfaces.png)
+	wAdventureMode = env->addStaticText(L"", irr::core::recti(0, 0, window_size.Width, window_size.Height), false, false, 0, -1, false);
+	wAdventureMode->setDrawBackground(false);
 	wAdventureMode->setVisible(false);
 
-	// Dedicated background
 	imgAdventureBg = env->addImage(irr::core::recti(0, 0, window_size.Width, window_size.Height), wAdventureMode);
-	imgAdventureBg->setScaleImage(true);
-	auto bgTex = driver->getTexture("textures/bg_duel.jpg");
-	if(!bgTex) bgTex = driver->getTexture("textures/bg.png");
-	if(!bgTex) bgTex = driver->getTexture("textures/bg_menu.png");
-	if(bgTex) {
-		imgAdventureBg->setImage(bgTex);
-		imgAdventureBg->setColor(irr::video::SColor(215, 255, 255, 255));
-	} else {
-		imgAdventureBg->setVisible(false);
-	}
+	imgAdventureBg->setVisible(false);
 
-	// 6 Dark Elegant Translucent Glass Panels (Bloques 1, 2, 3.1, 3.2, 4, 5) matching Lobby cards
-	const irr::video::SColor cCardBg(185, 10, 15, 28);
+	// 6 Dark Translucent Glass Panels matching Ranking / Ecosystem cards
+	const irr::video::SColor cCardBg(220, 9, 15, 32);
 	pnlAdventureLeft = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
 	pnlAdventureLeft->setBackgroundColor(cCardBg);
 
 	stAdventureTitle = env->addStaticText(L"MODO AVENTURA ANI DIMENSION", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
-	stAdventureTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stAdventureTitle->setTextAlignment(irr::gui::EGUIA_UPPERLEFT, irr::gui::EGUIA_CENTER);
 	stAdventureTitle->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
 	if(loginTitleFont)
 		stAdventureTitle->setOverrideFont(loginTitleFont);
@@ -2167,14 +2160,14 @@ void Game::PopulateAdventureModeWindow() {
 			b->setUseAlphaChannel(true);
 		}
 		b->setDrawBorder(false);
-		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 
 	// ==================== PANEL IZQUIERDO ====================
 	txtAdventureSerie = env->addStaticText(L"1. SELECCIONA LA SERIE:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureSerie->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) txtAdventureSerie->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureSerie->setOverrideFont(loginCardDescFont);
 
 	cbAdventureSeries = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_SERIES);
 	cbAdventureSeries->setMaxSelectionRows(8);
@@ -2184,9 +2177,9 @@ void Game::PopulateAdventureModeWindow() {
 	imgAdventureSeriesLogo->setUseAlphaChannel(true);
 	imgAdventureSeriesLogo->setVisible(false);
 
-	txtAdventureArco = env->addStaticText(L"2. ARCO HISTORICO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureArco = env->addStaticText(L"2. ARCO HIST\u00D3RICO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureArco->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) txtAdventureArco->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureArco->setOverrideFont(loginCardDescFont);
 
 	cbAdventureArc = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_ARC);
 	cbAdventureArc->setMaxSelectionRows(10);
@@ -2198,21 +2191,22 @@ void Game::PopulateAdventureModeWindow() {
 
 	txtAdventureDeck = env->addStaticText(L"3. TU BARAJA (DECK):", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureDeck->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) txtAdventureDeck->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureDeck->setOverrideFont(loginCardDescFont);
 
 	cbAdventureUserDeck = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_USER_DECK);
 	cbAdventureUserDeck->setMaxSelectionRows(10);
 
-	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"INICIAR DUELO");
-	applyAdvBtnStyle(btnAdventureDuel, L"INICIAR DUELO");
+	btnAdventureDuel = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_DUEL, L"Iniciar Duelo");
+	applyAdvBtnStyle(btnAdventureDuel, L"Iniciar Duelo");
+	btnAdventureDuel->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
 
-	btnAdventureBack = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_BACK, L"VOLVER AL MENU");
-	applyAdvBtnStyle(btnAdventureBack, L"VOLVER AL MENU");
+	btnAdventureBack = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_BACK, L"Volver al Lobby");
+	applyAdvBtnStyle(btnAdventureBack, L"Volver al Lobby");
 
 	// ==================== PANEL CENTRAL: CATALOGO 4x5 ====================
-	txtAdventureCat = env->addStaticText(L"CATALOGO DE DUELISTAS DEL ARCO:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
+	txtAdventureCat = env->addStaticText(L"CAT\u00C1LOGO DE DUELISTAS DEL ARCO", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureCat->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
-	if(loginUiFont) txtAdventureCat->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureCat->setOverrideFont(loginCardDescFont);
 
 	for(int i = 0; i < 20; ++i) {
 		btnAdventureNpcs[i] = env->addButton(irr::core::recti(0, 0, 10, 10), wAdventureMode, BUTTON_ADVENTURE_NPC_0 + i, L"");
@@ -2245,11 +2239,11 @@ void Game::PopulateAdventureModeWindow() {
 
 	stAdventureNPCName = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureNPCName->setOverrideColor(irr::video::SColor(255, 255, 255, 255));
-	if(loginUiFont) stAdventureNPCName->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) stAdventureNPCName->setOverrideFont(loginCardDescFont);
 
 	txtAdventureDiff = env->addStaticText(L"DIFICULTAD NPC:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureDiff->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginUiFont) txtAdventureDiff->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureDiff->setOverrideFont(loginCardDescFont);
 
 	cbAdventureDifficulty = AddComboBox(env, irr::core::recti(0, 0, 10, 10), wAdventureMode, COMBOBOX_ADVENTURE_DIFFICULTY);
 	cbAdventureDifficulty->addItem(L"Normal", 0);
@@ -2258,32 +2252,32 @@ void Game::PopulateAdventureModeWindow() {
 
 	txtAdventureLore = env->addStaticText(L"HISTORIA Y LEYENDA DEL DUELISTA:", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode);
 	txtAdventureLore->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-	if(loginUiFont) txtAdventureLore->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) txtAdventureLore->setOverrideFont(loginCardDescFont);
 
 	stAdventureNPCDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureNPCDesc->setWordWrap(true);
 	stAdventureNPCDesc->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginDescFont) stAdventureNPCDesc->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventureNPCDesc->setOverrideFont(loginCardDescFont);
 
 	stAdventureDeckDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureDeckDesc->setWordWrap(true);
 	stAdventureDeckDesc->setOverrideColor(irr::video::SColor(255, 147, 197, 253));
-	if(loginDescFont) stAdventureDeckDesc->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventureDeckDesc->setOverrideFont(loginCardDescFont);
 
 	stAdventureDiffDesc = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureDiffDesc->setWordWrap(true);
 	stAdventureDiffDesc->setOverrideColor(irr::video::SColor(255, 190, 205, 225));
-	if(loginDescFont) stAdventureDiffDesc->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventureDiffDesc->setOverrideFont(loginCardDescFont);
 
 	stAdventurePrize = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrize->setWordWrap(true);
 	stAdventurePrize->setOverrideColor(irr::video::SColor(255, 251, 191, 36));
-	if(loginDescFont) stAdventurePrize->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventurePrize->setOverrideFont(loginCardDescFont);
 
 	stAdventurePrizeStatus = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventurePrizeStatus->setWordWrap(true);
 	stAdventurePrizeStatus->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-	if(loginDescFont) stAdventurePrizeStatus->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventurePrizeStatus->setOverrideFont(loginCardDescFont);
 
 	wAdventureStatsBox = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, false, wAdventureMode, -1, true);
 	wAdventureStatsBox->setBackgroundColor(cCardBg);
@@ -2291,7 +2285,7 @@ void Game::PopulateAdventureModeWindow() {
 	stAdventureStatsText = env->addStaticText(L"", irr::core::recti(0, 0, 10, 10), false, true, wAdventureMode);
 	stAdventureStatsText->setWordWrap(true);
 	stAdventureStatsText->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginDescFont) stAdventureStatsText->setOverrideFont(loginDescFont);
+	if(loginCardDescFont) stAdventureStatsText->setOverrideFont(loginCardDescFont);
 
 	stAdventureNPCLevel = stAdventureNPCName;
 	stAdventureNPCDeck = stAdventureDeckDesc;
@@ -2347,10 +2341,11 @@ void Game::UpdateAdventureNPCImagePosition(int boxX, int boxY, int boxW, int box
 }
 
 void Game::ApplyAdventureSelectFont(irr::gui::IGUIComboBox* cb) {
-	if(!cb || !adventureSelectFont) return;
+	auto* f = loginCardDescFont ? loginCardDescFont : adventureSelectFont;
+	if(!cb || !f) return;
 	for(auto child : cb->getChildren()) {
 		if(child->getType() == irr::gui::EGUIET_STATIC_TEXT) {
-			((irr::gui::IGUIStaticText*)child)->setOverrideFont(adventureSelectFont);
+			((irr::gui::IGUIStaticText*)child)->setOverrideFont(f);
 		}
 	}
 }
@@ -2385,44 +2380,45 @@ void Game::ResizeAdventureMode() {
 	if(imgAdventureBg)
 		imgAdventureBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	// Top Nav Bar space allocation
+	// Top Nav Bar + unified header space allocation (matching Ranking / Ecosystem screens)
 	const int navH = Scale(48);
-	const int padX = std::max(12, (int)(W * 0.015f));
-	const int pnlTop = navH + Scale(8);
-	const int pnlBottom = H - Scale(8);
-	const int gap = Scale(12); // generous breathing room between blocks to reveal background
+	const int padX = std::max(Scale(16), (int)(W * 0.022f));
+	const int topY = navH + Scale(14);
+	const int pnlTop = topY + Scale(58);
+	const int pnlBottom = H - Scale(12);
+	const int gap = Scale(12);
 	const int innerPad = Scale(10);
 
+	if(stAdventureTitle)
+		stAdventureTitle->setRelativePosition(irr::core::recti(padX, topY, padX + Scale(480), topY + Scale(38)));
+	if(btnAdventureBack)
+		btnAdventureBack->setRelativePosition(irr::core::recti(W - padX - Scale(165), topY + Scale(2), W - padX, topY + Scale(36)));
+
 	const int usableW = W - 2 * padX - gap;
-	const int actionBtnH = Scale(38);
-	const int statsH = Scale(62);
+	const int actionBtnH = Scale(36);
+	const int statsH = Scale(54);
 	const int gapBetweenStatsAndBtns = Scale(8);
 	const int bloque5H = innerPad + statsH + gapBetweenStatsAndBtns + actionBtnH + innerPad;
 	const int bloque5Top = pnlBottom - bloque5H;
 	const int bloque4Bottom = bloque5Top - gap;
-	const int bloque4H = std::max(Scale(140), bloque4Bottom - pnlTop);
-	const int avatarStageH = std::max(Scale(120), bloque4H - 2 * innerPad);
+	const int bloque4H = std::max(Scale(130), bloque4Bottom - pnlTop);
+	const int avatarStageH = std::max(Scale(110), bloque4H - 2 * innerPad);
 
 	// Bloque 4 sizing: character portrait ratio (approx. 0.75)
 	const int targetRightW = (int)(avatarStageH * 0.75f) + 2 * innerPad;
-	const int colRightW = std::max(Scale(260), std::min((int)(usableW * 0.33f), targetRightW));
+	const int colRightW = std::max(Scale(250), std::min((int)(usableW * 0.32f), targetRightW));
 	const int leftAreaW = usableW - colRightW;
 
 	const int xLeft = padX;
 	const int xRight = xLeft + leftAreaW + gap;
 
-	// ==================== BLOQUE 1: TITULO CENTRADO + SELECTORES EN UNA FILA ====================
-	const int titleH = Scale(26);
-	const int gapTitleSel = Scale(8);
-	const int labelH = Scale(22);
-	const int gapLabelCombo = Scale(6);
-	const int comboH = Scale(28);
-	const int topBarH = innerPad + titleH + gapTitleSel + labelH + gapLabelCombo + comboH + innerPad;
+	// ==================== BLOQUE 1: SELECTORES EN UNA FILA ====================
+	const int labelH = Scale(20);
+	const int gapLabelCombo = Scale(4);
+	const int comboH = Scale(26);
+	const int topBarH = innerPad + labelH + gapLabelCombo + comboH + innerPad;
 	if(pnlAdventureLeft)
 		pnlAdventureLeft->setRelativePosition(irr::core::recti(xLeft, pnlTop, xLeft + leftAreaW, pnlTop + topBarH));
-
-	if(stAdventureTitle)
-		stAdventureTitle->setRelativePosition(irr::core::recti(xLeft + innerPad, pnlTop + innerPad, xLeft + leftAreaW - innerPad, pnlTop + innerPad + titleH));
 
 	if(imgAdventureSeriesLogo)
 		imgAdventureSeriesLogo->setVisible(false);
@@ -2433,7 +2429,7 @@ void Game::ResizeAdventureMode() {
 
 	const int selGap = Scale(8);
 	const int selW = (leftAreaW - 2 * innerPad - 2 * selGap) / 3;
-	const int selY = pnlTop + innerPad + titleH + gapTitleSel;
+	const int selY = pnlTop + innerPad;
 
 	if(txtAdventureSerie)
 		txtAdventureSerie->setRelativePosition(irr::core::recti(xLeft + innerPad, selY, xLeft + innerPad + selW, selY + labelH));
@@ -2560,14 +2556,9 @@ void Game::ResizeAdventureMode() {
 	if(stAdventureStatsText)
 		stAdventureStatsText->setRelativePosition(irr::core::recti(rx + Scale(8), statsY + Scale(6), rx + rw - Scale(8), statsY + statsH - Scale(6)));
 
-	const int actionBtnGap = Scale(8);
-	const int actionBtnW = (rw - actionBtnGap) / 2;
 	const int actionBtnY = statsY + statsH + gapBetweenStatsAndBtns;
-
 	if(btnAdventureDuel)
-		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + actionBtnW, actionBtnY + actionBtnH));
-	if(btnAdventureBack)
-		btnAdventureBack->setRelativePosition(irr::core::recti(rx + rw - actionBtnW, actionBtnY, rx + rw, actionBtnY + actionBtnH));
+		btnAdventureDuel->setRelativePosition(irr::core::recti(rx, actionBtnY, rx + rw, actionBtnY + actionBtnH));
 
 	ApplyAdventureSelectFont(cbAdventureSeries);
 	ApplyAdventureSelectFont(cbAdventureArc);
@@ -3158,6 +3149,8 @@ void Game::SpawnRemoteAdventureBot() {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -3252,6 +3245,8 @@ void Game::LoadSpanishCardTextsAsync() {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -4099,6 +4094,8 @@ void Game::SubmitLogin() {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -4285,6 +4282,8 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
 		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+		curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1L);
+		curl_easy_setopt(curl_handle, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 		if(!postJson.empty()) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
 			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, postJson.c_str());
@@ -4851,6 +4850,8 @@ irr::video::ITexture* Game::LoadCharacterTexture(const std::string& filename) {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 
 			for(const auto& host : hosts) {
 				bool downloaded = false;
@@ -4909,6 +4910,8 @@ irr::video::ITexture* Game::LoadMedalTexture(int npcLevel) {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -4992,7 +4995,8 @@ void Game::PopulateEconomyScreens() {
 		b->setScaleImage(true);
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
-		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
+		else if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 	auto styleCyanBtn = [&](irr::gui::IGUIButton* b) {
@@ -5003,7 +5007,8 @@ void Game::PopulateEconomyScreens() {
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
 		b->setOverrideColor(irr::video::SColor(255, 56, 189, 248));
-		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
+		else if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 	auto stylePurpBtn = [&](irr::gui::IGUIButton* b) {
@@ -5014,7 +5019,8 @@ void Game::PopulateEconomyScreens() {
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
 		b->setOverrideColor(irr::video::SColor(255, 192, 132, 252));
-		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
+		else if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
 	auto styleEmerBtn = [&](irr::gui::IGUIButton* b) {
@@ -5025,10 +5031,12 @@ void Game::PopulateEconomyScreens() {
 		b->setUseAlphaChannel(true);
 		b->setDrawBorder(false);
 		b->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
-		if(loginBtnFont) b->setOverrideFont(loginBtnFont);
+		if(loginCardDescFont) b->setOverrideFont(loginCardDescFont);
+		else if(loginBtnFont) b->setOverrideFont(loginBtnFont);
 		else if(loginUiFont) b->setOverrideFont(loginUiFont);
 	};
-	if(!tBgInterfaces) {
+	if(btnLoginSubmit) { styleEmerBtn(btnLoginSubmit); }
+	if(btnLoginExit) { styleDarkBtn(btnLoginExit); btnLoginExit->setOverrideColor(irr::video::SColor(255, 248, 113, 113)); }
 		tBgInterfaces = driver->getTexture("textures/bg_interfaces.png");
 	}
 
@@ -7783,6 +7791,8 @@ irr::video::ITexture* Game::LoadRewardBgTexture() {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -7836,6 +7846,8 @@ irr::video::ITexture* Game::LoadPuzzlePieceTexture(const std::string& carpeta, i
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -8935,6 +8947,8 @@ irr::video::ITexture* Game::LoadMedalTexture(const std::string& filename) {
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
 			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
+			curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
+			curl_easy_setopt(curl, CURLOPT_DNS_CACHE_TIMEOUT, 300L);
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -10025,6 +10039,14 @@ void Game::PopulateTabSettingsWindow() {
 		tabSettings.chkQuickAnimation = env->addCheckBox(gGameConfig->quick_animation, GetNextRect(), tabPanel, CHECKBOX_QUICK_ANIMATION, gDataManager->GetSysString(1299).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkQuickAnimation);
 		defaultStrings.emplace_back(tabSettings.chkQuickAnimation, 1299);
+		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreOpponents);
+		defaultStrings.emplace_back(tabSettings.chkIgnoreOpponents, 1290);
+		tabSettings.chkIgnoreSpectators = env->addCheckBox(gGameConfig->chkIgnore2, GetNextRect(), tabPanel, CHECKBOX_IGNORE_SPECTATORS, gDataManager->GetSysString(1291).data());
+		menuHandler.MakeElementSynchronized(tabSettings.chkIgnoreSpectators);
+		defaultStrings.emplace_back(tabSettings.chkIgnoreSpectators, 1291);
+		tabSettings.chkQuickAnimation = env->addCheckBox(gGameConfig->quick_animation, GetNextRect(), tabPanel, CHECKBOX_QUICK_ANIMATION, gDataManager->GetSysString(1299).data());
+		menuHandler.MakeElementSynchronized(tabSettings.chkQuickAnimation);
+		defaultStrings.emplace_back(tabSettings.chkQuickAnimation, 1299);
 		tabSettings.chkTopdown = env->addCheckBox(gGameConfig->topdown_view, GetNextRect(), tabPanel, CHECKBOX_TOPDOWN, gDataManager->GetSysString(2093).data());
 		menuHandler.MakeElementSynchronized(tabSettings.chkTopdown);
 		defaultStrings.emplace_back(tabSettings.chkTopdown, 2093);
@@ -10561,7 +10583,8 @@ bool Game::MainLoop() {
 						(wOrbsEvent && wOrbsEvent->isVisible()) ||
 						(wClansMenu && wClansMenu->isVisible()) ||
 						(wClanDetail && wClanDetail->isVisible()) ||
-						(wReplay && wReplay->isVisible());
+						(wReplay && wReplay->isVisible()) ||
+						(wAdventureMode && wAdventureMode->isVisible());
 				};
 				if(isProfileSectionVisible() && tBgInterfaces) {
 					DrawBackImage(tBgInterfaces, resized);
@@ -10639,6 +10662,9 @@ bool Game::MainLoop() {
 		if(wConfirmPurchase && wConfirmPurchase->isVisible()) {
 			driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), wConfirmPurchase->getAbsolutePosition());
 		}
+		if(gSettings.window && gSettings.window->isVisible()) {
+			driver->draw2DRectangle(irr::video::SColor(255, 11, 15, 25), gSettings.window->getAbsolutePosition());
+		}
 		DrawGUI();
 		DrawSpec();
 		auto isDescendant = [](irr::gui::IGUIElement* el, irr::gui::IGUIElement* root) {
@@ -10654,7 +10680,8 @@ bool Game::MainLoop() {
 
 		irr::gui::IGUIElement* activeModals[] = {
 			wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
-			wMyAvaHelpModal, wAvatarPreviewOverlay, wPackRevealOverlay, wPackPoolOverlay
+			wMyAvaHelpModal, wAvatarPreviewOverlay, wPackRevealOverlay, wPackPoolOverlay,
+			wConfirmPurchase, gSettings.window, wMessage, wACMessage, wASMessage, wFileSave
 		};
 
 		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
@@ -10954,19 +10981,6 @@ bool Game::MainLoop() {
 				drawNeon(btnDeleteReplay, irr::video::SColor(180, 248, 113, 113));
 			}
 			}
-		if(!dInfo.isInDuel && !is_building && wLogin && wLogin->isVisible() && wLoginCard) {
-			const irr::video::SColor cCyan(220, 56, 189, 248);
-			const irr::video::SColor cPurp(200, 168, 85, 247);
-			const irr::video::SColor cEmer(220, 52, 211, 153);
-			const irr::video::SColor cRed(190, 248, 113, 113);
-			drawNeon(wLoginCard, cCyan);
-			auto cr = wLoginCard->getAbsolutePosition();
-			driver->draw2DRectangle(irr::video::SColor(180, 56, 189, 248), irr::core::recti(cr.UpperLeftCorner.X + Scale(24), cr.UpperLeftCorner.Y + Scale(58), cr.LowerRightCorner.X - Scale(24), cr.UpperLeftCorner.Y + Scale(60)));
-			drawNeon(ebLoginUser, cCyan);
-			drawNeon(ebLoginPass, cPurp);
-			drawNeon(btnLoginSubmit, cEmer);
-			drawNeon(btnLoginExit, cRed);
-		}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
 				drawNeon(wMyAvaHelpModal, cCyan);
 				drawNeon(btnMyAvaHelpClose, cGold);
@@ -10977,6 +10991,9 @@ bool Game::MainLoop() {
 				drawNeon(btnConfirmNo, cGold);
 			}
 			if(wAdventureMode && wAdventureMode->isVisible() && (!wDuelReward || !wDuelReward->isVisible())) {
+				const irr::s32 divY = Scale(48) + Scale(14) + Scale(44);
+				const irr::s32 padX = std::max(Scale(16), (int)(window_size.Width * 0.022f));
+				driver->draw2DRectangle(irr::video::SColor(200, 226, 232, 240), irr::core::recti(padX, divY, (irr::s32)window_size.Width - padX, divY + 2));
 				drawNeon(pnlAdventureLeft, cCyan);
 				drawNeon(pnlAdventureCenter, cPurp);
 				drawNeon(pnlAdventureDetails, cCyan);
@@ -11048,7 +11065,35 @@ bool Game::MainLoop() {
 				}
 			}
 		}
+		if(!dInfo.isInDuel && !is_building && wLogin && wLogin->isVisible() && wLoginCard) {
+			const irr::video::SColor cCyan(230, 56, 189, 248);
+			const irr::video::SColor cPurp(210, 168, 85, 247);
+			const irr::video::SColor cEmer(230, 52, 211, 153);
+			const irr::video::SColor cRed(210, 248, 113, 113);
+			auto cr = wLoginCard->getAbsolutePosition();
+			driver->draw2DRectangleOutline(cr, cCyan);
+			driver->draw2DRectangle(irr::video::SColor(190, 56, 189, 248), irr::core::recti(cr.UpperLeftCorner.X + Scale(24), cr.UpperLeftCorner.Y + Scale(58), cr.LowerRightCorner.X - Scale(24), cr.UpperLeftCorner.Y + Scale(60)));
+			if(ebLoginUser && ebLoginUser->isVisible()) driver->draw2DRectangleOutline(ebLoginUser->getAbsolutePosition(), cCyan);
+			if(ebLoginPass && ebLoginPass->isVisible()) driver->draw2DRectangleOutline(ebLoginPass->getAbsolutePosition(), cPurp);
+			if(btnLoginSubmit && btnLoginSubmit->isVisible()) driver->draw2DRectangleOutline(btnLoginSubmit->getAbsolutePosition(), cEmer);
+			if(btnLoginExit && btnLoginExit->isVisible()) driver->draw2DRectangleOutline(btnLoginExit->getAbsolutePosition(), cRed);
+		}
 		if(dInfo.isInDuel) {
+			irr::gui::IGUIElement* duelModals[] = {
+				wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
+				gSettings.window, wHand, wANNumber, wANCard, wANAttribute, wANRace,
+				wMessage, wACMessage, wASMessage, wFileSave, gBot.window
+			};
+			auto isDuelDescendant = [](irr::gui::IGUIElement* el, irr::gui::IGUIElement* root) {
+				if(!el || !root) return false;
+				if(el == root) return true;
+				irr::gui::IGUIElement* p = el->getParent();
+				while(p) {
+					if(p == root) return true;
+					p = p->getParent();
+				}
+				return false;
+			};
 			auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
 				if(el && el->isVisible()) {
 					irr::gui::IGUIElement* p = el->getParent();
@@ -11057,8 +11102,16 @@ bool Game::MainLoop() {
 						if(!p->isVisible()) { parentVis = false; break; }
 						p = p->getParent();
 					}
-					if(parentVis)
+					if(parentVis) {
+						for(auto* m : duelModals) {
+							if(m && m->isVisible() && !isDuelDescendant(el, m)) {
+								if(m->getAbsolutePosition().isRectCollided(el->getAbsolutePosition())) {
+									return;
+								}
+							}
+						}
 						driver->draw2DRectangleOutline(el->getAbsolutePosition(), col);
+					}
 				}
 			};
 			if(wCardImg && wCardImg->isVisible())
@@ -11078,22 +11131,6 @@ bool Game::MainLoop() {
 				drawNeon(btnPSAD, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSDU, irr::video::SColor(220, 56, 189, 248));
 				drawNeon(btnPSDD, irr::video::SColor(220, 56, 189, 248));
-			}
-			if(wCardSelect && wCardSelect->isVisible()) {
-				drawNeon(wCardSelect, irr::video::SColor(220, 56, 189, 248));
-				for(int i = 0; i < 5; ++i) {
-					if(btnCardSelect[i] && btnCardSelect[i]->isVisible())
-						drawNeon(btnCardSelect[i], irr::video::SColor(200, 56, 189, 248));
-				}
-				drawNeon(btnSelectOK, irr::video::SColor(220, 52, 211, 153));
-			}
-			if(wCardDisplay && wCardDisplay->isVisible()) {
-				drawNeon(wCardDisplay, irr::video::SColor(220, 56, 189, 248));
-				for(int i = 0; i < 5; ++i) {
-					if(btnCardDisplay[i] && btnCardDisplay[i]->isVisible())
-						drawNeon(btnCardDisplay[i], irr::video::SColor(200, 56, 189, 248));
-				}
-				drawNeon(btnDisplayOK, irr::video::SColor(220, 52, 211, 153));
 			}
 			if(wQuery && wQuery->isVisible()) {
 				drawNeon(wQuery, irr::video::SColor(220, 56, 189, 248));
