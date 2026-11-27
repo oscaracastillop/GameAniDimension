@@ -10970,7 +10970,7 @@ bool Game::MainLoop() {
 		irr::gui::IGUIElement* activeModals[] = {
 			wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
 			wMyAvaHelpModal, wAvatarPreviewOverlay, wPackRevealOverlay, wPackPoolOverlay,
-			wConfirmPurchase, gSettings.window, wMessage, wACMessage, wASMessage, wFileSave
+			wConfirmPurchase, gSettings.window, wMessage, wACMessage, wFileSave
 		};
 
 		auto drawNeon = [&](irr::gui::IGUIElement* el, irr::video::SColor col) {
@@ -11387,7 +11387,7 @@ bool Game::MainLoop() {
 			irr::gui::IGUIElement* duelModals[] = {
 				wCardSelect, wCardDisplay, wQuery, wOptions, wPosSelect, wFTSelect,
 				gSettings.window, wHand, wANNumber, wANCard, wANAttribute, wANRace,
-				wMessage, wACMessage, wASMessage, wFileSave, gBot.window
+				wMessage, wACMessage, wFileSave, gBot.window
 			};
 			auto isDuelDescendant = [](irr::gui::IGUIElement* el, irr::gui::IGUIElement* root) {
 				if(!el || !root) return false;
