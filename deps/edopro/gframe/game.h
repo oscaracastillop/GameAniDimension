@@ -196,6 +196,7 @@ struct main_menu_panel_elements {
 	irr::gui::IGUIButton* btnLobbyQuickDuel{ nullptr };
 	irr::gui::IGUIButton* btnLobbyReplays{ nullptr };
 	irr::gui::IGUIButton* btnLobbyTutorials{ nullptr };
+	irr::gui::IGUIButton* btnLobbySettings{ nullptr };
 	irr::gui::IGUIStaticText* wTopNavBar{ nullptr };
 	irr::gui::IGUIStaticText* pnlTopNavBorder{ nullptr };
 	irr::gui::IGUIImage* imgTopNavLogo{ nullptr };
