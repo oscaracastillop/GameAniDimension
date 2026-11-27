@@ -373,6 +373,40 @@ struct replay_panel_elements {
 	irr::gui::IGUIStaticText* pnlReplayRight;
 	irr::gui::IGUIStaticText* stReplayInfoTitle;
 	irr::gui::IGUIStaticText* stReplayStartTurnLbl;
+
+	struct ReplayRowData {
+		int listIndex;
+		bool isDir;
+		bool playable;
+		std::wstring fileName;
+		std::wstring dateStr;
+		std::wstring playerStr;
+		std::wstring rivalStr;
+		std::wstring turnsStr;
+		std::wstring resultStr;
+	};
+	std::vector<ReplayRowData> replayEntries;
+	int replayPage{ 0 };
+	int selectedReplayIdx{ -1 };
+
+	irr::gui::IGUIStaticText* thReplayNum;
+	irr::gui::IGUIStaticText* thReplayName;
+	irr::gui::IGUIStaticText* thReplayDate;
+	irr::gui::IGUIStaticText* thReplayAct;
+	irr::gui::IGUIStaticText* stReplayRowNum[10];
+	irr::gui::IGUIStaticText* stReplayRowName[10];
+	irr::gui::IGUIStaticText* stReplayRowDate[10];
+	irr::gui::IGUIButton* btnReplayRowSelect[10];
+	irr::gui::IGUIButton* btnReplayPrev;
+	irr::gui::IGUIStaticText* stReplayPage;
+	irr::gui::IGUIButton* btnReplayNext;
+
+	irr::gui::IGUIStaticText* stRepDetFile;
+	irr::gui::IGUIStaticText* stRepDetDate;
+	irr::gui::IGUIStaticText* stRepDetPlayer;
+	irr::gui::IGUIStaticText* stRepDetRival;
+	irr::gui::IGUIStaticText* stRepDetTurns;
+	irr::gui::IGUIStaticText* stRepDetResult;
 };
 
 struct puzzle_panel_elements {
@@ -795,6 +829,8 @@ public:
 	void RefreshLFLists();
 	void RefreshAiDecks();
 	void RefreshReplay();
+	void UpdateReplayPageUI();
+	void SelectReplayRow(int absIdx);
 	void RefreshSingleplay();
 	void DrawSelectionLine(const Materials::QuadVertex vec, bool strip, int width, irr::video::SColor color);
 	void DrawBackGround();
