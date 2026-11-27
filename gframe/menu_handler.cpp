@@ -80,7 +80,7 @@ static void LoadReplay() {
 	mainGame->btnReplayUndo->setVisible(false);
 	mainGame->wPhase->setVisible(true);
 	mainGame->dField.Clear();
-	mainGame->HideElement(mainGame->wReplay);
+	mainGame->wReplay->setVisible(false);
 	mainGame->device->setEventReceiver(&mainGame->dField);
 	int start_turn;
 	try { start_turn = std::stoi(mainGame->ebRepStartTurn->getText());  }
@@ -353,7 +353,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 			case BUTTON_NAV_REPLAYS: {
 				mainGame->HideAllEcosystemScreens();
 				mainGame->ShowTopNavBar(true);
-				mainGame->HideElement(mainGame->wMainMenu);
+				if(mainGame->wMainMenu) mainGame->wMainMenu->setVisible(false);
 				mainGame->stReplayInfo->setText(L"");
 				mainGame->btnLoadReplay->setEnabled(false);
 				mainGame->btnDeleteReplay->setEnabled(false);
@@ -363,9 +363,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ebRepStartTurn->setText(L"1");
 				mainGame->chkYrp->setChecked(false);
 				mainGame->chkYrp->setEnabled(false);
+				mainGame->wReplay->setVisible(true);
+				mainGame->wReplay->setEnabled(true);
 				mainGame->ResizeEconomyScreens();
-				mainGame->ShowElement(mainGame->wReplay);
 				mainGame->RefreshReplay();
+				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wReplay);
 				break;
 			}
 			case BUTTON_NAV_EVENTOS:
@@ -1191,7 +1193,7 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_REPLAY_MODE: {
-				mainGame->HideElement(mainGame->wMainMenu);
+				if(mainGame->wMainMenu) mainGame->wMainMenu->setVisible(false);
 				mainGame->ShowTopNavBar(true);
 				mainGame->stReplayInfo->setText(L"");
 				mainGame->btnLoadReplay->setEnabled(false);
@@ -1202,9 +1204,11 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				mainGame->ebRepStartTurn->setText(L"1");
 				mainGame->chkYrp->setChecked(false);
 				mainGame->chkYrp->setEnabled(false);
+				mainGame->wReplay->setVisible(true);
+				mainGame->wReplay->setEnabled(true);
 				mainGame->ResizeEconomyScreens();
-				mainGame->ShowElement(mainGame->wReplay);
 				mainGame->RefreshReplay();
+				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wReplay);
 				break;
 			}
 			case BUTTON_SINGLE_MODE: {
@@ -1273,8 +1277,10 @@ bool MenuHandler::OnEvent(const irr::SEvent& event) {
 				break;
 			}
 			case BUTTON_CANCEL_REPLAY: {
-				mainGame->HideElement(mainGame->wReplay);
-				mainGame->ShowElement(mainGame->wMainMenu);
+				mainGame->wReplay->setVisible(false);
+				mainGame->ResizeMainMenuScreen();
+				mainGame->wMainMenu->setVisible(true);
+				mainGame->env->getRootGUIElement()->bringToFront(mainGame->wMainMenu);
 				break;
 			}
 			case BUTTON_HP_AI_TOGGLE: {

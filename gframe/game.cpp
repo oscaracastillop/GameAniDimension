@@ -638,38 +638,48 @@ void Game::Initialize() {
 	imgLoginDragonLeft = env->addImage(irr::core::recti(0, 0, 320, 320), wLogin);
 	imgLoginDragonLeft->setUseAlphaChannel(true);
 	imgLoginDragonLeft->setScaleImage(true);
-	if(auto drLeftTex = driver->getTexture("textures/blue_eyes_dragon.png"))
-		imgLoginDragonLeft->setImage(drLeftTex);
+	imgLoginDragonLeft->setVisible(false);
 
 	imgLoginDragonRight = env->addImage(irr::core::recti(0, 0, 320, 320), wLogin);
 	imgLoginDragonRight->setUseAlphaChannel(true);
 	imgLoginDragonRight->setScaleImage(true);
-	if(auto drRightTex = driver->getTexture("textures/red_eyes_dragon.png"))
-		imgLoginDragonRight->setImage(drRightTex);
+	imgLoginDragonRight->setVisible(false);
 
-	wLoginCard = env->addStaticText(L"", irr::core::recti(0, 0, 420, 280), true, false, wLogin, -1, true);
-	wLoginCard->setBackgroundColor(irr::video::SColor(232, 10, 14, 28));
-	stLoginTitle = env->addStaticText(L"INICIAR SESI\u00D3N", irr::core::recti(0, 0, 380, 34), false, false, wLoginCard);
+	wLoginCard = env->addStaticText(L"", irr::core::recti(0, 0, 380, 340), false, false, wLogin, -1, true);
+	wLoginCard->setBackgroundColor(irr::video::SColor(232, 9, 15, 32));
+	stLoginTitle = env->addStaticText(L"INICIAR SESI\u00D3N", irr::core::recti(0, 0, 340, 34), false, false, wLoginCard);
 	stLoginTitle->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
 	stLoginTitle->setOverrideColor(irr::video::SColor(255, 125, 211, 252));
 	if(loginTitleFont) stLoginTitle->setOverrideFont(loginTitleFont);
-	stLoginUserLbl = env->addStaticText(L"Usuario o Correo:", irr::core::recti(0, 0, 380, 22), false, false, wLoginCard);
+	stLoginUserLbl = env->addStaticText(L"Usuario o Correo", irr::core::recti(0, 0, 340, 22), false, false, wLoginCard);
 	stLoginUserLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginUiFont) stLoginUserLbl->setOverrideFont(loginUiFont);
-	ebLoginUser = env->addEditBox(L"", irr::core::recti(0, 0, 380, 38), true, wLoginCard, EDIT_LOGIN_USER);
-	if(loginUiFont) ebLoginUser->setOverrideFont(loginUiFont);
-	stLoginPassLbl = env->addStaticText(L"Contrase\u00F1a:", irr::core::recti(0, 0, 380, 22), false, false, wLoginCard);
+	if(loginCardDescFont) stLoginUserLbl->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) stLoginUserLbl->setOverrideFont(loginUiFont);
+	ebLoginUser = env->addEditBox(L"", irr::core::recti(0, 0, 340, 38), true, wLoginCard, EDIT_LOGIN_USER);
+	if(loginCardDescFont) ebLoginUser->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) ebLoginUser->setOverrideFont(loginUiFont);
+	stLoginPassLbl = env->addStaticText(L"Contrase\u00F1a", irr::core::recti(0, 0, 340, 22), false, false, wLoginCard);
 	stLoginPassLbl->setOverrideColor(irr::video::SColor(255, 226, 232, 240));
-	if(loginUiFont) stLoginPassLbl->setOverrideFont(loginUiFont);
-	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 380, 38), true, wLoginCard, EDIT_LOGIN_PASS);
+	if(loginCardDescFont) stLoginPassLbl->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) stLoginPassLbl->setOverrideFont(loginUiFont);
+	ebLoginPass = env->addEditBox(L"", irr::core::recti(0, 0, 340, 38), true, wLoginCard, EDIT_LOGIN_PASS);
 	ebLoginPass->setPasswordBox(true, L'*');
-	if(loginUiFont) ebLoginPass->setOverrideFont(loginUiFont);
-	stLoginStatus = env->addStaticText(L"Ingresa con tu cuenta de anidimension.online", irr::core::recti(0, 0, 380, 22), false, true, wLoginCard);
-	stLoginStatus->setOverrideColor(irr::video::SColor(255, 148, 163, 184));
-	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 210, 42), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
-	if(loginUiFont) btnLoginSubmit->setOverrideFont(loginUiFont);
-	btnLoginExit = env->addButton(irr::core::recti(0, 0, 150, 42), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
-	if(loginUiFont) btnLoginExit->setOverrideFont(loginUiFont);
+	if(loginCardDescFont) ebLoginPass->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) ebLoginPass->setOverrideFont(loginUiFont);
+	stLoginStatus = env->addStaticText(L"\u25CF SERVIDOR EN L\u00CDNEA \u2022 anidimension.online", irr::core::recti(0, 0, 340, 22), false, true, wLoginCard);
+	stLoginStatus->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+	stLoginStatus->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginCardDescFont) stLoginStatus->setOverrideFont(loginCardDescFont);
+	btnLoginSubmit = env->addButton(irr::core::recti(0, 0, 190, 40), wLoginCard, BUTTON_LOGIN_SUBMIT, L"INGRESAR");
+	btnLoginSubmit->setDrawBorder(false);
+	btnLoginSubmit->setOverrideColor(irr::video::SColor(255, 52, 211, 153));
+	if(loginCardDescFont) btnLoginSubmit->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) btnLoginSubmit->setOverrideFont(loginUiFont);
+	btnLoginExit = env->addButton(irr::core::recti(0, 0, 130, 40), wLoginCard, BUTTON_LOGIN_EXIT, L"SALIR");
+	btnLoginExit->setDrawBorder(false);
+	btnLoginExit->setOverrideColor(irr::video::SColor(255, 248, 113, 113));
+	if(loginCardDescFont) btnLoginExit->setOverrideFont(loginCardDescFont);
+	else if(loginUiFont) btnLoginExit->setOverrideFont(loginUiFont);
 	//lan mode
 	wLanWindow = env->addWindow(Scale(220, 100, 800, 520), false, gDataManager->GetSysString(1200).data());
 	defaultStrings.emplace_back(wLanWindow, 1200);
@@ -2019,6 +2029,10 @@ static nlohmann::json FetchAdventureApi(const std::string& endpoint, const std::
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &retrieved_data);
 		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
+		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
 		retrieved_data.clear();
 		auto res = curl_easy_perform(curl_handle);
 		if(res == CURLE_OK && !retrieved_data.empty()) {
@@ -3059,6 +3073,8 @@ void Game::SpawnRemoteAdventureBot() {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -3151,6 +3167,8 @@ void Game::LoadSpanishCardTextsAsync() {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -3200,36 +3218,28 @@ void Game::ResizeLoginScreen() {
 	if(imgLoginBg)
 		imgLoginBg->setRelativePosition(irr::core::recti(0, 0, W, H));
 
-	const int cardW = std::max(Scale(340), std::min(Scale(440), (int)(W * 0.40f)));
+	const int cardW = std::max(Scale(310), std::min(Scale(380), (int)(W * 0.34f)));
 	const int pad = Scale(24);
 	const int innerW = cardW - 2 * pad;
 	const int titleH = Scale(34);
 	const int lblH = Scale(22);
 	const int inputH = Scale(38);
-	const int statusH = Scale(22);
-	const int btnH = Scale(42);
-	const int cardH = Scale(16) + titleH + Scale(10) + lblH + Scale(4) + inputH + Scale(10) + lblH + Scale(4) + inputH + Scale(8) + statusH + Scale(10) + btnH + Scale(18);
-	const int cardX = (W - cardW) / 2;
-	const int cardY = std::max(Scale(115), std::min(H - cardH - Scale(20), (H - cardH) / 2 + Scale(44)));
+	const int statusH = Scale(24);
+	const int btnH = Scale(40);
+	const int cardH = Scale(20) + titleH + Scale(16) + lblH + Scale(4) + inputH + Scale(12) + lblH + Scale(4) + inputH + Scale(12) + statusH + Scale(14) + btnH + Scale(22);
+	const int cardX = W - cardW - std::max(Scale(32), (int)(W * 0.045f));
+	const int cardY = std::max(Scale(24), (H - cardH) / 2);
 
 	if(wLoginCard)
 		wLoginCard->setRelativePosition(irr::core::recti(cardX, cardY, cardX + cardW, cardY + cardH));
 
-	const int dragonSize = std::max(Scale(180), std::min((int)(H * 0.68f), (int)(cardX * 1.15f)));
-	const int dragonY = std::max(Scale(20), H - dragonSize - Scale(16));
-	if(imgLoginDragonLeft) {
-		int lx = std::max(Scale(4), cardX - dragonSize + Scale(20));
-		imgLoginDragonLeft->setRelativePosition(irr::core::recti(lx, dragonY, lx + dragonSize, dragonY + dragonSize));
-	}
-	if(imgLoginDragonRight) {
-		int rx = std::min(W - dragonSize - Scale(4), cardX + cardW - Scale(20));
-		imgLoginDragonRight->setRelativePosition(irr::core::recti(rx, dragonY, rx + dragonSize, dragonY + dragonSize));
-	}
+	if(imgLoginDragonLeft) imgLoginDragonLeft->setVisible(false);
+	if(imgLoginDragonRight) imgLoginDragonRight->setVisible(false);
 
-	int y = Scale(16);
+	int y = Scale(20);
 	if(stLoginTitle) {
 		stLoginTitle->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + titleH));
-		y += titleH + Scale(10);
+		y += titleH + Scale(16);
 	}
 	if(stLoginUserLbl) {
 		stLoginUserLbl->setRelativePosition(irr::core::recti(pad, y, pad + innerW, y + lblH));
@@ -3995,6 +4005,8 @@ void Game::SubmitLogin() {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			if(!caPath.empty() && Utils::FileExists(Utils::ToPathString(caPath))) {
 				curl_easy_setopt(curl, CURLOPT_CAINFO, caPath.c_str());
 			} else {
@@ -4033,68 +4045,12 @@ void Game::SubmitLogin() {
 			}
 		}
 
-		// Preload inventory and decks in this background thread so main GUI thread NEVER blocks
+		// Inventory & decks preload asynchronously after entering Lobby so login completes in milliseconds
 		std::unordered_map<uint32_t, int> stagingCards;
 		std::unordered_map<uint32_t, int> stagingOrder;
 		std::unordered_map<uint32_t, long long> stagingPrices;
 		std::vector<UserDeckSlot> stagingDecks;
 		bool hasInv = false;
-
-		if(ok && !tokenStr.empty()) {
-			auto invJson = CallSessionApi("/api/user/inventory", tokenStr);
-			if(invJson.contains("success") && invJson.value("success", false)) {
-				hasInv = true;
-				if(invJson.contains("profile") && invJson["profile"].is_object()) {
-					const auto& prof = invJson["profile"];
-					stagingLvl = SafeJsonInt(prof, "nivel", 1);
-					stagingExp = SafeJsonInt(prof, "exp", 1);
-					if(prof.contains("starShips") && prof["starShips"].is_number())
-						stagingSS = prof["starShips"].get<long long>();
-				}
-				if(invJson.contains("cards") && invJson["cards"].is_array()) {
-					int stIdx = 0;
-					for(const auto& c : invJson["cards"]) {
-						uint32_t code = static_cast<uint32_t>(SafeJsonInt(c, "passcode", 0));
-						int qty = SafeJsonInt(c, "cantidad", 0);
-						long long sellPrice = 0;
-						if(c.contains("precioRecompra") && c["precioRecompra"].is_number())
-							sellPrice = c["precioRecompra"].get<long long>();
-						if(code > 0 && qty > 0) {
-							stagingCards[code] = qty;
-							stagingOrder[code] = stIdx++;
-							stagingPrices[code] = sellPrice;
-						}
-					}
-				}
-			}
-			auto decksJson = CallSessionApi("/api/user/decks", tokenStr);
-			if(decksJson.contains("success") && decksJson.value("success", false)) {
-				std::string srvActiveName = SafeJsonStr(decksJson, "activeDeckName", "");
-				if(decksJson.contains("decks") && decksJson["decks"].is_array()) {
-					for(const auto& d : decksJson["decks"]) {
-						UserDeckSlot slotObj;
-						slotObj.slot = SafeJsonInt(d, "slot", 1);
-						slotObj.name = BufferIO::DecodeUTF8(SafeJsonStr(d, "nombreDeck", "Deck"));
-						if(srvActiveName.empty() && d.contains("esActivo") && d.value("esActivo", false))
-							srvActiveName = SafeJsonStr(d, "nombreDeck", "");
-						auto loadVec = [](const nlohmann::json& arr, Deck::Vector& out) {
-							if(!arr.is_array()) return;
-							for(const auto& item : arr) {
-								if(item.is_number()) {
-									uint32_t code = item.get<uint32_t>();
-									if(auto* cd = gDataManager->GetCardData(code))
-										out.push_back(cd);
-								}
-							}
-						};
-						if(d.contains("main")) loadVec(d["main"], slotObj.deck.main);
-						if(d.contains("extra")) loadVec(d["extra"], slotObj.deck.extra);
-						if(d.contains("side")) loadVec(d["side"], slotObj.deck.side);
-						stagingDecks.push_back(std::move(slotObj));
-					}
-				}
-			}
-		}
 
 		{
 			std::lock_guard<epro::mutex> lk(loginResultMutex);
@@ -4199,6 +4155,7 @@ void Game::ProcessPendingLoginResult() {
 			if(stLobbyPlayerLevel)
 				stLobbyPlayerLevel->setText(epro::format(L"Nivel {}", playerLevel).c_str());
 			FetchLobbyStatsAsync();
+			std::thread([this]() { FetchUserInventoryAndDecks(); }).detach();
 			wMainMenu->setVisible(true);
 			env->getRootGUIElement()->bringToFront(wMainMenu);
 			ShowTopNavBar(true);
@@ -4234,6 +4191,10 @@ static nlohmann::json CallSessionApi(const std::string& endpoint, const std::str
 		curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, &resp);
 		curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 		curl_easy_setopt(curl_handle, CURLOPT_NOPROXY, "*");
+		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
+		curl_easy_setopt(curl_handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+		curl_easy_setopt(curl_handle, CURLOPT_ACCEPT_ENCODING, "");
 		if(!postJson.empty()) {
 			curl_easy_setopt(curl_handle, CURLOPT_POST, 1L);
 			curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, postJson.c_str());
@@ -4798,6 +4759,8 @@ irr::video::ITexture* Game::LoadCharacterTexture(const std::string& filename) {
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, NpcHttpCallback);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 
 			for(const auto& host : hosts) {
 				bool downloaded = false;
@@ -4854,6 +4817,8 @@ irr::video::ITexture* Game::LoadMedalTexture(int npcLevel) {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -7843,6 +7808,8 @@ irr::video::ITexture* Game::LoadRewardBgTexture() {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -7894,6 +7861,8 @@ irr::video::ITexture* Game::LoadPuzzlePieceTexture(const std::string& carpeta, i
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -9010,6 +8979,8 @@ irr::video::ITexture* Game::LoadMedalTexture(const std::string& filename) {
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, &bytes);
 			curl_easy_setopt(curl, CURLOPT_USERAGENT, Utils::GetUserAgent().data());
 			curl_easy_setopt(curl, CURLOPT_NOPROXY, "*");
+			curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+			curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
 			long code = 0;
 			auto res = curl_easy_perform(curl);
 			curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &code);
@@ -9757,157 +9728,6 @@ void Game::OpenClanDetail(int clanId) {
 				ClanRequestItem rq;
 				rq.id = SafeJsonInt(s, "Id", 0);
 				rq.usuarioId = SafeJsonInt(s, "UsuarioId", 0);
-				rq.usuario = BufferIO::DecodeUTF8(SafeJsonStr(s, "Usuario", ""));
-				rq.nivel = SafeJsonInt(s, "Nivel", 1);
-				rq.fechaSolicitud = BufferIO::DecodeUTF8(SafeJsonStr(s, "FechaSolicitud", ""));
-				clanRequests.push_back(rq);
-			}
-		}
-
-		if(pnlClanRequestsTable) {
-			pnlClanRequestsTable->setVisible(myClanIsLeader);
-			if(stClanNoRequests) stClanNoRequests->setVisible(clanRequests.empty());
-			for(int i = 0; i < 4; ++i) {
-				if(i < (int)clanRequests.size()) {
-					const auto& rq = clanRequests[i];
-					if(stClanReqUser[i]) {
-						stClanReqUser[i]->setText(epro::format(L"{} (Nv. {})", rq.usuario, rq.nivel).c_str());
-						stClanReqUser[i]->setVisible(true);
-					}
-					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(true);
-					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(true);
-				} else {
-					if(stClanReqUser[i]) stClanReqUser[i]->setVisible(false);
-					if(btnClanReqAccept[i]) btnClanReqAccept[i]->setVisible(false);
-					if(btnClanReqReject[i]) btnClanReqReject[i]->setVisible(false);
-				}
-			}
-		}
-
-		if(resp.contains("miembros") && resp["miembros"].is_array()) {
-			for(const auto& m : resp["miembros"]) {
-				ClanMemberItem mb;
-				mb.usuarioId = SafeJsonInt(m, "UsuarioId", 0);
-				mb.usuario = BufferIO::DecodeUTF8(SafeJsonStr(m, "Usuario", ""));
-				mb.rol = BufferIO::DecodeUTF8(SafeJsonStr(m, "RolClan", "Miembro"));
-				mb.nivel = SafeJsonInt(m, "Nivel", 1);
-				mb.expAportada = m.value("ExperienciaAportada", 0LL);
-				mb.fechaIngreso = BufferIO::DecodeUTF8(SafeJsonStr(m, "FechaIngreso", ""));
-				clanMembers.push_back(mb);
-			}
-		}
-	}
-
-	clanMemberPage = 0;
-	RefreshClanMembersPage();
-	ResizeEconomyScreens();
-	wClanDetail->setVisible(true);
-}
-
-void Game::RefreshClanMembersPage() {
-	int total = (int)clanMembers.size();
-	int totalPages = std::max(1, (total + 5) / 6);
-	if(clanMemberPage >= totalPages) clanMemberPage = totalPages - 1;
-	if(clanMemberPage < 0) clanMemberPage = 0;
-
-	if(stClanMemTotal) stClanMemTotal->setText(epro::format(L"Total: {} miembro(s)", total).c_str());
-	if(stClanMemPage) stClanMemPage->setText(epro::format(L"P\u00E1gina {} de {}", clanMemberPage + 1, totalPages).c_str());
-	if(btnClanMemPrev) btnClanMemPrev->setEnabled(clanMemberPage > 0);
-	if(btnClanMemNext) btnClanMemNext->setEnabled(clanMemberPage + 1 < totalPages);
-
-	int startIdx = clanMemberPage * 6;
-	for(int r = 0; r < 6; ++r) {
-		int idx = startIdx + r;
-		if(idx < total) {
-			const auto& mb = clanMembers[idx];
-			if(stClanMemUser[r]) {
-				stClanMemUser[r]->setText(mb.usuario.c_str());
-				stClanMemUser[r]->setVisible(true);
-			}
-			if(stClanMemRole[r]) {
-				stClanMemRole[r]->setText(mb.rol.c_str());
-				stClanMemRole[r]->setVisible(true);
-			}
-			if(stClanMemLevel[r]) {
-				stClanMemLevel[r]->setText(epro::format(L"Nv. {}", mb.nivel).c_str());
-				stClanMemLevel[r]->setVisible(true);
-			}
-			if(stClanMemExp[r]) {
-				stClanMemExp[r]->setText(epro::format(L"{} EXP", mb.expAportada).c_str());
-				stClanMemExp[r]->setVisible(true);
-			}
-			if(stClanMemDate[r]) {
-				stClanMemDate[r]->setText(mb.fechaIngreso.substr(0, 10).c_str());
-				stClanMemDate[r]->setVisible(true);
-			}
-			if(btnClanMemKick[r]) {
-				bool canKick = myClanIsLeader && (myClanId == currentViewingClanId) && (mb.rol != L"LIDER" && mb.rol != L"L\u00CDDER");
-				btnClanMemKick[r]->setVisible(canKick);
-				btnClanMemKick[r]->setEnabled(canKick);
-			}
-		} else {
-			if(stClanMemUser[r]) stClanMemUser[r]->setVisible(false);
-			if(stClanMemRole[r]) stClanMemRole[r]->setVisible(false);
-			if(stClanMemLevel[r]) stClanMemLevel[r]->setVisible(false);
-			if(stClanMemExp[r]) stClanMemExp[r]->setVisible(false);
-			if(stClanMemDate[r]) stClanMemDate[r]->setVisible(false);
-			if(btnClanMemKick[r]) btnClanMemKick[r]->setVisible(false);
-		}
-	}
-}
-
-void Game::RequestJoinClanId(int clanId) {
-	if(clanId <= 0) return;
-	nlohmann::json body;
-	body["clanId"] = clanId;
-	auto resp = CallSessionApi("/api/clans/request", sessionToken, body.dump());
-	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
-	OpenClansMenu(ebClanSearch ? ebClanSearch->getText() : L"");
-}
-
-void Game::RespondClanRequestId(int reqId, bool accept) {
-	if(reqId <= 0) return;
-	nlohmann::json body;
-	body["solicitudId"] = reqId;
-	body["aceptar"] = accept;
-	auto resp = CallSessionApi("/api/clans/respond", sessionToken, body.dump());
-	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
-	if(currentViewingClanId > 0) OpenClanDetail(currentViewingClanId);
-}
-
-void Game::KickClanMember(int targetUserId) {
-	if(targetUserId <= 0 || currentViewingClanId <= 0) return;
-	nlohmann::json body;
-	body["clanId"] = currentViewingClanId;
-	body["miembroId"] = targetUserId;
-	auto resp = CallSessionApi("/api/clans/kick", sessionToken, body.dump());
-	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
-	OpenClanDetail(currentViewingClanId);
-}
-
-void Game::RequestLeaveMyClan() {
-	if(myClanId <= 0) return;
-	pendingConfirmType = 10;
-	pendingConfirmId = myClanId;
-	stConfirmPurchaseTitle->setText(L"SALIR DEL CLAN");
-	stConfirmPurchaseMsg->setText(L"\u00BFEst\u00E1s seguro de salir de tu clan actual?");
-	wConfirmPurchase->setVisible(true);
-	env->getRootGUIElement()->bringToFront(wConfirmPurchase);
-}
-
-void Game::SubmitCreateClan() {
-	std::string nom = ebClanCreateName ? BufferIO::EncodeUTF8(ebClanCreateName->getText()) : "";
-	std::string desc = ebClanCreateDesc ? BufferIO::EncodeUTF8(ebClanCreateDesc->getText()) : "";
-	int minLvl = 1;
-	if(ebClanCreateMinLvl) {
-		try { minLvl = std::stoi(BufferIO::EncodeUTF8(ebClanCreateMinLvl->getText())); } catch(...) { minLvl = 1; }
-	}
-	nlohmann::json body;
-	body["nombre"] = nom;
-	body["descripcion"] = desc;
-	body["nivelMinimo"] = std::max(1, std::min(300, minLvl));
-	auto resp = CallSessionApi("/api/clans/create", sessionToken, body.dump());
-	if(pnlClanCreate) pnlClanCreate->setVisible(false);
 	PopupMessage(BufferIO::DecodeUTF8(SafeJsonStr(resp, resp.value("success", false) ? "mensaje" : "error", "Procesado.")));
 	OpenClansMenu();
 }
@@ -10637,6 +10457,7 @@ bool Game::MainLoop() {
 			if(menuVis && (!wasMainMenuVisible || std::chrono::duration_cast<std::chrono::seconds>(now - lastLobbyPoll).count() >= 15)) {
 				lastLobbyPoll = now;
 				FetchLobbyStatsAsync();
+			std::thread([this]() { FetchUserInventoryAndDecks(); }).detach();
 			}
 			wasMainMenuVisible = menuVis;
 		}
@@ -11285,6 +11106,19 @@ bool Game::MainLoop() {
 				drawNeon(btnDeleteReplay, irr::video::SColor(180, 248, 113, 113));
 			}
 			}
+		if(!dInfo.isInDuel && !is_building && wLogin && wLogin->isVisible() && wLoginCard) {
+			const irr::video::SColor cCyan(220, 56, 189, 248);
+			const irr::video::SColor cPurp(200, 168, 85, 247);
+			const irr::video::SColor cEmer(220, 52, 211, 153);
+			const irr::video::SColor cRed(190, 248, 113, 113);
+			drawNeon(wLoginCard, cCyan);
+			auto cr = wLoginCard->getAbsolutePosition();
+			driver->draw2DRectangle(irr::video::SColor(180, 56, 189, 248), irr::core::recti(cr.UpperLeftCorner.X + Scale(24), cr.UpperLeftCorner.Y + Scale(58), cr.LowerRightCorner.X - Scale(24), cr.UpperLeftCorner.Y + Scale(60)));
+			drawNeon(ebLoginUser, cCyan);
+			drawNeon(ebLoginPass, cPurp);
+			drawNeon(btnLoginSubmit, cEmer);
+			drawNeon(btnLoginExit, cRed);
+		}
 			if(wMyAvaHelpModal && wMyAvaHelpModal->isVisible()) {
 				drawNeon(wMyAvaHelpModal, cCyan);
 				drawNeon(btnMyAvaHelpClose, cGold);
