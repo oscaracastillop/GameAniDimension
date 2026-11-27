@@ -3692,6 +3692,7 @@ void Game::ShowTopNavBar(bool show) {
 	}
 }
 
+static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "");
 void Game::LogoutToLogin() {
 	std::string tokToClose = sessionToken;
 	isLoggedIn = false;
@@ -3716,7 +3717,6 @@ void Game::LogoutToLogin() {
 	}
 }
 
-static nlohmann::json CallSessionApi(const std::string& endpoint, const std::string& token, const std::string& postJson = "");
 
 static long long SafeJsonInt64(const nlohmann::json& j, const char* key, long long def = 0) {
 	if(!j.contains(key)) return def;
