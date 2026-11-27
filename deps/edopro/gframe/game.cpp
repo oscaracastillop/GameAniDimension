@@ -10130,6 +10130,96 @@ void Game::PopulateTabSettingsWindow() {
 		tabRepositories->setVisible(false);
 		tabRepositories->setEnabled(false);
 		mTabRepositories = irr::gui::CGUICustomContextMenu::addCustomContextMenu(env, tabRepositories, -1, Scale(1, 275, 301, 639));
+		mTabRepositories->setCloseHandling(irr::gui::ECONTEXT_MENU_CLOSE::ECMC_HIDE);
+	}
+}
+
+void Game::PopulateSettingsWindow() {
+	gSettings.tabcontrolwindow = irr::gui::CGUIWindowedTabControl::addCGUIWindowedTabControl(env, Scale(180, 85, 840, 515), gDataManager->GetSysString(1273).data());
+
+	gSettings.window = gSettings.tabcontrolwindow->getWindow();
+	defaultStrings.emplace_back(gSettings.window, 1273);
+	gSettings.window->setVisible(false);
+
+	irr::s32 cur_y = 5;
+	irr::s32 cur_x = 15;
+	constexpr auto y_incr = 30;
+	constexpr auto x_incr = 325;
+	auto ResetXandY = [&cur_y, base_y = cur_y, &cur_x, base_x = cur_x] {
+		cur_y = base_y;
+		cur_x = base_x;
+	};
+	auto IncrementXorY = [&cur_y, y_incr, &cur_x, x_incr] {
+		if(cur_x > x_incr) {
+			cur_x -= x_incr;
+			cur_y += y_incr;
+		} else
+			cur_x += x_incr;
+	};
+	auto GetNextRect = [&cur_y, &cur_x, &IncrementXorY, this] {
+		auto cury = cur_y;
+		auto curx = cur_x;
+		IncrementXorY();
+		return Scale<irr::s32>(curx, cury, curx + 305, cury + 25);
+	};
+	auto GetCurrentRectWithXOffset = [&cur_y, &cur_x, this](irr::s32 x1, irr::s32 x2, bool is_scrollbar_text = false) {
+		const auto x_incr = cur_x - 15;
+		return Scale<irr::s32>(x1 + x_incr, cur_y, x2 + x_incr, cur_y + 25 - (is_scrollbar_text * 5));
+	};
+	{
+		gSettings.client.construct(env, gSettings.tabcontrolwindow, gDataManager->GetSysString(2088).data());
+		defaultStrings.emplace_back(gSettings.client.tab, 2088);
+
+		auto* sPanel = gSettings.client.panel->getSubpanel();
+		gSettings.chkShowScopeLabel = env->addCheckBox(gGameConfig->showScopeLabel, GetNextRect(), sPanel, CHECKBOX_SHOW_SCOPE_LABEL, gDataManager->GetSysString(2076).data());
+		defaultStrings.emplace_back(gSettings.chkShowScopeLabel, 2076);
+		gSettings.chkShowFPS = env->addCheckBox(gGameConfig->showFPS, GetNextRect(), sPanel, CHECKBOX_SHOW_FPS, gDataManager->GetSysString(1445).data());
+		defaultStrings.emplace_back(gSettings.chkShowFPS, 1445);
+		gSettings.chkHideSetname = env->addCheckBox(gGameConfig->chkHideSetname, GetNextRect(), sPanel, CHECKBOX_HIDE_ARCHETYPES, gDataManager->GetSysString(1354).data());
+		defaultStrings.emplace_back(gSettings.chkHideSetname, 1354);
+		gSettings.chkHidePasscodeScope = env->addCheckBox(gGameConfig->hidePasscodeScope, GetNextRect(), sPanel, CHECKBOX_HIDE_PASSCODE_SCOPE, gDataManager->GetSysString(2063).data());
+		defaultStrings.emplace_back(gSettings.chkHidePasscodeScope, 2063);
+		gSettings.chkFilterBot = env->addCheckBox(gGameConfig->filterBot, GetNextRect(), sPanel, CHECKBOX_FILTER_BOT, gDataManager->GetSysString(2069).data());
+		defaultStrings.emplace_back(gSettings.chkFilterBot, 2069);
+		{
+			gSettings.stCurrentSkin = env->addStaticText(gDataManager->GetSysString(2064).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
+			defaultStrings.emplace_back(gSettings.stCurrentSkin, 2064);
+			gSettings.cbCurrentSkin = AddComboBox(env, GetCurrentRectWithXOffset(95, 320), sPanel, COMBOBOX_CURRENT_SKIN);
+			ReloadCBCurrentSkin();
+			IncrementXorY();
+		}
+		{
+			gSettings.stCurrentLocale = env->addStaticText(gDataManager->GetSysString(2067).data(), GetCurrentRectWithXOffset(15, 90), false, true, sPanel);
+			defaultStrings.emplace_back(gSettings.stCurrentLocale, 2067);
+			PopulateLocales();
+			gSettings.cbCurrentLocale = AddComboBox(env, GetCurrentRectWithXOffset(95, 320), sPanel, COMBOBOX_CURRENT_LOCALE);
+			auto selectedLocale = gSettings.cbCurrentLocale->addItem(L"English");
+			for(const auto& _locale : locales) {
+				auto& locale = _locale.first;
+				auto itemIndex = gSettings.cbCurrentLocale->addItem(Utils::ToUnicodeIfNeeded(locale).data());
+				if(gGameConfig->locale == locale) {
+					selectedLocale = itemIndex;
+				}
+			}
+			gSettings.cbCurrentLocale->setSelected(selectedLocale);
+			IncrementXorY();
+		}
+		gSettings.btnReloadSkin = env->addButton(GetNextRect(), sPanel, BUTTON_RELOAD_SKIN, gDataManager->GetSysString(2066).data());
+		defaultStrings.emplace_back(gSettings.btnReloadSkin, 2066);
+		{
+			gSettings.stDpiScale = env->addStaticText(gDataManager->GetSysString(2070).data(), GetCurrentRectWithXOffset(15, 90), false, false, sPanel);
+			defaultStrings.emplace_back(gSettings.stDpiScale, 2070);
+			gSettings.ebDpiScale = env->addEditBox(WStr(gGameConfig->dpi_scale * 100), GetCurrentRectWithXOffset(95, 150), true, sPanel, EDITBOX_NUMERIC);
+			env->addStaticText(L"%", GetCurrentRectWithXOffset(155, 170), false, false, sPanel);
+			gSettings.ebDpiScale->setTextAlignment(irr::gui::EGUIA_CENTER, irr::gui::EGUIA_CENTER);
+			gSettings.btnRestart = env->addButton(GetCurrentRectWithXOffset(175, 320), sPanel, BUTTON_APPLY_RESTART, gDataManager->GetSysString(2071).data());
+			defaultStrings.emplace_back(gSettings.btnRestart, 2071);
+			IncrementXorY();
+		}
+#ifdef UPDATE_URL
+		gSettings.chkUpdates = env->addCheckBox(gGameConfig->noClientUpdates, GetNextRect(), sPanel, -1, gDataManager->GetSysString(1466).data());
+		defaultStrings.emplace_back(gSettings.chkUpdates, 1466);
+#endif
 		gSettings.chkShowConsole = env->addCheckBox(gGameConfig->showConsole, GetNextRect(), sPanel, -1, gDataManager->GetSysString(2072).data());
 		defaultStrings.emplace_back(gSettings.chkShowConsole, 2072);
 #if !EDOPRO_WINDOWS
